@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load saved_queries %}
+{% block helpdesk %}
+<script src="https://hackpad.com/static/hackpad.js"/></script>
+<script>
+$(document).ready(function(){
+  hackpad.render("#hackpad_pad", "{{ entry }}","tola");
+});
+</script>
+
+<div id='container2'>
+    <div id='header' class="row">
+        <br/>
+        <h1>{% block h1_title %}{% trans "Tola Blog and Help Documents" %}{% endblock %}</h1>
+    </div>
+
+    <div id='body' class="row">
+        {% block helpdesk_body %}
+        <nav>
+          <ul class="pagination">
+            <li>
+              <a href="/helpdesk/blog/{{ previous }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            {% for pad in hackpad %}
+                <li {% if pad == entry %}class="active" {% endif %}><a href="/helpdesk/blog/{{ pad }}">{{ forloop.counter }}</a></li>
+            {% endfor %}
+            <li>
+              <a href="/helpdesk/blog/{{ next }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <div class="row">
+            <div class="col-md-10">
+                <div id="hackpad_pad"></div>
+            </div>
+            <div class="col-md-2">
+                <p>Contribute more blog and documentation entires for Tola Data @ <a href="http://tola.hackpad.com">http://tola.hackpad.com</a></p>
+            </div>
+        </div>
+        {% endblock %}
+    </div>
+</div>
+
+{% endblock %}

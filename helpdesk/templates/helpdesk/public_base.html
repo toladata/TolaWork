@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load url from future %}
+{% load static from staticfiles %}
+{% block helpdesk %}
+<div id='container' class="container">
+    <div id='header' class="row">
+        <!-- Put your logo here if necessary: -->
+        <!-- <img class="brand pull-right" src="/media/logo.png"> -->
+        <h1>{% trans "Helpdesk" %}</h1>
+        {% include "helpdesk/navigation.html" %}
+    </div>
+    <div id='body' class="row">
+{% block helpdesk_body %}{% endblock %}
+    </div>
+</div>
+{% endblock %}
