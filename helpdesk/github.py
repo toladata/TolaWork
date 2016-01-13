@@ -8,6 +8,8 @@ def get_issue(repo,id):
     r = requests.get(repo)
     if(r.ok):
         issue = json.loads(r.text or r.content)
+    else:
+        issue = None
 
     return issue
 
