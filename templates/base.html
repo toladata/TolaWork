@@ -52,33 +52,25 @@
             </div>
             <div class="navbar-collapse collapse" role=navigation">
                 <ul class="nav navbar-nav">
-                <li><a href="{% url 'home' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
-                {% if user.is_staff %}
-                    <li><a href='{% url 'helpdesk_dashboard' %}'><span class="glyphicon glyphicon-dashboard"></span> <span class="nav-text">Dashboard</span></a></li>
-                {% endif %}
-                {% if user.is_staff %}
-                    <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text">Tickets</span></a></li>
-                {% else %}
-                    <li><a href='{% url 'public_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text">Tickets</span></a></li>
-                {% endif %}
-                <li><a href='{% url 'helpdesk_submit' %}'><span class="glyphicon glyphicon-plus"></span> <span class="nav-text">New Ticket</span></a></li>
-                {% if user.is_staff %}
-                    <li><a href='{% url 'helpdesk_report_index' %}'><span class="glyphicon glyphicon-stats"></span> <span class="nav-text">Stats</span></a></li>
-                {% endif %}
-                <li><a href="#" class="dropdown-toggle" data-toggle="dropdown">Knowledgebase<b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li><a href='{% url 'blog' %}'><span class="glyphicon glyphicon-info-sign"></span> <span class="nav-text">Blog/Release Info</span></a></li>
-                        <li><a href='{% url 'helpdesk_kb_index' %}'><span class="glyphicon glyphicon-tree-deciduous"></span> <span class="nav-text">Knowledgebase</span></a></li>
-                    </ul>
-                </li>
-                <li><a href="#" class="dropdown-toggle" data-toggle="dropdown">Help<b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/documentation">Documentation</a></li>
-                        <li><a href="/faq">FAQ</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                    </ul>
-                </li>
-
+                    <li><a href="{% url 'home' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+                    {% if user.is_staff %}
+                        <li><a href='{% url 'helpdesk_dashboard' %}'><span class="glyphicon glyphicon-dashboard"></span> <span class="nav-text">Dashboard</span></a></li>
+                    {% endif %}
+                    {% if user.is_staff %}
+                        <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text">Tickets</span></a></li>
+                    {% else %}
+                        <li><a href='{% url 'public_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text">Tickets</span></a></li>
+                    {% endif %}
+                    <li><a href='{% url 'helpdesk_submit' %}'><span class="glyphicon glyphicon-plus"></span> <span class="nav-text">New Ticket</span></a></li>
+                    {% if user.is_staff %}
+                        <li><a href='{% url 'helpdesk_report_index' %}'><span class="glyphicon glyphicon-stats"></span> <span class="nav-text">Stats</span></a></li>
+                    {% endif %}
+                    <li><a href="#" class="dropdown-toggle" data-toggle="dropdown">Knowledgebase<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href='{% url 'blog' %}'><span class="glyphicon glyphicon-info-sign"></span> <span class="nav-text">Blog/Release Info</span></a></li>
+                            <li><a href='{% url 'helpdesk_kb_index' %}'><span class="glyphicon glyphicon-tree-deciduous"></span> <span class="nav-text">Knowledgebase</span></a></li>
+                        </ul>
+                    </li>
                 </ul>
                 {% if user.is_authenticated  %}
                 <span>{{ request.session.country }}</span>
@@ -159,18 +151,19 @@
         </div><!-- .container collapse -->
 
         <div id = "loading" class="modal"> </div>
-        <div id="footer"><!-- Sticky Footer -->
+        <div id="footer">
+            <!-- Sticky Footer -->
             <div class="container">
-                <span style="float: left;" class="text-muted">
-                    <a href="https://github.com/mercycorps/tola-activity/blob/master/LICENSE">GNU GENERAL PUBLIC LICENSE Version 2</a>
-                </span>
-                <span style="float:right;" class="text-muted">
-                  <a href="{% url 'documentation' %}" class="text-muted">Documentation</a> |
-			            <a href="{% url 'faq' %}" class="text-muted">FAQ</a> |
-			            <a href="{% url 'contact' %}" class="text-muted">Feedback</a>
-                </span>
+                <div class="col-md-4 text-left">
+                    <a href="https://github.com/toladata/tola-work/blob/master/LICENSE" class="text-muted">GNU GENERAL PUBLIC LICENSE Version 2</a>
+                </div>
+                <div class="col-md-4 text-center">
+                    <a href="http://www.toladata.com" class="text-muted">Inspired in Kabul. Built in Portland.</a>
+                </div>
+                <div class="col-md-4 text-right">
+                    <a href="{% url 'documentation' %}" class="text-muted">Documentation</a> | <a href="{% url 'faq' %}" class="text-muted">FAQ</a>
+                </div>
             </div>
-
         </div><!-- .footer collapse -->
 
         <!-- jQuery UI (necessary for datepicker as well as dataTables library -->
