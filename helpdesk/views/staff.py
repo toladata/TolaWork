@@ -69,10 +69,10 @@ def dashboard(request):
                 repo = settings.GITHUB_REPO_2
             github_status = get_issue(repo,ticket.github_issue_number)
 
-            if github_status.state == "open" and ticket.status != 1:
-                Ticket.objects.update(status=1)
-            elif github_status.state == "closed" and ticket.status != 4:
-                Ticket.objects.update(status=4)
+            if github_status['state'] == "open" and ticket.status != 1:
+                Ticket.objects.filter(id=ticket.id).update(status=1)
+            elif github_status['state'] == "closed" and ticket.status != 4:
+                Ticket.objects.filter(id=ticket.id).update(status=4)
 
 
     # closed & resolved tickets, assigned to current user
@@ -334,7 +334,7 @@ def subscribe_staff_member_to_ticket(ticket, user):
 
 
 def update_ticket(request, ticket_id, public=False):
-    if not (public or (request.user.is_authenticated() and request.user.is_active and (request.user.is_staff))):
+    if not (public or (request.user.is_authenticated() and request.user.is_active)):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -531,7 +531,7 @@ def update_ticket(request, ticket_id, public=False):
         else:
             template_staff = 'updated_owner'
 
-        if (not reassigned or ( reassigned and ticket.assigned_to.usersettings.settings.get('email_on_ticket_assign', False))) or (not reassigned and ticket.assigned_to.usersettings.settings.get('email_on_ticket_change', False)):
+        if not reassigned:
             send_templated_mail(
                 template_staff,
                 context,
@@ -578,7 +578,7 @@ def return_to_ticket(user, ticket):
     if user.is_staff:
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:
-        return HttpResponseRedirect(ticket.ticket_url)
+        return HttpResponseRedirect(ticket.get_absolute_url())
 
 
 def mass_update(request):
@@ -679,7 +679,7 @@ def ticket_list(request):
     query_params = {
         'filtering': {},
         'sorting': None,
-        'sortreverse': False,
+        'sortreverse': True,
         'keyword': None,
         'other_filter': None,
         }
@@ -777,6 +777,14 @@ def ticket_list(request):
             except ValueError:
                 pass
 
+        types = request.GET.getlist('types')
+        if types:
+            try:
+                types = [int(s) for s in types]
+                query_params['filtering']['type__in'] = types
+            except ValueError:
+                pass
+
         date_from = request.GET.get('date_from')
         if date_from:
             query_params['filtering']['created__gte'] = date_from
@@ -855,6 +863,8 @@ def ticket_list(request):
     querydict = request.GET.copy()
     querydict.pop('page', 1)
 
+    print "TICKET TYPES:"
+    print Ticket.TICKET_TYPE
 
     return render_to_response('helpdesk/ticket_list.html',
         RequestContext(request, dict(
@@ -864,6 +874,7 @@ def ticket_list(request):
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
             status_choices=Ticket.STATUS_CHOICES,
+            type_choices=Ticket.TICKET_TYPE,
             urlsafe_query=urlsafe_query,
             user_saved_queries=user_saved_queries,
             query_params=query_params,

@@ -134,7 +134,7 @@ def public_ticket_list(request):
     query_params = {
         'filtering': {},
         'sorting': None,
-        'sortreverse': False,
+        'sortreverse': True,
         'keyword': None,
         'other_filter': None,
         }
@@ -232,6 +232,14 @@ def public_ticket_list(request):
             except ValueError:
                 pass
 
+        types = request.GET.getlist('types')
+        if types:
+            try:
+                types = [int(s) for s in types]
+                query_params['filtering']['type__in'] = types
+            except ValueError:
+                pass
+
         date_from = request.GET.get('date_from')
         if date_from:
             query_params['filtering']['created__gte'] = date_from
@@ -303,6 +311,8 @@ def public_ticket_list(request):
     querydict = request.GET.copy()
     querydict.pop('page', 1)
 
+    print "TICKET TYPES:"
+    print Ticket.TICKET_TYPE
 
     return render_to_response('helpdesk/public_ticket_list.html',
         RequestContext(request, dict(
@@ -312,6 +322,7 @@ def public_ticket_list(request):
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
             status_choices=Ticket.STATUS_CHOICES,
+            type_choices=Ticket.TICKET_TYPE,
             urlsafe_query=urlsafe_query,
             user_saved_queries=user_saved_queries,
             query_params=query_params,

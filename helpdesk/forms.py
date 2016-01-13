@@ -29,7 +29,7 @@ from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, Ti
 class EditTicketForm(forms.ModelForm):
     class Meta:
         model = Ticket
-        exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
+        exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'vote')
     
     def __init__(self, *args, **kwargs):
         """
@@ -481,6 +481,46 @@ class PublicTicketForm(forms.Form):
                 )
 
         return t
+
+
+class UserSettingsForm(forms.Form):
+    login_view_ticketlist = forms.BooleanField(
+        label=_('Show Ticket List on Login?'),
+        help_text=_('Display the ticket list upon login? Otherwise, the dashboard is shown.'),
+        required=False,
+        )
+
+    email_on_ticket_change = forms.BooleanField(
+        label=_('E-mail me on ticket change?'),
+        help_text=_('If you\'re the ticket owner and the ticket is changed via the web by somebody else, do you want to receive an e-mail?'),
+        required=False,
+        )
+
+    email_on_ticket_assign = forms.BooleanField(
+        label=_('E-mail me when assigned a ticket?'),
+        help_text=_('If you are assigned a ticket via the web, do you want to receive an e-mail?'),
+        required=False,
+        )
+
+    email_on_ticket_apichange = forms.BooleanField(
+        label=_('E-mail me when a ticket is changed via the API?'),
+        help_text=_('If a ticket is altered by the API, do you want to receive an e-mail?'),
+        required=False,
+        )
+
+    tickets_per_page = forms.IntegerField(
+        label=_('Number of tickets to show per page'),
+        help_text=_('How many tickets do you want to see on the Ticket List page?'),
+        required=False,
+        min_value=1,
+        max_value=1000,
+        )
+
+    use_email_as_submitter = forms.BooleanField(
+        label=_('Use my e-mail address when submitting tickets?'),
+        help_text=_('When you submit a ticket, do you want to automatically use your e-mail address as the submitter address? You can type a different e-mail address when entering the ticket if needed, this option only changes the default.'),
+        required=False,
+        )
 
 
 class EmailIgnoreForm(forms.ModelForm):

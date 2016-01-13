@@ -17,7 +17,7 @@ from django.utils.encoding import smart_str
 
 def send_templated_mail(template_name, email_context, recipients, sender=None, bcc=None, fail_silently=False, files=None):
     """
-    send_templated_mail() is a warpper around Django's e-mail routines that
+    send_templated_mail() is a wrapper around Django's e-mail routines that
     allows us to easily send multipart (text/plain & text/html) e-mails using
     templates that are stored in the database. This lets the admin provide
     both a text and a HTML template for each message.

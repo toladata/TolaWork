@@ -18,8 +18,8 @@ import os
 def home(request):
 
     #Ping Tola servers
-    activity_up = os.system("ping -c 1 " + "https://tola-activity.mercycorps.org")
-    data_up = os.system("ping -c 1 " + "https://tola-tables.mercycorps.org")
+    activity_up = os.system("ping -c 1 " + "http://tola-activity.mercycorps.org")
+    data_up = os.system("ping -c 1 " + "http://tola.mercycorps.org")
 
     #GitHub releases for status
     tola_repo = settings.GITHUB_REPO_1
@@ -44,9 +44,12 @@ def home(request):
     tickets = Ticket.objects.all().values('status').annotate(total=Count('status')).order_by('total')
 
     recent_tickets = Ticket.objects.all().exclude(status__in='4').order_by('-created')[:7]
+    votes_tickets = Ticket.objects.all().exclude(status__in='4').filter(type=2).order_by('-votes')[:4]
 
-
-    return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, 'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, 'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets , 'recent_tickets': recent_tickets})
+    return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
+                                         'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
+                                         'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
+                                         'recent_tickets': recent_tickets,'votes_tickets': votes_tickets})
 
 
 def contact(request):

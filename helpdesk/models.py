@@ -64,7 +64,7 @@ class FeedbackAdmin(admin.ModelAdmin):
 # FAQ
 class FAQ(models.Model):
     question = models.TextField(null=True, blank=True)
-    answer =  models.TextField(null=True, blank=True)
+    answer = models.TextField(null=True, blank=True)
     create_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:

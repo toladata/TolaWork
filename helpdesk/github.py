@@ -17,7 +17,7 @@ def new_issue(repo,ticket):
     payload = {}
     labels = ['Tola-Help Ticket']
     payload['title'] = ticket.title
-    payload['body'] = ticket.description
+    payload['body'] = ticket.submitter_email + " " + ticket.description
     payload['labels'] = labels
 
     token = settings.GITHUB_AUTH_TOKEN

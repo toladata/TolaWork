@@ -7,7 +7,6 @@
 <link rel='stylesheet' href='{% static "helpdesk/helpdesk-extend.css" %}' type='text/css' />
 <div id='container2'>
     <div id='header' class="row">
-        <br/>
         <h1>{% block h1_title %}{% trans "Helpdesk" %}{% endblock %}</h1>
         {% include "helpdesk/navigation.html" %}
     </div>
@@ -16,6 +15,5 @@
         {% block helpdesk_body %}{% endblock %}
     </div>
 </div>
-
 {% endwith %}
 {% endblock %}
