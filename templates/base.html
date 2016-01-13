@@ -46,13 +46,13 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="{% url 'home' %}">
-                    <img style="margin-top: -18px" width="150px" height="61px" src="{{ STATIC_URL }}/img/logo.gif" />
+                    <img style="margin-top: -18px; border-right:1px solid #e5e5e5;  border-right:1px solid #e5e5e5; border-left:1px solid #e5e5e5;" src="{{ STATIC_URL }}/img/logo.png" />
                 </a>
 
             </div>
             <div class="navbar-collapse collapse" role=navigation">
                 <ul class="nav navbar-nav">
-                <li class="{{ home_tab }}"><a href="{% url 'home' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+                <li><a href="{% url 'home' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
                 {% if user.is_staff %}
                     <li><a href='{% url 'helpdesk_dashboard' %}'><span class="glyphicon glyphicon-dashboard"></span> <span class="nav-text">Dashboard</span></a></li>
                 {% endif %}
@@ -97,10 +97,28 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> Login <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li>
-                               <a href="{% url 'social:begin' 'google-oauth2' %}">Login with Google</a>
-                            </li>
-                            <li>
-                               <a href="{% url 'login' %}">Login with Tola Account</a>
+                                <div class="navbar-text">
+                                    Login via
+                                    <div class="social-buttons">
+                                        <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-go"><i class="fa fa-google"></i> Google</a>
+                                    </div>
+                                    or
+                                    <a href="{% url 'login' %}">Login with Tola Account</a><br/>
+
+                                    <form class="form" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <input type="hidden" name="next" value="{{ next }}" />
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" name="username" placeholder="Username" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="password" name="password" placeholder="Password" class="form-control">
+                                        </div>
+                                        <button type="submit" class="btn btn-success">Sign in</button>
+                                    </form>
+                                </div>
                             </li>
                         </ul>
                     </li><!-- .dropdown collapse -->

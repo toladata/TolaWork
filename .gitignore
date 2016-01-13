@@ -21,9 +21,6 @@ build
 # Logs:
 *.log
 
-#virtualenv
-frds-venv/
-
 #allvritualenv
 venv/
 

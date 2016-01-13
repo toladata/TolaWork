@@ -1,1 +1,115 @@
 #App Specific CSS
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+    position: relative;
+    min-height: 100%;
+}
+body {
+    /* Margin bottom by footer height */
+    height: 100%;
+    margin-bottom: 60px;
+}
+#footer {
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 40px;
+    border-top: 1px solid #f5f5f5;
+    background-color: #e5e5e5;
+    vertical-align: top;
+}
+
+/* Login buttons for Social */
+.social-buttons{
+    margin:12px 0
+}
+
+.btn-fb{
+    color: #fff;
+    background-color:#3b5998;
+}
+.btn-fb:hover{
+    color: #fff;
+    background-color:#496ebc
+}
+.btn-tw{
+    color: #fff;
+    background-color:#55acee;
+}
+.btn-tw:hover{
+    color: #fff;
+    background-color:#59b5fa;
+}
+.btn-go{
+    color: #fff;
+    background-color:#55acee;
+}
+.btn-go:hover{
+    color: #fff;
+    background-color:#59b5fa;
+}
+
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+
+body > .container {
+    height: 100%;
+    margin-top: 40px;
+}
+
+.alert{
+    margin-top: 40px;
+    margin-bottom: -20px;
+}
+
+#footer > .container {
+    padding: 10px;
+}
+
+
+.btn-frozen {
+    color: #fff;
+    background-color: #808080;
+    border-color: #808080;
+}
+
+.date-badge {
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #000000;
+    line-height: 1;
+    vertical-align: baseline;
+    white-space: nowrap;
+    text-align: center;
+    background-color: lightgoldenrodyellow;
+    border-radius: 5px
+}
+
+.jumbotron.dashboard {
+    padding-top: 5px;
+    padding-bottom: 16px;
+    margin-bottom: 30px;
+}
+
+.btn-group.align-right {
+    float: right;
+}
+
+.ajaxLoader{
+    display: none;
+    min-width: 10px;
+    padding: 3px 7px;
+    vertical-align: baseline;
+    white-space: nowrap;
+    text-align: center;
+    background-color: lightgoldenrodyellow;
+    border-radius: 2px
+}
+
