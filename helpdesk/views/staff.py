@@ -72,8 +72,8 @@ def dashboard(request):
             if github_status:
                 if github_status['state'] == "open" and ticket.status != 1:
                     Ticket.objects.filter(id=ticket.id).update(status=1)
-                elif github_status['state'] == "closed" and ticket.status != 4:
-                    Ticket.objects.filter(id=ticket.id).update(status=4)
+                elif github_status['state'] == "closed" and ticket.status != 3:
+                    Ticket.objects.filter(id=ticket.id).update(status=3)
 
 
     # closed & resolved tickets, assigned to current user
