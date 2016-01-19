@@ -37,7 +37,7 @@ except ImportError:
 from helpdesk.forms import TicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
-from helpdesk.github import new_issue, get_issue, update_issue
+from helpdesk.github import new_issue, get_issue, update_issue, update_comments
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -51,29 +51,31 @@ def dashboard(request):
     showing ticket counts by queue/status, and a list of unassigned tickets
     with options for them to 'Take' ownership of said tickets.
     """
-
     # open & reopened tickets, assigned to current user
-    tickets = Ticket.objects.select_related('queue').filter(
-            assigned_to=request.user,
-        ).exclude(
-            status__in = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-        )
+    tickets = Ticket.objects.select_related('queue').exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
     # check status in github
     for ticket in tickets:
+
         #if there is a github issue check it's status in github
         if ticket.github_issue_number:
             if str(ticket.queue) == "Tola Data":
                 repo = settings.GITHUB_REPO_1
             else:
                 repo = settings.GITHUB_REPO_2
+
+            # getstatus from github
             github_status = get_issue(repo,ticket.github_issue_number)
 
+            #if status has been updated in github update here
             if github_status:
                 if github_status['state'] == "open" and ticket.status != 1:
                     Ticket.objects.filter(id=ticket.id).update(status=1)
                 elif github_status['state'] == "closed" and ticket.status != 3:
                     Ticket.objects.filter(id=ticket.id).update(status=3)
+
+            # update issue in github with local changes and comments
+            update_issue(repo,ticket)
 
 
     # closed & resolved tickets, assigned to current user
@@ -208,6 +210,14 @@ def followup_edit(request, ticket_id, followup_id):
             if followup.user:
                 new_followup.user = followup.user
             new_followup.save()
+            #send to github if needed
+            if ticket.github_issue_id:
+                print "YES!!!"
+                if str(ticket.queue) == "Tola Data":
+                    repo = settings.GITHUB_REPO_1
+                else:
+                    repo = settings.GITHUB_REPO_2
+                update_comments(repo, ticket, new_follwoup)
             # get list of old attachments & link them to new_followup
             attachments = Attachment.objects.filter(followup = followup)
             for attachment in attachments:
@@ -381,6 +391,15 @@ def update_ticket(request, ticket_id, public=False):
         owner = ticket.assigned_to.id
 
     f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+
+    #send to github if needed
+    if ticket.github_issue_id:
+        print "YES!!!"
+        if str(ticket.queue) == "Tola Data":
+            repo = settings.GITHUB_REPO_1
+        else:
+            repo = settings.GITHUB_REPO_2
+        update_comments(repo, ticket, comment)
 
     if request.user.is_staff:
         f.user = request.user
