@@ -838,22 +838,11 @@ def ticket_list(request):
 
     tickets = Ticket.objects.select_related()
     queue_choices = Queue.objects.all()
-    if not request.user.is_superuser:
-        user_queues = request.user.queuemembership.queues.all()
-        tickets = tickets.filter(
-            queue__in=user_queues,
-        )
-        queue_choices = user_queues
-
-    try:
-        ticket_qs = apply_query(tickets, query_params)
-    except ValidationError:
-        # invalid parameters in query, return default query
-        query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
-            'sorting': 'created',
-        }
-        ticket_qs = apply_query(tickets, query_params)
+    query_params = {
+        'filtering': {'status__in': [1, 2, 3]},
+        'sorting': 'created',
+    }
+    ticket_qs = apply_query(tickets, query_params)
 
     ticket_paginator = paginator.Paginator(ticket_qs, 20)
     try:
@@ -1037,11 +1026,6 @@ def run_report(request, report):
 
     report_queryset = Ticket.objects.all().select_related()
     limit_queues_by_user = not request.user.is_superuser
-    if limit_queues_by_user:
-        report_queryset = report_queryset.filter(
-            queue__in=request.user.queuemembership.queues.all(),
-        )
-
     from_saved_query = False
     saved_query = None
 
@@ -1101,10 +1085,6 @@ def run_report(request, report):
         title = _('User by Queue')
         col1heading = _('User')
         queue_options = Queue.objects.all()
-        if limit_queues_by_user:
-            queue_options  = queue_options.filter(
-                pk__in=request.user.queuemembership.queues.all(),
-            )
         possible_options = [q.title.encode('utf-8') for q in queue_options]
         charttype = 'bar'
 
