@@ -5,7 +5,7 @@ from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
 from helpdesk.models import TicketChange, Attachment, IgnoreEmail
 from helpdesk.models import CustomField
-from helpdesk.models import QueueMembership, UserSettings
+from helpdesk.models import UserSettings
 from helpdesk.models import DocumentationApp, DocumentationAppAdmin, FAQ, FAQAdmin
 
 class QueueAdmin(admin.ModelAdmin):
@@ -35,9 +35,6 @@ class CustomFieldAdmin(admin.ModelAdmin):
 class EmailTemplateAdmin(admin.ModelAdmin):
     list_display = ('template_name', 'heading', 'locale')
     list_filter = ('locale', )
-
-class QueueMembershipInline(admin.StackedInline):
-    model = QueueMembership
 
 class UserAdminWithQueueMemberships(UserAdmin):
 
