@@ -64,11 +64,28 @@ $(function () {
                 <div class="row">
                     <div class="col-md-8">
                         <h3>Tola Work</h3>
-                    <p>Get help setting up, using and configuring <a href="http://www.toladata.com">Tola Activity, Tola Tables</a>.  Report any issues you are having and request new features.</p>
-                    <br/>
-                    <a href="/helpdesk/tickets/submit" class="btn btn-lg btn-success">Submit Report</a>
-                    <br/>
-                    <br/>
+                        <p>Get help setting up, using and configuring Tola Activity, Tola Tables and Mobile Data collection platforms and M&E in general.  Report any issues with tools and request  and vote on new features.</p>
+                        <br/>
+                        <a href="/helpdesk/tickets/submit" class="btn btn-lg btn-success">Submit Report</a>
+                        <br/>
+                        <br/>
+                        <div class="table-responsive">
+                          <h4>Top Enhancement Requests</h4>
+                          <table class="table">
+                              <tr>
+                                  <th>Queue</th>
+                                  <th>Title</th>
+                                  <th>Votes</th>
+                              </tr>
+                              {% for item in votes_tickets %}
+                              <tr>
+                                  <td>{{ item.queue }}</td>
+                                  <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
+                                  <td>{{ item.votes }}</td>
+                              </tr>
+                              {% endfor %}
+                          </table>
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <div id="pie_container" style="min-width: 310px; height: 400px; max-width: 600px; margin: 0 auto"></div>

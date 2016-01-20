@@ -138,7 +138,7 @@ def dashboard(request):
         }))
 dashboard = staff_member_required(dashboard)
 
-@method_decorator(superuser_required)
+@method_decorator(staff_member_required)
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 

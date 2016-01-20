@@ -19,7 +19,7 @@ def home(request):
 
     #Ping Tola servers
     activity_up = os.system("ping -c 1 " + "http://tola-activity.mercycorps.org")
-    data_up = os.system("ping -c 1 " + "http://tola.mercycorps.org")
+    data_up = os.system("ping -c 1 " + "http://tola-tables.mercycorps.org")
 
     #GitHub releases for status
     tola_repo = settings.GITHUB_REPO_1
