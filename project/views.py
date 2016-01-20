@@ -134,3 +134,10 @@ def logout_view(request):
     logout(request)
     # Redirect to a success page.
     return HttpResponseRedirect("/")
+
+
+def permission_denied(request):
+    """
+    Something unauthorized happened
+    """
+    return render(request, '401.html')

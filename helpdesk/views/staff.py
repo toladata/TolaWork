@@ -26,6 +26,7 @@ from django.template import RequestContext
 from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
+from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.conf import settings
 
@@ -137,7 +138,7 @@ def dashboard(request):
         }))
 dashboard = staff_member_required(dashboard)
 
-
+@method_decorator(superuser_required)
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
@@ -159,7 +160,7 @@ def send_to_github(request, ticket_id):
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
-
+@method_decorator(staff_member_required)
 def delete_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
@@ -172,6 +173,7 @@ def delete_ticket(request, ticket_id):
         ticket.delete()
         return HttpResponseRedirect(reverse('helpdesk_home'))
 delete_ticket = staff_member_required(delete_ticket)
+
 
 def followup_edit(request, ticket_id, followup_id):
     "Edit followup options with an ability to change the ticket."
@@ -600,7 +602,7 @@ def return_to_ticket(user, ticket):
     else:
         return HttpResponseRedirect(ticket.get_absolute_url())
 
-
+@method_decorator(staff_member_required)
 def mass_update(request):
     tickets = request.POST.getlist('ticket_id')
     action = request.POST.get('action', None)

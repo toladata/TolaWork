@@ -8,6 +8,10 @@ from views import profile, register, faq, contact, home, documentation
 from django.contrib import admin
 admin.autodiscover()
 
+
+handler401 = 'project.views.permission_denied'
+handler403 = 'project.views.permission_denied'
+
 urlpatterns = patterns('',
     #Auth backend URL's
     url('', include('django.contrib.auth.urls', namespace='auth')),
