@@ -62,7 +62,7 @@ table {
     background-color: #ccc;
 }
 
-#header, #body, #footer {
+#header, #body {
     clear: both;
 }
 
@@ -320,4 +320,3 @@ a.tooltip:hover span {
   font: 12px Verdana, sans-serif;
   text-align: left;
 }
-

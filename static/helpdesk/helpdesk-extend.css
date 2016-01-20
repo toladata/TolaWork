@@ -46,10 +46,6 @@ table.ticket-stats tbody th, table.ticket-stats tbody tr {padding-left: 20px}
 /*
 Add your custom styles here
 */
-#footer {
-    border-top: 2px solid #AAAAAA;
-    margin-top: 20px;
-    padding: 10px 0;
-}
+
 #helpdesk-body {padding-top: 100px;}
 img.brand {padding-right: 30px;}
