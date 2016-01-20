@@ -14,6 +14,7 @@ logger = logging.getLogger('helpdesk')
 
 from django.utils.encoding import smart_str
 
+
 def send_templated_mail(template_name, email_context, recipients, sender=None, bcc=None, fail_silently=False, files=None):
     """
     send_templated_mail() is a wrapper around Django's e-mail routines that

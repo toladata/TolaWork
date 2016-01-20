@@ -53,7 +53,11 @@ def dashboard(request):
     with options for them to 'Take' ownership of said tickets.
     """
     # open & reopened tickets, assigned to current user
-    tickets = Ticket.objects.select_related('queue').exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+    tickets = Ticket.objects.select_related('queue').filter(
+            assigned_to=request.user,
+        ).exclude(
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        )
 
     # check status in github
     for ticket in tickets:
@@ -214,7 +218,6 @@ def followup_edit(request, ticket_id, followup_id):
             new_followup.save()
             #send to github if needed
             if ticket.github_issue_id:
-                print "YES!!!"
                 if str(ticket.queue) == "Tola Data":
                     repo = settings.GITHUB_REPO_1
                 else:
@@ -396,7 +399,6 @@ def update_ticket(request, ticket_id, public=False):
 
     #send to github if needed
     if ticket.github_issue_id:
-        print "YES!!!"
         if str(ticket.queue) == "Tola Data":
             repo = settings.GITHUB_REPO_1
         else:
@@ -840,11 +842,15 @@ def ticket_list(request):
 
     tickets = Ticket.objects.select_related()
     queue_choices = Queue.objects.all()
-    query_params = {
-        'filtering': {'status__in': [1, 2, 3]},
-        'sorting': 'created',
-    }
-    ticket_qs = apply_query(tickets, query_params)
+
+    try:
+       ticket_qs = apply_query(tickets, query_params)
+    except ValidationError:
+       # invalid parameters in query, return default query
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3]},
+            'sorting': 'created',
+        }
 
     ticket_paginator = paginator.Paginator(ticket_qs, 20)
     try:
