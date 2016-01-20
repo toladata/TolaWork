@@ -6,7 +6,6 @@
 
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
-
     // Enable Tabs
     $("#searchtabs").tabs({
         collapsible:true
@@ -14,7 +13,6 @@ $(document).ready(function() {
     // Hide all tabs by default
     $("#searchtabs > ul > li").removeClass().addClass("ui-corner-top ui-state-default");
     $("#searchtabs > div").addClass("ui-tabs-hide");
-
     $("#select_all").click(function() {
         $(".ticket_multi_select").attr('checked', true);
         return false;
