@@ -851,6 +851,7 @@ def ticket_list(request):
             'filtering': {'status__in': [1, 2, 3]},
             'sorting': 'created',
         }
+        ticket_qs = apply_query(tickets, query_params)
 
     ticket_paginator = paginator.Paginator(ticket_qs, 20)
     try:
