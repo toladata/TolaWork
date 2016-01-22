@@ -119,8 +119,6 @@
             </div><!-- .navbar-header collapse -->
             </div><!-- .container collapse -->
         </div><!-- .navbar collapse -->
-
-
         <div class="container">
             <br/>
             <div>{% block bread_crumb %}{% endblock %}</div>
@@ -148,31 +146,26 @@
             <p>{% block helpdesk %}{% endblock %}</p>
 
         </div><!-- .container collapse -->
-
         <div id="footer">
             <!-- Sticky Footer -->
             <div class="container">
                 <div class="col-md-4 text-left">
                     <a href="https://github.com/toladata/tola-work/blob/master/LICENSE" class="text-muted">GNU GENERAL PUBLIC LICENSE Version 2</a>
                 </div>
-                <div class="col-md-4 text-center">
-                    <a href="http://www.toladata.com" class="text-muted">Inspired in Kabul. Built in Portland.</a>
+                <div class="col-md-6 text-center">
+                    <a href="http://www.toladata.com" class="text-muted">Inspired in Kabul. Built in Portland. Supported from Nairobi</a>
                 </div>
-                <div class="col-md-4 text-right">
+                <div class="col-md-2 text-right">
                     <a href="{% url 'documentation' %}" class="text-muted">Documentation</a> | <a href="{% url 'faq' %}" class="text-muted">FAQ</a>
                 </div>
             </div>
         </div><!-- .footer collapse -->
-
         <!-- jQuery UI (necessary for datepicker as well as dataTables library -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.10.4.min.js"></script>
-
         <!-- data tables jquery javascript library -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
-
         <!-- Bootstrap compiled javascript plugins -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
-
         {% block extra_js_in_body %}{% endblock %}
     </body>
 </html>

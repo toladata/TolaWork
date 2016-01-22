@@ -112,6 +112,12 @@ class TicketForm(forms.Form):
             'updates to this ticket.'),
         )
 
+    error_message = forms.CharField(
+        widget=forms.Textarea(attrs={'cols': 47, 'rows': 4}),
+        label=_('Error Message'),
+        required=False,
+        help_text=_('Was an error message displaced? Please copy and paste this error message here. '),
+        )
     body = forms.CharField(
         widget=forms.Textarea(attrs={'cols': 47, 'rows': 15}),
         label=_('Description of Issue'),
@@ -201,6 +207,7 @@ class TicketForm(forms.Form):
                     status = Ticket.OPEN_STATUS,
                     queue = q,
                     description = self.cleaned_data['body'],
+                    error = self.cleaned_data['error_message'],
                     priority = self.cleaned_data['priority'],
                     type = self.cleaned_data['type'],
                     due_date = self.cleaned_data['due_date'],
