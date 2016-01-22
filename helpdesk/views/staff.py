@@ -403,7 +403,7 @@ def update_ticket(request, ticket_id, public=False):
             repo = settings.GITHUB_REPO_1
         else:
             repo = settings.GITHUB_REPO_2
-        update_comments(repo, ticket, comment)
+        update_comments(repo, ticket, comment, request.user.email)
 
     if request.user.is_staff:
         f.user = request.user
