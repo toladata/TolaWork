@@ -67,17 +67,17 @@ def update_issue(repo,ticket):
 
         getComments = FollowUp.objects.all().filter(ticket=ticket)
         for comment in getComments:
-            comment_status = update_comments(repo, ticket, comment)
+            comment_status = update_comments(repo, ticket, comment, comment.user.email)
 
             print comment_status
 
     return r.status_code
 
 
-def update_comments(repo, ticket, comment):
+def update_comments(repo, ticket, comment, email):
 
     payload = {}
-    payload['body'] = comment.ticket.submitter_email + " " + ticket.ticket_url + " " + comment
+    payload['body'] = email + " " + ticket.ticket_url + " " + comment
 
     token = settings.GITHUB_AUTH_TOKEN
 
