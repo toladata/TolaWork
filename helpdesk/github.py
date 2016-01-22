@@ -77,7 +77,7 @@ def update_issue(repo,ticket):
 def update_comments(repo, ticket, comment):
 
     payload = {}
-    payload['body'] = comment.submitter_email + " " + ticket.ticket_url + " " + comment
+    payload['body'] = comment.ticket.submitter_email + " " + ticket.ticket_url + " " + comment
 
     token = settings.GITHUB_AUTH_TOKEN
 
