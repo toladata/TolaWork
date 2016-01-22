@@ -52,7 +52,6 @@ def update_issue(repo,ticket):
     print "Called Update"
 
     payload = {}
-    labels = ['Tola-Help Ticket']
     payload['title'] = ticket.title
     payload['body'] = ticket.description
     payload['labels'] = labels
