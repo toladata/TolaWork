@@ -64,7 +64,7 @@ def dashboard(request):
 
         #if there is a github issue check it's status in github
         if ticket.github_issue_number:
-            if str(ticket.queue) == "Tola Data":
+            if str(ticket.queue) == "Tola Tables":
                 repo = settings.GITHUB_REPO_1
             else:
                 repo = settings.GITHUB_REPO_2
@@ -146,7 +146,7 @@ dashboard = staff_member_required(dashboard)
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    if str(ticket.queue) == "Tola Data":
+    if str(ticket.queue) == "Tola Tables":
         repo = settings.GITHUB_REPO_1
     else:
         repo = settings.GITHUB_REPO_2
@@ -399,7 +399,7 @@ def update_ticket(request, ticket_id, public=False):
 
     #send to github if needed
     if ticket.github_issue_id:
-        if str(ticket.queue) == "Tola Data":
+        if str(ticket.queue) == "Tola Tables":
             repo = settings.GITHUB_REPO_1
         else:
             repo = settings.GITHUB_REPO_2
