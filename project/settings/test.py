@@ -59,10 +59,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 ########## END EMAIL SETTINGS
 
 
-########## MongoDB Connect
-
-#connect('feeds')
-
 ########## END DATABASE CONFIGURATION
 
 ########## GOOGLE CLIENT CONFIG ###########
