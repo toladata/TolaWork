@@ -209,7 +209,6 @@ THIRD_PARTY_APPS = (
     'crispy_forms',
     'floppyforms',
     'django_extensions',
-    'report_builder',
     'mathfilters',
     'import_export',
     'requests_oauthlib',
