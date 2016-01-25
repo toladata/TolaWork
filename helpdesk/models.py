@@ -22,10 +22,10 @@ class DocumentationApp(models.Model):
     class Meta:
         ordering = ('create_date',)
 
-    def save(self):
+    def save(self, *args, **kw):
         if self.create_date is None:
             self.create_date = datetime.now()
-        super(DocumentationApp, self).save()
+        super(DocumentationApp, self).save(*args, **kw)
 
     def __unicode__(self):
         return unicode(self.name)
