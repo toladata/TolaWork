@@ -6,7 +6,7 @@ if __name__ == "__main__":
 
     settings = 'project.settings.test' if 'test' in sys.argv else 'project.settings.local'
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "project.settings.local")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
 
     from django.core.management import execute_from_command_line
 
