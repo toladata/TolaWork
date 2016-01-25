@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/toladata/TolaWork.svg?branch=master)](https://travis-ci.org/toladata/TolaWork)
+
 Tola-Work
 ===
 This is a help desk and info mangement system for the Tola suite of tools
