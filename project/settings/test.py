@@ -16,6 +16,7 @@ DATABASES = {
 
 from os.path import join, normpath
 
+SECRET_KEY = r"!ddf^+)=t*ly6ycprf9@adsfsdfdfsdff#pa*3333*lp5k9ko7"
 
 #from mongoengine import connect
 
