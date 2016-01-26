@@ -370,6 +370,12 @@ class Ticket(models.Model):
         help_text=_('If a ticket is on hold, it will not automatically be '
                     'escalated.'),
         )
+    error_msg = models.TextField(
+        _('Error Message'),
+        blank=True,
+        null=True,
+        help_text=_('Error message as it appears'),
+        )
     description = models.TextField(
         _('Description'),
         blank=True,

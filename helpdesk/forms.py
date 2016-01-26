@@ -207,7 +207,7 @@ class TicketForm(forms.Form):
                     status = Ticket.OPEN_STATUS,
                     queue = q,
                     description = self.cleaned_data['body'],
-                    error = self.cleaned_data['error_message'],
+                    error_msg = self.cleaned_data['error_message'],
                     priority = self.cleaned_data['priority'],
                     type = self.cleaned_data['type'],
                     due_date = self.cleaned_data['due_date'],
