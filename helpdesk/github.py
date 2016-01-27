@@ -54,7 +54,7 @@ def update_issue(repo,ticket):
     payload = {}
     payload['title'] = ticket.title
     payload['body'] = ticket.description
-    payload['labels'] = labels
+    payload['labels'] = ticket.labels
 
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues/" + ticket.github_issue_number
