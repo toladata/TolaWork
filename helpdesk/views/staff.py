@@ -164,7 +164,7 @@ def send_to_github(request, ticket_id):
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
-@method_decorator(staff_member_required)
+#@method_decorator(staff_member_required)
 def delete_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
@@ -604,7 +604,7 @@ def return_to_ticket(user, ticket):
     else:
         return HttpResponseRedirect(ticket.get_absolute_url())
 
-@method_decorator(staff_member_required)
+#@method_decorator(staff_member_required)
 def mass_update(request):
     tickets = request.POST.getlist('ticket_id')
     action = request.POST.get('action', None)
@@ -866,7 +866,7 @@ def ticket_list(request):
 
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
-        search_message = _('<p><strong>Note:</strong> Your keyword search is case sensitive because of your database. This means the search will <strong>not</strong> be accurate. By switching to a different database system you will gain better searching! For more information, read the <a href="http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-matching">Django Documentation on string matching in SQLite</a>.')
+        search_message = _('<p><strong>Note:</strong> The keyword search is case sensitive. This means the search will <strong>not</strong> be accurate.')
 
 
     try:
