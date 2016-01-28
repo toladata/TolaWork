@@ -1,11 +1,7 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
-{% block helpdesk_title %}{% trans "Helpdesk Dashboard" %}{% endblock %}
+{% block helpdesk_title %}{% trans "TolaWork Dashboard" %}{% endblock %}
 
 {% block helpdesk_body %}
-
-<div class="alert alert-warning">
-<p>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets submitted by you, tickets you are working on, and those tickets that have no owner." %}</p>
-</div>
 
 {% include 'helpdesk/include/summary.html' %}
 
