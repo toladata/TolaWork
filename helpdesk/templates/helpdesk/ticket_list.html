@@ -4,31 +4,7 @@
 
 <script type='text/javascript' language='javascript' src='{{ STATIC_URL }}helpdesk/filter.js'></script>
 
-<script type='text/javascript' language='javascript'>
-$(document).ready(function() {
-    // Enable Tabs
-    $("#searchtabs").tabs({
-        collapsible:true
-    });
-    // Hide all tabs by default
-    $("#searchtabs > ul > li").removeClass().addClass("ui-corner-top ui-state-default");
-    $("#searchtabs > div").addClass("ui-tabs-hide");
-    $("#select_all").click(function() {
-        $(".ticket_multi_select").attr('checked', true);
-        return false;
-    });
-    $("#select_none").click(function() {
-        $(".ticket_multi_select").attr('checked', false);
-        return false;
-    });
-    $("#select_inverse").click(function() {
-        $(".ticket_multi_select").each(function() {
-            $(this).attr('checked', !$(this).attr('checked'));
-        });
-        return false;
-    });
-});
-</script>
+
 {% endblock %}
 {% block h1_title %}Tickets
     {% if from_saved_query %} [{{ saved_query.title }}]{% endif %}{% endblock %}
@@ -117,13 +93,18 @@ $(document).ready(function() {
                     </div>
 
                     <div class='thumbnail filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxQueue'>
-                    <label for='id_queues'>{% trans "Queue(s)" %}</label><select id='id_queues' name='queue' multiple='selected' size='5'>{% for q in queue_choices %}<option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected='selected'{% endif %}>{{ q.title }}</option>{% endfor %}</select>
-                    <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
-                    <input type='button' class='filterBuilderRemove' value='-' />
+                        <label for='id_queues'>{% trans "Queue(s)" %}</label>
+                            <select id='id_queues' name='queue' multiple='selected' size='5'>{% for q in queue_choices %}
+                                <option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected='selected'{% endif %}>{{ q.title }}</option>
+                                {% endfor %}
+                            </select>
+                        <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                        <input type='button' class='filterBuilderRemove' value='-' />
                     </div>
 
                     <div class='thumbnail filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
-                    <label for='id_statuses'>{% trans "Status(es)" %}</label><select id='id_statuses' name='status' multiple='selected' size='5'>{% for s in status_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
+                    <label for='id_statuses'>{% trans "Status(es)" %}</label>
+                        <select id='id_statuses' name='status' multiple='selected' size='5'>{% for s in status_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
                     <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
                     <input type='button' class='filterBuilderRemove' value='-' />
                     </div>
@@ -267,4 +248,29 @@ $(document).ready(function() {
     {% csrf_token %}</form>
 
 </div>
+<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+    // Enable Tabs
+    $("#searchtabs").tabs({
+        collapsible:true
+    });
+    // Hide all tabs by default
+    $("#searchtabs > ul > li").removeClass().addClass("ui-corner-top ui-state-default");
+    $("#searchtabs > div").addClass("ui-tabs-hide");
+    $("#select_all").click(function() {
+        $(".ticket_multi_select").attr('checked', true);
+        return false;
+    });
+    $("#select_none").click(function() {
+        $(".ticket_multi_select").attr('checked', false);
+        return false;
+    });
+    $("#select_inverse").click(function() {
+        $(".ticket_multi_select").each(function() {
+            $(this).attr('checked', !$(this).attr('checked'));
+        });
+        return false;
+    });
+});
+</script>
 {% endblock %}
