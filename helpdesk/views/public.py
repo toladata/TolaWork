@@ -6,11 +6,12 @@ from django.utils.translation import ugettext as _
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.core import paginator
+from django.contrib import messages
 from django.contrib.auth.models import User
-
+from datetime import datetime
 from helpdesk.forms import PublicTicketForm
 from helpdesk.lib import text_is_spam, apply_query
-from helpdesk.models import Ticket, Queue, UserSettings, KBCategory, SavedSearch
+from helpdesk.models import Ticket, Queue, UserSettings, KBCategory, SavedSearch, UserVotes
 
 
 def homepage(request):
@@ -343,22 +344,41 @@ def change_language(request):
 def vote_up(request, id):
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
+    current_user = request.user
+    date = datetime.now()
     ticket = Ticket.objects.get(id=id)
-
+    user_vote = UserVotes(current_user=current_user, ticket_voted=ticket, user_vote='1', vote_date=date)
     ticket_new_value = ticket.votes + 1
-
-    Ticket.objects.filter(id=id).update(votes=ticket_new_value)
-
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    #pull out the record with the same ticket_id and user_id as the currently logged in user
+    try:
+        voted_ticket = UserVotes.objects.get(ticket_voted=ticket,current_user=current_user)
+        messages.add_message(request, messages.SUCCESS, 'You can\'t vote on this ticket...See, you already voted for this ticket. Can you vote again? Certainly not!')
+    except UserVotes.DoesNotExist:
+        voted_ticket = None
+    if voted_ticket == None:
+        user_vote.save()
+        Ticket.objects.filter(id=id).update(votes=ticket_new_value)
+        messages.add_message(request, messages.SUCCESS, 'Vote counted. You just voted up for this ticket. Now, let us hope more folks will vote too!')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'),RequestContext(request))
 
 def vote_down(request, id):
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
 
+    current_user = request.user
+    date = datetime.now()
     ticket = Ticket.objects.get(id=id)
+    user_vote = UserVotes(current_user=current_user, ticket_voted=ticket, user_vote='-1', vote_date=date)
 
     ticket_new_value = ticket.votes - 1
+    try:
+        voted_ticket = UserVotes.objects.get(ticket_voted=ticket,current_user=current_user)
+        messages.add_message(request, messages.SUCCESS, 'You can\'t vote down this ticket...See, you already voted for this ticket. Can you vote again? Certainly not!')
+    except UserVotes.DoesNotExist:
+        voted_ticket = None
 
-    Ticket.objects.filter(id=id).update(votes=ticket_new_value)
-
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    if voted_ticket == None:
+        user_vote.save()
+        Ticket.objects.filter(id=id).update(votes=ticket_new_value)
+        messages.add_message(request, messages.SUCCESS, 'Vote counted. You just voted down for this ticket. Now, let us hope more folks will vote too!')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'),RequestContext(request))
