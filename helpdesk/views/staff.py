@@ -925,10 +925,11 @@ def create_ticket(request):
         return HttpResponseRedirect(reverse('login'))
 
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-
+    messages.add_message(request, messages.SUCCESS, 'We recommend that you search for your issue or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!')
     if request.method == 'POST':
 
         if request.user.is_staff:
+
             form = TicketForm(request.POST, request.FILES)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
             form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
@@ -938,6 +939,7 @@ def create_ticket(request):
 
         if form.is_valid():
             ticket = form.save(user=request.user)
+            messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
             return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         initial_data = {}
