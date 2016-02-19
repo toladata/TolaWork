@@ -583,6 +583,22 @@ class FollowUp(models.Model):
         t.save()
         super(FollowUp, self).save(*args, **kwargs)
 
+class UserVotes(models.Model):
+    """
+
+    """
+    current_user = models.ForeignKey(settings.AUTH_USER_MODEL,blank=True,null=True,verbose_name=_('User'),)
+    ticket_voted = models.ForeignKey(Ticket,verbose_name=_('Ticket'),)
+    user_vote = models.IntegerField(_('User Vote'),help_text=_('Whether the user voted up or voted down'),)
+    vote_date = models.DateTimeField(_('Date'),)
+
+    def save(self, *args, **kwargs):
+
+        self.vote_date = datetime.now()
+        super(UserVotes, self).save()
+
+    def __unicode__(self):
+        return self.current_user
 
 class TicketChange(models.Model):
     """

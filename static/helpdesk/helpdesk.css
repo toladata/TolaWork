@@ -320,3 +320,11 @@ a.tooltip:hover span {
   font: 12px Verdana, sans-serif;
   text-align: left;
 }
+
+#FurtherEditOptions{
+ display:none;
+}
+
+#FurtherEditOptions:target{
+ display:block;
+}

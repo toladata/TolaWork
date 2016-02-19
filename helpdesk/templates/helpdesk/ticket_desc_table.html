@@ -1,4 +1,6 @@
 {% load i18n %}
+
+
 <table class="table table-hover table-bordered table-striped">
 <thead>
     <tr class='row_tablehead'><td colspan='2'><h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3> <span class='ticket_toolbar'>
@@ -73,7 +75,10 @@
 
 <tr>
     <th>{% trans "Votes" %}</th>
-    <td>{{ ticket.votes }} &nbsp; <a href="{% url 'vote_up' ticket.id %}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>&nbsp; <a href="{% url 'vote_down' ticket.id %}""><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a></td>
+    <td>{{ ticket.votes }} &nbsp; <a href="{% url 'vote_up' ticket.id %}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>&nbsp; <a href="{% url 'vote_down' ticket.id %}""><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
+        <br>{% if messages %}{% for message in messages %}{{ message }}{% endfor %}{% endif %}
+        <br>{{voted_ticket.vote_date}}
+    </td>
 </tr>
 </tbody>
 </table>
