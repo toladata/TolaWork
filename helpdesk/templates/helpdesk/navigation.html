@@ -11,8 +11,11 @@
     </div>
 
     <div class="collapse navbar-collapse" id="helpdesk-nav-collapse">
+
         {% if user.is_authenticated or user.is_staff %}
+
             <ul class="nav navbar-nav">
+
                 {% if user_saved_queries_ %}
                 <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-filter"></span> <span class="nav-text">{% trans "Saved Query" %} <b class="caret"></b></span></a>
                     <ul class="dropdown-menu">
@@ -40,6 +43,7 @@
                             </span>
                         </div>
                     </form>
+
                 {% elif user.is_authenticated %}
                     <form class="navbar-form navbar-left" id='searchform' method='get' action="{% url 'public_list' %}">
                         <div class="input-group">
@@ -52,6 +56,7 @@
                             </span>
                         </div>
                     </form>
+
                 {% endif %}
 
         {% else %}
