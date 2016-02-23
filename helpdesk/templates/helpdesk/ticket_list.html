@@ -217,6 +217,7 @@
                 <th>{% trans "Type" %}</th>
                 <th>{% trans "Title" %}</th>
                 <th>{% trans "Queue" %}</th>
+                <th>{% trans "GitHub" %}</th>
                 <th>{% trans "Status" %}</th>
                 <th>{% trans "Created" %}</th>
                 <th>{% trans "Owner" %}</th>
@@ -231,13 +232,14 @@
                 <td>{{ ticket.get_type_display }}</td>
                 <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
                 <td>{{ ticket.queue }}</td>
+                <td>{% if ticket.github_issue_url %}<a href="{{ ticket.github_issue_url }}" target="_new">{{ ticket.github_issue_number }}</a>{% endif %}</td>
                 <td>{{ ticket.get_status }}</td>
                 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created }}</span></td>
                 <td>{{ ticket.get_assigned_to }}</td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan='9'>{% trans "No Tickets Match Your Selection" %}</td>
+                <td colspan='10'>{% trans "No Tickets Match Your Selection" %}</td>
             </tr>
         {% endfor %}
         </tbody>
