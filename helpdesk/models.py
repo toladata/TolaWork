@@ -1274,17 +1274,9 @@ class TicketDependency(models.Model):
     To help enforce this, a helper function `can_be_resolved` on each Ticket instance checks that
     these have all been resolved.
     """
-    ticket = models.ForeignKey(
-        Ticket,
-        verbose_name=_('Ticket'),
-        related_name='ticketdependency',
-        )
+    ticket = models.ForeignKey(Ticket,verbose_name=_('Ticket'),related_name='ticketdependency',)
 
-    depends_on = models.ForeignKey(
-        Ticket,
-        verbose_name=_('Depends On Ticket'),
-        related_name='depends_on',
-        )
+    depends_on = models.ForeignKey(Ticket,verbose_name=_('Depends On Ticket'),related_name='depends_on',)
 
     def __unicode__(self):
         return '%s / %s' % (self.ticket, self.depends_on)
