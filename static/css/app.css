@@ -113,3 +113,10 @@ margin-right: 0px
     border-radius: 2px
 }
 
+.ticket-query-directive{
+    height: 45px;
+    padding-top: 12px;
+}
+.font1{
+    size: 2em;  
+}
