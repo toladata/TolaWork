@@ -114,9 +114,14 @@ margin-right: 0px
 }
 
 .ticket-query-directive{
-    height: 45px;
-    padding-top: 12px;
+    min-height: 45px;
+    padding-top: 15px;
+    border-radius: 10px;
+    background-color: #DCDCDC;
+    text-align: center;
+    margin-bottom: 10px;
+    padding-bottom: 15px;
 }
 .font1{
-    size: 2em;  
+    size: 3em;  
 }
