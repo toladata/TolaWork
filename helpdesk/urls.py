@@ -80,6 +80,10 @@ urlpatterns = patterns('helpdesk.views.staff',
         'send_to_github',
         name='send_to_github'),
 
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/post_to_slack/$',
+        'post_to_slack',
+        name='post_to_slack'),
+
     url(r'^raw/(?P<type>\w+)/$',
         'raw_details',
         name='helpdesk_raw'),

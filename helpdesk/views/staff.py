@@ -22,7 +22,7 @@ from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext
+from django.template import RequestContext, loader, Context
 from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
@@ -39,12 +39,12 @@ from helpdesk.forms import TicketForm, EmailIgnoreForm, EditTicketForm, TicketCC
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
 from helpdesk.github import new_issue, get_issue, update_issue, update_comments
+from helpdesk.slack import post_slack
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
 
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
-
 
 def dashboard(request):
     """
@@ -338,7 +338,6 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
 
     return ticketcc_string, SHOW_SUBSCRIBE
 
-
 def subscribe_staff_member_to_ticket(ticket, user):
     ''' used in view_ticket() and update_ticket() '''
     ticketcc = TicketCC()
@@ -396,6 +395,7 @@ def update_ticket(request, ticket_id, public=False):
         owner = ticket.assigned_to.id
 
     f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+    #send to slack
 
     #send to github if needed
     if ticket.github_issue_id:
@@ -507,8 +507,6 @@ def update_ticket(request, ticket_id, public=False):
         )
 
     if public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
-
-
         if f.new_status == Ticket.RESOLVED_STATUS:
             template = 'resolved_'
         elif f.new_status == Ticket.CLOSED_STATUS:
@@ -1670,5 +1668,18 @@ def date_rel_to_today(today, offset):
 def sort_string(begin, end):
     return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s' %(begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS)
 
+#add ticket to slack channel
+def post_to_slack(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    response = post_slack(ticket.id)
+
+    if int(response) == 200:
+        messages.success(request, 'Success, ticket sent to Slack')
+    else:
+        messages.success(request, 'Code : ' + str(response) + ' - Sorry, the ticket was not sent to Slack')
+        print response
+
+    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
 
