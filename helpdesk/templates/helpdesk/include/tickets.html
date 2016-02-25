@@ -1,20 +1,31 @@
 {% load i18n %}
-<table class="table table-hover table-bordered table-striped">{% if ticket_list_caption %}
-<caption>{{ ticket_list_caption }}</caption>{% endif %}
+<table class="table table-hover table-bordered table-striped">
+    {% if ticket_list_caption %}
+    <caption>{{ ticket_list_caption }}</caption>
+    {% endif %}
 <thead>
-<tr><th>#</th><th>{% trans "Pr" %}</th><th>{% trans "Type" %}</th><th>{% trans "Title" %}</th><th>{% trans "Queue" %}</th><th>{% trans "Github" %}</th><th>{% trans "Status" %}</th><th>{% trans "Last Update" %}</th></tr>
+<tr>
+    <th>#</th>
+    <th>{% trans "Pr" %}</th>
+    <th>{% trans "Type" %}</th>
+    <th>{% trans "Title" %}</th>
+    <th>{% trans "Queue" %}</th>
+    <th>{% trans "GitHub" %}</th>
+    <th>{% trans "Status" %}</th>
+    <th>{% trans "Last Update" %}</th>
+</tr>
 </thead>
 <tbody>
 {% for ticket in ticket_list %}
 <tr class="{{ ticket.get_priority_css_class }}">
-<td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket|upper }}</a></td>
-<td>{{ ticket.get_priority_display }}</td>
-<td>{{ ticket.get_type_display }}</td>
-<td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
-<td>{{ ticket.queue }}</td>
-<td>{% if ticket.github_issue_url %}<a href="{{ ticket.github_issue_url }}" target="_new">{{ ticket.github_issue_number }}</a>{% endif %}</td>
-<td>{{ ticket.get_status }}</td>
-<td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified }}</span></td>
+    <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket|upper }}</a></td>
+    <td>{{ ticket.get_priority_display }}</td>
+    <td>{{ ticket.get_type_display }}</td>
+    <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
+    <td>{{ ticket.queue }}</td>
+    <td>{% if ticket.github_issue_url %}<a href="{{ ticket.github_issue_url }}" target="_new">{{ ticket.github_issue_number }}</a>{% endif %}</td>
+    <td>{{ ticket.get_status }}</td>
+    <td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified }}</span></td>
 </tr>
 {% empty %}{% if ticket_list_empty_message %}
 <tr><td colspan='8'>{{ ticket_list_empty_message }}</td></tr>

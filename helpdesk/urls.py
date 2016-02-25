@@ -12,7 +12,7 @@ urlpatterns = patterns('helpdesk.views.staff',
         'ticket_list',
         name='helpdesk_list'),
 
-    url(r'^tickets/update/$',
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/update/$',
         'mass_update',
         name='helpdesk_mass_update'),
 
@@ -65,7 +65,7 @@ urlpatterns = patterns('helpdesk.views.staff',
         name='helpdesk_ticket_cc_del'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/add/$',
-        'ticket_dependency_add',
+        'tickets_dependency',
         name='helpdesk_ticket_dependency_add'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/delete/(?P<dependency_id>[0-9]+)/$',
@@ -79,6 +79,10 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^tickets/(?P<ticket_id>[0-9]+)/send_to_github/$',
         'send_to_github',
         name='send_to_github'),
+
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/post_to_slack/$',
+        'post_to_slack',
+        name='post_to_slack'),
 
     url(r'^raw/(?P<type>\w+)/$',
         'raw_details',
