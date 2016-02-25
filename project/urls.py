@@ -8,7 +8,6 @@ from views import profile, register, faq, contact, home, documentation
 from django.contrib import admin
 admin.autodiscover()
 
-
 handler401 = 'project.views.permission_denied'
 handler403 = 'project.views.permission_denied'
 

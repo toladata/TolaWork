@@ -3,6 +3,7 @@
 {% block helpdesk_head %}
 
 <script type='text/javascript' language='javascript' src='{{ STATIC_URL }}helpdesk/filter.js'></script>
+<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>>
 
 
 {% endblock %}
@@ -34,6 +35,12 @@
             </div>
             <div id="collapseOne" class="panel-collapse collapse in">
                 <div class="panel-body">
+                <div class="row">
+                    <div class=" col-md-7 ticket-query-directive">         
+                        <strong>Click</strong> the <strong>"+"</strong> button to add multiple filters to query on and the <strong>"-"</strong> button to remove a filter.
+                    </div>
+                    <div class="col-md-5"></div>
+                </div>
                     <form>
                         <select name='select' id='filterBuilderSelect'>
                         <option value='Sort'>{% trans "Sorting" %}</option>
