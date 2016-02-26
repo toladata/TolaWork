@@ -9,13 +9,13 @@ def post_slack(ticket_id):
 
     attachments = [
       {
-         'fallback':'Submitted By: ' + str(ticket.submitter_email) ,
-         'pretext':'Submitted By: ' + str(ticket.submitter_email) ,
+         'fallback':'[ ' + str(ticket.queue) +' ] Issue created By: ' + str(ticket.submitter_email) + ' ' + str(ticket.created) ,
+         'pretext':'[ ' + str(ticket.queue) +' ] Issue created By: ' + str(ticket.submitter_email) + ' ' + str(ticket.created) ,
          'color':'#D00000',
          'fields':[
             {
-               'title':'Ticket # ' + str(ticket.id),
-               'value':' - ' + str(ticket.description) ,
+               'title':'Ticket # ' + str(ticket.id) + ' - ' + str(ticket.title),
+               'value':' - '  + str(ticket.ticket_url) + " " +str(ticket.description) ,
                #'short': false
             }
          ]

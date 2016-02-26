@@ -222,7 +222,7 @@ def followup_edit(request, ticket_id, followup_id):
                     repo = settings.GITHUB_REPO_1
                 else:
                     repo = settings.GITHUB_REPO_2
-                update_comments(repo, ticket, new_follwoup)
+                update_comments(repo, ticket, new_followup)
             # get list of old attachments & link them to new_followup
             attachments = Attachment.objects.filter(followup = followup)
             for attachment in attachments:
