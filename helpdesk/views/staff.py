@@ -395,7 +395,6 @@ def update_ticket(request, ticket_id, public=False):
         owner = ticket.assigned_to.id
 
     f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
-    #send to slack
 
     #send to github if needed
     if ticket.github_issue_id:
@@ -1676,6 +1675,8 @@ def post_to_slack(request, ticket_id):
 
     if int(response) == 200:
         messages.success(request, 'Success, ticket sent to Slack')
+        ticket.slack_status = 1
+        ticket.save(update_fields=["slack_status"])
     else:
         messages.success(request, 'Code : ' + str(response) + ' - Sorry, the ticket was not sent to Slack')
         print response
