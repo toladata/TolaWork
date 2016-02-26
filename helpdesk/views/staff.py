@@ -1159,9 +1159,12 @@ def create_ticket(request):
 
         if form.is_valid():
             ticket = form.save(user=request.user)
+            #post ticket to slack #tola-work channel
             post_slack(ticket.id)
+            #update slack_status field in tickets
             ticket.slack_status = 1
             ticket.save(update_fields=["slack_status"])
+
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
             return HttpResponseRedirect(ticket.get_absolute_url())
     else:

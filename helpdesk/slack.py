@@ -4,8 +4,6 @@ from helpdesk.models import Ticket
 from django.shortcuts import get_object_or_404
 
 def post_slack(ticket_id):
-
-
     ticket = get_object_or_404(Ticket, id=ticket_id)
     hook_URL = 'https://hooks.slack.com/services/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'
 
@@ -24,9 +22,7 @@ def post_slack(ticket_id):
       }
     ]
     payload = {'channel': '#tola-work', 'username': 'Tola-Work', 'attachments': attachments, 'icon_emoji': ':panda_face:'}
-
     r = requests.post(hook_URL, data=json.dumps(payload))
-
     return r.status_code
 
 
