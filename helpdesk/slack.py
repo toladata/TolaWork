@@ -9,8 +9,8 @@ def post_slack(ticket_id):
 
     attachments = [
       {
-         'fallback':'[ ' + str(ticket.queue) +' ] Issue created By: ' + str(ticket.submitter_email) + ' ' + str(ticket.created) ,
-         'pretext':'[ ' + str(ticket.queue) +' ] Issue created By: ' + str(ticket.submitter_email) + ' ' + str(ticket.created) ,
+         'fallback':'[ ' + str(ticket.queue) +' ] Issue created By: ' + str(ticket.submitter_email) + ' Created On: ' + str(ticket.created) ,
+         'pretext':'[ ' + str(ticket.queue) +' ] Issue created By: ' + str(ticket.submitter_email) + ' Created On: ' + str(ticket.created) ,
          'color':'#D00000',
          'fields':[
             {
@@ -21,7 +21,7 @@ def post_slack(ticket_id):
          ]
       }
     ]
-    payload = {'channel': '#tola-work', 'username': 'Tola-Work', 'attachments': attachments, 'icon_emoji': ':panda_face:'}
+    payload = {'channel': '#tola-work', 'username': 'Tola-Work', 'attachments': attachments, 'icon_emoji': ':monkey:'}
     r = requests.post(hook_URL, data=json.dumps(payload))
     return r.status_code
 
