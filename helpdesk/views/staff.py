@@ -39,7 +39,7 @@ from helpdesk.forms import TicketForm, EmailIgnoreForm, EditTicketForm, TicketCC
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
 from helpdesk.github import new_issue, get_issue, update_issue, update_comments
-from helpdesk.slack import post_slack
+from helpdesk.slack import post_slack, post_edit_slack
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -216,6 +216,7 @@ def followup_edit(request, ticket_id, followup_id):
             if followup.user:
                 new_followup.user = followup.user
             new_followup.save()
+
             #send to github if needed
             if ticket.github_issue_id:
                 if str(ticket.queue) == "Tola Data":
@@ -440,6 +441,7 @@ def update_ticket(request, ticket_id, public=False):
             f.title = _('Updated')
 
     f.save()
+
 
     files = []
     if request.FILES:
@@ -1128,7 +1130,9 @@ def edit_ticket(request, ticket_id):
     if request.method == 'POST':
         form = EditTicketForm(request.POST, instance=ticket)
         if form.is_valid():
+
             ticket = form.save()
+
             return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         form = EditTicketForm(instance=ticket)
@@ -1159,12 +1163,6 @@ def create_ticket(request):
 
         if form.is_valid():
             ticket = form.save(user=request.user)
-            #post ticket to slack #tola-work channel
-            post_slack(ticket.id)
-            #update slack_status field in tickets
-            ticket.slack_status = 1
-            ticket.save(update_fields=["slack_status"])
-
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
             return HttpResponseRedirect(ticket.get_absolute_url())
     else:
@@ -1688,5 +1686,9 @@ def post_to_slack(request, ticket_id):
         print response
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+
+
+
+
 
 
