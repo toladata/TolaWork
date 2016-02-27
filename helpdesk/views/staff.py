@@ -39,7 +39,7 @@ from helpdesk.forms import TicketForm, EmailIgnoreForm, EditTicketForm, TicketCC
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
 from helpdesk.github import new_issue, get_issue, update_issue, update_comments
-from helpdesk.slack import post_slack, post_edit_slack
+from helpdesk.slack import post_slack
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
