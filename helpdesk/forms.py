@@ -4,11 +4,12 @@ except ImportError:
     from io import StringIO
 
 from crispy_forms.helper import FormHelper
+from django import forms
 from crispy_forms.layout import *
 from crispy_forms.bootstrap import *
 from crispy_forms.layout import Layout, Submit, Reset
 import floppyforms as forms
-from django.forms import extras
+from django.forms import extras, ModelForm
 from django.core.files.storage import default_storage
 from django.conf import settings
 from django.utils.translation import ugettext as _
@@ -25,6 +26,12 @@ except ImportError:
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency
 
+class CommentTicketForm(forms.ModelForm):
+    class Meta:
+        #associate model to ModelForm
+        model = Ticket
+        #which fields do we need? not all fields in the model
+        fields = ['title','description','comment']
 
 class EditTicketForm(forms.ModelForm):
     class Meta:
