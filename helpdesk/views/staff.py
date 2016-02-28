@@ -50,14 +50,14 @@ def post_comment(request, ticket_id):
 
     if request.method == 'POST':
         ticket = get_object_or_404(Ticket, id=ticket_id)
-        user = request.user
+        email_current_user = request.user.email
         form = CommentTicketForm(request.POST)
 
         if form.is_valid():
             ticket_id = ticket.id
             title = form.cleaned_data['title']
+            f_public = form.cleaned_data['public']
             created = ticket.created
-            modified = ticket.modified
             email = ticket.submitter_email
             status = ticket.status
             on_hold = ticket.on_hold
@@ -80,10 +80,12 @@ def post_comment(request, ticket_id):
                 comment = ''
 
             new_comment = form.cleaned_data['comment']
-            comments = 'Comment: ' + str(comment) + '[' + str(user) + '] Comment: ' + str(new_comment)
+
+            comments = str(comment) + str('\n') +  '[' + str(email_current_user)  + ' on ' + str(timezone.now()) + ' ] - ' + str(new_comment)
+            f_comments = str(email_current_user)  + ' added a comment ' + '  - ' + str(new_comment)
 
             update_comments = Ticket(id=ticket_id, title=title, created=created,
-                                     modified=modified, description=description,
+                                     modified=timezone.now(), description=description,
                                      submitter_email=email, status=status,
                                      on_hold=on_hold, resolution=resolution,
                                      priority=priority, due_date=due_date,
@@ -92,6 +94,11 @@ def post_comment(request, ticket_id):
                                      github_issue_url=github_url, type=type, votes=votes,
                                      error_msg=error, slack_status=slack_status, comment=comments)
             update_comments.save(update_fields=["comment"])
+
+            new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status, )
+            new_followup.save()
+
+
             return HttpResponseRedirect(reverse('helpdesk_list'))
 
 def dashboard(request):
