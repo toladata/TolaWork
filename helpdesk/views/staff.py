@@ -56,7 +56,7 @@ def post_comment(request, ticket_id):
         if form.is_valid():
             ticket_id = ticket.id
             title = form.cleaned_data['title']
-            f_public = form.cleaned_data['public']
+            f_public = form.cleaned_data.get('public', 1)
             created = ticket.created
             email = ticket.submitter_email
             status = ticket.status
