@@ -24,10 +24,15 @@ class AttachmentInline(admin.StackedInline):
 
 class FollowUpAdmin(admin.ModelAdmin):
     inlines = [TicketChangeInline, AttachmentInline]
+    list_display = ('ticket', 'date', 'title', 'comment')
+    list_display_links = ('ticket',)
+    #list_display = [field.name for field in Book._meta.fields if field.name != "id"]
+    #list_display=FollowUpAdmin._meta.get_all_field_names()
 
 class KBItemAdmin(admin.ModelAdmin):
     list_display = ('category', 'title', 'last_updated',)
     list_display_links = ('title',)
+
 
 class CustomFieldAdmin(admin.ModelAdmin):
     list_display = ('name', 'label', 'data_type')
