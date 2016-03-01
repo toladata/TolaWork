@@ -154,6 +154,10 @@ urlpatterns += patterns('helpdesk.views.kb',
     url(r'^kb/$',
         'index', name='helpdesk_kb_index'),
 
+    url(r'^kb/$',
+        'kb_list',
+        name = 'helpdesk_kb_list'),
+
     url(r'^kb/(?P<item>[0-9]+)/$',
         'item', name='helpdesk_kb_item'),
 

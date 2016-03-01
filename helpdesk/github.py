@@ -15,11 +15,19 @@ def get_issue(repo,id):
 
 
 def new_issue(repo,ticket):
+    attachment_note = ""
+    ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set') 
+    for ticket_attachment in ticket_attachments.all():
+        for attachment in ticket_attachment.attachment_set.all():
+            if attachment:
+                attachment_note = "This ticket has Attachments."
+            else:
+                attachment_note = " " 
 
     payload = {}
     labels = ['Tola-Work Ticket']
     payload['title'] = ticket.title
-    payload['body'] = ticket.submitter_email + " " + ticket.ticket_url + " " + ticket.description
+    payload['body'] = ticket.submitter_email + " " + ticket.description + "    #" + attachment_note
     payload['labels'] = labels
 
     token = settings.GITHUB_AUTH_TOKEN
@@ -48,12 +56,19 @@ def new_issue(repo,ticket):
 
 
 def update_issue(repo,ticket):
-
     print "Called Update"
+    attachment_note = ""
+    ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set') 
+    for ticket_attachment in ticket_attachments.all():
+        for attachment in ticket_attachment.attachment_set.all():
+            if attachment:
+                attachment_note = " " + " " + "## This Issue has Attachments."
+            else:
+                attachment_note = " " 
 
     payload = {}
     payload['title'] = ticket.title
-    payload['body'] = ticket.description
+    payload['body'] = ticket.description +  attachment_note
 
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues/" + ticket.github_issue_number

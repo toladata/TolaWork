@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load saved_queries %}
+{% block helpdesk %}
+{% load static from staticfiles %}
+{% with user|saved_queries as user_saved_queries_ %}
+
+<link rel='stylesheet' href='{% static "helpdesk/helpdesk-extend.css" %}' type='text/css' />
+<div id='container2'>
+    	<div id='header' class="row">
+	        <h1>{% block h1_title %}{% trans "TolaWork" %}{% endblock %}</h1>
+    		<form class="navbar-form navbar-left" id='searchform' method='get' action="{% url 'helpdesk_kb_index' %}">
+	        <div class="input-group">
+	            <input type='text' name='q' size='15' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/>
+	            {% csrf_token %}
+	            <span class="input-group-btn">
+	            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span> Go</button>
+	            </span>
+	        </div>
+    		</form>
+    	</div>
+
+    <div id='body' class="row">
+        {% block helpdesk_body %}{% endblock %}
+    </div>
+</div>
+{% endwith %}
+{% endblock %}
