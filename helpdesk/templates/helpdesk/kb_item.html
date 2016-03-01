@@ -7,12 +7,12 @@
 	<caption>{{ item.title }}</caption>
 	<tbody>
 		<tr>
-			<td><strong>Id</strong></td>
-			<td>{{ item.id }}</td>
+			<td><strong>Category</strong></td>
+			<td>{{ item.category.title }}</td>
 		</tr>
 		<tr>
 			<td><strong>Title</strong></td>
-			<td>{{ item.answer }}</td>
+			<td>{{ item.title }}</td>
 		</tr>
 		<tr>
 			<td><strong>Question</strong></td>
@@ -32,11 +32,7 @@
 		</tr>
 		<tr>
 			<td><strong>Last Updated</strong></td>
-			<td><span title='{{ ticket.created|date:"r" }}'>{{ item.answer }}</td>
-		</tr>
-		<tr>
-			<td><strong>Category</strong></td>
-			<td>{{ item.category.title }}</td>
+			<td><span title='{{ ticket.created|date:"r" }}'>{{ item.last_updated }}</td>
 		</tr>
 	</tbody>
 </table>
