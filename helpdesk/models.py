@@ -521,7 +521,7 @@ class FollowUp(models.Model):
         verbose_name_plural = _('Follow-ups')
 
     def __unicode__(self):
-        return u'%s' % self.title
+        return u'%s' %(self.comment)
 
     def get_absolute_url(self):
         return u"%s#followup%s" % (self.ticket.get_absolute_url(), self.id)
