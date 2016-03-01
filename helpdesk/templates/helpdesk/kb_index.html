@@ -1,4 +1,4 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n %}
+{% extends "helpdesk/kb_base.html" %}{% load i18n %}
 
 {% block helpdesk_body %}
 <h2>{% trans "Knowledgebase" %}</h2>
@@ -17,5 +17,58 @@
 {% endfor %}
 </tbody>
 </table>
+{% for item in data %}
+<p> This is the data am waiting for: {{ item.tittle }}</p>
+{% endfor %}
+<div>
+	<table class="table table-hover table-bordered table-striped">
+        <caption>{% trans "Knowledgebase Items" %}</caption>
+        <thead>
+            <tr>
+               	<th>&nbsp;</th>
+                <th>{% trans "Id" %}</th>
+                <th>{% trans "Title" %}</th>
+                <th>{% trans "Question" %}</th>
+                <th>{% trans "Answer" %}</th>
+                <th>{% trans "Votes" %}</th>
+                <th>{% trans "Recommendations" %}</th>
+                <th>{% trans "Last Updated" %}</th>
+                <th>{% trans "Category" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in kb_items %}
+            <tr class="{{ items.get_priority_css_class }}">
+                <td><input type='radio' name='ticket_id' value='{{ item.id }}'  /></td>
+                <td>{{ item.id }}</td>
+                <td><a href='{{ item.get_absolute_url }}'>{{ item.title }}</a></td>
+                <td>{{ item.question }}</td>
+                <td>{{ item.answer}}</a></td>
+                <td>{{ item.votes }}</td>
+                <td>{{ item.recommendations }}</td>
+                <td><span title='{{ ticket.created|date:"r" }}'>{{ item.last_updated }}</span></td>
+                <td>{{ item.category.title }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan='9'>{% trans "No Articles/Items Match Your Search" %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+        <div class="pagination">
+            <span class="step-links">
+            {% if kb_items.has_previous %}
+                <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ kb_items.previous_page_number }}">{% trans "Previous" %}</a>
+            {% endif %}
+                <span class="current">
+                    {% blocktrans with kb_items.number as kb_item_num and kb_items.paginator.num_pages as num_pages %}Page {{ kb_item_num }} of {{ num_pages }}.{% endblocktrans %}
+                </span>
+            {% if kb_items.has_next %}
+                <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ kb_items.next_page_number }}">{% trans "Next" %}</a>
+            {% endif %}
+            </span>
+        </div>
+</div>
 
 {% endblock %}
