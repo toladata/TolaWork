@@ -99,7 +99,7 @@ def post_comment(request, ticket_id):
             new_followup.save()
 
 
-            return HttpResponseRedirect(reverse('helpdesk_list'))
+            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
 def dashboard(request):
     """
