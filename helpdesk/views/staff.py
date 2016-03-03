@@ -59,7 +59,9 @@ def post_comment(request, ticket_id):
             f_public = form.cleaned_data.get('public', 1)
             created = ticket.created
             email = ticket.submitter_email
-            status = ticket.status
+            
+            status = request.POST.get('new_status')
+
             on_hold = ticket.on_hold
             description = ticket.description
             resolution = ticket.resolution
@@ -81,8 +83,12 @@ def post_comment(request, ticket_id):
 
             new_comment = form.cleaned_data['comment']
 
-            comments = str(comment) + str('\n') +  '[' + str(email_current_user)  + ' on ' + str(timezone.now()) + ' ] - ' + str(new_comment)
-            f_comments = str(email_current_user)  + ' added a comment ' + '  - ' + str(new_comment)
+            if not new_comment == '':
+                comments = str(comment) + str('\n') +  '[' + str(email_current_user)  + ' on ' + str(timezone.now()) + ' ] - ' + str(new_comment)
+                f_comments = str(email_current_user)  + ' added a comment ' + '  - ' + str(new_comment)
+            else:
+                comments = str(comment)
+                f_comments = str(email_current_user)  + ' changed ticket status from ['  + str(ticket.get_status) + '] to a New Status'
 
             update_comments = Ticket(id=ticket_id, title=title, created=created,
                                      modified=timezone.now(), description=description,
@@ -93,7 +99,8 @@ def post_comment(request, ticket_id):
                                      queue=queue, github_issue_id=github_id, github_issue_number=github_no,
                                      github_issue_url=github_url, type=type, votes=votes,
                                      error_msg=error, slack_status=slack_status, comment=comments)
-            update_comments.save(update_fields=["comment"])
+            update_comments.save(update_fields=['comment','status'])
+
 
             new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status, )
             new_followup.save()
