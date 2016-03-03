@@ -1,17 +1,43 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n %}
+{% extends "helpdesk/kb_base.html" %}{% load i18n %}
 
 {% block helpdesk_body %}
 <h2>{% blocktrans with item.title as item %}Knowledgebase: {{ item }}{% endblocktrans %}</h2>
 
 <table class="table table-hover table-bordered table-striped">
-<caption>{{ item.title }}</caption>
-<tbody>
-<tr><th>{{ item.question }}</th></tr>
-<tr><td>{{ item.answer }}</td></tr>
-</tbody>
+	<caption>{{ item.title }}</caption>
+	<tbody>
+		<tr>
+			<td><strong>Category</strong></td>
+			<td>{{ item.category.title }}</td>
+		</tr>
+		<tr>
+			<td><strong>Title</strong></td>
+			<td>{{ item.title }}</td>
+		</tr>
+		<tr>
+			<td><strong>Question</strong></td>
+			<td>{{ item.question }}</td>
+		</tr>
+		<tr>
+			<td><strong>Answer</strong></td>
+			<td>{{ item.answer }}</td>
+		</tr>
+		<tr>
+			<td><strong>Votes</strong></td>
+			<td>{{ item.votes }}</td>
+		</tr>
+		<tr>
+			<td><strong>Recommendations</strong></td>
+			<td>{{ item.recommendations }}</td>
+		</tr>
+		<tr>
+			<td><strong>Last Updated</strong></td>
+			<td><span title='{{ ticket.created|date:"r" }}'>{{ item.last_updated }}</td>
+		</tr>
+	</tbody>
 </table>
 
-<p>{% blocktrans with item.category.title as category_title and item.category.get_absolute_url as category_url %}View <a href='{{ category_url }}'>other <em>{{ category_title }}</em> articles</a>, or continue <a href='../'>viewing other knowledgebase articles</a>.{% endblocktrans %}</p>
+<p>{% blocktrans with item.category.title as category_title and item.category.get_absolute_url as category_url %}View <a href='{{ ../ }}'>other <em>{{ category_title }}</em> articles</a>, or continue <a href='../'>viewing other knowledgebase articles</a>.{% endblocktrans %}</p>
 
 <!-- Remove 'Feedback/voting' text from KB articles-->
 

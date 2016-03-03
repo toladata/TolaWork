@@ -339,79 +339,24 @@ class Ticket(models.Model):
     title = models.CharField(_('Title'), max_length=200,)
     queue = models.ForeignKey(Queue,verbose_name=_('Queue'),)
     created = models.DateTimeField(_('Created'), blank=True, help_text=_('Date this ticket was first created'),)
-    modified = models.DateTimeField(
-        _('Modified'),
-        blank=True,
-        help_text=_('Date this ticket was most recently changed.'),
-        )
-    submitter_email = models.EmailField(
-        _('Submitter E-Mail'),
-        blank=True,
-        null=True,
-        help_text=_('The submitter will receive an email for all public '
-                    'follow-ups left for this task.'),
-        )
-    assigned_to = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        related_name='assigned_to',
-        blank=True,
-        null=True,
-        verbose_name=_('Assigned to'),
-        )
-    status = models.IntegerField(
-        _('Status'),
-        choices=STATUS_CHOICES,
-        default=OPEN_STATUS,
-        )
-    on_hold = models.BooleanField(
-        _('On Hold'),
-        blank=True,
-        default=False,
-        help_text=_('If a ticket is on hold, it will not automatically be '
-                    'escalated.'),
-        )
-    error_msg = models.TextField(
-        _('Error Message'),
-        blank=True,
-        null=True,
-        help_text=_('Error message as it appears'),
-        )
-    description = models.TextField(
-        _('Description'),
-        blank=True,
-        null=True,
-        help_text=_('The content of the customers query.'),
-        )
-    resolution = models.TextField(
-        _('Resolution'),
-        blank=True,
-        null=True,
-        help_text=_('The resolution provided to the customer by our staff.'),
-        )
-    priority = models.IntegerField(
-        _('Priority'),
-        choices=PRIORITY_CHOICES,
-        default=3,
-        blank=3,
-        help_text=_('1 = Highest Priority, 5 = Low Priority'),
-        )
-    slack_status = models.IntegerField(
-        _('Slack Status'),
-        default=0
-    )
+    modified = models.DateTimeField(_('Modified'),blank=True,help_text=_('Date this ticket was most recently changed.'),)
+    submitter_email = models.EmailField(_('Submitter E-Mail'),blank=True,null=True,help_text=_('The submitter will receive an email for all public follow-ups left for this task.'),)
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL,related_name='assigned_to',blank=True,null=True,verbose_name=_('Assigned to'),)
+    status = models.IntegerField(_('Status'),choices=STATUS_CHOICES,default=OPEN_STATUS,)
+    on_hold = models.BooleanField(_('On Hold'),blank=True,default=False,help_text=_('If a ticket is on hold, it will not automatically be escalated.'),)
+    error_msg = models.TextField(_('Error Message'),blank=True,null=True,help_text=_('Error message as it appears'),)
+    description = models.TextField(_('Description'),blank=True,null=True,help_text=_('The content of the customers query.'),)
+    resolution = models.TextField(_('Resolution'),blank=True,null=True,help_text=_('The resolution provided to the customer by our staff.'),)
+    priority = models.IntegerField(_('Priority'),choices=PRIORITY_CHOICES,default=3,blank=3,help_text=_('1 = Highest Priority, 5 = Low Priority'),)
+    slack_status = models.IntegerField(_('Slack Status'),default=0)
     due_date = models.DateTimeField(_('Due on'), blank=True, null=True,)
-    last_escalation = models.DateTimeField(
-        blank=True,
-        null=True,
-        editable=False,
-        help_text=_('The date this ticket was last escalated - updated '
-            'automatically by management/commands/escalate_tickets.py.'),
-        )
+    last_escalation = models.DateTimeField(blank=True,null=True,editable=False,help_text=_('The date this ticket was last escalated - updated automatically by management/commands/escalate_tickets.py.'),)
     github_issue_number = models.CharField(max_length=255, null=True, blank=True)
     github_issue_url = models.CharField(max_length=255, null=True, blank=True)
     github_issue_id = models.CharField(max_length=255, null=True, blank=True)
     type = models.IntegerField(_('Ticket Type'), choices=TICKET_TYPE, default=PROBLEM, help_text="Type of Ticket")
     votes = models.IntegerField(default=0)
+    comment = models.TextField(_('Comment'), null=True, blank=True)
 
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
@@ -576,7 +521,7 @@ class FollowUp(models.Model):
         verbose_name_plural = _('Follow-ups')
 
     def __unicode__(self):
-        return u'%s' % self.title
+        return u'%s' %(self.comment)
 
     def get_absolute_url(self):
         return u"%s#followup%s" % (self.ticket.get_absolute_url(), self.id)

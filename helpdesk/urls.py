@@ -36,9 +36,8 @@ urlpatterns = patterns('helpdesk.views.staff',
         'edit_ticket',
         name='helpdesk_edit'),
 
-    url(r'^tickets/(?P<ticket_id>[0-9]+)/update/$',
-        'update_ticket',
-        name='helpdesk_update'),
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/update/$', 'update_ticket', name='helpdesk_update'),
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/post_comment/$', 'post_comment', name='post_comment'), # post comments
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/delete/$',
         'delete_ticket',
@@ -154,6 +153,10 @@ urlpatterns += patterns('helpdesk.views.public',
 urlpatterns += patterns('helpdesk.views.kb',
     url(r'^kb/$',
         'index', name='helpdesk_kb_index'),
+
+    url(r'^kb/$',
+        'kb_list',
+        name = 'helpdesk_kb_list'),
 
     url(r'^kb/(?P<item>[0-9]+)/$',
         'item', name='helpdesk_kb_item'),

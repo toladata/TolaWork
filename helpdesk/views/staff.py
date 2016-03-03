@@ -35,16 +35,78 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
-from helpdesk.forms import TicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
+from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
 from helpdesk.github import new_issue, get_issue, update_issue, update_comments
-from helpdesk.slack import post_slack
+from helpdesk.slack import post_slack,post_tola_slack
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
 
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
+
+def post_comment(request, ticket_id):
+
+    if request.method == 'POST':
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+        email_current_user = request.user.email
+        form = CommentTicketForm(request.POST)
+
+        if form.is_valid():
+            ticket_id = ticket.id
+            title = form.cleaned_data['title']
+            f_public = form.cleaned_data.get('public', 1)
+            created = ticket.created
+            email = ticket.submitter_email
+            
+            status = request.POST.get('new_status')
+
+            on_hold = ticket.on_hold
+            description = ticket.description
+            resolution = ticket.resolution
+            priority = ticket.priority
+            due_date = ticket.due_date
+            last_escalation = ticket.last_escalation
+            assigned = ticket.assigned_to
+            queue = ticket.queue
+            github_id = ticket.github_issue_id
+            github_no = ticket.github_issue_number
+            github_url = ticket.github_issue_url
+            type = ticket.type
+            votes = ticket.votes
+            error = ticket.error_msg
+            slack_status = ticket.slack_status
+            comment = ticket.comment
+            if str(comment) == 'None':
+                comment = ''
+
+            new_comment = form.cleaned_data['comment']
+
+            if not new_comment == '':
+                comments = str(comment) + str('\n') +  '[' + str(email_current_user)  + ' on ' + str(timezone.now()) + ' ] - ' + str(new_comment)
+                f_comments = str(email_current_user)  + ' added a comment ' + '  - ' + str(new_comment)
+            else:
+                comments = str(comment)
+                f_comments = str(email_current_user)  + ' changed ticket status from ['  + str(ticket.get_status) + '] to a New Status'
+
+            update_comments = Ticket(id=ticket_id, title=title, created=created,
+                                     modified=timezone.now(), description=description,
+                                     submitter_email=email, status=status,
+                                     on_hold=on_hold, resolution=resolution,
+                                     priority=priority, due_date=due_date,
+                                     last_escalation=last_escalation, assigned_to=assigned,
+                                     queue=queue, github_issue_id=github_id, github_issue_number=github_no,
+                                     github_issue_url=github_url, type=type, votes=votes,
+                                     error_msg=error, slack_status=slack_status, comment=comments)
+            update_comments.save(update_fields=['comment','status'])
+
+
+            new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status, )
+            new_followup.save()
+
+
+            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
 def dashboard(request):
     """
@@ -216,13 +278,15 @@ def followup_edit(request, ticket_id, followup_id):
             if followup.user:
                 new_followup.user = followup.user
             new_followup.save()
+
+
             #send to github if needed
             if ticket.github_issue_id:
                 if str(ticket.queue) == "Tola Data":
                     repo = settings.GITHUB_REPO_1
                 else:
                     repo = settings.GITHUB_REPO_2
-                update_comments(repo, ticket, new_follwoup)
+                update_comments(repo, ticket, new_followup)
             # get list of old attachments & link them to new_followup
             attachments = Attachment.objects.filter(followup = followup)
             for attachment in attachments:
@@ -347,12 +411,18 @@ def subscribe_staff_member_to_ticket(ticket, user):
     ticketcc.can_update = True
     ticketcc.save()
 
-
 def update_ticket(request, ticket_id, public=False):
     if not (public or (request.user.is_authenticated() and request.user.is_active)):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    if request.method == 'POST':
+        form = TicketForm(request.POST, instance=ticket)
+        if form.is_valid():
+
+            ticket = form.save()
+
+            return HttpResponseRedirect(ticket.get_absolute_url())
 
     comment = request.POST.get('comment', '')
     new_status = int(request.POST.get('new_status', ticket.status))
@@ -363,6 +433,10 @@ def update_ticket(request, ticket_id, public=False):
     due_date_year = int(request.POST.get('due_date_year', 0))
     due_date_month = int(request.POST.get('due_date_month', 0))
     due_date_day = int(request.POST.get('due_date_day', 0))
+
+    # update the comment field in ticket table
+    ticket.comment = 'Test comment'
+    ticket.save(update_fields=['comment'])
 
     if not (due_date_year and due_date_month and due_date_day):
         due_date = ticket.due_date
@@ -383,6 +457,7 @@ def update_ticket(request, ticket_id, public=False):
         (owner == -1) or (not owner and not ticket.assigned_to) or (owner and User.objects.get(id=owner) == ticket.assigned_to),
     ])
 
+
     if no_changes:
         return return_to_ticket(request.user, ticket)
 
@@ -395,6 +470,7 @@ def update_ticket(request, ticket_id, public=False):
         owner = ticket.assigned_to.id
 
     f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+
 
     #send to github if needed
     if ticket.github_issue_id:
@@ -441,6 +517,7 @@ def update_ticket(request, ticket_id, public=False):
 
     f.save()
 
+
     files = []
     if request.FILES:
         import mimetypes, os
@@ -462,12 +539,7 @@ def update_ticket(request, ticket_id, public=False):
 
 
     if title != ticket.title:
-        c = TicketChange(
-            followup=f,
-            field=_('Title'),
-            old_value=ticket.title,
-            new_value=title,
-            )
+        c = TicketChange(followup=f,field=_('Title'),old_value=ticket.title,new_value=title,)
         c.save()
         ticket.title = title
 
@@ -591,7 +663,6 @@ def update_ticket(request, ticket_id, public=False):
             subscribe_staff_member_to_ticket(ticket, request.user)
 
     return return_to_ticket(request.user, ticket)
-
 
 def return_to_ticket(user, ticket):
     ''' Helpder function for update_ticket '''
@@ -1128,7 +1199,9 @@ def edit_ticket(request, ticket_id):
     if request.method == 'POST':
         form = EditTicketForm(request.POST, instance=ticket)
         if form.is_valid():
+
             ticket = form.save()
+
             return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         form = EditTicketForm(instance=ticket)
@@ -1158,11 +1231,15 @@ def create_ticket(request):
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
 
         if form.is_valid():
-            ticket = form.save(user=request.user)
-            post_slack(ticket.id)
-            ticket.slack_status = 1
-            ticket.save(update_fields=["slack_status"])
+            a_user= get_object_or_404(User, id=request.POST['assigned_to'])
+
+            ticket = form.save(user=a_user)
+
+            #autopost new ticket to #tola-work slack channel in Tola
+            post_tola_slack(ticket.id)
+
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
+
             return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         initial_data = {}
@@ -1678,6 +1755,7 @@ def post_to_slack(request, ticket_id):
 
     if int(response) == 200:
         messages.success(request, 'Success, ticket sent to Slack')
+        #update the slack_status field in ticket from 0 to 1
         ticket.slack_status = 1
         ticket.save(update_fields=["slack_status"])
     else:
@@ -1685,5 +1763,9 @@ def post_to_slack(request, ticket_id):
         print response
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+
+
+
+
 
 
