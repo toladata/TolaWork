@@ -1231,9 +1231,8 @@ def create_ticket(request):
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
 
         if form.is_valid():
-            a_user= get_object_or_404(User, id=request.POST['assigned_to'])
-
-            ticket = form.save(user=a_user)
+           
+            ticket = form.save(user= request.POST.get('assigned_to'))
 
             #autopost new ticket to #tola-work slack channel in Tola
             post_tola_slack(ticket.id)
