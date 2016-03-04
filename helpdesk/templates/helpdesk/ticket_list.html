@@ -1,10 +1,7 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 {% block helpdesk_head %}
-
-<script type='text/javascript' language='javascript' src='{{ STATIC_URL }}helpdesk/filter.js'></script>
-<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>>
-
+<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>
 
 {% endblock %}
 {% block h1_title %}Tickets
@@ -212,14 +209,12 @@
 
 <div class="row">
     {{ search_message|safe }}
-    {% for ticket in tickets.object_list %}
+    {% for ticket in tickets.object_list.reverse %}
     <form method='post' action='{% url 'helpdesk_mass_update' ticket.id %}' id='ticket_mass_update'>{% endfor %}
-        <table class="table table-hover table-bordered table-striped">
-        <caption>{% trans "Tickets" %}</caption>
+        <table id="example" class="display table table-hover table-bordered table-striped" cellspacing="0" width="100%">
         <thead>
             <tr>
                 <th>#</th>
-
                 <th>&nbsp;</th>
                 <th>{% trans "Pr" %}</th>
                 <th>{% trans "Type" %}</th>
@@ -231,6 +226,20 @@
                 <th>{% trans "Owner" %}</th>
             </tr>
         </thead>
+        <tfoot>
+            <tr>
+                <th>#</th>
+                <th>&nbsp;</th>
+                <th>{% trans "Pr" %}</th>
+                <th>{% trans "Type" %}</th>
+                <th>{% trans "Title" %}</th>
+                <th>{% trans "Queue" %}</th>
+                <th>{% trans "GitHub" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Submitter" %}</th>
+                <th>{% trans "Owner" %}</th>
+            </tr>
+        </tfoot>
         <tbody>
         {% for ticket in tickets.object_list.reverse %}
             <tr class="{{ ticket.get_priority_css_class }}">
@@ -251,7 +260,7 @@
             </tr>
         {% endfor %}
         </tbody>
-        </table>
+    </table>
 
         <div class="pagination">
             <span class="step-links">
@@ -294,6 +303,7 @@
     </form>
 
 </div>
+
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
     // Enable Tabs
@@ -340,6 +350,17 @@ $(document).ready(function() {
     });
 });
 
-
+$(document).ready(function() {
+    $('#example').DataTable( {
+        dom: 'Bfrtip',
+        buttons: [
+            'copyHtml5',
+            'excelHtml5',
+            'csvHtml5',
+            'pdfHtml5'
+        ]
+    } );
+} );
 </script>
+
 {% endblock %}
