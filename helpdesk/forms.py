@@ -31,7 +31,7 @@ class CommentTicketForm(forms.ModelForm):
         #associate model to ModelForm
         model = Ticket
         #which fields do we need? not all fields in the model
-        fields = ['title','description','comment']
+        fields = ['title','description']
 
 class EditTicketForm(forms.ModelForm):
     class Meta:
