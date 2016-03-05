@@ -31,7 +31,7 @@ class CommentTicketForm(forms.ModelForm):
         #associate model to ModelForm
         model = Ticket
         #which fields do we need? not all fields in the model
-        fields = ['title','description','comment']
+        fields = ['title','description']
 
 class EditTicketForm(forms.ModelForm):
     class Meta:
@@ -242,7 +242,7 @@ class TicketForm(forms.Form):
                         date = timezone.now(),
                         public = True,
                         comment = self.cleaned_data['body'],
-                        user = user,
+                        user = t.assigned_to,
                      )
         if self.cleaned_data['assigned_to']:
             f.title = _('Ticket Opened & Assigned to %(name)s') % {
