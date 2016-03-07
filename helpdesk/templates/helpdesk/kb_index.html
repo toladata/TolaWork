@@ -1,10 +1,48 @@
 {% extends "helpdesk/kb_base.html" %}{% load i18n %}
+{% block helpdesk_head %}
+<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>>
+
+{% endblock %}
 
 {% block helpdesk_body %}
 <h2>{% trans "Knowledgebase" %}</h2>
 
 <p>{% trans "We have listed a number of knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
 
+<!-- <div class="col-md-8 collapselist">
+<h4><strong> Knowlegebase Categories</strong></h4>
+      <div id="menu">
+        <a><span class="glyphicon glyphicon-plus-sign"> Teachers</span></a><br />
+        <div style="display: none">
+            <ul>
+                <li><a href="">Edit</a><br /></li>
+                <li><a href="">Delete</a><br /></li>
+            </ul>
+        </div>
+        <a><span class="glyphicon glyphicon-plus-sign"> Schools</span></a><br />
+        <div style="display: none">
+            <ul>  
+                <li><a href="">Edit</a><br /></li>
+                <li><a href="">Delete</a><br /></li>
+            </ul>
+        </div>
+        <a><span class="glyphicon glyphicon-plus-sign"> Lecturers</span></a><br />
+        <div style="display: none">
+            <ul>  
+                <li><a href="">Edit</a><br /></li>
+                <li><a href="">Delete</a><br /></li>
+            </ul>
+        </div>
+        <a><span class="glyphicon glyphicon-plus-sign"> Students</span></a><br />
+        <div style="display: none">
+            <ul>  
+                <li><a href="">Edit</a><br /></li>
+                <li><a href="">Delete</a><br /></li>
+            </ul>
+        </div>
+    </div>
+</div> -->
+<!-- <br><br><br> -->
 <table class="table table-hover table-bordered table-striped">
 <caption>{% trans "Knowledgebase Categories" %}</caption>
 <thead>
@@ -13,7 +51,7 @@
 <tbody>
 {% for category in kb_categories %}
 <tr><th><a href='{{ category.get_absolute_url }}'>{{ category.title }}</a></th></tr>
-<tr><td>{{ category.description }}</td></tr>
+<tr><td><a href='{{ category.description }}'><font color="#00f"> {{ category.description }}</font></a></td></tr>
 {% endfor %}
 </tbody>
 </table>
@@ -70,5 +108,11 @@
             </span>
         </div>
 </div>
+<script type="text/javascript">
+$('#menu > a').click(function(){
+    $(this).next().next().slideToggle();
+    return false;
+});
+</script>
 
 {% endblock %}

@@ -14,6 +14,7 @@ try:
     User = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
@@ -29,6 +30,7 @@ from django.utils.html import escape
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.conf import settings
+from django.core.mail import send_mail
 
 try:
     from django.utils import timezone
@@ -37,7 +39,7 @@ except ImportError:
 
 from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.github import new_issue, get_issue, update_issue, update_comments
 from helpdesk.slack import post_slack,post_tola_slack
 
@@ -50,18 +52,78 @@ def post_comment(request, ticket_id):
 
     if request.method == 'POST':
         ticket = get_object_or_404(Ticket, id=ticket_id)
-        email_current_user = request.user.email
+
         form = CommentTicketForm(request.POST)
+        f_public = request.POST.get('public', False) #public
+
+        if f_public == True:
+            current_user = request.user.email.upper() #who is the sender? CHANGE to tolawork@mercycorps.org
+            if ticket.assigned_to:
+                assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
 
         if form.is_valid():
             ticket_id = ticket.id
             title = form.cleaned_data['title']
-            f_public = form.cleaned_data.get('public', 1)
-            created = ticket.created
-            email = ticket.submitter_email
-            
-            status = request.POST.get('new_status')
+            status = request.POST.get('new_status') #new ticket status
+            if int(status) == 1:
+                status_text = 'Open'
+                open_template = get_object_or_404(EmailTemplate, template_name='open')
+                m_subject = open_template.heading
+                m_body = open_template.html
+                sender = request.user.email.upper() # person adding comment or changing ticket status
+                assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
+                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
+                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
 
+            elif int(status) == 2:
+                status_text = 'Re-Opened'
+                reopen_template = get_object_or_404(EmailTemplate, template_name='reopen')
+                m_subject = reopen_template.heading
+                m_body = reopen_template.html
+                sender = request.user.email.upper() # person adding comment or changing ticket status
+                assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
+                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
+                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+
+            elif int(status) == 3:
+                status_text = 'Resolved'
+                resolved_template = get_object_or_404(EmailTemplate, template_name='resolved')
+                m_subject = resolved_template.heading
+                m_body = resolved_template.html
+                sender = request.user.email.upper() # person adding comment or changing ticket status
+                assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
+                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
+                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+
+            elif int(status) == 4:
+                status_text = 'Closed'
+                closed_template = get_object_or_404(EmailTemplate, template_name='closed')
+                m_subject = closed_template.heading
+                m_body = closed_template.html
+                sender = request.user.email.upper() # person adding comment or changing ticket status
+                assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
+                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
+                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+            elif int(status) == 5:
+                status_text = 'Duplicate'
+                duplicate_template = get_object_or_404(EmailTemplate, template_name='duplicate')
+                m_subject = duplicate_template.heading
+                m_body = duplicate_template.html
+                sender = request.user.email.upper() # person adding comment or changing ticket status
+                assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
+                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
+                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+            else:
+                status_text = 'Not a status'
+
+            created = ticket.created
+            #check the person whom the ticket is assigned to
+            assigned_to_username = str(ticket.assigned_to).upper()
             on_hold = ticket.on_hold
             description = ticket.description
             resolution = ticket.resolution
@@ -77,34 +139,27 @@ def post_comment(request, ticket_id):
             votes = ticket.votes
             error = ticket.error_msg
             slack_status = ticket.slack_status
-            comment = ticket.comment
-            if str(comment) == 'None':
-                comment = ''
-
-            new_comment = form.cleaned_data['comment']
+            new_comment = request.POST.get('comment', '')
 
             if not new_comment == '':
-                comments = str(comment) + str('\n') +  '[' + str(email_current_user)  + ' on ' + str(timezone.now()) + ' ] - ' + str(new_comment)
-                f_comments = str(email_current_user)  + ' added a comment ' + '  - ' + str(new_comment)
+
+                f_comments = str(request.user.email.upper())  + ' added a comment ' + '  - ' + str(new_comment)
             else:
-                comments = str(comment)
-                f_comments = str(email_current_user)  + ' changed ticket status from ['  + str(ticket.get_status) + '] to a New Status'
+
+                f_comments = str(request.user.email.upper())  + ' changed ticket status from ['  + str(ticket.get_status) + '] to [ ' + str(status_text) + ']'
 
             update_comments = Ticket(id=ticket_id, title=title, created=created,
                                      modified=timezone.now(), description=description,
-                                     submitter_email=email, status=status,
+                                     submitter_email=request.POST.get('submitter_email',request.user.email.upper()), status=status,
                                      on_hold=on_hold, resolution=resolution,
                                      priority=priority, due_date=due_date,
                                      last_escalation=last_escalation, assigned_to=assigned,
                                      queue=queue, github_issue_id=github_id, github_issue_number=github_no,
                                      github_issue_url=github_url, type=type, votes=votes,
-                                     error_msg=error, slack_status=slack_status, comment=comments)
-            update_comments.save(update_fields=['comment','status'])
-
-
+                                     error_msg=error, slack_status=slack_status)
+            update_comments.save(update_fields=['status'])
             new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status, )
             new_followup.save()
-
 
             return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
@@ -394,6 +449,7 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
     # check whether current user is a submitter or assigned to ticket
     assignedto_username = str(ticket.assigned_to).upper()
     submitter_email = ticket.submitter_email.upper()
+
     strings_to_check = list()
     strings_to_check.append(assignedto_username)
     strings_to_check.append(submitter_email)
@@ -435,8 +491,8 @@ def update_ticket(request, ticket_id, public=False):
     due_date_day = int(request.POST.get('due_date_day', 0))
 
     # update the comment field in ticket table
-    ticket.comment = 'Test comment'
-    ticket.save(update_fields=['comment'])
+    #ticket.comment = 'Test comment'
+    #ticket.save(update_fields=['comment'])
 
     if not (due_date_year and due_date_month and due_date_day):
         due_date = ticket.due_date
@@ -588,14 +644,8 @@ def update_ticket(request, ticket_id, public=False):
         template_suffix = 'submitter'
 
         if ticket.submitter_email:
-            send_templated_mail(
-                template + template_suffix,
-                context,
-                recipients=ticket.submitter_email,
-                sender=ticket.queue.from_address,
-                fail_silently=True,
-                files=files,
-                )
+
+            send_templated_mail(template + template_suffix,context,recipients=ticket.submitter_email,sender=ticket.queue.from_address,fail_silently=True,files=files,)
             messages_sent_to.append(ticket.submitter_email)
 
         template_suffix = 'cc'
@@ -1231,9 +1281,9 @@ def create_ticket(request):
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
 
         if form.is_valid():
-            a_user= get_object_or_404(User, id=request.POST['assigned_to'])
 
-            ticket = form.save(user=a_user)
+            ticket = form.save(user=request.POST.get('assigned_to'))
+
 
             #autopost new ticket to #tola-work slack channel in Tola
             post_tola_slack(ticket.id)

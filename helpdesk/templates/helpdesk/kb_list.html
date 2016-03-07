@@ -3,7 +3,7 @@
 {% block helpdesk_head %}
 
 <script type='text/javascript' language='javascript' src='{{ STATIC_URL }}helpdesk/filter.js'></script>
-<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>>
+<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>
 
 
 {% endblock %}
@@ -33,7 +33,7 @@
                     </a>
                 </h3>
             </div>
-            <div id="collapseOne" class="panel-collapse collapse in">
+            <div id="collapseOne" class="panel-collapse collapse in test">
                 <div class="panel-body">
                 <div class="row">
                     <div class=" col-md-7 ticket-query-directive">         
@@ -162,7 +162,7 @@
             </div>
             <div id="collapseTwo" class="panel-collapse collapse">
                 <div class="panel-body">
-                    <form method='post' action='{% url 'helpdesk_savequery' %}'>
+                    <form method='post' action='{% url'helpdesk_savequery' %}'>
                     <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}' />
                     <dl>
                     <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
