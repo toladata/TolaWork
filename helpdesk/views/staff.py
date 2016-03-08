@@ -491,8 +491,8 @@ def update_ticket(request, ticket_id, public=False):
     due_date_day = int(request.POST.get('due_date_day', 0))
 
     # update the comment field in ticket table
-    ticket.comment = 'Test comment'
-    ticket.save(update_fields=['comment'])
+    #ticket.comment = 'Test comment'
+    #ticket.save(update_fields=['comment'])
 
     if not (due_date_year and due_date_month and due_date_day):
         due_date = ticket.due_date
