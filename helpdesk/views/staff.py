@@ -6,6 +6,7 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
+
 from __future__ import unicode_literals
 from datetime import datetime, timedelta
 
@@ -37,6 +38,8 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
+import requests
+import json
 from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
@@ -275,7 +278,7 @@ dashboard = staff_member_required(dashboard)
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    if str(ticket.queue) == "Tola Tables":
+    if str(ticket.queue) == "Tola Help":
         repo = settings.GITHUB_REPO_1
     else:
         repo = settings.GITHUB_REPO_2

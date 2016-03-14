@@ -2,6 +2,7 @@ import requests
 import json
 from helpdesk.models import Ticket, FollowUp
 from django.conf import settings
+from helpdesk.forms import CommentTicketForm
 
 def get_issue(repo,id):
     repo = repo + "/issues/" + id
@@ -15,36 +16,35 @@ def get_issue(repo,id):
 
 
 def new_issue(repo,ticket):
-    attachment_note = ""
-    ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set') 
+    ticket_comments = FollowUp.objects.filter(ticket_id=ticket.id).all()
+    new_comment = ''
+    for t in ticket_comments:
+        new_comment = str(new_comment) + '<br>' + str(t)
+
+    attachment_note = ''
+    ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set')
     for ticket_attachment in ticket_attachments.all():
         for attachment in ticket_attachment.attachment_set.all():
             if attachment:
-                attachment_note = "This ticket has Attachments."
+                attachment_note = 'This ticket has Attachments.'
             else:
-                attachment_note = " " 
-
+                attachment_note = ''
     payload = {}
     labels = ['Tola-Work Ticket']
     payload['title'] = ticket.title
-    payload['body'] = ticket.submitter_email + " " + ticket.description + "    #" + attachment_note
+    payload['body'] = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment)
     payload['labels'] = labels
-
     token = settings.GITHUB_AUTH_TOKEN
-
     repo = repo + "/issues"
 
     header = {'Authorization': 'token %s' % token}
     r = requests.post(repo,json.dumps(payload),headers=header)
 
-    #Update ticket with new github info if created successfully "201" response
     if int(r.status_code) == 201:
-        #print r.content
         data = json.loads(r.content)
         github_issue_url = data['html_url']
         github_issue_number = data['number']
         github_issue_id = data['id']
-
 
         update_ticket = Ticket.objects.get(id=ticket.id)
         update_ticket.github_issue_url = github_issue_url
@@ -80,6 +80,7 @@ def update_issue(repo,ticket):
         print "201"
 
         getComments = FollowUp.objects.all().filter(ticket=ticket)
+
         for comment in getComments:
             comment_status = update_comments(repo, ticket, comment, comment.user.email)
 
