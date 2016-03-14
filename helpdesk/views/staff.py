@@ -595,7 +595,11 @@ def update_ticket(request, ticket_id, public=False):
             if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
                 # Only files smaller than 512kb (or as defined in
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                files.append([a.filename, a.file])
+                try:
+                    files.append([a.filename, a.file])
+                except NotImplementedError:
+                    pass
+                   
 
 
     if title != ticket.title:
@@ -1287,7 +1291,33 @@ def create_ticket(request):
         if form.is_valid():
 
             ticket = form.save(user=request.POST.get('assigned_to'))
+            #ticket.comment = ''
+            comment = ""
+            f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+            f.save()
 
+            files = []
+            if request.FILES:
+                import mimetypes, os
+                for file in request.FILES.getlist('attachment'):
+                    filename = file.name.encode('ascii', 'ignore')
+                    a = Attachment(
+                        followup=f,
+                        filename=filename,
+                        mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                        size=file.size,
+                        )
+                    a.file.save(filename, file, save=False)
+                    a.save()
+
+                    if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
+                        # Only files smaller than 512kb (or as defined in
+                        #settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                        try:
+                            files.append([a.filename, a.file])
+                        except NotImplementedError:
+                            pass
+                   
 
             #autopost new ticket to #tola-work slack channel in Tola
             post_tola_slack(ticket.id)
