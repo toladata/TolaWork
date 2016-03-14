@@ -6,6 +6,7 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
+
 from __future__ import unicode_literals
 from datetime import datetime, timedelta
 
@@ -37,6 +38,8 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
+import requests
+import json
 from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
@@ -54,24 +57,24 @@ def post_comment(request, ticket_id):
         ticket = get_object_or_404(Ticket, id=ticket_id)
 
         form = CommentTicketForm(request.POST)
-        f_public = request.POST.get('public', False) #public
-
-        if f_public == True:
-            current_user = request.user.email.upper() #who is the sender? CHANGE to tolawork@mercycorps.org
-            if ticket.assigned_to:
-                assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
 
         if form.is_valid():
             ticket_id = ticket.id
             title = form.cleaned_data['title']
             status = request.POST.get('new_status') #new ticket status
+
+            f_public = request.POST.get('public', False) #public
+            #if f_public == True:
             if int(status) == 1:
                 status_text = 'Open'
                 open_template = get_object_or_404(EmailTemplate, template_name='open')
                 m_subject = open_template.heading
                 m_body = open_template.html
                 sender = request.user.email.upper() # person adding comment or changing ticket status
-                assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                if ticket.assigned_to:
+                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                else:
+                    assigned_user = request.user.email.upper()
                 submitter = request.POST.get('submitter_email',sender) #person submitted ticket
                 receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
                 send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
@@ -82,7 +85,10 @@ def post_comment(request, ticket_id):
                 m_subject = reopen_template.heading
                 m_body = reopen_template.html
                 sender = request.user.email.upper() # person adding comment or changing ticket status
-                assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                if ticket.assigned_to:
+                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                else:
+                    assigned_user = request.user.email.upper()
                 submitter = request.POST.get('submitter_email',sender) #person submitted ticket
                 receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
                 send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
@@ -93,9 +99,13 @@ def post_comment(request, ticket_id):
                 m_subject = resolved_template.heading
                 m_body = resolved_template.html
                 sender = request.user.email.upper() # person adding comment or changing ticket status
-                assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                if ticket.assigned_to:
+                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                else:
+                    assigned_user = request.user.email.upper()
                 submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
+                qa_lead = 'joash@open.build'
+                receivers = [assigned_user, submitter,qa_lead ] #email addresses of 'assigned user' and 'submitter'
                 send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
 
             elif int(status) == 4:
@@ -104,7 +114,11 @@ def post_comment(request, ticket_id):
                 m_subject = closed_template.heading
                 m_body = closed_template.html
                 sender = request.user.email.upper() # person adding comment or changing ticket status
-                assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+
+                if ticket.assigned_to:
+                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                else:
+                    assigned_user = request.user.email.upper()
                 submitter = request.POST.get('submitter_email',sender) #person submitted ticket
                 receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
                 send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
@@ -114,7 +128,10 @@ def post_comment(request, ticket_id):
                 m_subject = duplicate_template.heading
                 m_body = duplicate_template.html
                 sender = request.user.email.upper() # person adding comment or changing ticket status
-                assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                if ticket.assigned_to:
+                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
+                else:
+                    assigned_user = request.user.email.upper()
                 submitter = request.POST.get('submitter_email',sender) #person submitted ticket
                 receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
                 send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
@@ -142,10 +159,8 @@ def post_comment(request, ticket_id):
             new_comment = request.POST.get('comment', '')
 
             if not new_comment == '':
-
                 f_comments = str(request.user.email.upper())  + ' added a comment ' + '  - ' + str(new_comment)
             else:
-
                 f_comments = str(request.user.email.upper())  + ' changed ticket status from ['  + str(ticket.get_status) + '] to [ ' + str(status_text) + ']'
 
             update_comments = Ticket(id=ticket_id, title=title, created=created,
@@ -263,7 +278,7 @@ dashboard = staff_member_required(dashboard)
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    if str(ticket.queue) == "Tola Tables":
+    if str(ticket.queue) == "Tola Help":
         repo = settings.GITHUB_REPO_1
     else:
         repo = settings.GITHUB_REPO_2
@@ -591,7 +606,11 @@ def update_ticket(request, ticket_id, public=False):
             if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
                 # Only files smaller than 512kb (or as defined in
                 # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                files.append([a.filename, a.file])
+                try:
+                    files.append([a.filename, a.file])
+                except NotImplementedError:
+                    pass
+                   
 
 
     if title != ticket.title:
@@ -1283,7 +1302,33 @@ def create_ticket(request):
         if form.is_valid():
 
             ticket = form.save(user=request.POST.get('assigned_to'))
+            #ticket.comment = ''
+            comment = ""
+            f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+            f.save()
 
+            files = []
+            if request.FILES:
+                import mimetypes, os
+                for file in request.FILES.getlist('attachment'):
+                    filename = file.name.encode('ascii', 'ignore')
+                    a = Attachment(
+                        followup=f,
+                        filename=filename,
+                        mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                        size=file.size,
+                        )
+                    a.file.save(filename, file, save=False)
+                    a.save()
+
+                    if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
+                        # Only files smaller than 512kb (or as defined in
+                        #settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                        try:
+                            files.append([a.filename, a.file])
+                        except NotImplementedError:
+                            pass
+                   
 
             #autopost new ticket to #tola-work slack channel in Tola
             post_tola_slack(ticket.id)
