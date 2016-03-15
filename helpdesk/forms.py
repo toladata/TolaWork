@@ -263,7 +263,7 @@ class TicketForm(forms.Form):
                 size=file.size,
                 )
             a.file.save(file.name, file, save=False)
-            a.save()
+            #a.save()
 
             if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
                 # Only files smaller than 512kb (or as defined in
