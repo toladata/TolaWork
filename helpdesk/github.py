@@ -56,11 +56,8 @@ def new_issue(repo,ticket):
 
 
 def update_issue(repo,ticket):
-    ticket_comments = FollowUp.objects.filter(ticket_id=ticket.id).all()
-    new_comment = ''
-    for t in ticket_comments:
-        new_comment = str(new_comment)  + str(t) + '<br>'
-
+    new_comment  = FollowUp.objects.filter(ticket_id=ticket.id).reverse()[0]
+    
     attachment_note = ""
     ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set') 
     for ticket_attachment in ticket_attachments.all():
@@ -74,7 +71,7 @@ def update_issue(repo,ticket):
 
     payload = {}
     payload['title'] = ticket.title
-    payload['body'] = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment)
+    payload['body'] = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " <br/> " + str(new_comment)
 
 
     token = settings.GITHUB_AUTH_TOKEN
