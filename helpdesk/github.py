@@ -19,7 +19,7 @@ def new_issue(repo,ticket):
     ticket_comments = FollowUp.objects.filter(ticket_id=ticket.id).all()
     new_comment = ''
     for t in ticket_comments:
-        new_comment = str(new_comment) + '<br>' + str(t)
+        new_comment = str(new_comment)  + str(t) + '<br>'
 
     attachment_note = ''
     ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set')
@@ -56,7 +56,11 @@ def new_issue(repo,ticket):
 
 
 def update_issue(repo,ticket):
-    print "Called Update"
+    ticket_comments = FollowUp.objects.filter(ticket_id=ticket.id).all()
+    new_comment = ''
+    for t in ticket_comments:
+        new_comment = str(new_comment)  + str(t) + '<br>'
+
     attachment_note = ""
     ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set') 
     for ticket_attachment in ticket_attachments.all():
@@ -66,46 +70,25 @@ def update_issue(repo,ticket):
             else:
                 attachment_note = " " 
 
+
+
     payload = {}
     payload['title'] = ticket.title
-    payload['body'] = ticket.description +  attachment_note
+    payload['body'] = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment)
+
 
     token = settings.GITHUB_AUTH_TOKEN
-    repo = repo + "/issues/" + ticket.github_issue_number
-
-    header = {'Authorization': 'token %s' % token}
-    r = requests.post(repo,json.dumps(payload),headers=header)
-    #Update ticket with new github info if created successfully "201" response
-    if int(r.status_code) == 201:
-        print "201"
-
-        getComments = FollowUp.objects.all().filter(ticket=ticket)
-
-        for comment in getComments:
-            comment_status = update_comments(repo, ticket, comment, comment.user.email)
-
-            print comment_status
-
-    return r.status_code
-
-
-def update_comments(repo, ticket, comment, email):
-
-    payload = {}
-    payload['body'] = email + " " + ticket.ticket_url + " " + comment
-
-    token = settings.GITHUB_AUTH_TOKEN
-
     repo = repo + "/issues/" + ticket.github_issue_number + "/comments"
 
     header = {'Authorization': 'token %s' % token}
     r = requests.post(repo,json.dumps(payload),headers=header)
 
-    print repo
-
-    print r.status_code
-
     return r.status_code
+
+
+def update_comments(repo, ticket, comment):
+
+    print repo
 
 
 def latest_release(repo):
