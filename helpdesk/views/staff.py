@@ -167,7 +167,7 @@ def post_comment(request, ticket_id):
                                      submitter_email=request.POST.get('submitter_email',request.user.email.upper()), status=status,
                                      on_hold=on_hold, resolution=resolution,
                                      priority=priority, due_date=due_date,
-                                     last_escalation=last_escalation, assigned_to=assigned,tag=tag,
+                                     last_escalation=last_escalation, assigned_to=assigned,
                                      queue=queue, github_issue_id=github_id, github_issue_number=github_no,
                                      github_issue_url=github_url, type=type, votes=votes,
                                      error_msg=error, slack_status=slack_status)
@@ -936,14 +936,6 @@ def tickets_dependency(request,ticket_id):
 
         owners = request.GET.getlist('assigned_to')
 
-        tags = request.GET.getlist('tag')
-        if tags:
-            try:
-                tags = [int(t) for t in tags]
-                query_params['filtering']['tag__id__in'] = tags
-            except ValueError:
-                pass
-
         owners = request.GET.getlist('assigned_to')
         if owners:
             try:
@@ -1050,7 +1042,6 @@ def tickets_dependency(request,ticket_id):
             tickets=tickets,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
-            tag_choices=tag_choices,
             status_choices=Ticket.STATUS_CHOICES,
             type_choices=Ticket.TICKET_TYPE,
             urlsafe_query=urlsafe_query,
@@ -1153,14 +1144,6 @@ def ticket_list(request):
             try:
                 queues = [int(q) for q in queues]
                 query_params['filtering']['queue__id__in'] = queues
-            except ValueError:
-                pass
-
-        tags = request.GET.getlist('tag')
-        if tags:
-            try:
-                tags = [int(q) for q in tags]
-                query_params['filtering']['tag__id__in'] = tags
             except ValueError:
                 pass
 
@@ -1271,7 +1254,6 @@ def ticket_list(request):
             tickets=tickets,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
-            tag_choices=tag_choices,
             status_choices=Ticket.STATUS_CHOICES,
             type_choices=Ticket.TICKET_TYPE,
             urlsafe_query=urlsafe_query,
