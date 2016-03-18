@@ -42,7 +42,7 @@ import requests
 import json
 from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate, TicketTag
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.github import new_issue, get_issue, update_issue, update_comments
 from helpdesk.slack import post_slack,post_tola_slack
 
@@ -148,8 +148,6 @@ def post_comment(request, ticket_id):
             due_date = ticket.due_date
             last_escalation = ticket.last_escalation
             assigned = ticket.assigned_to
-            queue = ticket.queue
-            tag = TicketTag.tag
             github_id = ticket.github_issue_id
             github_no = ticket.github_issue_number
             github_url = ticket.github_issue_url
@@ -1003,7 +1001,6 @@ def tickets_dependency(request,ticket_id):
 
     tickets = Ticket.objects.select_related()
     queue_choices = Queue.objects.all()
-    tag_choices = TicketTag.objects.all()
 
     try:
        ticket_qs = apply_query(tickets, query_params)
@@ -1224,7 +1221,7 @@ def ticket_list(request):
 
     tickets = Ticket.objects.select_related()
     queue_choices = Queue.objects.all()
-    tag_choices = TicketTag.objects.all()
+
 
     try:
        ticket_qs = apply_query(tickets, query_params)
@@ -1319,12 +1316,11 @@ def create_ticket(request):
 
             form = TicketForm(request.POST, request.FILES)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            form.fields['tag'].choices = [('', '--------')] + [[tag.id, tag.tag] for tag in TicketTag.objects.all()]
-            #form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
         else:
             form = PublicTicketForm(request.POST, request.FILES)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            #form.fields['tag'].choices = [('', '--------')] + [[tag.id, tag.tag] for tag in TicketTag.objects.all()]
+
 
         if form.is_valid():
 
@@ -1370,18 +1366,16 @@ def create_ticket(request):
         if 'queue' in request.GET:
             initial_data['queue'] = request.GET['queue']
 
-        if 'tag' in request.GET:
-            initial_data['tag'] = request.GET['tag']
+
 
         if request.user.is_staff:
             form = TicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            form.fields['tag'].choices = [('', '--------')] + [[tag.id, tag.tag] for tag in TicketTag.objects.all()]
             form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
         else:
             form = PublicTicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            #form.fields['tag'].choices = [('', '--------')] + [[tag.id, tag.tag] for tag in TicketTag.objects.all()]
+
 
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
