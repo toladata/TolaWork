@@ -23,12 +23,80 @@
         {% endfor %}
         {% endcomment %}
 
-    <div class='buttons form-group'>
-        <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
+<div class = "col-md-offset-2 col-md-10">
+
+    <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'><b>{% trans "Attach More File(s) &raquo;" %}</b></a></p>
+
+    <div id='FileUpload' style='display: none;'>
+
+        <dl>
+
+            <dt><label for='id_file'> <b>{% trans "Attach a File" %}</b></label></dt>
+            <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'><b>{% trans "Add Another File" %}</b></a>)</span></dd>
+        </dl>
+
     </div>
+        <div class='buttons form-group'>
+            <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
+    </div>
+</div> 
+
 
 
 {% csrf_token %}</form>
 
+<script>
+    $(document).ready(function() {
+        $("#ShowFurtherEditOptions").click(function() {
+            $("#FurtherEditOptions").fadeIn();
+            $("#ShowFurtherOptPara").show();
+            return false;
+        });
+
+        processAddFileClick();
+        $("#ShowFileUpload").click(function() {
+            $("#FileUpload").fadeIn();
+            $("#ShowFileUploadPara").show();
+            return false;
+        });
+
+        $('#id_preset').change(function() {
+            preset = $('#id_preset').val();
+            if (preset != '') {
+                $.get("{% url 'helpdesk_raw' "preset" %}?id=" + preset, function(data) {
+                    $("#commentBox").val(data)
+                });
+            }
+        });
+
+        $("[data-toggle=tooltip]").tooltip();
+    });
+
+    function processAddFileClick() {
+        /* Until jQuery includes some 'livequery' functionality in the core
+           distribution, this will have to do. */
+        $(".AddAnotherFile>a").click(function() {
+            $(this).parent().remove();
+            $("#FileUpload>dl").append("<dt><label>{% trans "Attach another File" %}</label></dt><dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>");
+            processAddFileClick();
+            return false;
+        });
+
+    }
+</script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js">
+</script>
+
+<script type="text/javascript" 
+src="{{ STATIC_URL }}js/chosen.jquery.min.js">
+</script>
+
+<link rel="stylesheet" href="{{ STATIC_URL }}css/chosen.css" 
+type="text/css" media="screen" />
+
+<script type="text/javascript">  
+    $(".chosen").chosen();
+
+</script>
 
 {% endblock %}

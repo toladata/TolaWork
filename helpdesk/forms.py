@@ -169,11 +169,11 @@ class TicketForm(forms.Form):
         #    print "you changed!"
         return data
 
-    attachment = forms.FileField(
-        required=False,
-        label=_('Attach File'),
-        help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
-        )
+    # attachment = forms.FileField(
+    #     required=False,
+    #     label=_('Attach File'),
+    #     help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
+    #     )
 
     def __init__(self, *args, **kwargs):
         """
@@ -251,27 +251,27 @@ class TicketForm(forms.Form):
 
         f.save()
 
-        files = []
-        if self.cleaned_data['attachment']:
-            import mimetypes
-            file = self.cleaned_data['attachment']
-            filename = file.name.replace(' ', '_')
-            a = Attachment(
-                followup=f,
-                filename=filename,
-                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
-                size=file.size,
-                )
-            a.file.save(file.name, file, save=False)
-            a.save()
+        # files = []
+        # if self.cleaned_data['attachment']:
+        #     import mimetypes
+        #     file = self.cleaned_data['attachment']
+        #     filename = file.name.replace(' ', '_')
+        #     a = Attachment(
+        #         followup=f,
+        #         filename=filename,
+        #         mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+        #         size=file.size,
+        #         )
+        #     a.file.save(file.name, file, save=False)
+            #a.save()
 
-            if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-                # Only files smaller than 512kb (or as defined in
-                # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                try:
-                    files.append([a.filename, a.file])
-                except NotImplementedError:
-                    pass
+            # if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
+            #     # Only files smaller than 512kb (or as defined in
+            #     # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+            #     try:
+            #         files.append([a.filename, a.file])
+            #     except NotImplementedError:
+            #         pass
 
         context = safe_template_context(t)
         context['comment'] = f.comment
@@ -285,7 +285,7 @@ class TicketForm(forms.Form):
                 recipients=t.submitter_email,
                 sender=q.from_address,
                 fail_silently=True,
-                files=files,
+                # files=files,
                 )
             messages_sent_to.append(t.submitter_email)
 
