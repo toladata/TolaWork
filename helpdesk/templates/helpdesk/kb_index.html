@@ -6,66 +6,57 @@
 
 {% block helpdesk_body %}
 <h2>{% trans "Knowledgebase" %}</h2>
-
-<p>{% trans "We have listed a number of knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
-
-<!-- <div class="col-md-8 collapselist">
-<h4><strong> Knowlegebase Categories</strong></h4>
-      <div id="menu">
-        <a><span class="glyphicon glyphicon-plus-sign"> Tola Data</span></a><br />
-        <div style="display: none">
-            <ul>
-                <li><a href="">Edit</a><br /></li>
-                <li><a href="">Delete</a><br /></li>
-            </ul>
-        </div>
-        <a><span class="glyphicon glyphicon-plus-sign"> Tola Tables</span></a><br />
-        <div style="display: none">
-            <ul>  
-                <li><a href="">Edit</a><br /></li>
-                <li><a href="">Delete</a><br /></li>
-            </ul>
-        </div>
-        <a><span class="glyphicon glyphicon-plus-sign"> Data Collection</span></a><br />
-        <div style="display: none">
-            <ul>  
-                <li><a href="">Ona</a><br /></li>
-                <li><a href="">ODK</a><br /></li>
-            </ul>
-        </div>
-        <a><span class="glyphicon glyphicon-plus-sign"> Tola Activity</span></a><br />
-        <div style="display: none">
-            <ul>  
-                <li><a href="">Workflow</a><br /></li>
-                <li><a href="">Indicators</a><br /></li>
-                <li><a href="">Form Library</a><br /></li>
-                <li><a href="">Reports</a><br /></li>
-            </ul>
-        </div>
+<div class="col-md-12 row">
+    <div class="col-md-8">
+    <p>{% trans "We have listed a number of knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
     </div>
-</div> -->
-<br><br><br>
-<table class="table table-hover table-bordered table-striped">
-<caption>{% trans "Knowledgebase Categories" %}</caption>
-<thead>
-<tr><th>{% trans "Category" %}</th></tr>
-</thead>
-<tbody>
-{% for category in kb_categories %}
-<tr><th><a href='{{ category.get_absolute_url }}'>{{ category.title }}</a></th></tr>
-<tr><td><a href='{{ category.description }}'><font color="#00f"> {{ category.description }}</font></a></td></tr>
-{% endfor %}
-</tbody>
-</table>
+</div>
+
+<div class="col-md-12 row"> 
+    <div class="col-md-8 collapselist knowledge_panel">
+    <h4><strong> Knowledgebase Categories</strong></h4>
+    {% for supercategory in superkbcategories%}
+      <div class="panel-group ">
+        <div class="panel knowledge_main">
+          <div class="panel-heading knowledge_head">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" href='#{{supercategory.id}}' ><span class="glyphicon glyphicon-plus-sign"> <font class="font5"> {{supercategory.title}}</font></span></a>
+            </h4>
+          </div>
+          <div id='{{supercategory.id}}' class="panel-collapse collapse">
+            <div class="panel-body table-responsive">
+            <table class="table table-striped"> 
+                <tr> 
+                    <th>Category</th>
+                    <th> Description</th>
+                </tr>
+                {% for category in supercategory.kbcategory_set.all  %}
+                    <tr> 
+                        <td> {{ category.title }}</td>
+                        <td><a href="#">{{ category.description }}</a> </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            </div>
+            <div class="panel-footer"></div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+</div>
+
+<h2> Knowledgebase Items</h2>
+
 {% for item in data %}
 <p> This is the data am waiting for: {{ item.tittle }}</p>
 {% endfor %}
-<div>
-	<table class="table table-hover table-bordered table-striped">
-        <caption>{% trans "Knowledgebase Items" %}</caption>
+<div class="col-md-12 row">
+    <div class="table-responsive">
+    <table class="table table-bordered table-striped">
         <thead>
             <tr>
-               	<th>&nbsp;</th>
+                <th>&nbsp;</th>
                 <th>{% trans "Id" %}</th>
                 <th>{% trans "Title" %}</th>
                 <th>{% trans "Question" %}</th>
@@ -110,6 +101,9 @@
             </span>
         </div>
 </div>
+</div>
+
+
 <script type="text/javascript">
 $('#menu > a').click(function(){
     $(this).next().next().slideToggle();
