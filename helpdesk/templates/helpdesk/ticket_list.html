@@ -243,7 +243,7 @@
         <tbody>
         {% for ticket in tickets.object_list %}
             <tr class="{{ ticket.get_priority_css_class }}">
-                <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.id}}</a></td>
+                <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}}</a></td>
                 <td><input type='checkbox' name='ticket_id' value='{{ ticket.id }}' class='ticket_multi_select' /></td>
                 <td>{{ ticket.priority }}</td>
                 <td>{{ ticket.get_type_display }}</td>
@@ -340,6 +340,9 @@ $(document).ready(function() {
 
 $(document).ready(function() {
     $('#example').DataTable( {
+        columnDefs: [
+          { type: 'natural', targets: 0 }
+        ],
         "order": [[ 0, "desc" ]],
         "pageLength": 20,
         dom: 'Bfrtip',
