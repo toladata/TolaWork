@@ -29,17 +29,5 @@ class Migration(migrations.Migration):
             name='kbcategory',
             options={'ordering': ['title'], 'verbose_name': 'KnCatowledge base category', 'verbose_name_plural': 'Knowledge base categories'},
         ),
-        migrations.RemoveField(
-            model_name='ticket',
-            name='tag',
-        ),
-        migrations.DeleteModel(
-            name='TicketTag',
-        ),
-        migrations.AddField(
-            model_name='kbcategory',
-            name='supercategory',
-            field=models.ForeignKey(default=1, verbose_name='SuperCategory', to='helpdesk.SuperKBCategory'),
-            preserve_default=False,
-        ),
+
     ]
