@@ -1,0 +1,193 @@
+/**//*body
+{
+	background-image: url("../images/toladata8.png");
+	background-size: contain;
+	height:100%;
+	width:100%;
+	background-repeat: no-repeat;
+}*/
+body {
+  /* Location of the image */
+  background-image: url(../img/image1.jpg);
+  
+  /* Image is centered vertically and horizontally at all times */
+  background-position: center center;
+  
+  /* Image doesn't repeat */
+  background-repeat: no-repeat;
+  
+  /* Makes the image fixed in the viewport so that it doesn't move when 
+     the content height is greater than the image height */
+  background-attachment: fixed;
+  
+  /* This is what makes the background image rescale based on its container's size */
+  background-size: cover;
+  
+  /* Pick a solid background color that will be displayed while the background image is loading */
+  background-color:#464646;
+  
+  /* SHORTHAND CSS NOTATION
+   * background: url(background-photo.jpg) center center cover no-repeat fixed;
+   */
+}
+
+/* For mobile devices */
+@media only screen and (max-width: 767px) {
+  body {
+    /* The file size of this background image is 93% smaller
+     * to improve page load speed on mobile internet connections */
+    background-image: url(../img/image1.jpg);
+  }
+	}
+
+.navbar
+{
+	background-color: transparent;
+	border:none;
+	min-height: 10px;
+}
+.collapse .navbar-collapse
+{
+	border:none;
+}
+ .navbar-collapse
+{
+	border:none;
+}
+.navbar h1
+{
+	margin-top: 0px;
+}
+/*//fonts*/
+.font1
+{
+	color:#fff;
+}
+.font2
+{
+	color:#cc0000;
+	font-weight: bold;
+}
+.font3
+{
+	font-weight: bold;
+}
+.font4
+{
+	color:#ff8000;
+
+}
+.font5
+{
+	color:#ff9933;
+}
+.font6
+{
+	color:#ff8000;
+	font-weight: bold;
+	font-size: 15px;
+}
+/*end of fonts*/
+.button
+{
+	background-color: #ff8000;
+}
+nav ul
+{
+	background-color: rgba(0,0,0,0.2);
+	padding-right: 10px;
+
+}
+nav ul li
+{
+	margin-left: 20px;
+}
+.logo
+{
+	margin-left: 100px;
+}
+.splash
+{
+	/*background-image: url(".images/slide7.jpg");*/
+	padding-top: 20px;
+	background-color: transparent;
+	
+}
+#input_detail
+{
+	margin: 5px;
+}
+#intro_form
+{
+	border: 1px solid#eee; 
+	border-radius: 10px;
+	margin-top: 80px;
+	background-color: rgba(255,255,255,0.2);
+	padding: 20px;
+}
+p
+{
+	color:#fff;
+}
+.splash_main
+{
+	margin-top: 20px;
+}
+#intro_description
+{
+	background-color: rgba(0,0,0,0.5);
+	position: relative;
+	overflow: hidden;
+	min-height: 10px;
+	border-radius: 10px;
+	margin-top: 10px;
+	padding-bottom: 20px;
+}
+.intro_feature
+{
+	margin-top: 15px;
+}
+/*//login modal*/
+.modal-body
+{
+	position: relative;
+	overflow: hidden;
+	border:1px solid#eee;
+	border-radius: 10px;
+	padding:10px;
+	margin-top: 5px;
+}
+.modal-title
+{
+	text-align: center;
+}
+.modal-details
+{
+	position: relative;
+	overflow: hidden;
+	border:1px solid#eee;
+	border-radius: 10px;
+	padding:10px;
+}
+.modal-top
+{
+	padding-left: 10px;
+	padding-right: 10px;
+}
+.modal-header
+{
+	border:none;
+}
+.modal-footer
+{
+	border:none;
+}
+.modal-content
+{
+	padding-left: 10px;
+	padding-right: 10px;
+}
+.social-buttons
+{
+	margin-top: 5px;
+}

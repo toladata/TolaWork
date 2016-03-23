@@ -65,7 +65,7 @@
                 </a>
 
             </div>
-            <div class="navbar-collapse collapse" role=navigation">
+            <div class="navbar-collapse collapse" role="navigation">
                 <ul class="nav navbar-nav">
                     <li><a href="{% url 'home' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
                     {% if user.is_staff %}
@@ -100,34 +100,8 @@
                 </ul>
                 {% else %}
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> Login <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <div class="navbar-text">
-                                    Login via
-                                    <div class="social-buttons">
-                                        <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-go"><i class="fa fa-google"></i> Google</a>
-                                    </div>
-                                    or
-                                    <a href="{% url 'login' %}">Login with Tola Account</a><br/>
-
-                                    <form class="form" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
-                                        {% csrf_token %}
-                                        <div class="form-group">
-                                            <input type="hidden" name="next" value="{{ next }}" />
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="text" name="username" placeholder="Username" class="form-control">
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="password" name="password" placeholder="Password" class="form-control">
-                                        </div>
-                                        <button type="submit" class="btn btn-success">Sign in</button>
-                                    </form>
-                                </div>
-                            </li>
-                        </ul>
+                    <li>
+                        <a href="{% url 'login' %}"><span class="glyphicon glyphicon-user"></span> Login</a>
                     </li><!-- .dropdown collapse -->
                  </ul>
                 {% endif %}
