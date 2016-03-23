@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
-from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory
+from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, SuperKBCategory, KBCategory
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
 from helpdesk.models import TicketChange, Attachment, IgnoreEmail
 from helpdesk.models import CustomField
@@ -57,6 +57,7 @@ admin.site.register(PreSetReply)
 admin.site.register(EscalationExclusion)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(KBCategory)
+admin.site.register(SuperKBCategory)
 admin.site.register(KBItem, KBItemAdmin)
 admin.site.register(IgnoreEmail)
 admin.site.register(CustomField, CustomFieldAdmin)

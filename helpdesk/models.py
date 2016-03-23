@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-
 from django.db import models
 from django.contrib import admin
 from django.conf import settings
@@ -720,14 +719,46 @@ class EmailTemplate(models.Model):
         verbose_name = _('e-mail template')
         verbose_name_plural = _('e-mail templates')
 
+# superCateory
 
+class SuperKBCategory (models.Model):
+    """
+    Super_Category refers to the a more general categories for nesting the various KB categories.
+    """
+    title = models.CharField(
+        _('Title'),
+        max_length=100,
+        )
 
+    slug = models.SlugField(
+        _('Slug'),
+        )
+
+    description = models.TextField(
+        _('Description'),
+        )
+
+    def __unicode__(self):
+        return u'%s' % self.title
+
+    class Meta:
+        ordering = ['title',]
+        verbose_name = _('Knowledge base supercategory')
+        verbose_name_plural = _('Knowledge base supercategories')
+
+    def get_absolute_url(self):
+        return ('helpdesk_super_kb_category', (), {'slug': self.slug})
+    get_absolute_url = models.permalink(get_absolute_url)
 
 class KBCategory(models.Model):
     """
     Lets help users help themselves: the Knowledge Base is a categorised
     listing of questions & answers.
     """
+    supercategory = models.ForeignKey(
+        SuperKBCategory,
+        verbose_name=_('SuperCategory'),
+        )
 
     title = models.CharField(
         _('Title'),
@@ -745,12 +776,13 @@ class KBCategory(models.Model):
 
     class Meta:
         ordering = ['title',]
-        verbose_name = _('Knowledge base category')
+        verbose_name = _('KnCatowledge base category')
         verbose_name_plural = _('Knowledge base categories')
 
     def get_absolute_url(self):
         return ('helpdesk_kb_category', (), {'slug': self.slug})
     get_absolute_url = models.permalink(get_absolute_url)
+
 
 
 class KBItem(models.Model):
