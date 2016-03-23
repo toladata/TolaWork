@@ -232,8 +232,8 @@ AUTHENTICATION_BACKENDS = (
 )
 
 ########## Login redirect ###########
-LOGIN_REDIRECT_URL = '/'
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/home'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/home'
 
 ########## LOGGING CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#logging
