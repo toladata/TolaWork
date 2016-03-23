@@ -2,7 +2,7 @@ import requests
 import json
 from helpdesk.models import Ticket, FollowUp
 from django.conf import settings
-from helpdesk.forms import CommentTicketForm
+
 
 def get_issue(repo,id):
     repo = repo + "/issues/" + id

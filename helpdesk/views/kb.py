@@ -17,10 +17,11 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
 
-from helpdesk.models import KBCategory, KBItem
+from helpdesk.models import SuperKBCategory, KBCategory, KBItem
 
 
 def index(request):
+    supercategory_list = SuperKBCategory.objects.select_related()
     category_list = KBCategory.objects.all()
 
     if ('q' in request.GET) and request.GET['q'].strip():
@@ -45,6 +46,7 @@ def index(request):
     # TODO: It'd be great to have a list of most popular items here.
     return render_to_response('helpdesk/kb_index.html',
         RequestContext(request, {
+            'superkbcategories':supercategory_list,
             'kb_categories': category_list,
             'kb_items': item_list
         }))
@@ -227,7 +229,6 @@ def kb_list(request):
 
     kb_items = KBItem.objects.select_related()
     queue_choices = Queue.objects.all()
-
     try:
        kb_item_qs = apply_query(kb_items, query_params)
     except ValidationError:
