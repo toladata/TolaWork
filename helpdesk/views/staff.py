@@ -153,6 +153,7 @@ def post_comment(request, ticket_id):
             github_url = ticket.github_issue_url
             type = ticket.type
             votes = ticket.votes
+            queue = ticket.queue
             error = ticket.error_msg
             slack_status = ticket.slack_status
             new_comment = request.POST.get('comment', '')

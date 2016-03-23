@@ -14,6 +14,8 @@ from django.conf import settings
 from django.db.models import Count
 import os
 
+def splash(request):
+    return render(request, "splash.html")
 
 def home(request):
 
@@ -98,7 +100,7 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect("/")
+            return HttpResponseRedirect("/login")
     else:
         form = UserCreationForm()
     return render(request, "registration/register.html", {
