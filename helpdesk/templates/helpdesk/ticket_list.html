@@ -241,9 +241,9 @@
             </tr>
         </tfoot>
         <tbody>
-        {% for ticket in tickets.object_list.reverse %}
+        {% for ticket in tickets.object_list %}
             <tr class="{{ ticket.get_priority_css_class }}">
-                <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket|upper }}</a></td>
+                <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}}</a></td>
                 <td><input type='checkbox' name='ticket_id' value='{{ ticket.id }}' class='ticket_multi_select' /></td>
                 <td>{{ ticket.priority }}</td>
                 <td>{{ ticket.get_type_display }}</td>
@@ -261,20 +261,8 @@
         {% endfor %}
         </tbody>
     </table>
-
-        <div class="pagination">
-            <span class="step-links">
-            {% if tickets.has_previous %}
-                <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}">{% trans "Previous" %}</a>
-            {% endif %}
-                <span class="current">
-                    {% blocktrans with tickets.number as ticket_num and tickets.paginator.num_pages as num_pages %}Page {{ ticket_num }} of {{ num_pages }}.{% endblocktrans %}
-                </span>
-            {% if tickets.has_next %}
-                <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a>
-            {% endif %}
-            </span>
-        </div>
+    <br>
+    <br>
 
         <p><label>{% trans "Select:" %} </label>
             <a href='#select_all' id='select_all'>{% trans "All" %}</a>
@@ -352,7 +340,11 @@ $(document).ready(function() {
 
 $(document).ready(function() {
     $('#example').DataTable( {
+        columnDefs: [
+          { type: 'natural', targets: 0 }
+        ],
         "order": [[ 0, "desc" ]],
+        "pageLength": 20,
         dom: 'Bfrtip',
         buttons: [
             'copyHtml5',

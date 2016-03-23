@@ -148,7 +148,6 @@ def post_comment(request, ticket_id):
             due_date = ticket.due_date
             last_escalation = ticket.last_escalation
             assigned = ticket.assigned_to
-            queue = ticket.queue
             github_id = ticket.github_issue_id
             github_no = ticket.github_issue_number
             github_url = ticket.github_issue_url
@@ -381,6 +380,8 @@ followup_delete = staff_member_required(followup_delete)
 
 
 def view_ticket(request, ticket_id):
+    if not (request.user.is_authenticated() and request.user.is_active):
+        return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
@@ -438,7 +439,6 @@ def view_ticket(request, ticket_id):
             'ticketcc_string': ticketcc_string,
             'SHOW_SUBSCRIBE': SHOW_SUBSCRIBE,
         }))
-
 def return_ticketccstring_and_show_subscribe(user, ticket):
     ''' used in view_ticket() and followup_edit()'''
     # create the ticketcc_string and check whether current user is already
@@ -494,6 +494,7 @@ def update_ticket(request, ticket_id, public=False):
             ticket = form.save()
 
             return HttpResponseRedirect(ticket.get_absolute_url())
+
 
     comment = request.POST.get('comment', '')
     new_status = int(request.POST.get('new_status', ticket.status))
@@ -934,6 +935,8 @@ def tickets_dependency(request,ticket_id):
                 pass
 
         owners = request.GET.getlist('assigned_to')
+
+        owners = request.GET.getlist('assigned_to')
         if owners:
             try:
                 owners = [int(u) for u in owners]
@@ -1202,6 +1205,7 @@ def ticket_list(request):
     tickets = Ticket.objects.select_related()
     queue_choices = Queue.objects.all()
 
+
     try:
        ticket_qs = apply_query(tickets, query_params)
     except ValidationError:
@@ -1212,7 +1216,8 @@ def ticket_list(request):
         }
         ticket_qs = apply_query(tickets, query_params)
 
-    ticket_paginator = paginator.Paginator(ticket_qs, 20)
+
+    ticket_paginator = paginator.Paginator(ticket_qs, len(tickets))
     try:
         page = int(request.GET.get('page', '1'))
     except ValueError:
@@ -1299,6 +1304,7 @@ def create_ticket(request):
             form = PublicTicketForm(request.POST, request.FILES)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
 
+
         if form.is_valid():
 
             ticket = form.save(user=request.POST.get('assigned_to'))
@@ -1343,6 +1349,8 @@ def create_ticket(request):
         if 'queue' in request.GET:
             initial_data['queue'] = request.GET['queue']
 
+
+
         if request.user.is_staff:
             form = TicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
@@ -1350,6 +1358,7 @@ def create_ticket(request):
         else:
             form = PublicTicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
 
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
