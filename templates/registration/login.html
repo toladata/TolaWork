@@ -3,14 +3,18 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-    <br/>
-    <h1>Login</h1>
-    <p>Login required to submit new issues or view existing.  If you have a Tola Help account login below or use your <a href="/login/google-oauth2/?next=/accounts/login/">Google account</a> to login.</p>
-    <form action="" method="post">
+  <h1>Login</h1>
+
+  <form action="" method="post">
       {% csrf_token %}
       {{ form.as_p }}
       <input type="submit" value="login">
-    </form>
-    <br/>
-    <p>Don't have an account? <a href="/accounts/register">Register Here</a></p>
+      {% if non_ldap %}
+        <div class="social-buttons">
+            <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-go"><i class="fa fa-google"></i> Google</a>
+        </div>
+        or
+        <a href="{% url 'register' %}">Register a new Tola Account</a><br/>
+      {% endif %}
+  </form>
 {% endblock %}
