@@ -17,7 +17,7 @@ urlpatterns = patterns('',
     url('', include('social.apps.django_app.urls', namespace='social')),
 
     #Home page
-    url(r'^$', 'project.views.splash', name='index'),
+    url(r'^$', 'project.views.home', name='index'),
 
     #base template include
     url(r'^$', TemplateView.as_view(template_name='base.html')),
@@ -26,7 +26,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 
     #home
-    url(r'^splash', 'project.views.splash', name='splash'),
+
     url(r'^home', 'project.views.home', name='home'),
     url(r'^contact', 'project.views.contact', name='contact'),
     url(r'^faq', 'project.views.faq', name='faq'),
@@ -34,7 +34,7 @@ urlpatterns = patterns('',
 
     #local login
     url(r'^login/$', 'django.contrib.auth.views.login', name='login'),
-    url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),
+
 
     url(r'^accounts/logout/$', 'project.views.logout_view', name='logout'),
 

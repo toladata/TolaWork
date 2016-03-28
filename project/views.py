@@ -14,8 +14,7 @@ from django.conf import settings
 from django.db.models import Count
 import os
 
-def splash(request):
-    return render(request, "splash.html")
+
 
 def home(request):
 
