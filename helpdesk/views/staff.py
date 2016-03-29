@@ -278,7 +278,7 @@ dashboard = staff_member_required(dashboard)
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    if str(ticket.queue) == "Tola Help":
+    if str(ticket.queue) == "Tola Tables":
         repo = settings.GITHUB_REPO_1
     else:
         repo = settings.GITHUB_REPO_2
