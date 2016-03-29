@@ -1,7 +1,13 @@
 import requests
 import json
+from helpdesk.forms import CommentTicketForm
 from helpdesk.models import Ticket, FollowUp
 from django.conf import settings
+from django.shortcuts import get_object_or_404
+try:
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 
 
 def get_issue(repo,id):
@@ -67,23 +73,68 @@ def update_issue(repo,ticket):
             else:
                 attachment_note = " " 
 
-
-
     payload = {}
     payload['title'] = ticket.title
-    payload['body'] = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " <br/> " + str(new_comment)
+    payload['state'] = "closed"
+    payload['body'] =  str(new_comment)
 
 
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues/" + ticket.github_issue_number + "/comments"
-
     header = {'Authorization': 'token %s' % token}
-    r = requests.post(repo,json.dumps(payload),headers=header)
+    r = requests.post(repo,data=json.dumps(payload),headers=header)
 
     return r.status_code
 
+def close_issue(repo,ticket):
+    new_comment  = FollowUp.objects.filter(ticket_id=ticket.id).reverse()[0]
 
-def update_comments(repo, ticket, comment):
+    attachment_note = ""
+    ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set')
+    for ticket_attachment in ticket_attachments.all():
+        for attachment in ticket_attachment.attachment_set.all():
+            if attachment:
+                attachment_note = " " + " " + "## This Issue has Attachments."
+            else:
+                attachment_note = " "
+
+    payload = {}
+    payload['title'] = ticket.title
+    payload['state'] = "closed"
+    payload['body'] =  str(new_comment)
+
+    token = settings.GITHUB_AUTH_TOKEN
+    repo = repo + "/issues/" + ticket.github_issue_number
+    header = {'Authorization': 'token %s' % token}
+
+    r = requests.patch(repo,data=json.dumps(payload),headers=header)
+    return r.status_code
+
+def reopen_issue(repo,ticket):
+    new_comment  = FollowUp.objects.filter(ticket_id=ticket.id).reverse()[0]
+
+    attachment_note = ""
+    ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set')
+    for ticket_attachment in ticket_attachments.all():
+        for attachment in ticket_attachment.attachment_set.all():
+            if attachment:
+                attachment_note = " " + " " + "## This Issue has Attachments."
+            else:
+                attachment_note = " "
+
+    payload = {}
+    payload['title'] = ticket.title
+    payload['state'] = "open"
+    payload['body'] =  str(new_comment)
+
+    token = settings.GITHUB_AUTH_TOKEN
+    repo = repo + "/issues/" + ticket.github_issue_number
+    header = {'Authorization': 'token %s' % token}
+
+    r = requests.patch(repo,data=json.dumps(payload),headers=header)
+    return r.status_code
+
+def update_comments(repo, ticket_id):
 
     print repo
 
