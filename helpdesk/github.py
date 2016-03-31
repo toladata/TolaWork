@@ -128,7 +128,7 @@ def reopen_issue(repo,ticket):
     payload['body'] =  str(new_comment)
 
     token = settings.GITHUB_AUTH_TOKEN
-    repo = repo + "/issues/" + ticket.github_issue_number
+    repo = repo + "/issues/" + str(ticket.github_issue_number)
     header = {'Authorization': 'token %s' % token}
 
     r = requests.patch(repo,data=json.dumps(payload),headers=header)
