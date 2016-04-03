@@ -133,3 +133,33 @@ margin-right: 0px
     margin-top: 20px;
 }
 
+.knowledge_panel
+{
+    
+    border:1px solid#eee;
+    border-radius: 10px;
+    padding: 10px;
+}
+.knowledge_main
+{
+    
+    border:1px solid#eee;
+    border-radius: 20px;
+}
+.knowledge_head
+{
+    background-color: #ff9933;
+}
+.panel-footer
+{
+    background-color: #ff9933;
+}
+.font4
+{
+    color:#ff8000;
+    font-weight: bold;
+}
+.font5
+{
+    color:#fff;
+}
