@@ -192,7 +192,28 @@ def post_comment(request, ticket_id):
             update_comments.save(update_fields=['status'])
             new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status, )
             new_followup.save()
+            
+            files = []
+            if request.FILES:
+                import mimetypes, os
+                for file in request.FILES.getlist('attachment'):
+                    filename = file.name.encode('ascii', 'ignore')
+                    a = Attachment(
+                        followup= new_followup,
+                        filename=filename,
+                        mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                        size=file.size,
+                        )
+                    a.file.save(filename, file, save=False)
+                    a.save()
 
+                    if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
+                        # Only files smaller than 512kb (or as defined in
+                        #settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                        try:
+                            files.append([a.filename, a.file])
+                        except NotImplementedError:
+                            pass    
 
             return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
