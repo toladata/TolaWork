@@ -1464,12 +1464,12 @@ def hold_ticket(request, ticket_id, unhold=False):
     ticket.save()
 
     return HttpResponseRedirect(ticket.get_absolute_url())
-hold_ticket = staff_member_required(hold_ticket)
+#hold_ticket = staff_member_required(hold_ticket)
 
 
 def unhold_ticket(request, ticket_id):
     return hold_ticket(request, ticket_id, unhold=True)
-unhold_ticket = staff_member_required(unhold_ticket)
+#unhold_ticket = staff_member_required(unhold_ticket)
 
 
 def rss_list(request):
