@@ -242,8 +242,7 @@ class TicketForm(forms.Form):
                         date = timezone.now(),
                         public = True,
                         comment = self.cleaned_data['body'],
-                        user = t.assigned_to,
-                     )
+                        user = t.assigned_to,)
         if self.cleaned_data['assigned_to']:
             f.title = _('Ticket Opened & Assigned to %(name)s') % {
                 'name': t.get_assigned_to

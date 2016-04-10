@@ -43,7 +43,7 @@ import json
 from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
-from helpdesk.github import new_issue, get_issue, update_issue, update_comments
+from helpdesk.github import new_issue, get_issue, update_issue, update_comments,reopen_issue,close_issue
 from helpdesk.slack import post_slack,post_tola_slack
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
@@ -53,10 +53,16 @@ superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_ac
 
 def post_comment(request, ticket_id):
 
+
     if request.method == 'POST':
         ticket = get_object_or_404(Ticket, id=ticket_id)
 
         form = CommentTicketForm(request.POST)
+
+        if str(ticket.queue) == "Tola Tables":
+            repo = settings.GITHUB_REPO_1
+        else:
+            repo = settings.GITHUB_REPO_2
 
         if form.is_valid():
             ticket_id = ticket.id
@@ -64,9 +70,12 @@ def post_comment(request, ticket_id):
             status = request.POST.get('new_status') #new ticket status
 
             f_public = request.POST.get('public', False) #public
-            #if f_public == True:
+
             if int(status) == 1:
                 status_text = 'Open'
+
+                reopen_issue(repo,ticket) #reopen issue in github
+
                 open_template = get_object_or_404(EmailTemplate, template_name='open')
                 m_subject = open_template.heading
                 m_body = open_template.html
@@ -81,6 +90,9 @@ def post_comment(request, ticket_id):
 
             elif int(status) == 2:
                 status_text = 'Re-Opened'
+
+                reopen_issue(repo,ticket) #reopen issue in github
+
                 reopen_template = get_object_or_404(EmailTemplate, template_name='reopen')
                 m_subject = reopen_template.heading
                 m_body = reopen_template.html
@@ -95,6 +107,7 @@ def post_comment(request, ticket_id):
 
             elif int(status) == 3:
                 status_text = 'Resolved'
+
                 resolved_template = get_object_or_404(EmailTemplate, template_name='resolved')
                 m_subject = resolved_template.heading
                 m_body = resolved_template.html
@@ -110,6 +123,9 @@ def post_comment(request, ticket_id):
 
             elif int(status) == 4:
                 status_text = 'Closed'
+
+                close_issue(repo,ticket) #close issue in github
+
                 closed_template = get_object_or_404(EmailTemplate, template_name='closed')
                 m_subject = closed_template.heading
                 m_body = closed_template.html
@@ -153,10 +169,12 @@ def post_comment(request, ticket_id):
             github_url = ticket.github_issue_url
             type = ticket.type
             votes = ticket.votes
+            queue = ticket.queue
             error = ticket.error_msg
             slack_status = ticket.slack_status
             new_comment = request.POST.get('comment', '')
 
+            print new_comment
             if not new_comment == '':
                 f_comments = str(request.user.email.upper())  + ' added a comment ' + '  - ' + str(new_comment)
             else:
@@ -174,6 +192,28 @@ def post_comment(request, ticket_id):
             update_comments.save(update_fields=['status'])
             new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status, )
             new_followup.save()
+            
+            files = []
+            if request.FILES:
+                import mimetypes, os
+                for file in request.FILES.getlist('attachment'):
+                    filename = file.name.encode('ascii', 'ignore')
+                    a = Attachment(
+                        followup= new_followup,
+                        filename=filename,
+                        mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                        size=file.size,
+                        )
+                    a.file.save(filename, file, save=False)
+                    a.save()
+
+                    if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
+                        # Only files smaller than 512kb (or as defined in
+                        #settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                        try:
+                            files.append([a.filename, a.file])
+                        except NotImplementedError:
+                            pass    
 
             return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
@@ -276,8 +316,22 @@ dashboard = staff_member_required(dashboard)
 
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    """
+    # first update comment in followup
+    request.POST = {
+            'owner': request.user.id,
+            'public': 1,
+            'title': ticket.title,
+            'status': 1,
+            'comment': 'Data from text area'
+        }
 
-    if str(ticket.queue) == "Tola Help":
+    new_followup = FollowUp(title=request.POST.get('title'), date=timezone.now(), ticket_id=ticket_id, comment=request.POST.get('comment'), public=request.POST.get('public'), new_status=request.POST.get('status'), )
+    new_followup.save()
+
+    """
+
+    if str(ticket.queue) == "Tola Tables":
         repo = settings.GITHUB_REPO_1
     else:
         repo = settings.GITHUB_REPO_2
@@ -289,11 +343,13 @@ def send_to_github(request, ticket_id):
 
     if int(response) == 201:
         messages.success(request, 'Success, issue sent to Github')
+
     else:
         messages.success(request, 'There was a problem sending the ticket to GitHub')
         print response
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+
 
 #@method_decorator(staff_member_required)
 def delete_ticket(request, ticket_id):
@@ -351,7 +407,7 @@ def followup_edit(request, ticket_id, followup_id):
 
             #send to github if needed
             if ticket.github_issue_id:
-                if str(ticket.queue) == "Tola Data":
+                if str(ticket.queue) == "Tola Tables":
                     repo = settings.GITHUB_REPO_1
                 else:
                     repo = settings.GITHUB_REPO_2
@@ -1408,12 +1464,12 @@ def hold_ticket(request, ticket_id, unhold=False):
     ticket.save()
 
     return HttpResponseRedirect(ticket.get_absolute_url())
-hold_ticket = staff_member_required(hold_ticket)
+#hold_ticket = staff_member_required(hold_ticket)
 
 
 def unhold_ticket(request, ticket_id):
     return hold_ticket(request, ticket_id, unhold=True)
-unhold_ticket = staff_member_required(unhold_ticket)
+#unhold_ticket = staff_member_required(unhold_ticket)
 
 
 def rss_list(request):
