@@ -21,7 +21,9 @@ def get_issue(repo,id):
     return issue
 
 
-def new_issue(repo,ticket):
+def new_issue(ticket):
+    repo = queue_repo(ticket)
+
     ticket_comments = FollowUp.objects.filter(ticket_id=ticket.id).all()
     new_comment = ''
     for t in ticket_comments:
@@ -61,86 +63,50 @@ def new_issue(repo,ticket):
     return r.status_code
 
 
-def update_issue(repo,ticket):
-    new_comment  = FollowUp.objects.filter(ticket_id=ticket.id).reverse()[0]
-    
-    attachment_note = ""
-    ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set') 
-    for ticket_attachment in ticket_attachments.all():
-        for attachment in ticket_attachment.attachment_set.all():
-            if attachment:
-                attachment_note = " " + " " + "## This Issue has Attachments."
-            else:
-                attachment_note = " " 
-
+def add_comments(comment,ticket):
+    repo = queue_repo(ticket)
     payload = {}
     payload['title'] = ticket.title
-    payload['state'] = "closed"
-    payload['body'] =  str(new_comment)
-
-
+    payload['state'] = "open"
+    payload['body'] =  comment
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues/" + ticket.github_issue_number + "/comments"
     header = {'Authorization': 'token %s' % token}
     r = requests.post(repo,data=json.dumps(payload),headers=header)
+    print 'comment Repo:' + repo
 
-    return r.status_code
+def queue_repo(ticket):
+    if str(ticket.queue) == "Tola Tables":
+        repo = settings.GITHUB_REPO_1
+    else:
+        repo = settings.GITHUB_REPO_2
+    return repo
 
-def close_issue(repo,ticket):
-    new_comment  = FollowUp.objects.filter(ticket_id=ticket.id).reverse()[0]
-
-    attachment_note = ""
-    ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set')
-    for ticket_attachment in ticket_attachments.all():
-        for attachment in ticket_attachment.attachment_set.all():
-            if attachment:
-                attachment_note = " " + " " + "## This Issue has Attachments."
-            else:
-                attachment_note = " "
-
+def close_issue(ticket):
+    repo = queue_repo(ticket)
     payload = {}
     payload['title'] = ticket.title
     payload['state'] = "closed"
-    payload['body'] =  str(new_comment)
-
+    payload['body'] =  "Closed"
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues/" + ticket.github_issue_number
     header = {'Authorization': 'token %s' % token}
-
     r = requests.patch(repo,data=json.dumps(payload),headers=header)
     return r.status_code
 
-def reopen_issue(repo,ticket):
-    new_comment  = FollowUp.objects.filter(ticket_id=ticket.id).reverse()[0]
-
-    attachment_note = ""
-    ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set')
-    for ticket_attachment in ticket_attachments.all():
-        for attachment in ticket_attachment.attachment_set.all():
-            if attachment:
-                attachment_note = " " + " " + "## This Issue has Attachments."
-            else:
-                attachment_note = " "
-
+def open_issue(ticket):
+    repo = queue_repo(ticket)
     payload = {}
     payload['title'] = ticket.title
     payload['state'] = "open"
-    payload['body'] =  str(new_comment)
-
+    payload['body'] =  "Re-Opened"
     token = settings.GITHUB_AUTH_TOKEN
-    repo = repo + "/issues/" + str(ticket.github_issue_number)
+    repo = repo + "/issues/" + ticket.github_issue_number
     header = {'Authorization': 'token %s' % token}
-
     r = requests.patch(repo,data=json.dumps(payload),headers=header)
     return r.status_code
 
-def update_comments(repo, ticket_id):
-
-    print repo
-
-
 def latest_release(repo):
-
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/releases/latest"
     print repo
@@ -154,5 +120,4 @@ def latest_release(repo):
         print content
         print r.status_code
         content = None
-
     return content
