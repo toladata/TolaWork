@@ -52,9 +52,9 @@ staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
 
 def post_comment(request, ticket_id):
-
+    ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
-        ticket = get_object_or_404(Ticket, id=ticket_id)
+
         form = CommentTicketForm(request.POST)
 
         if form.is_valid():
