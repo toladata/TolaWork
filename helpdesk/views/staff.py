@@ -43,7 +43,7 @@ import json
 from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
-from helpdesk.github import new_issue, get_issue, add_comments, open_issue,close_issue
+from helpdesk.github import new_issue, get_issue, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
@@ -52,9 +52,9 @@ staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
 
 def post_comment(request, ticket_id):
-    ticket = get_object_or_404(Ticket, id=ticket_id)
 
     if request.method == 'POST':
+        ticket = get_object_or_404(Ticket, id=ticket_id)
         form = CommentTicketForm(request.POST)
 
         if form.is_valid():
@@ -69,8 +69,9 @@ def post_comment(request, ticket_id):
 
                 if ticket.github_issue_id:
                     #if there are comments, update github
+                    repo = queue_repo(ticket)
                     if not comment == '':
-                        add_comments(comment,ticket)
+                        add_comments(comment,repo,ticket)
 
                 open_template = get_object_or_404(EmailTemplate, template_name='open')
                 m_subject = open_template.heading
@@ -89,10 +90,11 @@ def post_comment(request, ticket_id):
 
                 if ticket.github_issue_id:
                     #if there are comments, update github
+                    repo = queue_repo(ticket)
                     if not comment == '':
-                        add_comments(comment,ticket)
+                        add_comments(comment,repo,ticket)
                     #Re-open issue in github
-                    response = open_issue(ticket)
+                    response = open_issue(repo,ticket)
 
                     if int(response) == 200:
                         messages.success(request, 'Success, ticket also re-opened in Github')
@@ -134,10 +136,11 @@ def post_comment(request, ticket_id):
 
                 if ticket.github_issue_id:
                     #if there are comments, update github
+                    repo = queue_repo(ticket)
                     if not comment == '':
-                        add_comments(comment,ticket)
+                        add_comments(comment,repo,ticket)
                     #close issue in github
-                    response=close_issue(ticket)
+                    response=close_issue(repo,ticket)
 
                     if int(response) == 200:
                         messages.success(request, 'Success, ticket also closed in Github')
@@ -269,7 +272,7 @@ def dashboard(request):
                     Ticket.objects.filter(id=ticket.id).update(status=3)
 
             # update issue in github with local changes and comments
-            update_issue(repo,ticket)
+            #update_issue(repo,ticket)
 
 
     # closed & resolved tickets, assigned to current user
@@ -334,9 +337,9 @@ dashboard = staff_member_required(dashboard)
 
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-
+    repo = queue_repo(ticket)
     if not ticket.github_issue_id:
-        response = new_issue(ticket)
+        response = new_issue(repo,ticket)
 
     if int(response) == 201:
         messages.success(request, 'Success, issue sent to Github')

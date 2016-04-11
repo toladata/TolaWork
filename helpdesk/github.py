@@ -21,8 +21,7 @@ def get_issue(repo,id):
     return issue
 
 
-def new_issue(ticket):
-    repo = queue_repo(ticket)
+def new_issue(repo,ticket):
 
     ticket_comments = FollowUp.objects.filter(ticket_id=ticket.id).all()
     new_comment = ''
@@ -63,8 +62,8 @@ def new_issue(ticket):
     return r.status_code
 
 
-def add_comments(comment,ticket):
-    repo = queue_repo(ticket)
+def add_comments(comment,repo,ticket):
+    #repo = queue_repo(ticket)
     payload = {}
     payload['title'] = ticket.title
     payload['state'] = "open"
@@ -80,10 +79,10 @@ def queue_repo(ticket):
         repo = settings.GITHUB_REPO_1
     else:
         repo = settings.GITHUB_REPO_2
+    print "Queue Repo: " + repo
     return repo
 
-def close_issue(ticket):
-    repo = queue_repo(ticket)
+def close_issue(repo,ticket):
     payload = {}
     payload['title'] = ticket.title
     payload['state'] = "closed"
@@ -92,10 +91,11 @@ def close_issue(ticket):
     repo = repo + "/issues/" + ticket.github_issue_number
     header = {'Authorization': 'token %s' % token}
     r = requests.patch(repo,data=json.dumps(payload),headers=header)
+    print 'Closing:' + repo
     return r.status_code
 
-def open_issue(ticket):
-    repo = queue_repo(ticket)
+def open_issue(repo,ticket):
+
     payload = {}
     payload['title'] = ticket.title
     payload['state'] = "open"
@@ -104,6 +104,7 @@ def open_issue(ticket):
     repo = repo + "/issues/" + ticket.github_issue_number
     header = {'Authorization': 'token %s' % token}
     r = requests.patch(repo,data=json.dumps(payload),headers=header)
+    print 'Re-open: ' + repo
     return r.status_code
 
 def latest_release(repo):
