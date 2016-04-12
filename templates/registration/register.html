@@ -1,29 +1,53 @@
 {% extends "base.html" %}
 
-{% block title %}Create an account{% endblock %}
-
 {% block content %}
-  <h1>Create an account</h1>
+<head>
+  <!--  splash screen css files -->
+    <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="{{ STATIC_URL }}css/login.css" rel="stylesheet" type="text/css">
+    <link href="{{ STATIC_URL }}css/fontawesome-4.2.0.min.css" rel="stylesheet" type="text/css">
 
-    {% if form.errors %}
-        {% for field in form %}
-            {% for error in field.errors %}
-                <div class="alert alert-error">
-                    <strong>{{ error|escape }}</strong>
+</head>
+<div class="container col-md-12">
+  <div class="col-md-3"></div>
+  <div class="login-main col-md-6 col-sm-6">
+    <div class="login-details">
+          <h2 class="font4 login-title"> <strong>Sign Up with TolaWork...</strong> </h2>
+          <div class="login-top col-md-offset-1">
+          Sign up via
+          <div class="social-buttons ">
+              <a type="button" href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-info col-md-offset-1"><i class="fa fa-google"></i> Google</a>
+              </div>
+              <h4 class="col-md-offset 2">OR</h4>
+              <p>Fill in the form below to register</p><br/>
+          </div>
+          <div class="form_register login-body col-md-10 col-md-offset-1">
+              <form class="row" id="register" method="post" action="/accounts/register/">
+                {% csrf_token %}
+
+                <div id="input_detail" class="col-md-12">
+                  <input id="username" class="form-control" type="text" name="username" placeholder="Username"> 
                 </div>
-            {% endfor %}
-        {% endfor %}
-        {% for error in form.non_field_errors %}
-            <div class="alert alert-error">
-                <strong>{{ error|escape }}</strong>
-            </div>
-        {% endfor %}
-    {% endif %}
+                  
+                <div id="input_detail" class="col-md-12">
+                  <input class="form-control" type="password" name="password1" placeholder="Enter your Password"> 
+                </div>
+                
+                <div id="input_detail" class="col-md-12  ">
+                  <input class="form-control form-field" type="password" name="password2" placeholder="Confirm Your Password"> 
+                </div>
+                <!-- Submit Button -->
+                <div class="form_register_btn">
+                  <input class="btn btn-info btn-lg" type="submit" value="Register">
+                </div> 
+              </form>
+            </div> 
+        <br>
+        <div class="col-md-8 col-md-offset-3">
+          <p>Already registered? <a href="{% url 'login' %}">Login</a></p>
+        </div>
+      </div>
+  </div>
+</div>
 
-
-  <form action="" method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <input type="submit" value="Create the account">
-  </form>
-{% endblock %}
+{% endblock content %}

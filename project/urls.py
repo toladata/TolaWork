@@ -16,7 +16,7 @@ urlpatterns = patterns('',
     url('', include('django.contrib.auth.urls', namespace='auth')),
     url('', include('social.apps.django_app.urls', namespace='social')),
 
-    #Home page
+    #splash screen
     url(r'^$', 'project.views.home', name='index'),
 
     #base template include
@@ -30,6 +30,7 @@ urlpatterns = patterns('',
     url(r'^home', 'project.views.home', name='home'),
     url(r'^contact', 'project.views.contact', name='contact'),
     url(r'^faq', 'project.views.faq', name='faq'),
+    url(r'^splash', 'project.views.splash', name='splash'),
     url(r'^documentation', 'project.views.documentation', name='documentation'),
 
     #local login

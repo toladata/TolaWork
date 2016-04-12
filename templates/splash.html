@@ -4,182 +4,197 @@
 
 <head>	
 	<meta charset="utf-8">
-	<title>Tolawork</title>
+	<title>TolaData</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-
+	<link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.png" type="image/png">
+	
+	
 	<!-- 	splash screen css files -->
     <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="{{ STATIC_URL }}css/splash.css" rel="stylesheet" type="text/css">
     <link href="{{ STATIC_URL }}css/fontawesome-4.2.0.min.css" rel="stylesheet" type="text/css">
-
+    <!-- fonts -->
+    <script src="https://use.typekit.net/shi4wqr.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
     <!-- splash screen js files -->
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/modernizer.js"></script>
+
 
 	
 </head>
 		
 <body>		
-	<header id="header">
-		<nav class="navbar navbar-inverse">
-		  <div class="container-fluid col-md-12 col-sm-12 row">
-		  <div class="col-md-1 col-sm-1"></div>
-		    <div class="navbar-header col-md-3 col-sm-3">
-		      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-		        <span class="icon-bar"></span>
-		        <span class="icon-bar"></span>
-		        <span class="icon-bar"></span> 
-		      </button>
-		      <a class="navbar-brand" href="#"><font class="font4"><h1> <strong>Tola</strong>Work </h1></font></a>
-		    </div>
-		    <div class="collapse navbar-collapse" id="myNavbar">
-		      <ul class="nav navbar-nav navbar-right">
-		      <li><a id="GoToHome" href="{% url 'home' %}" > <font class="font5"><strong>Home</strong></font></a></li>
-		        <li><a id="GoToHome" href="#intro" > <font class="font5"><strong>About Us</strong></font></a></li>
-				<li><a id="GoToAbout" href="#about-1" > <font class="font5"><strong>Contact us</strong> </font></a></li>
-		      </ul>
-		    </div>
-		  </div>
-		</nav>
-		
-	</header>
-		
-	<div class="splash">	
-		<section id="intro" class="intro-parallax ">
-			<div class="container splash_main">								
-				<div class="row">
-									
-					<!-- Intro Section Description -->		
-					<div id="intro_description" class="col-sm-7 col-md-7">
-					
-						<!-- Intro Section Title -->
-						<!-- <h1><strong>Tolawork</h1> -->
-							
-						<!-- Description #1 -->	
-						<div class="intro_feature">
-						<p> <font class="font6">TolaWork: </font>Get help setting up, using and configuring Tola Activity, Tola Tables and Mobile Data collection platforms and M&E in general. Report any issues with tools and request and vote on new features.</p>
-							<h4 class="font2"><i class="fa fa-check"></i> Tola Activity</h4>
-							<p>Tola activity is a collection of standard data forms, reports, and visualizations designed to track the impact of organizations' programs and projects.  There are two primary sections of Tola Activity: Project Workflow and Indicator Tracking. 
-							</p>
-							
-							
-						</div>
-						
-						<!-- Description #2 -->	
-						<div class="intro_feature">
-							<h4 class="font2"><i class="fa fa-check"></i> Tola  Tables</h4>
-							<p>Tola Tables directly integrates with mobile data collection provider Ona to provide you with access to all of your data for import and management in Tola, or you can import any spreadsheet or Google Sheet of data you have. Each data set is then managed on its own and can then later be mapped, merged and updated into any number of other Tables owned or shared with you. 
-							</p>
-						</div>
-						
-						<!-- Description #3 -->	
-						<div class="intro_feature">
-							<h4 class="font2"><i class="fa fa-check"></i> Mobile Data collection platforms</h4>
-							<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut 
-							      labore et dolore magna aliqua ullamco laboris aliquipea commodo consequat. labore et dolore magna aliqua ullamco laboris aliquipea commodo consequat. 
-							</p>
-						</div>
-						
-						<!-- Intro Section Button -->	
-						<div class="intro_button text-center">
-							<a class="btn btn-primary btn-lg" href="#">More information</a>
-						</div>
-							
-					</div>	<!-- End Intro Section Description -->	
-					
-						
-					<!-- Intro Section Form -->		
-					<div id="intro_form" class="col-sm-4 col-md-4 col-md-offset-1">
-					
-						<!--Register form -->
-						<div class="form_register">
-							<h2 class="font4"> Register Now! </h2>
-							
-							<form class="row" id="register" method="post" action="/accounts/register/">
-								{% csrf_token %}
+<div class="carousel slide carousel-fade" data-ride="carousel">
 
-								<div id="input_detail" class="col-md-12">
-									<input id="username" class="form-control" type="text" name="username" placeholder="Username"> 
-								</div>
-									
-								<div id="input_detail" class="col-md-12">
-									<input class="form-control" type="password" name="password1" placeholder="Enter your Password"> 
-								</div>
-								
-								<div id="input_detail" class="col-md-12">
-									<input class="form-control" type="password" name="password2" placeholder="Confirm Your Password"> 
-								</div>
-		
-								<!-- Submit Button -->
-								<div id="form_register_btn" class="text-center">
-									<input class="btn btn-info btn-lg" type="submit" value="Register">
-								</div> 
-							</form>
-						</div> 
-						<div id="input_detail" class="col-md-12 col-sm-12 row"> 
-							<p class="font1">Already a TolaWork member? </p> 
-							<div class="col-md-4 col-sm-4"></div>
-							<div class="col-md-4 col-sm-4">
-								<button type="button" class="btn btn-primary form-control" data-toggle="modal" data-target="#myModal">Log In</button>
-								<!-- Modal -->
-								  <div class="modal fade" id="myModal" role="dialog">
-								    <div class="modal-dialog">
-								    
-								      <!-- Modal content-->
-								      <div class="modal-content">
-								        <div class="modal-header">
-								          <button type="button" class="close" data-dismiss="modal">&times;</button>
-								          <h2 class="font4 modal-title"> Welcome to TolaWork... </h2>
-								        </div>
-								        <div class="modal-details">
-								        	<div class="modal-top">
-									         	Login via
-									        	<div class="social-buttons">
-			                                        <a type="button" href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-info col-md-offset-1"><i class="fa fa-google"></i> Google</a>
-			                                    </div>
-			                                    <h4 class="col-md-offset 2">OR</h4>
-			                                    <a href="{% url 'login' %}" class="col-md-offset-1">Login with Tola Account</a><br/>
-								       		 </div>
-											<form class="form" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
-	                                    			{% csrf_token %}
-										   		<div class="modal-body">
-														
-														<div id="input_detail" class="col-md-12">
-															<input class="form-control" type="text" name="username" placeholder="Username"> 
-														</div>
-															
-														<div id="input_detail" class="col-md-12">
-															<input class="form-control" type="password" name="password" placeholder="Password"> 
-														</div>
-														<div class="col-md-12 row">
-															<div class="col-md-4"></div>
-													        <div class="col-md-4">
-													        	<button type="submit" class="btn btn-info btn-lg form-control">Log In</button>
-													     	</div> 
-														</div>
-										        </div>
-										        <div class="modal-footer">
-											        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> 
-										        </div>
-											</form>
-								        </div>
-								        
-								      </div>
-								      
-								    </div>
-								  </div>
-							</div>
-							<div class="col-md-4 col-sm-4"></div>
-						</div>							
-													
-					</div>	<!-- End Intro Section Form -->
-				
-				</div>	<!-- End row -->	
-				<div>
-			</div>	   <!-- End container -->
-			</div>
-		</section> 
-	</div>
+    <!-- Wrapper for slides -->
+    <div class="carousel-inner" role="listbox">
+        <div class="item active">
+        </div>
+        <div class="item">
+        </div>
+        <div class="item">
+        </div>
+        <div class="item">
+        </div>
+    </div>
+</div>
+
+<!-- Remeber to put all the content you want on top of the slider below the slider code -->   
+  <header id="header">
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid col-md-12 col-sm-12 row">
+      <div class="col-md-1 col-sm-1"></div>
+        <div class="navbar-header col-md-3 col-sm-3">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span> 
+          </button>
+          <a class="navbar-brand" href="#"> <img src="{{ STATIC_URL }}img/tola-data-primary-mark-light.png" > </a>
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+          <ul class="nav navbar-nav navbar-right">
+          <li><a id="GoToHome" href="{% url 'home' %}" > <font class="font5"><strong>TolaWork</strong></font></a></li>
+            <li><a id="GoToHome" href="{% url 'documentation' %}" > <font class="font5"><strong>About Us</strong></font></a></li>
+        <li><a id="GoToAbout" href="#" > <font class="font5"><strong>Contact us</strong> </font></a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    
+  </header>
+    
+  <div class="splash">  
+    <section id="intro" class="intro-parallax ">
+      <div class="container splash_main">               
+        <div class="row">
+                  
+          <!-- Intro Section Description -->    
+          <div id="intro_description" class="col-sm-7 col-md-7">
+          
+            <!-- Intro Section Title -->
+            <!-- <h1><strong>Tolawork</h1> -->
+              
+            <!-- Description #1 --> 
+            <div class="intro_feature">
+            <p> <font class="font6">Tola </font>improves how we evaluate program data by providing adaptable tools that support the things we learn from experience.</p>
+              <h3 class="font8"><img src="{{ STATIC_URL }}img/tola-activity-icon-orange.png" class="icon"> Tola Activity</h3>
+              <p>Tola activity is a collection of standard data forms, reports, and visualizations designed to track the impact of organizations' programs and projects. 
+              </p>
+            </div>
+            <!-- Description #2 --> 
+            <div class="intro_feature">
+              <h3 class="font7"><img src="{{ STATIC_URL }}img/tola-tables-icon-blue.png" class="icon"> Tola  Tables</h3>
+              <p>Tola Tables directly integrates with mobile data collection provider Ona to provide you with access to all of your data for import and management in Tola, or you can import any spreadsheet or Google Sheet of data you have. 
+              </p>
+            </div>  
+            <div>
+              <h3 class="font6"><img src="{{ STATIC_URL }}img/tola-data-icon-red.png" class="icon"> Tola Work</h3>
+              <p>Tola Work is a helpdesk, documentation and support tool for TolaData</p>
+            </div>
+            <div class="intro_button text-center">
+              <a class="btn btn-lg button" href="{% url 'documentation' %}">More information</a>
+            </div>
+            
+          </div>  <!-- End Intro Section Description -->  
+          
+            
+          <!-- Intro Section Form -->   
+          <div id="intro_form" class="col-sm-4 col-md-4 col-md-offset-1">
+          
+            <!--Register form -->
+            <div class="form_register">
+              <h2 class="font4"> Register Now! </h2>
+              
+              <form class="row" id="register" method="post" action="/accounts/register/">
+                {% csrf_token %}
+
+                <div id="input_detail" class="col-md-12">
+                  <input id="username" class="form-control" type="text" name="username" placeholder="Username"> 
+                </div>
+                  
+                <div id="input_detail" class="col-md-12">
+                  <input class="form-control" type="password" name="password1" placeholder="Enter your Password"> 
+                </div>
+                
+                <div id="input_detail" class="col-md-12">
+                  <input class="form-control" type="password" name="password2" placeholder="Confirm Your Password"> 
+                </div>
+    
+                <!-- Submit Button -->
+                <div id="form_register_btn" >
+                  <input class="btn btn-info btn-lg" type="submit" value="Register">
+                </div> 
+              </form>
+            </div> 
+            <div class="col-md-12 col-sm-12 row login-prompt"> 
+              <p class="font1">Already a TolaWork member? </p> 
+              <div class="col-md-5 col-sm-6">
+                <button type="button" class="btn button " data-toggle="modal" data-target="#myModal">Log In</button>
+                <!-- Modal -->
+                  <div class="modal fade" id="myModal" role="dialog">
+                    <div class="modal-dialog">
+                    
+                      <!-- Modal content-->
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <h2 class="font4 modal-title"> Welcome to TolaWork... </h2>
+                        </div>
+                        <div class="modal-details">
+                          <div class="modal-top">
+                            Login via
+                            <div class="social-buttons">
+                                              <a type="button" href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-info col-md-offset-1"><i class="fa fa-google"></i> Google</a>
+                                          </div>
+                                          <h4 class="col-md-offset 2">OR</h4>
+                                          <a href="{% url 'login' %}" class="col-md-offset-1">Login with Tola Account</a><br/>
+                           </div>
+                      <form class="form" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
+                                            {% csrf_token %}
+                          <div class="modal-body">
+                            
+                            <div id="input_detail" class="col-md-12">
+                              <input class="form-control" type="text" name="username" placeholder="Username"> 
+                            </div>
+                              
+                            <div id="input_detail" class="col-md-12">
+                              <input class="form-control" type="password" name="password" placeholder="Password"> 
+                            </div>
+                            <div class="col-md-12 row ">
+                              <div class="col-md-4 modal-button">
+                                <button type="submit" class="btn btn-info btn-lg form-control">Log In</button>
+                              </div> 
+                            </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> 
+                            </div>
+                      </form>
+                        </div>
+                        
+                      </div>
+                      
+                    </div>
+                  </div>
+              </div>
+              <div class="col-md-4 col-sm-4"></div>
+            </div>              
+                          
+          </div>  <!-- End Intro Section Form -->
+        
+        </div>  <!-- End row -->  
+        <div>
+      </div>     <!-- End container -->
+      </div>
+    </section> 
+  </div>
 </body>
+<script type="text/javascript">
+	$('.carousel').carousel();
+</script>
+
 </html>
