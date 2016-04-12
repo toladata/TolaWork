@@ -19,7 +19,7 @@ body {
     /* Set the fixed height of the footer here */
     height: 40px;
     border-top: 1px solid #f5f5f5;
-    background-color: #e5e5e5;
+    background-color: #b20838;
     vertical-align: top;
     color:#fff;
     z-index: 100;
@@ -152,10 +152,18 @@ margin-right: 0px
 {
     font-size: 20px;
 }
-.font9
+.font6
 {
-    color:#fff;
+    color: #fff;
+    font-weight: bold;
 }
+.font8
+{
+    color: #fff;
+    font-weight: bold;
+}
+
+
 /*//end of fonts*/
 .collapselist
 {
@@ -186,7 +194,6 @@ margin-right: 0px
     background-color: #ff9933;
 }
 
-<<<<<<< HEAD
 .main_home p
 {
 
@@ -211,7 +218,6 @@ margin-right: 0px
 .minor_home
 {
     background-color: #fff;
-    /*border-left:10px solid#ccc;*/
     border-radius: 5px;
     padding: 0px;
     
@@ -230,25 +236,11 @@ margin-right: 0px
 {
     background-color: #b20838;
     color:#fff;
-=======
-.faq_links a:hover
-{
-    text-decoration: none;
-}
-.faq_links a:focus
-{
-    text-decoration: none;
-}
-.faq_links a:active
-{
-    text-decoration: none;
-    border: none;
->>>>>>> 455030b9bd2b9c37b32c605c95784c117c9ea4e2
 }
 .pie 
 {
     border-bottom: 1px solid#eee;
-    
+    padding-bottom: 40px;
 }
 .panel_top
 {
@@ -258,15 +250,7 @@ margin-right: 0px
 {
     background-color: #b20838;
 }
-<<<<<<< HEAD
 .glyph
-=======
-.faq-font
-{
-    color:#fff;
-}
-.font4
->>>>>>> 455030b9bd2b9c37b32c605c95784c117c9ea4e2
 {
     color:#fff;
     font-size: 25px;
@@ -279,7 +263,6 @@ margin-right: 0px
 {
     color:#fff;
 }
-<<<<<<< HEAD
 
 .tools
 {
@@ -287,32 +270,19 @@ margin-right: 0px
 }
 .homenav>li>a:hover
 {
-    background-color: rgb(161, 8, 53);
+    background-color: #800000;
 }
 .homenav>li>a:active
 {
-    background-color: rgb(161, 8, 53);
+    background-color: #800000;
 }
 .homenav>ul>li>a:hover
 {
-    background-color: rgb(161, 8, 53);
+    background-color: #800000;
 }
 .homenav>ul>li>a:active
 {
-    background-color: rgb(161, 8, 53);
-}
-.homenav ul li ul
-{
-    background-color: #b20838;
-}
-.homenav ul li ul li a:hover
-{
-    background-color: rgb(161, 8, 53);
-}
-
-.dropdown-toggle ul
-{
-    background-color: #b20838;
+    background-color: #800000;
 }
 .container
 {
@@ -324,11 +294,10 @@ margin-right: 0px
 .pie_container
 {
     min-width: 310px; 
-    height: 370px; 
+    height: 320px; 
     max-width: 600px; 
     margin: 0 auto;
 }
-
 .tolatables
 {
     background-color: #4db3d0;
@@ -360,28 +329,13 @@ margin-right: 0px
 {
     margin-bottom: 10px;
 }
-.faq_head
-{
-    background-color: #b20838;
-}
-.faq-footer
-{
-    background-color: #b20838;
-}
-.faq-font
-{
-    color:#fff;
-}
 .icon
 {
-    width: 15px;
     height: 15px;
+    width:15px;
 }
 .splash
 {
     padding: 3px;
     padding-left: 10px;
-    color:#fff;
 }
-=======
->>>>>>> 455030b9bd2b9c37b32c605c95784c117c9ea4e2
