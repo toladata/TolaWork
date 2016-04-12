@@ -99,7 +99,7 @@ def post_comment(request, ticket_id):
                     if int(response) == 200:
                         messages.success(request, 'Success, ticket also re-opened in Github')
                     else:
-                        messages.success(request, 'There was a problem re-opening the ticket in GitHub')
+                        messages.success(request, str(response) + ': There was a problem re-opening the ticket in GitHub')
                     print response
 
                 #send email
@@ -145,7 +145,7 @@ def post_comment(request, ticket_id):
                     if int(response) == 200:
                         messages.success(request, 'Success, ticket also closed in Github')
                     else:
-                        messages.success(request, str(response) + ':There was a problem closing the ticket in GitHub')
+                        messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
                     print response
                 #send email
                 closed_template = get_object_or_404(EmailTemplate, template_name='closed')
