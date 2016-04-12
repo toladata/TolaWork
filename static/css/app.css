@@ -186,6 +186,7 @@ margin-right: 0px
     background-color: #ff9933;
 }
 
+<<<<<<< HEAD
 .main_home p
 {
 
@@ -229,6 +230,20 @@ margin-right: 0px
 {
     background-color: #b20838;
     color:#fff;
+=======
+.faq_links a:hover
+{
+    text-decoration: none;
+}
+.faq_links a:focus
+{
+    text-decoration: none;
+}
+.faq_links a:active
+{
+    text-decoration: none;
+    border: none;
+>>>>>>> 455030b9bd2b9c37b32c605c95784c117c9ea4e2
 }
 .pie 
 {
@@ -243,7 +258,15 @@ margin-right: 0px
 {
     background-color: #b20838;
 }
+<<<<<<< HEAD
 .glyph
+=======
+.faq-font
+{
+    color:#fff;
+}
+.font4
+>>>>>>> 455030b9bd2b9c37b32c605c95784c117c9ea4e2
 {
     color:#fff;
     font-size: 25px;
@@ -256,6 +279,7 @@ margin-right: 0px
 {
     color:#fff;
 }
+<<<<<<< HEAD
 
 .tools
 {
@@ -359,3 +383,5 @@ margin-right: 0px
     padding-left: 10px;
     color:#fff;
 }
+=======
+>>>>>>> 455030b9bd2b9c37b32c605c95784c117c9ea4e2
