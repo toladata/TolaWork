@@ -156,13 +156,26 @@ margin-right: 0px
     background-color: #ff9933;
 }
 
-.faq_head
+.faq_links a:hover
 {
-    background-color: #b20838;
+    text-decoration: none;
+}
+.faq_links a:focus
+{
+    text-decoration: none;
+}
+.faq_links a:active
+{
+    text-decoration: none;
+    border: none;
 }
 .faq-footer
 {
     background-color: #b20838;
+}
+.faq-font
+{
+    color:#fff;
 }
 .font4
 {
@@ -170,10 +183,6 @@ margin-right: 0px
     font-weight: bold;
 }
 .font5
-{
-    color:#fff;
-}
-.faq-font
 {
     color:#fff;
 }
