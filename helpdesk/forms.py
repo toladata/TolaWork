@@ -295,7 +295,7 @@ class TicketForm(forms.Form):
                 recipients=t.assigned_to.email,
                 sender=q.from_address,
                 fail_silently=True,
-                files=files,
+                #files=files,
                 )
             messages_sent_to.append(t.assigned_to.email)
 
@@ -306,7 +306,7 @@ class TicketForm(forms.Form):
                 recipients=q.new_ticket_cc,
                 sender=q.from_address,
                 fail_silently=True,
-                files=files,
+                #files=files,
                 )
             messages_sent_to.append(q.new_ticket_cc)
 
@@ -317,7 +317,7 @@ class TicketForm(forms.Form):
                 recipients=q.updated_ticket_cc,
                 sender=q.from_address,
                 fail_silently=True,
-                files=files,
+                #files=files,
                 )
 
         return t
