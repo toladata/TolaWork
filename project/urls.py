@@ -17,7 +17,7 @@ urlpatterns = patterns('',
     url('', include('social.apps.django_app.urls', namespace='social')),
 
     #splash screen
-    url(r'^$', 'project.views.home', name='index'),
+    url(r'^$', 'project.views.splash', name='index'),
 
     #base template include
     url(r'^$', TemplateView.as_view(template_name='base.html')),
