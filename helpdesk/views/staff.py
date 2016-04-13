@@ -1321,7 +1321,10 @@ def ticket_list(request):
             search_message=search_message,
 
         )))
+"""
+allow non-admin users to use saved_queries
 ticket_list = staff_member_required(ticket_list)
+"""
 
 
 def edit_ticket(request, ticket_id):
@@ -1669,17 +1672,18 @@ run_report = staff_member_required(run_report)
 
 
 def save_query(request):
-    title = request.POST.get('title', None)
-    shared = request.POST.get('shared', False)
-    query_encoded = request.POST.get('query_encoded', None)
+    if request.user.is_staff:
+        title = request.POST.get('title', None)
+        shared = request.POST.get('shared', False)
+        query_encoded = request.POST.get('query_encoded', None)
 
-    if not title or not query_encoded:
-        return HttpResponseRedirect(reverse('helpdesk_list'))
+        if not title or not query_encoded:
+            return HttpResponseRedirect(reverse('helpdesk_list'))
 
-    query = SavedSearch(title=title, shared=shared, query=query_encoded, user=request.user)
-    query.save()
+        query = SavedSearch(title=title, shared=shared, query=query_encoded, user=request.user)
+        query.save()
 
-    return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk_list'), query.id))
+        return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk_list'), query.id))
 save_query = staff_member_required(save_query)
 
 
