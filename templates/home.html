@@ -57,13 +57,13 @@ $(function () {
 
 </script>
 <div class="container col-md-12">
-  <div>
-    <div class=" col-md-9 col-sm-9 main_home">
-        <div class="col-md-12 col-sm-12">
+  <div class="home_cover">
+    <div class="main_home">
+        <div class="col-md-9 col-sm-9">
             <h2> <strong>Tola</strong>Work</h2>
             <p class="font7">Get help setting up, using and configuring Tola Activity, Tola Tables and Mobile Data collection platforms and M&E in general.  Report any issues with tools and request  and vote on new features.</p>
             <br/>
-            <a href="/helpdesk/tickets/submit" class="btn btn-lg btn-success"><b><span class="glyphicon glyphicon-plus"></b></span> Enter a Ticket</a>
+            <a href="/helpdesk/tickets/submit" class="btn btn-lg btn-success"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
             <br/>
             <h3>Enhancement requests and Recent Tickets</h3>
             <div>
@@ -100,10 +100,10 @@ $(function () {
                   <div class="panel-heading home-paneltitle">
                     <h4 class="panel-title">
                       <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">
-                      <font class="font5"><b><span class="glyphicon glyphicon-list"></span></b>  Recent Tickets </font></a>
+                      <font class="font5"><b><span class="glyphicon glyphicon-plus-sign"></span></b>  Recent Tickets </font></a>
                     </h4>
                   </div>
-                  <div id="collapse2" class="panel-collapse collapse in">
+                  <div id="collapse2" class="panel-collapse collapse">
                     <div class="panel-body">
                       <div class="table-responsive">
                           <table class="table table-striped">
@@ -129,18 +129,22 @@ $(function () {
               </div> 
             </div>
         </div>
-  </div>
-    <div class="row">
-        <div class="col-md-3 col-sm-3 minor_home">
-    <!-- //the pie chart -->
-        <div class="col-md-12 pie">
-            <div id="pie_container">
-            </div>
+      <div class="row">
+          <div class="col-md-3 col-sm-3 minor_home">
+      <!-- //the pie chart -->
+          <div class="col-md-12 pie">
+              <div id="pie_container">
+              </div>
+          </div>
         </div>
-        <div class="row tools">
-          <div class="col-md-12">
+      </div>
+  </div>
+</div>
+
+<div class="col-md-12">
+  <div class="row tools">
               <h3>Tola Tools</h3>
-              <div class="list-group tools-items">
+              <div class="list-group col-md-6">
                   <a href="https://tola-tables.mercycorps.org" class="active">
                       <div class="tolatables"> <img src="{{ STATIC_URL }}img/tola-tables-icon-white.png" class="icon"> Tola Tables</div>
                   </a>
@@ -148,7 +152,7 @@ $(function () {
                   <li class="list-group-item">Status: {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}</li>
                   <li class="list-group-item"><img src="https://travis-ci.org/toladata/TolaTables.svg?branch=master"></li>
               </div>
-              <div class="list-group tools-items">
+              <div class="list-group  col-md-6">
                   <a href="https://tola-activity.mercycorps.org" class=" active">
                       <div class="tolaactivity"><img src="{{ STATIC_URL }}img/tola-activity-icon-white.png" class="icon"> Tola Activity</div>
                   </a>
@@ -156,18 +160,8 @@ $(function () {
                   <li class="list-group-item">Status: {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}</li>
                   <li class="list-group-item"><img src="https://travis-ci.org/toladata/TolaActivity.svg?branch=master"></li>
               </div>
-              <div class="list-group tools-items">
-                  <div class="btn-success splash"> 
-                      <h4> <font class="font9"> Splashscreen </font></h4>
-                  </div>
-                  <li class="list-group-item">Link: <a href="{% url 'splash' %} "><span>splashscreen</span></a></li>
-                  <!-- <li class="list-group-item">Votes: <a href="{{ tola_activity_url }}"><span class="badge">{{ tola_activity_number }}</span></a></li> -->
-              </div>
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
+</div>
 </div>
 
 

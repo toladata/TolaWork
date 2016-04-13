@@ -147,7 +147,7 @@ margin-right: 0px
 }
 .font7
 {
-    font-size: 20px;
+    font-size: 23px;
 }
 
 
@@ -189,9 +189,9 @@ margin-right: 0px
 /*//home page*/
 .main_home
 {
-    background-color: #fff;
+    background-color: #FAFAFA;
     border-radius: 5px;
-    padding: 0px;
+    /*padding-bottom:10px;*/
 
 }
 .main_home table a 
@@ -205,18 +205,17 @@ margin-right: 0px
 }
 .minor_home
 {
-    background-color: #fff;
+    background-color: #FAFAFA;
     border-radius: 5px;
     padding: 0px;
     
 }
 .home_cover
 {
-    background-color: #ccc;
     position: relative;
+    border:1px solid#eee;
     overflow: hidden;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 5px;
     border-radius: 5px;
 
 }
@@ -227,8 +226,7 @@ margin-right: 0px
 }
 .pie 
 {
-    border-bottom: 1px solid#eee;
-    padding-bottom: 40px;
+    background-color: #FAFAFA;
 }
 .panel_top
 {
@@ -251,10 +249,13 @@ margin-right: 0px
 {
     color:#fff;
 }
-
+.center
+{
+    margin-bottom: 5px;
+}
 .tools
 {
-    margin-top: 12px;
+    margin-top: 8px;
 }
 .homenav>li>a:hover
 {
@@ -282,7 +283,7 @@ margin-right: 0px
 .pie_container
 {
     min-width: 310px; 
-    height: 320px; 
+    height: 300px; 
     max-width: 600px; 
     margin: 0 auto;
 }

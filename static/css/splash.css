@@ -277,22 +277,24 @@ p
 {
     position: relative;
     overflow: hidden;
-    border:1px solid#eee;
     border-radius: 10px;
-    padding:10px;
+    padding:5px;
     margin-top: 5px;
 }
-.modal-title
+
+.modal-content
 {
-    text-align: center;
+    background-color: rgba(0,0,0,0.7);
+    border:1px solid#eee;
+    color: #fff;
+    margin-top: 150px;
+    border-radius: 10px;
 }
 .modal-details
 {
     position: relative;
     overflow: hidden;
-    border:1px solid#eee;
-    border-radius: 10px;
-    padding:10px;
+    
 }
 .modal-top
 {
@@ -302,6 +304,8 @@ p
 .modal-header
 {
     border:none;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
 }
 .modal-footer
 {
@@ -311,10 +315,6 @@ p
 {
     padding-left: 10px;
     padding-right: 10px;
-}
-.social-buttons
-{
-    margin-top: 5px;
 }
 .intro_button
 {

@@ -45,8 +45,8 @@ def home(request):
 
     tickets = Ticket.objects.all().values('status').annotate(total=Count('status')).order_by('total')
 
-    recent_tickets = Ticket.objects.all().exclude(status__in='4').order_by('-created')[:10]
-    votes_tickets = Ticket.objects.all().exclude(status__in='4').filter(type=2).order_by('-votes')[:10]
+    recent_tickets = Ticket.objects.all().exclude(status__in='4').order_by('-created')[:5]
+    votes_tickets = Ticket.objects.all().exclude(status__in='4').filter(type=2).order_by('-votes')[:5]
 
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
