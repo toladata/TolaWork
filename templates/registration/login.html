@@ -1,20 +1,51 @@
 {% extends "base.html" %}
 
-{% block title %}Login{% endblock %}
-
 {% block content %}
-  <h1>Login</h1>
+<head>
+  <!--  splash screen css files -->
+    <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="{{ STATIC_URL }}css/login.css" rel="stylesheet" type="text/css">
+    <link href="{{ STATIC_URL }}css/fontawesome-4.2.0.min.css" rel="stylesheet" type="text/css">
 
-  <form action="" method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <input type="submit" value="login">
-      {% if non_ldap %}
-        <div class="social-buttons">
-            <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-go"><i class="fa fa-google"></i> Google</a>
+</head>
+<div class="container col-md-12">
+  <div class="col-md-3"></div>
+  <div class="login-main col-md-6 col-sm-6">
+    <div class="login-details">
+          <h2 class="font4 login-title"> <strong>Welcome to TolaWork...</strong> </h2>
+          <div class="login-top col-md-offset-3">
+          Login via
+          <div class="social-buttons ">
+              <a type="button" href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-info col-md-offset-1"><i class="fa fa-google"></i> Google</a>
+              </div>
+              <h4 class="col-md-offset 2">OR</h4>
+              <p>Login with Tola Account</p><br/>
+          </div>
+          <div> 
+            <form class="form" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
+                                  {% csrf_token %}
+                <div class="login-body col-md-6 col-md-offset-3">
+                    <div id="input_detail">
+                      <input class="form-control" type="text" name="username" placeholder="Username"> 
+                    </div>
+                      
+                    <div id="input_detail" >
+                      <input class="form-control" type="password" name="password" placeholder="Password"> 
+                    </div>
+                    <div class="row login-button">
+                      <div class="col-md-6 ">
+                         <button type="submit" class="btn  btn-info btn-lg form-control">Log In</button>
+                      </div>   
+                    </div>
+                </div>
+            </form>
+          </div>
+        <br>
+        <div class="col-md-8 col-md-offset-2">
+          <p>New Member? <a href="{% url 'register' %}">Register with TolaWork</a></p>
         </div>
-        or
-        <a href="{% url 'register' %}">Register a new Tola Account</a><br/>
-      {% endif %}
-  </form>
-{% endblock %}
+      </div>
+  </div>
+</div>
+
+{% endblock content %}

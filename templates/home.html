@@ -56,92 +56,111 @@ $(function () {
 });
 
 </script>
-<div class="container">
-	<br/>
-    <div class="jumbotron">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="row">
-                    <div class="col-md-8">
-                        <h3>Tola Work</h3>
-                        <p>Get help setting up, using and configuring Tola Activity, Tola Tables and Mobile Data collection platforms and M&E in general.  Report any issues with tools and request  and vote on new features.</p>
-                        <br/>
-                        <a href="/helpdesk/tickets/submit" class="btn btn-lg btn-success">Enter a Ticket</a>
-                        <br/>
-                        <br/>
-                        <div class="table-responsive">
-                          <h4>Top Enhancement Requests</h4>
-                          <table class="table">
+<div class="container col-md-12">
+  <div class="home_cover">
+    <div class="main_home">
+        <div class="col-md-9 col-sm-9">
+            <h2> <strong>Tola</strong>Work</h2>
+            <p class="font7">Get help setting up, using and configuring Tola Activity, Tola Tables and Mobile Data collection platforms and M&E in general.  Report any issues with tools and request  and vote on new features.</p>
+            <br/>
+            <a href="/helpdesk/tickets/submit" class="btn btn-lg btn-success"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
+            <br/>
+            <h3>Enhancement requests and Recent Tickets</h3>
+            <div>
+                <div class="panel-group" id="accordion">
+                <div class="panel home-panel">
+                  <div class="panel-heading home-paneltitle">
+                    <h4 class="panel-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
+                      <font class="font5"><b><span class="glyphicon glyphicon-plus-sign"></span></b> Top Enhancement Requests </font></a>
+                    </h4>
+                  </div>
+                  <div id="collapse1" class="panel-collapse collapse">
+                    <div class="panel-body">
+                      <div class=" col-md-12 table-responsive">
+                        <table class="table table-striped">
+                            <tr>
+                                <th>Queue</th>
+                                <th>Title</th>
+                                <th>Votes</th>
+                            </tr>
+                            {% for item in votes_tickets %}
+                            <tr>
+                                <td>{{ item.queue }}</td>
+                                <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
+                                <td>{{ item.votes }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel home-panel">
+                  <div class="panel-heading home-paneltitle">
+                    <h4 class="panel-title">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">
+                      <font class="font5"><b><span class="glyphicon glyphicon-plus-sign"></span></b>  Recent Tickets </font></a>
+                    </h4>
+                  </div>
+                  <div id="collapse2" class="panel-collapse collapse">
+                    <div class="panel-body">
+                      <div class="table-responsive">
+                          <table class="table table-striped">
                               <tr>
+                                  <th>Status</th>
                                   <th>Queue</th>
                                   <th>Title</th>
-                                  <th>Votes</th>
+                                  <th>Date Created</th>
                               </tr>
-                              {% for item in votes_tickets %}
+                              {% for item in recent_tickets %}
                               <tr>
+                                  <td>{% if item.status == 1 %} Open {%elif item.status == 2%}Re-Opened{% elif item.status == 3%}Resolved{% elif item.status == 4%}Closed{% elif item.status == 5%}Duplicate{% endif %}</td>
                                   <td>{{ item.queue }}</td>
                                   <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
-                                  <td>{{ item.votes }}</td>
+                                  <td>{{ item.created }}</td>
                               </tr>
                               {% endfor %}
                           </table>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div id="pie_container" style="min-width: 310px; height: 400px; max-width: 600px; margin: 0 auto"></div>
-                    </div>
+                  </div>
                 </div>
+              </div> 
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="table-responsive">
-              <h3>Recent Tickets</h3>
-              <table class="table">
-                  <tr>
-                      <th>Status</th>
-                      <th>Queue</th>
-                      <th>Title</th>
-                      <th>Date Created</th>
-                  </tr>
-                  {% for item in recent_tickets %}
-                  <tr>
-                      <td>{% if item.status == 1 %} Open {%elif item.status == 2%}Re-Opened{% elif item.status == 3%}Resolved{% elif item.status == 4%}Closed{% elif item.status == 5%}Duplicate{% endif %}</td>
-                      <td>{{ item.queue }}</td>
-                      <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
-                      <td>{{ item.created }}</td>
-                  </tr>
-                  {% endfor %}
-              </table>
-            </div>
+      <div class="row">
+          <div class="col-md-3 col-sm-3 minor_home">
+      <!-- //the pie chart -->
+          <div class="col-md-12 pie">
+              <div id="pie_container">
+              </div>
+          </div>
         </div>
-        <div class="col-md-6">
+      </div>
+  </div>
+</div>
 
-            <h3>Tola Tools</h3>
-            <div class="list-group">
-                <a href="https://tola-tables.mercycorps.org" class="list-group-item active">
-                    Tola Tables
-                </a>
-                <li class="list-group-item">Latest Release: <a href="{{ tola_url }}"><span class="badge">{{ tola_number }}</span></a></li>
-                <li class="list-group-item">Status: {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}</li>
-                <li class="list-group-item"><img src="https://travis-ci.org/toladata/TolaTables.svg?branch=master"></li>
-            </div>
-            <div class="list-group">
-                <a href="https://tola-activity.mercycorps.org" class="list-group-item active">
-                    Tola Activity
-                </a>
-                <li class="list-group-item">Latest Release: <a href="{{ tola_activity_url }}"><span class="badge">{{ tola_activity_number }}</span></a></li>
-                <li class="list-group-item">Status: {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}</li>
-                <li class="list-group-item"><img src="https://travis-ci.org/toladata/TolaActivity.svg?branch=master"></li>
-            </div>
-
-        </div>
-    </div>
-
-
-
-
+<div class="col-md-12">
+  <div class="row tools">
+              <h3>Tola Tools</h3>
+              <div class="list-group col-md-6">
+                  <a href="https://tola-tables.mercycorps.org" class="active">
+                      <div class="tolatables"> <img src="{{ STATIC_URL }}img/tola-tables-icon-white.png" class="icon"> Tola Tables</div>
+                  </a>
+                  <li class="list-group-item">Latest Release: <a href="{{ tola_url }}"><span class="badge">{{ tola_number }}</span></a></li>
+                  <li class="list-group-item">Status: {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}</li>
+                  <li class="list-group-item"><img src="https://travis-ci.org/toladata/TolaTables.svg?branch=master"></li>
+              </div>
+              <div class="list-group  col-md-6">
+                  <a href="https://tola-activity.mercycorps.org" class=" active">
+                      <div class="tolaactivity"><img src="{{ STATIC_URL }}img/tola-activity-icon-white.png" class="icon"> Tola Activity</div>
+                  </a>
+                  <li class="list-group-item">Latest Release: <a href="{{ tola_activity_url }}"><span class="badge">{{ tola_activity_number }}</span></a></li>
+                  <li class="list-group-item">Status: {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}</li>
+                  <li class="list-group-item"><img src="https://travis-ci.org/toladata/TolaActivity.svg?branch=master"></li>
+              </div>         
+</div>
 </div>
 
 

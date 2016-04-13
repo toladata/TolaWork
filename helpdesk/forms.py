@@ -250,7 +250,7 @@ class TicketForm(forms.Form):
 
         f.save()
 
-        # files = []
+        #files = []
         # if self.cleaned_data['attachment']:
         #     import mimetypes
         #     file = self.cleaned_data['attachment']
@@ -284,7 +284,7 @@ class TicketForm(forms.Form):
                 recipients=t.submitter_email,
                 sender=q.from_address,
                 fail_silently=True,
-                # files=files,
+
                 )
             messages_sent_to.append(t.submitter_email)
 
@@ -295,7 +295,7 @@ class TicketForm(forms.Form):
                 recipients=t.assigned_to.email,
                 sender=q.from_address,
                 fail_silently=True,
-                files=files,
+
                 )
             messages_sent_to.append(t.assigned_to.email)
 
@@ -306,7 +306,7 @@ class TicketForm(forms.Form):
                 recipients=q.new_ticket_cc,
                 sender=q.from_address,
                 fail_silently=True,
-                files=files,
+
                 )
             messages_sent_to.append(q.new_ticket_cc)
 
@@ -317,7 +317,7 @@ class TicketForm(forms.Form):
                 recipients=q.updated_ticket_cc,
                 sender=q.from_address,
                 fail_silently=True,
-                files=files,
+
                 )
 
         return t

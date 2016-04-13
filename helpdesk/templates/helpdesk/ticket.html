@@ -205,7 +205,7 @@
       <input name="github" type='button ' class="btn btn-info" value='{% trans "Send to Github" %}' onClick="location.href='send_to_github/'"/>
     {% endif %}
     {% else %}
-    <input name="update_github" type='button ' class="btn btn-info" value='{% trans "Update Issue in Github" %}' onClick="location.href='send_to_github/'"/>
+
     <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Issue in Github" %}' onClick="location.href='{{ ticket.github_issue_url }}'"/>
     {% endif %}
 

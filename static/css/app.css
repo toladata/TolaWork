@@ -8,6 +8,7 @@ html {
 body {
     /* Margin bottom by footer height */
     height: 100%;
+    font-size: 15px;
     margin-bottom: 60px;
 }
 
@@ -20,7 +21,15 @@ body {
     border-top: 1px solid #f5f5f5;
     background-color: #e5e5e5;
     vertical-align: top;
+    
+    z-index: 100;
 }
+
+.login-button
+{
+    margin-top: 10px;
+}
+
 
 #footer > .container {
     padding: 10px;
@@ -122,10 +131,28 @@ margin-right: 0px
     margin-bottom: 10px;
     padding-bottom: 15px;
 }
+/*//fonts*/
 .font1{
-    size: 3em;  
+    size: 4em;  
+}
+.font4
+{
+    color:#ff8000;
+    font-weight: bold;
+}
+.font5
+{
+    color:#fff;
+    font-size: 15px;
+}
+.font7
+{
+    font-size: 23px;
 }
 
+
+
+/*//end of fonts*/
 .collapselist
 {
     padding: 5px;
@@ -150,30 +177,154 @@ margin-right: 0px
 {
     background-color: #ff9933;
 }
-
 .panel-footer
 {
     background-color: #ff9933;
 }
 
-.faq_head
+.main_home p
+{
+
+}
+/*//home page*/
+.main_home
+{
+    background-color: #FAFAFA;
+    border-radius: 5px;
+    /*padding-bottom:10px;*/
+
+}
+.main_home table a 
+{
+    color:#4db3d0;
+}
+.main_home
+{
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+.minor_home
+{
+    background-color: #FAFAFA;
+    border-radius: 5px;
+    padding: 0px;
+    
+}
+.home_cover
+{
+    position: relative;
+    border:1px solid#eee;
+    overflow: hidden;
+    padding: 5px;
+    border-radius: 5px;
+
+}
+.home_button
+{
+    background-color: #b20838;
+    color:#fff;
+}
+.pie 
+{
+    background-color: #FAFAFA;
+}
+.panel_top
+{
+    background-color: #ff8000;
+}
+.homenav
 {
     background-color: #b20838;
 }
-.faq-footer
+.glyph
 {
-    background-color: #b20838;
+    color:#fff;
+    font-size: 25px;
 }
-.font4
+.navbar-collapse
 {
-    color:#ff8000;
-    font-weight: bold;
+    border:none;
 }
-.font5
+.homenav ul li a
 {
     color:#fff;
 }
-.faq-font
+.center
 {
+    margin-bottom: 5px;
+}
+.tools
+{
+    margin-top: 8px;
+}
+.homenav>li>a:hover
+{
+    background-color: #800000;
+}
+.homenav>li>a:active
+{
+    background-color: #800000;
+}
+.homenav>ul>li>a:hover
+{
+    background-color: #800000;
+}
+.homenav>ul>li>a:active
+{
+    background-color: #800000;
+}
+.container
+{
+    width:95.5%;
+    margin-left: 2%;
+}
+
+/*//pie chart*/
+.pie_container
+{
+    min-width: 310px; 
+    height: 300px; 
+    max-width: 600px; 
+    margin: 0 auto;
+}
+.tolatables
+{
+    background-color: #4db3d0;
     color:#fff;
+    padding:10px;
+    padding-left: 15px;
+}
+.tolaactivity
+{
+    background-color: #e89424;
+    color:#fff;
+    padding:10px;
+    padding-left: 15px;
+}
+.home-paneltitle
+{
+    background-color: #4db3d0;
+}
+.home-panel
+{
+    border: 1px solid#4db3d0;
+}
+.form_register_btn
+{
+    margin-left: 16px;
+    margin-top: 30px;
+}
+.form-field
+{
+    margin-bottom: 10px;
+}
+.icon
+{
+    height: 15px;
+    width:15px;
+}
+.splash
+{
+    padding: 3px;
+    padding-left: 10px;
 }

@@ -14,7 +14,8 @@ from django.conf import settings
 from django.db.models import Count
 import os
 
-
+def splash(request):
+    return render(request, "splash.html")
 
 def home(request):
 
@@ -44,8 +45,8 @@ def home(request):
 
     tickets = Ticket.objects.all().values('status').annotate(total=Count('status')).order_by('total')
 
-    recent_tickets = Ticket.objects.all().exclude(status__in='4').order_by('-created')[:7]
-    votes_tickets = Ticket.objects.all().exclude(status__in='4').filter(type=2).order_by('-votes')[:4]
+    recent_tickets = Ticket.objects.all().exclude(status__in='4').order_by('-created')[:5]
+    votes_tickets = Ticket.objects.all().exclude(status__in='4').filter(type=2).order_by('-votes')[:5]
 
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
@@ -134,7 +135,7 @@ def logout_view(request):
     """
     logout(request)
     # Redirect to a success page.
-    return HttpResponseRedirect("/")
+    return HttpResponseRedirect("/home")
 
 
 def permission_denied(request):

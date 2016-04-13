@@ -43,7 +43,7 @@ import json
 from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
-from helpdesk.github import new_issue, get_issue, update_issue, update_comments,reopen_issue,close_issue
+from helpdesk.github import new_issue, get_issue, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
@@ -52,29 +52,26 @@ staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
 
 def post_comment(request, ticket_id):
-
-
+    ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
-        ticket = get_object_or_404(Ticket, id=ticket_id)
 
         form = CommentTicketForm(request.POST)
-
-        if str(ticket.queue) == "Tola Tables":
-            repo = settings.GITHUB_REPO_1
-        else:
-            repo = settings.GITHUB_REPO_2
 
         if form.is_valid():
             ticket_id = ticket.id
             title = form.cleaned_data['title']
-            status = request.POST.get('new_status') #new ticket status
-
-            f_public = request.POST.get('public', False) #public
+            comment = request.POST.get('comment', '')
+            f_public = request.POST.get('public', False)
+            status = request.POST.get('new_status')
 
             if int(status) == 1:
                 status_text = 'Open'
 
-                reopen_issue(repo,ticket) #reopen issue in github
+                if ticket.github_issue_id:
+                    #if there are comments, update github
+                    repo = queue_repo(ticket)
+                    if not comment == '':
+                        add_comments(comment,repo,ticket)
 
                 open_template = get_object_or_404(EmailTemplate, template_name='open')
                 m_subject = open_template.heading
@@ -91,8 +88,21 @@ def post_comment(request, ticket_id):
             elif int(status) == 2:
                 status_text = 'Re-Opened'
 
-                reopen_issue(repo,ticket) #reopen issue in github
+                if ticket.github_issue_id:
+                    #if there are comments, update github
+                    repo = queue_repo(ticket)
+                    if not comment == '':
+                        add_comments(comment,repo,ticket)
+                    #Re-open issue in github
+                    response = open_issue(repo,ticket)
 
+                    if int(response) == 200:
+                        messages.success(request, 'Success, ticket also re-opened in Github')
+                    else:
+                        messages.success(request, str(response) + ': There was a problem re-opening the ticket in GitHub')
+                    print response
+
+                #send email
                 reopen_template = get_object_or_404(EmailTemplate, template_name='reopen')
                 m_subject = reopen_template.heading
                 m_body = reopen_template.html
@@ -124,8 +134,20 @@ def post_comment(request, ticket_id):
             elif int(status) == 4:
                 status_text = 'Closed'
 
-                close_issue(repo,ticket) #close issue in github
+                if ticket.github_issue_id:
+                    #if there are comments, update github
+                    repo = queue_repo(ticket)
+                    if not comment == '':
+                        add_comments(comment,repo,ticket)
+                    #close issue in github
+                    response=close_issue(repo,ticket)
 
+                    if int(response) == 200:
+                        messages.success(request, 'Success, ticket also closed in Github')
+                    else:
+                        messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
+                    print response
+                #send email
                 closed_template = get_object_or_404(EmailTemplate, template_name='closed')
                 m_subject = closed_template.heading
                 m_body = closed_template.html
@@ -172,9 +194,8 @@ def post_comment(request, ticket_id):
             queue = ticket.queue
             error = ticket.error_msg
             slack_status = ticket.slack_status
-            new_comment = request.POST.get('comment', '')
 
-            print new_comment
+            new_comment = request.POST.get('comment', '')
             if not new_comment == '':
                 f_comments = str(request.user.email.upper())  + ' added a comment ' + '  - ' + str(new_comment)
             else:
@@ -192,7 +213,7 @@ def post_comment(request, ticket_id):
             update_comments.save(update_fields=['status'])
             new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status, )
             new_followup.save()
-            
+
             files = []
             if request.FILES:
                 import mimetypes, os
@@ -208,14 +229,14 @@ def post_comment(request, ticket_id):
                     a.save()
 
                     if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-                        # Only files smaller than 512kb (or as defined in
-                        #settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                            # Only files smaller than 512kb (or as defined in
+                            #settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
                         try:
                             files.append([a.filename, a.file])
                         except NotImplementedError:
-                            pass    
+                            pass
 
-            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
 def dashboard(request):
     """
@@ -251,7 +272,7 @@ def dashboard(request):
                     Ticket.objects.filter(id=ticket.id).update(status=3)
 
             # update issue in github with local changes and comments
-            update_issue(repo,ticket)
+            #update_issue(repo,ticket)
 
 
     # closed & resolved tickets, assigned to current user
@@ -316,30 +337,9 @@ dashboard = staff_member_required(dashboard)
 
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    """
-    # first update comment in followup
-    request.POST = {
-            'owner': request.user.id,
-            'public': 1,
-            'title': ticket.title,
-            'status': 1,
-            'comment': 'Data from text area'
-        }
-
-    new_followup = FollowUp(title=request.POST.get('title'), date=timezone.now(), ticket_id=ticket_id, comment=request.POST.get('comment'), public=request.POST.get('public'), new_status=request.POST.get('status'), )
-    new_followup.save()
-
-    """
-
-    if str(ticket.queue) == "Tola Tables":
-        repo = settings.GITHUB_REPO_1
-    else:
-        repo = settings.GITHUB_REPO_2
-
+    repo = queue_repo(ticket)
     if not ticket.github_issue_id:
         response = new_issue(repo,ticket)
-    else:
-        response = update_issue(repo,ticket)
 
     if int(response) == 201:
         messages.success(request, 'Success, issue sent to Github')
@@ -1321,7 +1321,10 @@ def ticket_list(request):
             search_message=search_message,
 
         )))
+"""
+allow non-admin users to use saved_queries
 ticket_list = staff_member_required(ticket_list)
+"""
 
 
 def edit_ticket(request, ticket_id):
@@ -1669,17 +1672,18 @@ run_report = staff_member_required(run_report)
 
 
 def save_query(request):
-    title = request.POST.get('title', None)
-    shared = request.POST.get('shared', False)
-    query_encoded = request.POST.get('query_encoded', None)
+    if request.user.is_staff:
+        title = request.POST.get('title', None)
+        shared = request.POST.get('shared', False)
+        query_encoded = request.POST.get('query_encoded', None)
 
-    if not title or not query_encoded:
-        return HttpResponseRedirect(reverse('helpdesk_list'))
+        if not title or not query_encoded:
+            return HttpResponseRedirect(reverse('helpdesk_list'))
 
-    query = SavedSearch(title=title, shared=shared, query=query_encoded, user=request.user)
-    query.save()
+        query = SavedSearch(title=title, shared=shared, query=query_encoded, user=request.user)
+        query.save()
 
-    return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk_list'), query.id))
+        return HttpResponseRedirect('%s?saved_query=%s' % (reverse('helpdesk_list'), query.id))
 save_query = staff_member_required(save_query)
 
 
