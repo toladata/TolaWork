@@ -156,7 +156,13 @@ $(function () {
                   <li class="list-group-item">Status: {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}</li>
                   <li class="list-group-item"><img src="https://travis-ci.org/toladata/TolaActivity.svg?branch=master"></li>
               </div>
-
+              <div class="list-group tools-items">
+                  <div class="btn-success splash">
+                      <h4> <font class="font9"> Splashscreen </font></h4>
+                  </div>
+                  <li class="list-group-item">Link: <a href="{% url 'splash' %} "><span>splashscreen</span></a></li>
+                  <!-- <li class="list-group-item">Votes: <a href="{{ tola_activity_url }}"><span class="badge">{{ tola_activity_number }}</span></a></li> -->
+              </div>
           </div>
         </div>
       </div>
