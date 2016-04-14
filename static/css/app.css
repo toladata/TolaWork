@@ -16,6 +16,8 @@ body {
     position: fixed;
     bottom: 0px;
     width: 100%;
+    width: 1335px;
+    margin-left: -40px;
     /* Set the fixed height of the footer here */
     height: 40px;
     border-top: 1px solid #f5f5f5;
