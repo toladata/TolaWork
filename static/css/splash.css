@@ -185,6 +185,27 @@ body {
     font-weight: bold;
     font-size: 20px;
 }
+.font9
+{
+    color:#fff;
+    margin-right: 2px;
+}
+.dropdown-menu li
+{
+    margin: 0px;
+    list-style: none;
+    padding: 0px;
+}
+.dropdown-toggle:active
+{
+    background-color: 
+}
+.dropdown-menu
+{
+    background-color: #fff;
+    width:250px;
+    border-bottom: 0px;
+}
 /*end of fonts*/
 .button
 {
@@ -198,7 +219,7 @@ body {
 }
 .modal-button
 {
-    margin-left: 4px;
+    margin-left: 20px;
     margin-top: 5px;
 }
 
@@ -210,13 +231,12 @@ body {
 nav ul
 {
     background-color: rgba(179, 8, 56, 0.5);
-    padding-right: 10px;
-
-
+    
 }
-nav ul li
+
+nav ul li a:active
 {
-    margin-left: 20px;
+    background-color: transparent;
 }
 .logo
 {
@@ -273,7 +293,7 @@ p
     margin-top: 15px;
 }
 /*//login modal*/
-.modal-body
+/*.modal-body
 {
     position: relative;
     overflow: hidden;
@@ -315,7 +335,7 @@ p
 {
     padding-left: 10px;
     padding-right: 10px;
-}
+}*/
 .intro_button
 {
     padding-bottom: 12px;

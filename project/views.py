@@ -15,6 +15,9 @@ from django.db.models import Count
 import os
 
 def splash(request):
+    if request.user.is_authenticated():
+        return render(request, "home.html")
+        
     return render(request, "splash.html")
 
 def home(request):

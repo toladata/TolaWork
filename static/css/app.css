@@ -16,8 +16,8 @@ body {
     position: fixed;
     bottom: 0px;
     width: 100%;
-    /* Set the fixed height of the footer here */
-    height: 40px;
+    margin-left: -40px;
+     /* Set the fixed height of the footer here */
     border-top: 1px solid #f5f5f5;
     background-color: #e5e5e5;
     vertical-align: top;
@@ -33,6 +33,7 @@ body {
 
 #footer > .container {
     padding: 10px;
+
 }
 
 body > .container {
