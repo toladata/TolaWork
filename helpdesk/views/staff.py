@@ -74,16 +74,7 @@ def post_comment(request, ticket_id):
                         add_comments(comment,repo,ticket)
 
                 open_template = get_object_or_404(EmailTemplate, template_name='open')
-                m_subject = open_template.heading
-                m_body = open_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                send_mail(open_template.heading, open_template.html, 'toladatawork@gmail.com', [ticket.submitter_email],fail_silently=False)
 
             elif int(status) == 2:
                 status_text = 'Re-Opened'
@@ -104,32 +95,13 @@ def post_comment(request, ticket_id):
 
                 #send email
                 reopen_template = get_object_or_404(EmailTemplate, template_name='reopen')
-                m_subject = reopen_template.heading
-                m_body = reopen_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                send_mail(reopen_template.heading, reopen_template.html, 'toladatawork@gmail.com', [ticket.submitter_email],fail_silently=False)
 
             elif int(status) == 3:
                 status_text = 'Resolved'
 
                 resolved_template = get_object_or_404(EmailTemplate, template_name='resolved')
-                m_subject = resolved_template.heading
-                m_body = resolved_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                qa_lead = 'joash@open.build'
-                receivers = [assigned_user, submitter,qa_lead ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                send_mail(resolved_template.heading, resolved_template.html, 'toladatawork@gmail.com', [ticket.submitter_email],fail_silently=False)
 
             elif int(status) == 4:
                 status_text = 'Closed'
@@ -149,30 +121,11 @@ def post_comment(request, ticket_id):
                     print response
                 #send email
                 closed_template = get_object_or_404(EmailTemplate, template_name='closed')
-                m_subject = closed_template.heading
-                m_body = closed_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                send_mail(closed_template.heading, closed_template.html, 'toladatawork@gmail.com', [ticket.submitter_email],fail_silently=False)
             elif int(status) == 5:
                 status_text = 'Duplicate'
                 duplicate_template = get_object_or_404(EmailTemplate, template_name='duplicate')
-                m_subject = duplicate_template.heading
-                m_body = duplicate_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                send_mail(duplicate_template.heading, duplicate_template.html, 'toladatawork@gmail.com', [ticket.submitter_email],fail_silently=False)
             else:
                 status_text = 'Not a status'
 
