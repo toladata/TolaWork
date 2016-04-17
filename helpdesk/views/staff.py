@@ -91,7 +91,7 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem re-opening the ticket in GitHub')
                     print response
-                reopen_notify(ticket)
+                reopen_notify(ticket,comment)
 
             elif int(status) == 3:
                 status_text = 'Resolved'
