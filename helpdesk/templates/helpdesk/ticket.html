@@ -210,9 +210,9 @@
     {% endif %}
 
     {% if ticket.slack_status == 0 %}
-    <a href='{% url 'post_to_slack' ticket.id %}'><img alt="Add to Slack" height="40" width="139" src="{{ STATIC_URL }}/img/add_to_slack.png"></a>
+    <a href='{% url "post_to_slack" ticket.id %}'><img alt="Add to Slack" height="40" width="139" src="{{ STATIC_URL }}/img/add_to_slack.png"></a>
     {% else %}
-    <img alt="Posted to Slack" height="60" width="140" src="{{ STATIC_URL }}/img/slack.png" />
+    <a href="https://tola-users.slack.com/archives/tola-work"><img alt="Posted to Slack" height="60" width="140" src="{{ STATIC_URL }}/img/slack.png" /></a>
     {% endif %}
     {% csrf_token %}
 </form>

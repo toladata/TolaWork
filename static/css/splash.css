@@ -65,13 +65,7 @@ html {
     -o-background-size: cover;
     background-size: cover;
 }
-.item:nth-child(4) {
-    background: url(../img/img1.jpg) no-repeat center center fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-}
+
 .carousel {
     z-index: -99;
 }
@@ -122,6 +116,10 @@ body {
      * to improve page load speed on mobile internet connections */
     /*background-image: url(../img/1.png);*/
   }
+ .navbar li ul
+{
+    background-color: #fff;
+}
     }
 
 .navbar
@@ -130,6 +128,7 @@ body {
     border:none;
     min-height: 10px;
 }
+
 .collapse .navbar-collapse
 {
     border:none;
@@ -185,6 +184,27 @@ body {
     font-weight: bold;
     font-size: 20px;
 }
+.font9
+{
+    color:#fff;
+    margin-right: 2px;
+}
+.font10
+{
+    color:#1c1c1c;
+}
+.dropdown-menu li
+{
+    margin: 0px;
+    list-style: none;
+    padding: 0px;
+}
+.dropdown-menu
+{
+    background-color: #fff;
+    width: 250px;
+    border-bottom: 0px;
+}
 /*end of fonts*/
 .button
 {
@@ -198,8 +218,12 @@ body {
 }
 .modal-button
 {
-    margin-left: 4px;
+    margin-left: 20px;
     margin-top: 5px;
+}
+.login-modal
+{
+    background-color: #fff;
 }
 
 #form_register_btn
@@ -210,13 +234,12 @@ body {
 nav ul
 {
     background-color: rgba(179, 8, 56, 0.5);
-    padding-right: 10px;
-
-
+    
 }
-nav ul li
+
+nav ul li a:active
 {
-    margin-left: 20px;
+    background-color: transparent;
 }
 .logo
 {
@@ -259,7 +282,7 @@ p
 
 #intro_description
 {
-    background-color: rgba(0,0,0,0.2);
+    background-color: rgba(0,0,0,0.5);
     position: relative;
     overflow: hidden;
     min-height: 10px;
@@ -272,50 +295,7 @@ p
 {
     margin-top: 15px;
 }
-/*//login modal*/
-.modal-body
-{
-    position: relative;
-    overflow: hidden;
-    border-radius: 10px;
-    padding:5px;
-    margin-top: 5px;
-}
 
-.modal-content
-{
-    background-color: rgba(0,0,0,0.7);
-    border:1px solid#eee;
-    color: #fff;
-    margin-top: 150px;
-    border-radius: 10px;
-}
-.modal-details
-{
-    position: relative;
-    overflow: hidden;
-    
-}
-.modal-top
-{
-    padding-left: 10px;
-    padding-right: 10px;
-}
-.modal-header
-{
-    border:none;
-    margin-bottom: 0px;
-    padding-bottom: 0px;
-}
-.modal-footer
-{
-    border:none;
-}
-.modal-content
-{
-    padding-left: 10px;
-    padding-right: 10px;
-}
 .intro_button
 {
     padding-bottom: 12px;

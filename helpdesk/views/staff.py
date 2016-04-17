@@ -45,6 +45,7 @@ from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_t
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.github import new_issue, get_issue, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
+from helpdesk.postfix import close_notify, open_notify, reopen_notify, resolve_notify, duplicate_notify
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -72,18 +73,7 @@ def post_comment(request, ticket_id):
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
-
-                open_template = get_object_or_404(EmailTemplate, template_name='open')
-                m_subject = open_template.heading
-                m_body = open_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                open_notify(ticket,comment)
 
             elif int(status) == 2:
                 status_text = 'Re-Opened'
@@ -101,35 +91,11 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem re-opening the ticket in GitHub')
                     print response
-
-                #send email
-                reopen_template = get_object_or_404(EmailTemplate, template_name='reopen')
-                m_subject = reopen_template.heading
-                m_body = reopen_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                reopen_notify(ticket)
 
             elif int(status) == 3:
                 status_text = 'Resolved'
-
-                resolved_template = get_object_or_404(EmailTemplate, template_name='resolved')
-                m_subject = resolved_template.heading
-                m_body = resolved_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                qa_lead = 'joash@open.build'
-                receivers = [assigned_user, submitter,qa_lead ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                resolve_notify(ticket,comment)
 
             elif int(status) == 4:
                 status_text = 'Closed'
@@ -147,32 +113,12 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
                     print response
-                #send email
-                closed_template = get_object_or_404(EmailTemplate, template_name='closed')
-                m_subject = closed_template.heading
-                m_body = closed_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
+                close_notify(ticket,comment)
 
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
             elif int(status) == 5:
                 status_text = 'Duplicate'
-                duplicate_template = get_object_or_404(EmailTemplate, template_name='duplicate')
-                m_subject = duplicate_template.heading
-                m_body = duplicate_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                duplicate_notify(ticket,comment)
+
             else:
                 status_text = 'Not a status'
 

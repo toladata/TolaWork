@@ -45,23 +45,22 @@
                             <td><span title='{{ ticket.created|date:"r" }}'>{{ item.last_updated }}</span></td>
 
                         </tr>
-                    {% endif %}
+                    {% endif %}   
                 {% endfor %}
-
             </table>
             <div class="pagination">
-            <span class="step-links">
-            {% if kb_items.has_previous %}
-                <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ kb_items.previous_page_number }}">{% trans "Previous" %}</a>
-            {% endif %}
-                <span class="current">
-                    {% blocktrans with kb_items.number as kb_item_num and kb_items.paginator.num_pages as num_pages %}Page {{ kb_item_num }} of {{ num_pages }}.{% endblocktrans %}
+                <span class="step-links">
+                {% if kb_items.has_previous %}
+                    <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ kb_items.previous_page_number }}">{% trans "Previous" %}</a>
+                {% endif %}
+                    <span class="current">
+                        {% blocktrans with kb_items.number as kb_item_num and kb_items.paginator.num_pages as num_pages %}Page {{ kb_item_num }} of {{ num_pages }}.{% endblocktrans %}
+                    </span>
+                {% if kb_items.has_next %}
+                    <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ kb_items.next_page_number }}">{% trans "Next" %}</a>
+                {% endif %}
                 </span>
-            {% if kb_items.has_next %}
-                <a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ kb_items.next_page_number }}">{% trans "Next" %}</a>
-            {% endif %}
-            </span>
-        </div>
+            </div>
             </div>
             <div class="panel-footer"></div>
           </div>
@@ -70,6 +69,8 @@
     {% endfor %}
     </div>
 </div>
+
+        
 
 
 <script type="text/javascript">
