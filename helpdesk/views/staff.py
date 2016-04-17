@@ -45,7 +45,7 @@ from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_t
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.github import new_issue, get_issue, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
-from helpdesk.postfix import close_email
+from helpdesk.postfix import close_notify, open_notify, reopen_notify, resolve_notify, duplicate_notify
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -73,9 +73,7 @@ def post_comment(request, ticket_id):
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
-
-                open_template = get_object_or_404(EmailTemplate, template_name='open')
-                send_mail(open_template.heading, open_template.html, 'toladatawork@gmail.com', [ticket.submitter_email],fail_silently=False)
+                open_notify(ticket)
 
             elif int(status) == 2:
                 status_text = 'Re-Opened'
@@ -93,16 +91,11 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem re-opening the ticket in GitHub')
                     print response
-
-                #send email
-                reopen_template = get_object_or_404(EmailTemplate, template_name='reopen')
-                send_mail(reopen_template.heading, reopen_template.html, 'toladatawork@gmail.com', [ticket.submitter_email],fail_silently=False)
+                reopen_notify(ticket)
 
             elif int(status) == 3:
                 status_text = 'Resolved'
-
-                resolved_template = get_object_or_404(EmailTemplate, template_name='resolved')
-                send_mail(resolved_template.heading, resolved_template.html, 'toladatawork@gmail.com', [ticket.submitter_email],fail_silently=False)
+                resolve_notify(ticket)
 
             elif int(status) == 4:
                 status_text = 'Closed'
@@ -120,14 +113,12 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
                     print response
-
-                #send email
-                close_email(ticket)
+                close_notify(ticket)
 
             elif int(status) == 5:
                 status_text = 'Duplicate'
-                duplicate_template = get_object_or_404(EmailTemplate, template_name='duplicate')
-                send_mail(duplicate_template.heading, duplicate_template.html, 'toladatawork@gmail.com', [ticket.submitter_email],fail_silently=False)
+                duplicate_notify(ticket)
+
             else:
                 status_text = 'Not a status'
 
