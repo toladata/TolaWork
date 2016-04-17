@@ -73,7 +73,7 @@ def post_comment(request, ticket_id):
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
-                open_notify(ticket)
+                open_notify(ticket,comment)
 
             elif int(status) == 2:
                 status_text = 'Re-Opened'
@@ -95,7 +95,7 @@ def post_comment(request, ticket_id):
 
             elif int(status) == 3:
                 status_text = 'Resolved'
-                resolve_notify(ticket)
+                resolve_notify(ticket,comment)
 
             elif int(status) == 4:
                 status_text = 'Closed'
@@ -113,11 +113,11 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
                     print response
-                close_notify(ticket)
+                close_notify(ticket,comment)
 
             elif int(status) == 5:
                 status_text = 'Duplicate'
-                duplicate_notify(ticket)
+                duplicate_notify(ticket,comment)
 
             else:
                 status_text = 'Not a status'
