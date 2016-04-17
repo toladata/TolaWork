@@ -10,7 +10,7 @@ except ImportError:
 def open_notify(ticket,comment):
     open_template = get_object_or_404(EmailTemplate, template_name='open')
     send_mail('New Ticket: ' + ticket.title,
-              ticket.description + ' Comments: ' + comment + open_template.html,
+              ticket.description + open_template.html + comment,
               'toladatawork@gmail.com',
               [ticket.submitter_email],
               fail_silently=False)
@@ -19,7 +19,7 @@ def open_notify(ticket,comment):
 def reopen_notify(ticket,comment):
     reopen_template = get_object_or_404(EmailTemplate, template_name='reopen')
     send_mail('Re-Opened: ' + ticket.title,
-              ticket.description + ' Comments: ' + comment + reopen_template.html,
+              ticket.description + reopen_template.html + comment,
               'toladatawork@gmail.com',
               [ticket.submitter_email],
               fail_silently=False)
@@ -28,7 +28,7 @@ def reopen_notify(ticket,comment):
 def close_notify(ticket,comment):
     closed_template = get_object_or_404(EmailTemplate, template_name='closed')
     send_mail('Closed: ' + ticket.title,
-              ticket.description + ' Comments: ' + comment + closed_template.html,
+              ticket.description + closed_template.html + comment,
               'toladatawork@gmail.com',
               [ticket.submitter_email],
               fail_silently=False)
@@ -37,7 +37,7 @@ def close_notify(ticket,comment):
 def resolve_notify(ticket,comment):
     resolve_template = get_object_or_404(EmailTemplate, template_name='resolved')
     send_mail('Resolved: ' + ticket.title,
-              ticket.description + ' Comments: ' + comment + resolve_template.html,
+              ticket.description + resolve_template.html + comment,
               'toladatawork@gmail.com',
               [ticket.submitter_email],
               fail_silently=False)
@@ -46,7 +46,7 @@ def resolve_notify(ticket,comment):
 def duplicate_notify(ticket,comment):
     duplicate_template = get_object_or_404(EmailTemplate, template_name='duplicate')
     send_mail('Duplicated: ' + ticket.title,
-              ticket.description + ' Comments: ' + comment + duplicate_template.html,
+              ticket.description + duplicate_template.html + comment,
               'toladatawork@gmail.com',
               [ticket.submitter_email],
               fail_silently=False)
