@@ -45,6 +45,7 @@ from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_t
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.github import new_issue, get_issue, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
+from helpdesk.postfix import close_email
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -119,9 +120,10 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
                     print response
+
                 #send email
-                closed_template = get_object_or_404(EmailTemplate, template_name='closed')
-                send_mail(closed_template.heading, closed_template.html, 'toladatawork@gmail.com', [ticket.submitter_email],fail_silently=False)
+                close_email(ticket)
+
             elif int(status) == 5:
                 status_text = 'Duplicate'
                 duplicate_template = get_object_or_404(EmailTemplate, template_name='duplicate')
