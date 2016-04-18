@@ -190,10 +190,10 @@ ROOT_URLCONF = '%s.urls' % SITE_NAME
 ########## APP CONFIGURATION
 DJANGO_APPS = (
     #django-admin-tools
-    'admin_tools',     # for staticfiles in Django 1.3
-    'admin_tools.theming',
-    'admin_tools.menu',
-    'admin_tools.dashboard',
+    #'admin_tools',     # for staticfiles in Django 1.3
+    #'admin_tools.theming',
+    #'admin_tools.menu',
+    #'admin_tools.dashboard',
 
     # Default Django apps:
     'django.contrib.auth',
@@ -219,7 +219,7 @@ THIRD_PARTY_APPS = (
     'mathfilters',
     'import_export',
     'requests_oauthlib',
-    'fluent_dashboard',
+    #'fluent_dashboard',
 
 )
 
@@ -342,6 +342,6 @@ WSGI_APPLICATION = '%s.wsgi.application' % SITE_NAME
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
-ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
-ADMIN_TOOLS_APP_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentAppIndexDashboard'
-ADMIN_TOOLS_MENU = 'fluent_dashboard.menu.FluentMenu'
+#ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
+#ADMIN_TOOLS_APP_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentAppIndexDashboard'
+#ADMIN_TOOLS_MENU = 'fluent_dashboard.menu.FluentMenu'
