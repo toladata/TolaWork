@@ -4,8 +4,11 @@
 {% block helpdesk %}
 {% load static from staticfiles %}
 {% with user|saved_queries as user_saved_queries_ %}
-
-<link rel='stylesheet' href='{% static "helpdesk/helpdesk-extend.css" %}' type='text/css' />
+<head>
+	<link rel='stylesheet' href='{% static "helpdesk/helpdesk-extend.css" %}' type='text/css' />
+	<script src="https://use.typekit.net/shi4wqr.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+</head>
 <div id='container2'>
     	<div id='header' class="row">
 	        <h1>{% block h1_title %}{% trans "TolaWork" %}{% endblock %}</h1>
