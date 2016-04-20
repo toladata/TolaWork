@@ -23,10 +23,6 @@
 			<td>{{ item.answer | urlize }}</td>
 		</tr>
 		<tr>
-			<td><strong>Votes</strong></td>
-			<td>{{ item.votes }}</td>
-		</tr>
-		<tr>
 			<td><strong>Recommendations</strong></td>
 			<td>{{ item.recommendations }}</td>
 		</tr>
@@ -36,8 +32,6 @@
 		</tr>
 	</tbody>
 </table>
-
-<p>{% blocktrans with item.category.title as category_title and item.category.get_absolute_url as category_url %}View <a href='{{ ../ }}'>other <em>{{ category_title }}</em> articles</a>, or continue <a href='../'>viewing other knowledgebase articles</a>.{% endblocktrans %}</p>
 
 <!-- Remove 'Feedback/voting' text from KB articles-->
 
