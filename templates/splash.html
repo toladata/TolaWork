@@ -38,7 +38,7 @@
 <!-- Remeber to put all the content you want on top of the slider below the slider code -->   
   <header id="header">
     <nav class="navbar navbar-default">
-      <div class="container-fluid col-md-12 col-sm-12 row">
+      <div class="container col-md-12 col-sm-12 row">
       <div class="col-md-1 col-sm-1"></div>
         <div class="navbar-header col-md-3 col-sm-3">
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
@@ -50,40 +50,37 @@
         </div>
         <div class="collapse navbar-collapse" id="myNavbar">
           <ul class="nav navbar-nav navbar-right">
-          <li><a id="GoToHome" href="{% url 'home' %}" > <font class="font5"><strong>TolaWork</strong></font></a></li>
-            <li><a id="GoToHome" href="{% url 'documentation' %}" > <font class="font5"><strong>About Us</strong></font></a></li>
-        <li><a id="GoToAbout" href="#" > <font class="font5"><strong>Contact us</strong> </font></a></li>
-        <li><a href="" type="button" data-toggle="dropdown"> <span class="glyphicon glyphicon-user font9"></span> <font class="font5"><strong> Log In</strong> </font><b class="caret font9"></b></a>
-         <ul class="dropdown-menu "> 
-             <li >
-               <div class=" col-md-12 col-sm-12">
-                  <h5 class="font10">Login via</h5>
-                  <div>
+            <li><a id="GoToHome" href="{% url 'home' %}" > <font class="font5">TolaWork</font></a></li>
+            <li><a id="GoToHome" href="{% url 'documentation' %}" > <font class="font5">About Us</font></a></li>
+            <li><a id="GoToAbout" href="#" > <font class="font5">Contact us</font></a></li>
+            <li><a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span class="glyphicon glyphicon-user font9"></span> <font class="font5"> Log In </font><b class="caret font9"></b></a>
+                <ul class="dropdown-menu"> 
+                 <li >
+                 <div class=" col-md-12 col-sm-12">
+                    <h5 class="font10">Login via</h5>
                       <a type="button" href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-info "><i class="fa fa-google"></i> Google</a>
+                    <h4 class="font10" >OR</h4>
+                    <h5 class="font10">Login with Tola Account</h5>
                   </div>
-                  <h4 class="font10" >OR</h4>
-                  <h5 class="font10">Login with Tola Account</h5>
-                </div>
-                <form class="form col-md-12 col-sm-12" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
-                    {% csrf_token %}
-                  <div class=" row">
-                      <div id="input_detail" class="col-md-12 col-sm-12">
-                        <input class="form-control" type="text" name="username" placeholder="Username"> 
-                      </div>
-                        
-                      <div id="input_detail" class="col-md-12 col-sm-12">
-                        <input class="form-control" type="password" name="password" placeholder="Password"> 
-                      </div>
-                      <div class="col-md-8 col-sm-9 row ">
-                        <div class=" modal-button">
-                          <button type="submit" class="btn btn-info btn-lg">Log In</button>
-                        </div> 
-                      </div>
+                  <form class="form col-md-12 col-sm-12" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
+                      {% csrf_token %}
+                    <div class=" row">
+                        <div id="input_detail" class="col-md-12 col-sm-12">
+                          <input class="form-control" type="text" name="username" placeholder="Username"> 
+                        </div>
+                        <div id="input_detail" class="col-md-12 col-sm-12">
+                          <input class="form-control" type="password" name="password" placeholder="Password"> 
+                        </div>
+                        <div class="col-md-8 col-sm-9 row ">
+                          <div class=" modal-button">
+                            <button type="submit" class="btn btn-info btn-lg">Log In</button>
+                          </div> 
+                        </div>
                     </div>
-                </form>
-             </li>
-           </ul>
-          </li>
+                  </form>
+               </li>
+             </ul>
+            </li>
           </ul>
         </div>
       </div>
