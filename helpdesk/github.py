@@ -10,15 +10,23 @@ except ImportError:
     from datetime import datetime as timezone
 
 
-def get_issue(repo,id):
-    repo = repo + "/issues/" + id
-    r = requests.get(repo)
-    if(r.ok):
-        issue = json.loads(r.text or r.content)
-    else:
-        issue = None
+def get_issue_status(repo,ticket):
+    #get github issue status and update ticket
 
-    return issue
+    repo = repo + "/issues/" + ticket.github_issue_number
+    r = requests.get(repo)
+
+    if int(r.status_code) == 200:
+        data = json.loads(r.content)
+        state = data['state']
+        if state == 'closed':
+            status = 4
+        else:
+            status = 2 #re-opened
+        update_ticket = Ticket.objects.get(id=ticket.id)
+        update_ticket.status = status
+        update_ticket.save()
+    return r.status_code
 
 
 def new_issue(repo,ticket):
