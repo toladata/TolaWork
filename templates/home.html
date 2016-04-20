@@ -144,25 +144,38 @@ $(function () {
 
 <div class="col-md-12">
   <div class="row tools">
-              <h3>Tola Tools</h3>
-              <div class="list-group col-md-6">
-                  <a href="https://tola-tables.mercycorps.org" class="active">
-                      <div class="tolatables"> <img src="{{ STATIC_URL }}img/tola-tables-icon-white.png" class="icon"> Tola Tables</div>
-                  </a>
-                  <li class="list-group-item">Latest Release: <a href="{{ tola_url }}"><span class="badge">{{ tola_number }}</span></a></li>
-                  <li class="list-group-item">Status: {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}</li>
-                  <li class="list-group-item"><img src="https://travis-ci.org/toladata/TolaTables.svg?branch=master"></li>
-              </div>
-              <div class="list-group  col-md-6">
-                  <a href="https://tola-activity.mercycorps.org" class=" active">
-                      <div class="tolaactivity"><img src="{{ STATIC_URL }}img/tola-activity-icon-white.png" class="icon"> Tola Activity</div>
-                  </a>
-                  <li class="list-group-item">Latest Release: <a href="{{ tola_activity_url }}"><span class="badge">{{ tola_activity_number }}</span></a></li>
-                  <li class="list-group-item">Status: {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}</li>
-                  <li class="list-group-item"><img src="https://travis-ci.org/toladata/TolaActivity.svg?branch=master"></li>
-              </div>         
+      <h3>Tola Tools</h3>
+      <div class="list-group col-md-4">
+          <a href="https://tola-tables.mercycorps.org" class="active">
+              <div class="tolatables"> <img src="{{ STATIC_URL }}img/tola-tables-icon-white.png" class="icon"> Tola Tables</div>
+          </a>
+          <li class="list-group-item">Latest Release: <a href="{{ tola_url }}"><span class="badge">{{ tola_number }}</span></a></li>
+          <li class="list-group-item">Status: {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}</li>
+          <li class="list-group-item"><img src="https://travis-ci.org/toladata/TolaTables.svg?branch=master"></li>
+      </div>
+      <div class="list-group  col-md-4">
+          <a href="https://tola-activity.mercycorps.org" class=" active">
+              <div class="tolaactivity"><img src="{{ STATIC_URL }}img/tola-activity-icon-white.png" class="icon"> Tola Activity</div>
+          </a>
+          <li class="list-group-item">Latest Release: <a href="{{ tola_activity_url }}"><span class="badge">{{ tola_activity_number }}</span></a></li>
+          <li class="list-group-item">Status: {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}</li>
+          <li class="list-group-item"><img src="https://travis-ci.org/toladata/TolaActivity.svg?branch=master"></li>
+      </div>
+      <div class="list-group  col-md-4">
+          <div class="ona">Your Mercy Corps' ONA Account</div>
+          <form class="row" id="ona_submit" method="post" action="">
+              {% csrf_token %}
+              <br/>ONA username: <input id="ona_username" class="form-control" type="text" name="ona_username" placeholder="Ona username ">
+              You are currently signed into Mercy Corp's <b>'COUNTRY'</b> TolaData<input class='btn btn-success btn-sm pull-right' type='submit' value='Submit'>
+          </form>
+      </div>
+  </div>
+
+
+  </div>
 </div>
 </div>
+
 </div>
 
 {% endblock content %}
