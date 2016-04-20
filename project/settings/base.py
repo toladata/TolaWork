@@ -149,6 +149,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
+    'admin_tools.template_loaders.Loader',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
@@ -188,6 +189,12 @@ ROOT_URLCONF = '%s.urls' % SITE_NAME
 
 ########## APP CONFIGURATION
 DJANGO_APPS = (
+    #django-admin-tools
+    #'admin_tools',     # for staticfiles in Django 1.3
+    #'admin_tools.theming',
+    #'admin_tools.menu',
+    #'admin_tools.dashboard',
+
     # Default Django apps:
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -212,6 +219,8 @@ THIRD_PARTY_APPS = (
     'mathfilters',
     'import_export',
     'requests_oauthlib',
+    #'fluent_dashboard',
+
 )
 
 # Apps specific for this project go here.
@@ -332,3 +341,7 @@ WSGI_APPLICATION = '%s.wsgi.application' % SITE_NAME
 ########## END WSGI CONFIGURATION
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+#ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
+#ADMIN_TOOLS_APP_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentAppIndexDashboard'
+#ADMIN_TOOLS_MENU = 'fluent_dashboard.menu.FluentMenu'
