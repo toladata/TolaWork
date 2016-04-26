@@ -10,15 +10,41 @@ except ImportError:
     from datetime import datetime as timezone
 
 
-def get_issue(repo,id):
-    repo = repo + "/issues/" + id
-    r = requests.get(repo)
-    if(r.ok):
-        issue = json.loads(r.text or r.content)
-    else:
-        issue = None
+def get_issue_status(repo,ticket):
+    #get github issue status and update ticket
 
-    return issue
+    repo = repo + "/issues/" + ticket.github_issue_number
+    r = requests.get(repo)
+
+    if int(r.status_code) == 200:
+        data = json.loads(r.content)
+        title = data['title']
+        closed_by = data['closed_by']
+        person = closed_by['login']
+
+        updated_date = data['updated_at']
+
+        state = data['state']
+        if state == 'closed':
+            status = 4
+            state_txt = 'Closed'
+        else:
+            status = 2 #re-opened
+            state_txt = 'Re-opened'
+
+        comments = '[GitHub Sync] Ticket has been ' + str(state_txt) + ' in GitHub by ' + str(person)
+
+        update_ticket = Ticket.objects.get(id=ticket.id)
+        current_status = update_ticket.status
+
+        if not int(current_status) == int(status):
+            new_followup = FollowUp(title=title, date=updated_date, ticket_id=ticket.id, comment=comments, public=1, new_status=status, )
+            new_followup.save()
+
+        update_ticket.status = status
+        update_ticket.save()
+
+    return r.status_code
 
 
 def new_issue(repo,ticket):
@@ -75,7 +101,7 @@ def add_comments(comment,repo,ticket):
     print 'comment Repo:' + repo
 
 def queue_repo(ticket):
-    if str(ticket.queue) == "Tola Tables":
+    if str(ticket.queue) == "Tola Help":
         repo = settings.GITHUB_REPO_1
     else:
         repo = settings.GITHUB_REPO_2
