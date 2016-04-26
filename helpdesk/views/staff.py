@@ -43,8 +43,9 @@ import json
 from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
-from helpdesk.github import new_issue, get_issue, add_comments, open_issue, close_issue, queue_repo
+from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
+from helpdesk.postfix import close_notify, open_notify, reopen_notify, resolve_notify, duplicate_notify
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -72,18 +73,7 @@ def post_comment(request, ticket_id):
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
-
-                open_template = get_object_or_404(EmailTemplate, template_name='open')
-                m_subject = open_template.heading
-                m_body = open_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                open_notify(ticket,comment)
 
             elif int(status) == 2:
                 status_text = 'Re-Opened'
@@ -101,35 +91,11 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem re-opening the ticket in GitHub')
                     print response
-
-                #send email
-                reopen_template = get_object_or_404(EmailTemplate, template_name='reopen')
-                m_subject = reopen_template.heading
-                m_body = reopen_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                reopen_notify(ticket,comment)
 
             elif int(status) == 3:
                 status_text = 'Resolved'
-
-                resolved_template = get_object_or_404(EmailTemplate, template_name='resolved')
-                m_subject = resolved_template.heading
-                m_body = resolved_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                qa_lead = 'joash@open.build'
-                receivers = [assigned_user, submitter,qa_lead ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                resolve_notify(ticket,comment)
 
             elif int(status) == 4:
                 status_text = 'Closed'
@@ -147,32 +113,12 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
                     print response
-                #send email
-                closed_template = get_object_or_404(EmailTemplate, template_name='closed')
-                m_subject = closed_template.heading
-                m_body = closed_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
+                close_notify(ticket,comment)
 
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
             elif int(status) == 5:
                 status_text = 'Duplicate'
-                duplicate_template = get_object_or_404(EmailTemplate, template_name='duplicate')
-                m_subject = duplicate_template.heading
-                m_body = duplicate_template.html
-                sender = request.user.email.upper() # person adding comment or changing ticket status
-                if ticket.assigned_to:
-                    assigned_user = User.objects.get(id=ticket.assigned_to.id).email.upper() #get 'assigned user'
-                else:
-                    assigned_user = request.user.email.upper()
-                submitter = request.POST.get('submitter_email',sender) #person submitted ticket
-                receivers = [assigned_user, submitter ] #email addresses of 'assigned user' and 'submitter'
-                send_mail(m_subject, m_body, sender, receivers,fail_silently=False)
+                duplicate_notify(ticket,comment)
+
             else:
                 status_text = 'Not a status'
 
@@ -439,6 +385,22 @@ def view_ticket(request, ticket_id):
     if not (request.user.is_authenticated() and request.user.is_active):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    if ticket.github_issue_id:
+        repo = queue_repo(ticket)
+        response = get_issue_status(repo,ticket)
+        if response == 200:
+            #synced status wth github
+            ticket_state = get_object_or_404(Ticket, id=ticket_id)
+            status = ticket_state.status
+            if status == 4:
+                state = 'Closed'
+            else:
+                state = 'Open'
+            print 'Ticket status in Github is: [' + str(state) + ']'
+        else:
+            print 'Check ticket status in GitHub'
+        print response
+    ticket_state = get_object_or_404(Ticket, id=ticket_id)
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
 
@@ -447,23 +409,23 @@ def view_ticket(request, ticket_id):
         request.POST = {
             'owner': request.user.id,
             'public': 1,
-            'title': ticket.title,
+            'title': ticket_state.title,
             'comment': ''
         }
         return update_ticket(request, ticket_id)
 
     if 'subscribe' in request.GET:
         # Allow the user to subscribe him/herself to the ticket whilst viewing it.
-        ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
+        ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
         if SHOW_SUBSCRIBE:
-            subscribe_staff_member_to_ticket(ticket, request.user)
-            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+            subscribe_staff_member_to_ticket(ticket_state, request.user)
+            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_state.id]))
 
-    if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
-        if not ticket.assigned_to:
+    if 'close' in request.GET and ticket_state.status == Ticket.RESOLVED_STATUS:
+        if not ticket_state.assigned_to:
             owner = 0
         else:
-            owner = ticket.assigned_to.id
+            owner = ticket_state.assigned_to.id
 
         # Trick the update_ticket() view into thinking it's being called with
         # a valid POST.
@@ -471,7 +433,7 @@ def view_ticket(request, ticket_id):
             'new_status': Ticket.CLOSED_STATUS,
             'public': 1,
             'owner': owner,
-            'title': ticket.title,
+            'title': ticket_state.title,
             'comment': _('Accepted resolution and closed ticket'),
             }
 
@@ -481,13 +443,13 @@ def view_ticket(request, ticket_id):
 
 
     # TODO: shouldn't this template get a form to begin with?
-    form = TicketForm(initial={'due_date':ticket.due_date})
+    form = TicketForm(initial={'due_date':ticket_state.due_date})
 
-    ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
+    ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
-            'ticket': ticket,
+            'ticket': ticket_state,
             'form': form,
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
@@ -495,6 +457,7 @@ def view_ticket(request, ticket_id):
             'ticketcc_string': ticketcc_string,
             'SHOW_SUBSCRIBE': SHOW_SUBSCRIBE,
         }))
+
 def return_ticketccstring_and_show_subscribe(user, ticket):
     ''' used in view_ticket() and followup_edit()'''
     # create the ticketcc_string and check whether current user is already
