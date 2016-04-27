@@ -20,7 +20,10 @@ def get_issue_status(repo,ticket):
         data = json.loads(r.content)
         title = data['title']
         closed_by = data['closed_by']
-        person = closed_by['login']
+        if closed_by == 'None':
+            person = 'Tolabot'
+        else:
+            person = closed_by['login']
 
         updated_date = data['updated_at']
 
