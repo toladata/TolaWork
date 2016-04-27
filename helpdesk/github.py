@@ -101,7 +101,7 @@ def add_comments(comment,repo,ticket):
     print 'comment Repo:' + repo
 
 def queue_repo(ticket):
-    if str(ticket.queue) == "Tola Help":
+    if str(ticket.queue) == "Tola Tables":
         repo = settings.GITHUB_REPO_1
     else:
         repo = settings.GITHUB_REPO_2
