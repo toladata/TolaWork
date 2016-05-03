@@ -19,8 +19,8 @@ def get_issue_status(repo,ticket):
     if int(r.status_code) == 200:
         data = json.loads(r.content)
         title = data['title']
-        closed_by = data['closed_by']
-        person = closed_by['login']
+        #closed_by = data['closed_by']
+        #person = closed_by['login']
 
         updated_date = data['updated_at']
 
@@ -32,7 +32,7 @@ def get_issue_status(repo,ticket):
             status = 2 #re-opened
             state_txt = 'Re-opened'
 
-        comments = '[GitHub Sync] Ticket has been ' + str(state_txt) + ' in GitHub by ' + str(person)
+        comments = '[GitHub Sync] Ticket has been ' + str(state_txt) + ' in GitHub'
 
         update_ticket = Ticket.objects.get(id=ticket.id)
         current_status = update_ticket.status
@@ -101,7 +101,7 @@ def add_comments(comment,repo,ticket):
     print 'comment Repo:' + repo
 
 def queue_repo(ticket):
-    if str(ticket.queue) == "Tola Help":
+    if str(ticket.queue) == "Tola Tables":
         repo = settings.GITHUB_REPO_1
     else:
         repo = settings.GITHUB_REPO_2
