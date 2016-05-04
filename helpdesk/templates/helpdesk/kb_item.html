@@ -1,8 +1,8 @@
 {% extends "helpdesk/kb_base.html" %}{% load i18n %}
 
 {% block helpdesk_body %}
-<h2>{% blocktrans with item.title as item %}Knowledgebase: {{ item }}{% endblocktrans %}</h2>
-
+<br>
+<p><a href='{% url 'helpdesk_kb_index' %}'> Knowledgebase</a>>><a href='{{ item.category.get_absolute_url }}'>{{ item.category.title }}</a>>><strong> {{ item.title }}</strong></p><br>
 <table class="table table-hover table-bordered table-striped">
 	<caption>{{ item.title }}</caption>
 	<tbody>
