@@ -220,6 +220,7 @@ THIRD_PARTY_APPS = (
     'import_export',
     'requests_oauthlib',
     #'fluent_dashboard',
+    'tinymce',
 
 )
 
