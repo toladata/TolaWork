@@ -1,0 +1,324 @@
+#App Specific CSS
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+    position: relative;
+    min-height: 100%;
+}
+body {
+    /* Margin bottom by footer height */
+    height: 100%;
+    font-size: 15px;
+    margin-bottom: 60px;
+}
+
+#footer {
+    position: fixed;
+    bottom: 0px;
+     /* Set the fixed height of the footer here */
+    border-top: 1px solid #f5f5f5;
+    background-color: #e5e5e5;
+    vertical-align: top;
+    z-index: 100;
+}
+
+.login-button
+{
+    margin-top: 10px;
+}
+
+
+#footer > .container {
+    padding: 10px;
+
+}
+
+body > .container {
+    height: 100%;
+    margin-top: 40px;
+}
+
+.row {
+margin-left: 0px;
+margin-right: 0px
+}
+
+/* Login buttons for Social */
+.social-buttons{
+    margin:12px 0
+}
+
+.btn-fb{
+    color: #fff;
+    background-color:#3b5998;
+}
+.btn-fb:hover{
+    color: #fff;
+    background-color:#496ebc
+}
+.btn-tw{
+    color: #fff;
+    background-color:#55acee;
+}
+.btn-tw:hover{
+    color: #fff;
+    background-color:#59b5fa;
+}
+.btn-go{
+    color: #fff;
+    background-color:#55acee;
+}
+.btn-go:hover{
+    color: #fff;
+    background-color:#59b5fa;
+}
+
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+
+.btn-frozen {
+    color: #fff;
+    background-color: #808080;
+    border-color: #808080;
+}
+
+.date-badge {
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #000000;
+    line-height: 1;
+    vertical-align: baseline;
+    white-space: nowrap;
+    text-align: center;
+    background-color: lightgoldenrodyellow;
+    border-radius: 5px
+}
+
+.jumbotron.dashboard {
+    padding-top: 5px;
+    padding-bottom: 16px;
+    margin-bottom: 30px;
+}
+
+.btn-group.align-right {
+    float: right;
+}
+
+.ajaxLoader{
+    display: none;
+    min-width: 10px;
+    padding: 3px 7px;
+    vertical-align: baseline;
+    white-space: nowrap;
+    text-align: center;
+    background-color: lightgoldenrodyellow;
+    border-radius: 2px
+}
+
+.ticket-query-directive{
+    min-height: 45px;
+    padding-top: 15px;
+    border-radius: 10px;
+    background-color: #DCDCDC;
+    text-align: center;
+    margin-bottom: 10px;
+    padding-bottom: 15px;
+}
+/*//fonts*/
+.font1{
+    size: 4em;  
+}
+.font4
+{
+    color:#ff8000;
+    font-weight: bold;
+}
+.font5
+{
+    color:#fff;
+    font-size: 15px;
+}
+.font7
+{
+    font-size: 23px;
+}
+
+
+
+/*//end of fonts*/
+.collapselist
+{
+    padding: 5px;
+    margin-bottom: 10px;
+    margin-top: 20px;
+}
+
+.knowledge_panel
+{
+    
+    border:1px solid#eee;
+    border-radius: 10px;
+    padding: 10px;
+}
+.knowledge_main
+{
+    
+    border:1px solid#eee;
+    border-radius: 20px;
+}
+.knowledge_head
+{
+    background-color: #ff9933;
+}
+.panel-footer
+{
+    background-color: #ff9933;
+}
+
+/*//home page*/
+.main_home
+{
+    background-color: #FAFAFA;
+    border-radius: 5px;
+    /*padding-bottom:10px;*/
+
+}
+.main_home table a 
+{
+    color:#4db3d0;
+}
+.main_home
+{
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+.minor_home
+{
+    background-color: #FAFAFA;
+    border-radius: 5px;
+    padding: 0px;
+    
+}
+.home_cover
+{
+    position: relative;
+    border:1px solid#eee;
+    overflow: hidden;
+    padding: 5px;
+    border-radius: 5px;
+
+}
+.home_button
+{
+    background-color: #b20838;
+    color:#fff;
+}
+.pie 
+{
+    background-color: #FAFAFA;
+}
+.panel_top
+{
+    background-color: #ff8000;
+}
+.homenav
+{
+    background-color: #b20838;
+}
+.glyph
+{
+    color:#fff;
+    font-size: 25px;
+}
+.navbar-collapse
+{
+    border:none;
+}
+.homenav ul li a
+{
+    color:#fff;
+}
+.center
+{
+    margin-bottom: 5px;
+}
+.tools
+{
+    margin-top: 8px;
+}
+.homenav>li>a:hover
+{
+    background-color: #800000;
+}
+.homenav>li>a:active
+{
+    background-color: #800000;
+}
+.homenav>ul>li>a:hover
+{
+    background-color: #800000;
+}
+.homenav>ul>li>a:active
+{
+    background-color: #800000;
+}
+.container
+{
+    width:95.5%;
+    margin-left: 2%;
+}
+
+/*//pie chart*/
+.pie_container
+{
+    min-width: 310px; 
+    height: 300px; 
+    max-width: 600px; 
+    margin: 0 auto;
+}
+.tolatables
+{
+    background-color: #4db3d0;
+    color:#fff;
+    padding:10px;
+    padding-left: 15px;
+}
+.tolaactivity
+{
+    background-color: #e89424;
+    color:#fff;
+    padding:10px;
+    padding-left: 15px;
+}
+.home-paneltitle
+{
+    background-color: #4db3d0;
+}
+.home-panel
+{
+    border: 1px solid#4db3d0;
+}
+.form_register_btn
+{
+    margin-left: 16px;
+    margin-top: 30px;
+}
+.form-field
+{
+    margin-bottom: 10px;
+}
+.icon
+{
+    height: 15px;
+    width:15px;
+}
+.splash
+{
+    padding: 3px;
+    padding-left: 10px;
+}
