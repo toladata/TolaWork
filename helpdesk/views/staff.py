@@ -191,7 +191,7 @@ def dashboard(request):
     with options for them to 'Take' ownership of said tickets.
     """
     # open & reopened tickets, assigned to current user
-    tickets = Ticket.objects.select_related('queue').filter(
+    tickets = Ticket.objects.all().select_related('queue').filter(
             assigned_to=request.user,
         ).exclude(
             status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
