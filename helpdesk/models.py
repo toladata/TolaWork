@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 from django.db import models
+from tinymce.models import HTMLField
+from tinymce.widgets import TinyMCE
 from django.contrib import admin
 from django.conf import settings
 from datetime import datetime
@@ -62,8 +64,8 @@ class FeedbackAdmin(admin.ModelAdmin):
 
 # FAQ
 class FAQ(models.Model):
-    question = models.TextField(null=True, blank=True)
-    answer = models.TextField(null=True, blank=True)
+    question = HTMLField(null=True, blank=True)
+    answer = HTMLField(null=True, blank=True)
     create_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -79,9 +81,16 @@ class FAQ(models.Model):
 
 
 class FAQAdmin(admin.ModelAdmin):
+    formfield_overrides = {
+        models.TextField: {'widget': TinyMCE(attrs={'cols': 80, 'rows': 20}, )},
+    }
     list_display = ( 'question', 'answer', 'create_date',)
     display = 'FAQ'
+    
+    def question(self, obj):
+        return u'%s' % obj.question
 
+    question.allow_tags = True
 
 class Queue(models.Model):
     """
@@ -764,10 +773,10 @@ class KBItem(models.Model):
         _('Title'),
         max_length=100,
         )
-    question = models.TextField(
+    question = HTMLField(
         _('Question'),
         )
-    answer = models.TextField(
+    answer = HTMLField(
         _('Answer'),
         )
     votes = models.IntegerField(
@@ -810,6 +819,12 @@ class KBItem(models.Model):
     def get_absolute_url(self):
         return ('helpdesk_kb_item', (self.id,))
     get_absolute_url = models.permalink(get_absolute_url)
+
+    def question(self, obj):
+        return u'%s' % obj.kbitem
+
+    question.allow_tags = True
+
 
 
 class SavedSearch(models.Model):
