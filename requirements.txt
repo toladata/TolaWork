@@ -45,3 +45,4 @@ python-social-auth==0.2.12
 gunicorn==19.3.0
 MySQL-python==1.2.5
 wheel==0.29.0
+django-tinymce

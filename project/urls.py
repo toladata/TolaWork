@@ -48,6 +48,9 @@ urlpatterns = patterns('',
     #app include of activitydb urls
     url(r'^helpdesk/', include('helpdesk.urls')),
 
+    #tinymce formatting
+    url(r'^tinymce/', include('tinymce.urls')),
+
 
 
 )   + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

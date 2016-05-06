@@ -208,7 +208,7 @@ def dashboard(request):
                 repo = settings.GITHUB_REPO_2
 
             # getstatus from github
-            github_status = get_issue(repo,ticket.github_issue_number)
+            github_status = get_issue_status(repo,ticket.github_issue_number)
 
             #if status has been updated in github update here
             if github_status:
@@ -357,7 +357,7 @@ def followup_edit(request, ticket_id, followup_id):
                     repo = settings.GITHUB_REPO_1
                 else:
                     repo = settings.GITHUB_REPO_2
-                update_comments(repo, ticket, new_followup)
+                add_comments(repo, ticket, new_followup)
             # get list of old attachments & link them to new_followup
             attachments = Attachment.objects.filter(followup = followup)
             for attachment in attachments:
@@ -569,7 +569,7 @@ def update_ticket(request, ticket_id, public=False):
             repo = settings.GITHUB_REPO_1
         else:
             repo = settings.GITHUB_REPO_2
-        update_comments(repo, ticket, comment, request.user.email)
+        add_comments(repo, ticket, comment, request.user.email)
 
     if request.user.is_staff:
         f.user = request.user
