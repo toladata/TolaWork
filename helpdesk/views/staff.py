@@ -191,15 +191,18 @@ def dashboard(request):
     with options for them to 'Take' ownership of said tickets.
     """
     # open & reopened tickets, assigned to current user
-    tickets = Ticket.objects.all().select_related('queue').filter(
+    tickets = Ticket.objects.select_related('queue').filter(
             assigned_to=request.user,
         ).exclude(
             status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
         )
-
+    
+    """
+    Update github tickets via status
+    """
+    github_tickets = Ticket.objects.all().exclude(github_issue_number__isnull=True)
     # check status in github
-    for ticket in tickets:
-
+    for ticket in github_tickets:
         #if there is a github issue check it's status in github
         if ticket.github_issue_number:
             if str(ticket.queue) == "Tola Tables":
@@ -208,18 +211,7 @@ def dashboard(request):
                 repo = settings.GITHUB_REPO_2
 
             # getstatus from github
-            github_status = get_issue_status(repo,ticket.github_issue_number)
-
-            #if status has been updated in github update here
-            if github_status:
-                if github_status['state'] == "open" and ticket.status != 1:
-                    Ticket.objects.filter(id=ticket.id).update(status=1)
-                elif github_status['state'] == "closed" and ticket.status != 3:
-                    Ticket.objects.filter(id=ticket.id).update(status=3)
-
-            # update issue in github with local changes and comments
-            #update_issue(repo,ticket)
-
+            github_status = get_issue_status(repo,ticket)
 
     # closed & resolved tickets, assigned to current user
     tickets_closed_resolved =  Ticket.objects.select_related('queue').filter(

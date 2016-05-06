@@ -15,7 +15,8 @@ def get_issue_status(repo,ticket):
 
     repo = repo + "/issues/" + ticket.github_issue_number
     r = requests.get(repo)
-
+    status = None	
+    
     if int(r.status_code) == 200:
         data = json.loads(r.content)
         title = data['title']
@@ -44,7 +45,7 @@ def get_issue_status(repo,ticket):
         update_ticket.status = status
         update_ticket.save()
 
-    return r.status_code
+    return status
 
 
 def new_issue(repo,ticket):
