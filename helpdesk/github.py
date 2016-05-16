@@ -30,10 +30,10 @@ def get_issue_status(repo,ticket):
             status = 4
             state_txt = 'Closed'
         else:
-            status = 2 #re-opened
-            state_txt = 'Re-opened'
+            status = 2 #open
+            state_txt = 'Open'
 
-        comments = '[GitHub Sync] Ticket has been ' + str(state_txt) + ' in GitHub'
+        comments = '[GitHub Sync] Ticket is ' + str(state_txt) + ' in GitHub'
 
         update_ticket = Ticket.objects.get(id=ticket.id)
         current_status = update_ticket.status
@@ -126,12 +126,12 @@ def open_issue(repo,ticket):
     payload = {}
     payload['title'] = ticket.title
     payload['state'] = "open"
-    payload['body'] =  "Re-Opened"
+    payload['body'] = "Opened"
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues/" + ticket.github_issue_number
     header = {'Authorization': 'token %s' % token}
     r = requests.patch(repo,data=json.dumps(payload),headers=header)
-    print 'Re-open: ' + repo
+    print 'open: ' + repo
     return r.status_code
 
 def latest_release(repo):

@@ -1302,11 +1302,13 @@ edit_ticket = staff_member_required(edit_ticket)
 
 
 def create_ticket(request):
+    #user authentication
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
 
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     messages.add_message(request, messages.SUCCESS, 'We recommend that you search for your issue or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!')
+
     if request.method == 'POST':
 
         if request.user.is_staff:
@@ -1362,8 +1364,6 @@ def create_ticket(request):
             initial_data['submitter_email'] = request.user.email
         if 'queue' in request.GET:
             initial_data['queue'] = request.GET['queue']
-
-
 
         if request.user.is_staff:
             form = TicketForm(initial=initial_data)
