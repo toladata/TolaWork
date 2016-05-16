@@ -30,7 +30,7 @@ def get_issue_status(repo,ticket):
             status = 4
             state_txt = 'Closed'
         else:
-            status = 2 #open
+            status = 1 #open
             state_txt = 'Open'
 
         comments = '[GitHub Sync] Ticket is ' + str(state_txt) + ' in GitHub'
