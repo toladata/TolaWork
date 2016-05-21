@@ -432,7 +432,7 @@ def view_ticket(request, ticket_id):
         return update_ticket(request, ticket_id)
 
     users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-
+    q = Queue.objects.all()
 
     # TODO: shouldn't this template get a form to begin with?
     form = TicketForm(initial={'due_date':ticket_state.due_date})
@@ -445,6 +445,8 @@ def view_ticket(request, ticket_id):
             'form': form,
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
+            'ticket_type': Ticket.TICKET_TYPE,
+            'ticket_queue': q,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
             'ticketcc_string': ticketcc_string,
             'SHOW_SUBSCRIBE': SHOW_SUBSCRIBE,

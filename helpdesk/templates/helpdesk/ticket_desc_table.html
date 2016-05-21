@@ -8,15 +8,80 @@
             <h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
             <span class='ticket_toolbar'>
                 {% if request.user.is_staff %}
-                <a href='{% url 'helpdesk_edit' ticket.id %}' class="ticket-edit"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
-    |           <a href='{% url 'helpdesk_delete' ticket.id %}' class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+                <a href='{% url "helpdesk_edit" ticket.id %}' class="ticket-edit"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
+    |            <a href='{% url "helpdesk_delete" ticket.id %}' class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+
                 {% endif %}
                 {% if ticket.on_hold %}
-                    | <a href='{% url 'helpdesk_unhold' ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>
+                    | <a href='{% url "helpdesk_unhold" ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>
                 {% else %}
-                    |<a href='{% url 'helpdesk_hold' ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>
+                    |<a href='{% url "helpdesk_hold" ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>
                 {% endif %}
             </span>
+
+            <div>
+                <div class="panel-group" id="dynamicForm">
+                <div class="panel home-panel">
+                  <div class="panel-heading home-paneltitle">
+                    <h4 class="panel-title">
+                      <a data-toggle="collapse" data-parent="#dynamicForm" href="#dynamicEdit">
+                      <font class="font5"><b><span class="glyphicon glyphicon-cog"></span></b>  Edit Ticket </font></a>
+                    </h4>
+                  </div>
+                  <div id="dynamicEdit" class="panel-collapse collapse">
+                    <div class="panel-body">
+                      <div class="panel-body">
+                        <p>{% blocktrans %}<strong>No new details should be entered when editing a ticket. </strong>This form should only be used to fix incorrect details on a ticket or clean up the submission.{% endblocktrans %}</p>
+
+                        <!-- TW#90 - add a dynamic edit form -->
+                          <form method='post' action='' enctype='multipart/form-data' class="form-horizontal">
+                            <table class="table table-hover table-striped">
+                                <tr>
+                                <th>{% trans "Title:" %}</th>
+                                <td colspan="7"><input type='text' name='title' id='id_title' size='95' value='{{ ticket.title|escape }}' /></td>
+                                </tr>
+                                <tr>
+                                    <th>{% trans "Queue:" %}</th>
+                                    <td><select id='id_queue' name='queue'>{% for q in ticket_queue %}<option value='{{ q.id }}'{% ifequal q.id ticket.queue_id %} selected='selected'{% endifequal %}>{{ q }}</option>{% endfor %}</select></td>
+                                    <th>{% trans "Type of Ticket:" %}</th>
+                                    <td><select id='id_type' name='type'>{% for tt in ticket_type %}<option value='{{ tt.0 }}'{% ifequal tt.0 ticket.type %} selected='selected'{% endifequal %}>{{ tt.1 }}</option>{% endfor %}</select></td>
+
+                                    <th>{% trans "Case Owner:" %}</th>
+                                    <td><select id='id_owner' name='owner'><option value='0'>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select></td>
+                                    <th>{% trans "Priority:" %}</th>
+                                    <td><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></td>
+
+                                </tr>
+                                <tr>
+                                <th>{% trans "Error Message:" %}</th>
+                                <td colspan="3"><textarea name="comment" rows="4" cols="40"> {{ ticket.error_msg|escape }} </textarea></td>
+                                    <th>{% trans "Description of Issue:" %}</th>
+                                    <td colspan="3"><textarea name="comment" rows="4" cols="40"> {{ ticket.description|escape }} </textarea></td>
+                                </tr>
+
+
+                                <tr>
+                                    <th>{% trans "Due Date:" %}</th>
+                                    <td colspan="3">{{ form.due_date }}</td>
+                                    <th>{% trans "Submitter Email:" %}</th>
+                                    <td colspan="3"><input type='text' name='title' id='id_email' size='30' value='{{ ticket.submitter_email|escape }}' /></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="8"><input class="btn btn-primary" type='submit' value='{% trans "Update This Ticket" %}' /></td>
+
+                                </tr>
+                            </table>
+
+                              {% csrf_token %}
+
+                          </form>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
         </td>
     </tr>
     <tr>
