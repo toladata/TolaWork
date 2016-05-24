@@ -1283,25 +1283,29 @@ allow non-admin users to use saved_queries
 ticket_list = staff_member_required(ticket_list)
 """
 
-
-def edit_ticket(request, ticket_id):
+def ticket_edit(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
-        form = EditTicketForm(request.POST, instance=ticket)
+
+        form = CommentTicketForm(request.POST)
+
         if form.is_valid():
+            ticket_id = ticket.id
+            title = request.POST.get('title')
+            queue = request.POST.get('queue')
+            type = request.POST.get('type')
+            owner = request.POST.get('owner')
 
-            ticket = form.save()
-
-            return HttpResponseRedirect(ticket.get_absolute_url())
-    else:
-        form = EditTicketForm(instance=ticket)
-
-    return render_to_response('helpdesk/edit_ticket.html',
-        RequestContext(request, {
-            'form': form,
-        }))
-edit_ticket = staff_member_required(edit_ticket)
-
+            priority = request.POST.get('priority')
+            error_msg = request.POST.get('error_msg')
+            description = request.POST.get('description')
+            email = request.POST.get('email')
+            due_date = ticket.due_date
+            update_comments = Ticket(id=ticket_id, title=title, description=description, assigned_to_id=owner,
+                                     submitter_email=email, priority=priority, due_date=due_date,
+                                     queue_id=queue, type=type, error_msg=error_msg)
+            update_comments.save(update_fields=['title','queue_id','type','assigned_to_id','error_msg','priority','description','submitter_email', 'due_date'])
+    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
 def create_ticket(request):
     #user authentication
