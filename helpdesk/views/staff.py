@@ -380,6 +380,7 @@ def view_ticket(request, ticket_id):
     if ticket.github_issue_id:
         repo = queue_repo(ticket)
         response = get_issue_status(repo,ticket)
+
         if response == 200:
             #synced status wth github
             ticket_state = get_object_or_404(Ticket, id=ticket_id)
@@ -391,7 +392,7 @@ def view_ticket(request, ticket_id):
             print 'Ticket status in Github is: [' + str(state) + ']'
         else:
             print 'Check ticket status in GitHub'
-        print response
+
     ticket_state = get_object_or_404(Ticket, id=ticket_id)
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
@@ -415,7 +416,7 @@ def view_ticket(request, ticket_id):
 
     if 'close' in request.GET and ticket_state.status == Ticket.RESOLVED_STATUS:
         if not ticket_state.assigned_to:
-            owner = 0
+            owner = ''
         else:
             owner = ticket_state.assigned_to.id
 
@@ -1286,16 +1287,17 @@ ticket_list = staff_member_required(ticket_list)
 def ticket_edit(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
-
         form = CommentTicketForm(request.POST)
-
         if form.is_valid():
             ticket_id = ticket.id
             title = request.POST.get('title')
-            queue = request.POST.get('queue')
+            if ticket.github_issue_id:
+                queue = ticket.queue_id
+            else:
+                queue = request.POST.get('queue')
+
             type = request.POST.get('type')
             owner = request.POST.get('owner')
-
             priority = request.POST.get('priority')
             error_msg = request.POST.get('error_msg')
             description = request.POST.get('description')

@@ -16,9 +16,10 @@ def get_issue_status(repo,ticket):
     repo = repo + "/issues/" + ticket.github_issue_number
     r = requests.get(repo)
     status = None	
-    
+
     if int(r.status_code) == 200:
         data = json.loads(r.content)
+
         title = data['title']
         #closed_by = data['closed_by']
         #person = closed_by['login']
@@ -46,7 +47,6 @@ def get_issue_status(repo,ticket):
         update_ticket.save()
 
     return status
-
 
 def new_issue(repo,ticket):
 
@@ -106,7 +106,7 @@ def queue_repo(ticket):
         repo = settings.GITHUB_REPO_1
     else:
         repo = settings.GITHUB_REPO_2
-    print "Queue Repo: " + repo
+
     return repo
 
 def close_issue(repo,ticket):
