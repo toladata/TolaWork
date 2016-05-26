@@ -293,7 +293,15 @@ class Queue(models.Model):
                 self.email_box_port = 110
         super(Queue, self).save(*args, **kwargs)
 
+#Tags
+class Tag(models.Model):
+    name = models.CharField(max_length=100)
 
+    class Meta:
+        verbose_name_plural = 'tags'
+
+    def __unicode__(self):
+        return self.name
 
 class Ticket(models.Model):
     """
@@ -364,6 +372,7 @@ class Ticket(models.Model):
     github_issue_id = models.CharField(max_length=255, null=True, blank=True)
     type = models.IntegerField(_('Ticket Type'), choices=TICKET_TYPE, default=PROBLEM, help_text="Type of Ticket")
     votes = models.IntegerField(default=0)
+    tags = models.ManyToManyField(Tag, related_name='+')
 
 
     def _get_assigned_to(self):
@@ -472,6 +481,7 @@ class Ticket(models.Model):
         ordering = ('id',)
         verbose_name = _('Ticket')
         verbose_name_plural = _('Tickets')
+        managed = False
 
     def __unicode__(self):
         return u'%s %s' % (self.id, self.title)

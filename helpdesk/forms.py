@@ -5,6 +5,8 @@ except ImportError:
 
 from crispy_forms.helper import FormHelper
 from django import forms
+from easy_select2 import Select2Multiple
+from easy_select2 import select2_modelform
 from crispy_forms.layout import *
 from crispy_forms.bootstrap import *
 from crispy_forms.layout import Layout, Submit, Reset
@@ -24,7 +26,7 @@ except ImportError:
     from datetime import datetime as timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency
+from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency,Tag
 
 class CommentTicketForm(forms.ModelForm):
     class Meta:
@@ -161,6 +163,9 @@ class TicketForm(forms.Form):
         required=False,
         label=_('Due on'),
         )
+    # tags = forms.ModelMultipleChoiceField(
+    #     queryset=Tag.objects.all(),
+    #     )
 
     def clean_due_date(self):
         data = self.cleaned_data['due_date']

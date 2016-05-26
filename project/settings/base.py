@@ -221,6 +221,7 @@ THIRD_PARTY_APPS = (
     'requests_oauthlib',
     #'fluent_dashboard',
     'tinymce',
+    'easy_select2',
 
 )
 

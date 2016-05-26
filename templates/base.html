@@ -18,7 +18,6 @@
 
         <!-- Bootstrap -->
         <link href="{{ STATIC_URL}}css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-        <link href="{{ STATIC_URL}}css/chosen.css" rel="stylesheet" type="text/css" />
 
         <!-- JQuery UI CSS -->
         <link href="{{ STATIC_URL }}css/ui-lightness/jquery-ui-1.10.4.min.css" rel="stylesheet" type="text/css" />
@@ -26,6 +25,11 @@
         <!-- Custom Footer CSS -->
         <link href="{{ STATIC_URL }}css/app.css" rel="stylesheet" type="text/css">
         <link href="{{ STATIC_URL }}css/test.css" rel="stylesheet" type="text/css">
+
+        <!-- Tagging -->
+        <link href="{{ STATIC_URL }}easy_select2/vendor/select2/css/select2.min.css" rel="stylesheet" type="text/css">
+
+        lookup_override.1.8
 
         <!-- Data tables CSS -->
         <link href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
@@ -40,6 +44,7 @@
         <script type="text/javascript" src="//code.jquery.com/jquery-1.12.0.min.js"></script>
         <!-- App specific Javascript -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/app.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}easy_select2/vendor/select2/js/select2.min.js"></script>
 
         {% endblock %}
 
@@ -62,9 +67,6 @@
             <div class="navbar-collapse collapse " role="navigation">
                 <ul class="nav navbar-nav row">
                     <li><a href="{% url 'home' %}"><span class="glyphicon glyphicon-home"></span> <font class="font6">Home</font></a></li>
-                    {% if user.is_staff %}
-                        <li><a href='{% url 'helpdesk_dashboard' %}'><span class="glyphicon glyphicon-dashboard"></span> <span class="nav-text"><font class="font6">Dashboard</font></span></a></li>
-                    {% endif %}
                     {% if user.is_staff %}
                         <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text"><font class="font6">Tickets</font></span></a></li>
                     {% else %}
