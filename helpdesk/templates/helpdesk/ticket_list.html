@@ -208,9 +208,6 @@
 </div>
 
 <div class="row">
-    {{ search_message|safe }}
-    {% for ticket in tickets.object_list.reverse %}
-    <form method='post' action='{% url 'helpdesk_mass_update' ticket.id %}' id='ticket_mass_update'>{% endfor %}
         <table id="example" class="display table table-hover table-bordered table-striped" cellspacing="0" width="100%">
         <thead>
             <tr>

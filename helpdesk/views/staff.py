@@ -1,10 +1,7 @@
 """
-django-helpdesk - A Django powered ticket tracker for small enterprise.
-
-(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.
-
 views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
+                 It combines Knowledgebase logic and the Public logic
 """
 
 from __future__ import unicode_literals
@@ -19,7 +16,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
-from django.core import paginator
 from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -32,7 +28,8 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
-
+from django.core import paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 try:
     from django.utils import timezone
 except ImportError:
@@ -43,6 +40,7 @@ import json
 from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
+from helpdesk.models import KBCategory, KBItem
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
 from helpdesk.postfix import close_notify, open_notify, reopen_notify, resolve_notify, duplicate_notify
@@ -160,118 +158,10 @@ def post_comment(request, ticket_id):
             new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status, )
             new_followup.save()
 
-            files = []
-            if request.FILES:
-                import mimetypes, os
-                for file in request.FILES.getlist('attachment'):
-                    filename = file.name.encode('ascii', 'ignore')
-                    a = Attachment(
-                        followup= new_followup,
-                        filename=filename,
-                        mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
-                        size=file.size,
-                        )
-                    a.file.save(filename, file, save=False)
-                    a.save()
-
-                    if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-                            # Only files smaller than 512kb (or as defined in
-                            #settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                        try:
-                            files.append([a.filename, a.file])
-                        except NotImplementedError:
-                            pass
+            #Attch a File
+            file_attachment(request, new_followup)
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
-
-def dashboard(request):
-    """
-    A quick summary overview for users: A list of their own tickets, a table
-    showing ticket counts by queue/status, and a list of unassigned tickets
-    with options for them to 'Take' ownership of said tickets.
-    """
-    # open & reopened tickets, assigned to current user
-    tickets = Ticket.objects.select_related('queue').filter(
-            assigned_to=request.user,
-        ).exclude(
-            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-        )
-    
-    """
-    Update github tickets via status
-    """
-    github_tickets = Ticket.objects.all().exclude(github_issue_number__isnull=True)
-    # check status in github
-    for ticket in github_tickets:
-        #if there is a github issue check it's status in github
-        if ticket.github_issue_number:
-            if str(ticket.queue) == "Tola Tables":
-                repo = settings.GITHUB_REPO_1
-            else:
-                repo = settings.GITHUB_REPO_2
-
-            # getstatus from github
-            github_status = get_issue_status(repo,ticket)
-
-    # closed & resolved tickets, assigned to current user
-    tickets_closed_resolved =  Ticket.objects.select_related('queue').filter(
-            assigned_to=request.user,
-            status__in = [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
-
-    unassigned_tickets = Ticket.objects.select_related('queue').filter(
-            assigned_to__isnull=True,
-        ).exclude(
-            status=Ticket.CLOSED_STATUS,
-        )
-
-
-    # all tickets, reported by current user
-    all_tickets_reported_by_current_user = ''
-    email_current_user = request.user.email
-    if email_current_user:
-        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
-            submitter_email=email_current_user,
-        ).order_by('status')
-
-    Tickets = Ticket.objects
-
-    basic_ticket_stats = calc_basic_ticket_stats(Tickets)
-
-    # The following query builds a grid of queues & ticket statuses,
-    # to be displayed to the user. EG:
-    #          Open  Resolved
-    # Queue 1    10     4
-    # Queue 2     4    12
-
-    from_clause = """FROM    helpdesk_ticket t,
-                    helpdesk_queue q"""
-    where_clause = """WHERE   q.id = t.queue_id"""
-    cursor = connection.cursor()
-    cursor.execute("""
-        SELECT      q.id as queue,
-                    q.title AS name,
-                    COUNT(CASE t.status WHEN '1' THEN t.id WHEN '2' THEN t.id END) AS open,
-                    COUNT(CASE t.status WHEN '3' THEN t.id END) AS resolved,
-                    COUNT(CASE t.status WHEN '4' THEN t.id END) AS closed
-            %s
-            %s
-            GROUP BY queue, name
-            ORDER BY q.id;
-    """ % (from_clause, where_clause))
-
-    dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
-
-    return render_to_response('helpdesk/dashboard.html',
-        RequestContext(request, {
-            'user_tickets': tickets,
-            'user_tickets_closed_resolved': tickets_closed_resolved,
-            'unassigned_tickets': unassigned_tickets,
-            'all_tickets_reported_by_current_user': all_tickets_reported_by_current_user,
-            'dash_tickets': dash_tickets,
-            'basic_ticket_stats': basic_ticket_stats,
-        }))
-dashboard = staff_member_required(dashboard)
-
 
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -496,258 +386,6 @@ def subscribe_staff_member_to_ticket(ticket, user):
     ticketcc.can_update = True
     ticketcc.save()
 
-def update_ticket(request, ticket_id, public=False):
-    if not (public or (request.user.is_authenticated() and request.user.is_active)):
-        return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
-
-    ticket = get_object_or_404(Ticket, id=ticket_id)
-    if request.method == 'POST':
-        form = TicketForm(request.POST, instance=ticket)
-        if form.is_valid():
-
-            ticket = form.save()
-
-            return HttpResponseRedirect(ticket.get_absolute_url())
-
-
-    comment = request.POST.get('comment', '')
-    new_status = int(request.POST.get('new_status', ticket.status))
-    title = request.POST.get('title', '')
-    public = request.POST.get('public', False)
-    owner = int(request.POST.get('owner', -1))
-    priority = int(request.POST.get('priority', ticket.priority))
-    due_date_year = int(request.POST.get('due_date_year', 0))
-    due_date_month = int(request.POST.get('due_date_month', 0))
-    due_date_day = int(request.POST.get('due_date_day', 0))
-
-    # update the comment field in ticket table
-    #ticket.comment = 'Test comment'
-    #ticket.save(update_fields=['comment'])
-
-    if not (due_date_year and due_date_month and due_date_day):
-        due_date = ticket.due_date
-    else:
-        if ticket.due_date:
-            due_date = ticket.due_date
-        else:
-            due_date = timezone.now()
-        due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
-
-    no_changes = all([
-        not request.FILES,
-        not comment,
-        new_status == ticket.status,
-        title == ticket.title,
-        priority == int(ticket.priority),
-        due_date == ticket.due_date,
-        (owner == -1) or (not owner and not ticket.assigned_to) or (owner and User.objects.get(id=owner) == ticket.assigned_to),
-    ])
-
-
-    if no_changes:
-        return return_to_ticket(request.user, ticket)
-
-    # We need to allow the 'ticket' and 'queue' contexts to be applied to the
-    # comment.
-    from django.template import loader, Context
-    context = safe_template_context(ticket)
-
-    if owner is -1 and ticket.assigned_to:
-        owner = ticket.assigned_to.id
-
-    f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
-
-
-    #send to github if needed
-    if ticket.github_issue_id:
-        if str(ticket.queue) == "Tola Tables":
-            repo = settings.GITHUB_REPO_1
-        else:
-            repo = settings.GITHUB_REPO_2
-        add_comments(repo, ticket, comment, request.user.email)
-
-    if request.user.is_staff:
-        f.user = request.user
-
-    f.public = public
-
-    reassigned = False
-
-    if owner is not -1:
-        if owner != 0 and ((ticket.assigned_to and owner != ticket.assigned_to.id) or not ticket.assigned_to):
-            new_user = User.objects.get(id=owner)
-            f.title = _('Assigned to %(username)s') % {
-                'username': new_user.get_username(),
-                }
-            ticket.assigned_to = new_user
-            reassigned = True
-        # user changed owner to 'unassign'
-        elif owner == 0 and ticket.assigned_to is not None:
-            f.title = _('Unassigned')
-            ticket.assigned_to = None
-
-    if new_status != ticket.status:
-        ticket.status = new_status
-        ticket.save()
-        f.new_status = new_status
-        if f.title:
-            f.title += ' and %s' % ticket.get_status_display()
-        else:
-            f.title = '%s' % ticket.get_status_display()
-
-    if not f.title:
-        if f.comment:
-            f.title = _('Comment')
-        else:
-            f.title = _('Updated')
-
-    f.save()
-
-
-    files = []
-    if request.FILES:
-        import mimetypes, os
-        for file in request.FILES.getlist('attachment'):
-            filename = file.name.encode('ascii', 'ignore')
-            a = Attachment(
-                followup=f,
-                filename=filename,
-                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
-                size=file.size,
-                )
-            a.file.save(filename, file, save=False)
-            a.save()
-
-            if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-                # Only files smaller than 512kb (or as defined in
-                # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                try:
-                    files.append([a.filename, a.file])
-                except NotImplementedError:
-                    pass
-                   
-
-
-    if title != ticket.title:
-        c = TicketChange(followup=f,field=_('Title'),old_value=ticket.title,new_value=title,)
-        c.save()
-        ticket.title = title
-
-    if priority != ticket.priority:
-        c = TicketChange(
-            followup=f,
-            field=_('Priority'),
-            old_value=ticket.priority,
-            new_value=priority,
-            )
-        c.save()
-        ticket.priority = priority
-
-    if due_date != ticket.due_date:
-        c = TicketChange(
-            followup=f,
-            field=_('Due on'),
-            old_value=ticket.due_date,
-            new_value=due_date,
-            )
-        c.save()
-        ticket.due_date = due_date
-
-    if new_status in [ Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS ]:
-        if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
-            ticket.resolution = comment
-
-    messages_sent_to = []
-
-    # ticket might have changed above, so we re-instantiate context with the
-    # (possibly) updated ticket.
-    context = safe_template_context(ticket)
-    context.update(
-        resolution=ticket.resolution,
-        comment=f.comment,
-        )
-
-    if public and (f.comment or (f.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))):
-        if f.new_status == Ticket.RESOLVED_STATUS:
-            template = 'resolved_'
-        elif f.new_status == Ticket.CLOSED_STATUS:
-            template = 'closed_'
-        else:
-            template = 'updated_'
-
-        template_suffix = 'submitter'
-
-        if ticket.submitter_email:
-
-            send_templated_mail(template + template_suffix,context,recipients=ticket.submitter_email,sender=ticket.queue.from_address,fail_silently=True,files=files,)
-            messages_sent_to.append(ticket.submitter_email)
-
-        template_suffix = 'cc'
-
-        for cc in ticket.ticketcc_set.all():
-            if cc.email_address not in messages_sent_to:
-                send_templated_mail(
-                    template + template_suffix,
-                    context,
-                    recipients=cc.email_address,
-                    sender=ticket.queue.from_address,
-                    fail_silently=True,
-                    )
-                messages_sent_to.append(cc.email_address)
-
-    if ticket.assigned_to and request.user != ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
-        # We only send e-mails to staff members if the ticket is updated by
-        # another user. The actual template varies, depending on what has been
-        # changed.
-        if reassigned:
-            template_staff = 'assigned_owner'
-        elif f.new_status == Ticket.RESOLVED_STATUS:
-            template_staff = 'resolved_owner'
-        elif f.new_status == Ticket.CLOSED_STATUS:
-            template_staff = 'closed_owner'
-        else:
-            template_staff = 'updated_owner'
-
-        if not reassigned:
-            send_templated_mail(
-                template_staff,
-                context,
-                recipients=ticket.assigned_to.email,
-                sender=ticket.queue.from_address,
-                fail_silently=True,
-                files=files,
-                )
-            messages_sent_to.append(ticket.assigned_to.email)
-
-    if ticket.queue.updated_ticket_cc and ticket.queue.updated_ticket_cc not in messages_sent_to:
-        if reassigned:
-            template_cc = 'assigned_cc'
-        elif f.new_status == Ticket.RESOLVED_STATUS:
-            template_cc = 'resolved_cc'
-        elif f.new_status == Ticket.CLOSED_STATUS:
-            template_cc = 'closed_cc'
-        else:
-            template_cc = 'updated_cc'
-
-        send_templated_mail(
-            template_cc,
-            context,
-            recipients=ticket.queue.updated_ticket_cc,
-            sender=ticket.queue.from_address,
-            fail_silently=True,
-            files=files,
-            )
-
-    ticket.save()
-
-    # auto subscribe user if enabled
-    if request.user.is_authenticated():
-        ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket)
-        if SHOW_SUBSCRIBE:
-            subscribe_staff_member_to_ticket(ticket, request.user)
-
-    return return_to_ticket(request.user, ticket)
-
 def return_to_ticket(user, ticket):
     ''' Helpder function for update_ticket '''
 
@@ -755,106 +393,6 @@ def return_to_ticket(user, ticket):
         return HttpResponseRedirect(ticket.get_absolute_url())
     else:
         return HttpResponseRedirect(ticket.get_absolute_url())
-
-#@method_decorator(staff_member_required)
-def mass_update(request, ticket_id):
-    depend_ticket = Ticket.objects.get(id=ticket_id)
-
-    tickets = request.POST.getlist('ticket_id')
-    action = request.POST.get('action', None)
-    if not (tickets and action):
-        return HttpResponseRedirect(reverse('helpdesk_list'))
-
-    if action.startswith('assign_'):
-        parts = action.split('_')
-        user = User.objects.get(id=parts[1])
-        action = 'assign'
-    elif action == 'take':
-        user = request.user
-        action = 'assign'
-
-    for t in Ticket.objects.filter(id__in=tickets):
-
-
-        if action == 'assign' and t.assigned_to != user:
-            t.assigned_to = user
-            t.save()
-            f = FollowUp(ticket=t, date=timezone.now(), title=_('Assigned to %(username)s in bulk update' % {'username': user.get_username()}), public=True, user=request.user)
-            f.save()
-        elif action == 'depend':
-            d = TicketDependency(ticket=depend_ticket, depends_on=t)
-            if depend_ticket != t:
-                d.save()
-
-        elif action == 'unassign' and t.assigned_to is not None:
-            t.assigned_to = None
-            t.save()
-            f = FollowUp(ticket=t, date=timezone.now(), title=_('Unassigned in bulk update'), public=True, user=request.user)
-            f.save()
-        elif action == 'close' and t.status != Ticket.CLOSED_STATUS:
-            t.status = Ticket.CLOSED_STATUS
-            t.save()
-            f = FollowUp(ticket=t, date=timezone.now(), title=_('Closed in bulk update'), public=False, user=request.user, new_status=Ticket.CLOSED_STATUS)
-            f.save()
-        elif action == 'close_public' and t.status != Ticket.CLOSED_STATUS:
-            t.status = Ticket.CLOSED_STATUS
-            t.save()
-            f = FollowUp(ticket=t, date=timezone.now(), title=_('Closed in bulk update'), public=True, user=request.user, new_status=Ticket.CLOSED_STATUS)
-            f.save()
-            # Send email to Submitter, Owner, Queue CC
-            context = safe_template_context(t)
-            context.update(
-                resolution = t.resolution,
-                queue = t.queue,
-                )
-
-            messages_sent_to = []
-
-            if t.submitter_email:
-                send_templated_mail(
-                    'closed_submitter',
-                    context,
-                    recipients=t.submitter_email,
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                    )
-                messages_sent_to.append(t.submitter_email)
-
-            for cc in t.ticketcc_set.all():
-                if cc.email_address not in messages_sent_to:
-                    send_templated_mail(
-                        'closed_submitter',
-                        context,
-                        recipients=cc.email_address,
-                        sender=t.queue.from_address,
-                        fail_silently=True,
-                        )
-                    messages_sent_to.append(cc.email_address)
-
-            if t.assigned_to and request.user != t.assigned_to and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
-                send_templated_mail(
-                    'closed_owner',
-                    context,
-                    recipients=t.assigned_to.email,
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                    )
-                messages_sent_to.append(t.assigned_to.email)
-
-            if t.queue.updated_ticket_cc and t.queue.updated_ticket_cc not in messages_sent_to:
-                send_templated_mail(
-                    'closed_cc',
-                    context,
-                    recipients=t.queue.updated_ticket_cc,
-                    sender=t.queue.from_address,
-                    fail_silently=True,
-                    )
-
-        elif action == 'delete':
-            t.delete()
-
-    return HttpResponseRedirect(reverse('helpdesk_list'))
-mass_update = staff_member_required(mass_update)
 
 def tickets_dependency(request,ticket_id):
     d_ticket = Ticket.objects.get(id=ticket_id)
@@ -983,27 +521,10 @@ def tickets_dependency(request,ticket_id):
             query_params['filtering']['created__lte'] = date_to
 
         ### KEYWORD SEARCHING
-        q = request.GET.get('q', None)
-
-        if q:
-            qset = (
-                Q(title__icontains=q) |
-                Q(description__icontains=q) |
-                Q(resolution__icontains=q) |
-                Q(submitter_email__icontains=q)
-            )
-            context = dict(context, query=q)
-
-            query_params['other_filter'] = qset
+        key_word_searching(request, context, query_params)
 
         ### SORTING
-        sort = request.GET.get('sort', None)
-        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
-            sort = 'created'
-        query_params['sorting'] = sort
-
-        sortreverse = request.GET.get('sortreverse', None)
-        query_params['sortreverse'] = sortreverse
+        data_sorting(request,query_params)
 
     tickets = Ticket.objects.select_related()
     queue_choices = Queue.objects.all()
@@ -1194,27 +715,10 @@ def ticket_list(request):
             query_params['filtering']['created__lte'] = date_to
 
         ### KEYWORD SEARCHING
-        q = request.GET.get('q', None)
-
-        if q:
-            qset = (
-                Q(title__icontains=q) |
-                Q(description__icontains=q) |
-                Q(resolution__icontains=q) |
-                Q(submitter_email__icontains=q)
-            )
-            context = dict(context, query=q)
-
-            query_params['other_filter'] = qset
+        key_word_searching(request, context, query_params)
 
         ### SORTING
-        sort = request.GET.get('sort', None)
-        if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
-            sort = 'created'
-        query_params['sorting'] = sort
-
-        sortreverse = request.GET.get('sortreverse', None)
-        query_params['sortreverse'] = sortreverse
+        data_sorting(request,query_params)
 
     tickets = Ticket.objects.select_related()
     queue_choices = Queue.objects.all()
@@ -1337,31 +841,11 @@ def create_ticket(request):
             f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
             f.save()
 
-            files = []
-            if request.FILES:
-                import mimetypes, os
-                for file in request.FILES.getlist('attachment'):
-                    filename = file.name.encode('ascii', 'ignore')
-                    a = Attachment(
-                        followup=f,
-                        filename=filename,
-                        mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
-                        size=file.size,
-                        )
-                    a.file.save(filename, file, save=False)
-                    a.save()
-
-                    if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-                        # Only files smaller than 512kb (or as defined in
-                        #settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-                        try:
-                            files.append([a.filename, a.file])
-                        except NotImplementedError:
-                            pass
+            #Attch a File
+            file_attachment(request, f)
                    
-
             #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
+            #post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
@@ -1892,7 +1376,305 @@ def post_to_slack(request, ticket_id):
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
 
+#KB view
+def index(request):
+    category_list = KBCategory.objects.all()
+
+    if ('q' in request.GET) and request.GET['q'].strip():
+        query_string = request.GET.get('q')
+        item_list = KBItem.objects.filter((Q(title__icontains=query_string) | Q(question__icontains=query_string) | Q(answer__icontains=query_string )))
+
+    else:
+        item_list = KBItem.objects.all()
+
+    paginator = Paginator(item_list, 10) # Show 15 items per page
+
+    page = request.GET.get('page')
+    try:
+        item_list = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        item_list = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        item_list = paginator.page(paginator.num_pages)
+
+    # TODO: It'd be great to have a list of most popular items here.
+    return render_to_response('helpdesk/kb_index.html',
+        RequestContext(request, {
+            'kb_categories': category_list,
+            'kb_items': item_list
+        }))
 
 
+def category(request, slug):
+    category = get_object_or_404(KBCategory, slug__iexact=slug)
+    items = category.kbitem_set.all()
+    return render_to_response('helpdesk/kb_category.html',
+        RequestContext(request, {
+            'category': category,
+            'items': items,
+        }))
 
 
+def item(request, item):
+    item = get_object_or_404(KBItem, pk=item)
+    return render_to_response('helpdesk/kb_item.html',
+        RequestContext(request, {
+            'item': item
+        }))
+
+
+def vote(request, item):
+    item = get_object_or_404(KBItem, pk=item)
+    vote = request.GET.get('vote', None)
+    if vote in ('up', 'down'):
+        item.votes += 1
+        if vote == 'up':
+            item.recommendations += 1
+        item.save()
+
+    return HttpResponseRedirect(item.get_absolute_url())
+
+def kb_list(request):
+
+    context = {}
+
+    # Query_params will hold a dictionary of parameters relating to
+    # a query, to be saved if needed:
+    query_params = {
+        'filtering': {},
+        'sorting': None,
+        'sortreverse': True,
+        'keyword': None,
+        'other_filter': None,
+        }
+
+    from_saved_query = False
+
+    # If the user is coming from the header/navigation search box, lets' first
+    # look at their query to see if they have entered a valid ticket number. If
+    # they have, just redirect to that ticket number. Otherwise, we treat it as
+    # a keyword search.
+
+    if request.GET.get('search_type', None) == 'header':
+        query = request.GET.get('q')
+        filter = None
+        if query.find('-') > 0:
+            try:
+                queue, id = query.split('-')
+                id = int(id)
+            except ValueError:
+                id = None
+
+            if id:
+                filter = {'queue__slug': queue, 'id': id }
+        else:
+            try:
+                query = int(query)
+            except ValueError:
+                query = None
+
+            if query:
+                filter = {'id': int(query) }
+
+        if filter:
+            try:
+                ticket = Ticket.objects.get(**filter)
+                return HttpResponseRedirect(ticket.staff_url)
+            except Ticket.DoesNotExist:
+                # Go on to standard keyword searching
+                pass
+
+    saved_query = None
+    if request.GET.get('saved_query', None):
+        from_saved_query = True
+        try:
+            saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
+        except SavedSearch.DoesNotExist:
+            return HttpResponseRedirect(reverse('helpdesk_kb_list'))
+        if not (saved_query.shared or saved_query.user == request.user):
+            return HttpResponseRedirect(reverse('helpdesk_kb_list'))
+
+        try:
+            import pickle
+        except ImportError:
+            import cPickle as pickle
+        from helpdesk.lib import b64decode
+        query_params = pickle.loads(b64decode(str(saved_query.query)))
+    elif not (  'queue' in request.GET
+            or  'assigned_to' in request.GET
+            or  'status' in request.GET
+            or  'q' in request.GET
+            or  'sort' in request.GET
+            or  'sortreverse' in request.GET
+                ):
+
+        # Fall-back if no querying is being done, force the list to only
+        # show open/reopened/resolved (not closed) cases sorted by creation
+        # date.
+
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3]},
+            'sorting': 'created',
+        }
+    else:
+        queues = request.GET.getlist('queue')
+        if queues:
+            try:
+                queues = [int(q) for q in queues]
+                query_params['filtering']['queue__id__in'] = queues
+            except ValueError:
+                pass
+
+        owners = request.GET.getlist('assigned_to')
+        if owners:
+            try:
+                owners = [int(u) for u in owners]
+                query_params['filtering']['assigned_to__id__in'] = owners
+            except ValueError:
+                pass
+
+        statuses = request.GET.getlist('status')
+        if statuses:
+            try:
+                statuses = [int(s) for s in statuses]
+                query_params['filtering']['status__in'] = statuses
+            except ValueError:
+                pass
+
+        types = request.GET.getlist('types')
+        if types:
+            try:
+                types = [int(s) for s in types]
+                query_params['filtering']['type__in'] = types
+            except ValueError:
+                pass
+
+        date_from = request.GET.get('date_from')
+        if date_from:
+            query_params['filtering']['created__gte'] = date_from
+
+        date_to = request.GET.get('date_to')
+        if date_to:
+            query_params['filtering']['created__lte'] = date_to
+
+        ### KEYWORD SEARCHING
+        key_word_searching(request, context, query_params)
+
+        ### SORTING
+        data_sorting(request,query_params)
+
+    kb_items = KBItem.objects.select_related()
+    queue_choices = Queue.objects.all()
+    try:
+       kb_item_qs = apply_query(kb_items, query_params)
+    except ValidationError:
+       # invalid parameters in query, return default query
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3]},
+            'sorting': 'created',
+        }
+        kb_item_qs = apply_query(kb_items, query_params)
+
+    kb_item_paginator = paginator.Paginator(ticket_qs, 20)
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+         page = 1
+
+    try:
+        kb_items = kb_item_paginator.page(page)
+    except (paginator.EmptyPage, paginator.InvalidPage):
+        kb_items = kb_item_paginator.page(kb_item_paginator.num_pages)
+
+    search_message = ''
+    if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
+        search_message = _('<p><strong>Note:</strong> The keyword search is case sensitive. This means the search will <strong>not</strong> be accurate.')
+
+
+    try:
+        import pickle
+    except ImportError:
+        import cPickle as pickle
+    from helpdesk.lib import b64encode
+    urlsafe_query = b64encode(pickle.dumps(query_params))
+
+    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
+
+    querydict = request.GET.copy()
+    querydict.pop('page', 1)
+
+    print "TICKET TYPES:"
+    print Ticket.TICKET_TYPE
+
+    return render_to_response('helpdesk/kb_list.html',
+        RequestContext(request, dict(
+            context,
+            query_string=querydict.urlencode(),
+            kb_items=kb_items,
+            user_choices=User.objects.filter(is_active=True,is_staff=True),
+            queue_choices=queue_choices,
+            status_choices=Ticket.STATUS_CHOICES,
+            type_choices=Ticket.TICKET_TYPE,
+            urlsafe_query=urlsafe_query,
+            user_saved_queries=user_saved_queries,
+            query_params=query_params,
+            from_saved_query=from_saved_query,
+            saved_query=saved_query,
+            search_message=search_message,
+
+        )))
+
+###-------------COMMON SUB-FUNCTIONS---------------------------------####
+
+#KEYWORD SEARCHING
+def key_word_searching(request, context, query_params):
+    q = request.GET.get('q', None)
+    if q:
+        qset = (
+            Q(title__icontains=q) |
+            Q(description__icontains=q) |
+            Q(resolution__icontains=q) |
+            Q(submitter_email__icontains=q)
+        )
+        context = dict(context, query=q)
+
+        query_params['other_filter'] = qset
+    return
+
+#SORTING
+def data_sorting(request,query_params):
+    sort = request.GET.get('sort', None)
+    if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
+        sort = 'created'
+    query_params['sorting'] = sort
+
+    sortreverse = request.GET.get('sortreverse', None)
+    query_params['sortreverse'] = sortreverse
+
+    return
+#FILE ATTACHMENT
+def file_attachment(request,f):
+    files = []
+    if request.FILES:
+        import mimetypes, os
+        for file in request.FILES.getlist('attachment'):
+            filename = file.name.encode('ascii', 'ignore')
+            a = Attachment(
+                followup=f,
+                filename=filename,
+                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                size=file.size,
+                )
+            a.file.save(filename, file, save=False)
+            a.save()
+
+            if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
+                # Only files smaller than 512kb (or as defined in
+                #settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                try:
+                    files.append([a.filename, a.file])
+                except NotImplementedError:
+                    pass
+    return

@@ -2,19 +2,11 @@
 from django.conf.urls import *
 from django.contrib.auth.decorators import login_required
 
-
 urlpatterns = patterns('helpdesk.views.staff',
-    url(r'^dashboard/$',
-        'dashboard',
-        name='helpdesk_dashboard'),
 
     url(r'^tickets/$',
         'ticket_list',
         name='helpdesk_list'),
-
-    url(r'^tickets/(?P<ticket_id>[0-9]+)/update/$',
-        'mass_update',
-        name='helpdesk_mass_update'),
 
     url(r'^tickets/submit/$',
         'create_ticket',
@@ -122,6 +114,23 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^ignore/delete/(?P<id>[0-9]+)/$',
         'email_ignore_del',
         name='helpdesk_email_ignore_del'),
+
+    #KB urls
+    url(r'^kb/$',
+        'index', name='helpdesk_kb_index'),
+
+    url(r'^kb/$',
+        'kb_list',
+        name = 'helpdesk_kb_list'),
+
+    url(r'^kb/(?P<item>[0-9]+)/$',
+        'item', name='helpdesk_kb_item'),
+
+    url(r'^kb/(?P<item>[0-9]+)/vote/$',
+        'vote', name='helpdesk_kb_vote'),
+
+    url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/$',
+        'category', name='helpdesk_kb_category'),
 )
 
 urlpatterns += patterns('helpdesk.views.public',
@@ -148,24 +157,6 @@ urlpatterns += patterns('helpdesk.views.public',
     url(r'^vote_down/(?P<id>[0-9]+)/$',
         'vote_down',
         name='vote_down'),
-)
-
-urlpatterns += patterns('helpdesk.views.kb',
-    url(r'^kb/$',
-        'index', name='helpdesk_kb_index'),
-
-    url(r'^kb/$',
-        'kb_list',
-        name = 'helpdesk_kb_list'),
-
-    url(r'^kb/(?P<item>[0-9]+)/$',
-        'item', name='helpdesk_kb_item'),
-
-    url(r'^kb/(?P<item>[0-9]+)/vote/$',
-        'vote', name='helpdesk_kb_vote'),
-
-    url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/$',
-        'category', name='helpdesk_kb_category'),
 )
 
 urlpatterns += patterns('helpdesk.views.blog',

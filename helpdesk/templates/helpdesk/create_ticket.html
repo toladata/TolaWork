@@ -53,6 +53,11 @@
             return false;
         });
 
+        $("#id_tags").select2({
+                tags: true,
+                allowClear: true,
+        });
+
         processAddFileClick();
         $("#ShowFileUpload").click(function() {
             $("#FileUpload").fadeIn();
