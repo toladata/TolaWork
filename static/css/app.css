@@ -147,7 +147,10 @@ margin-right: 0px
 {
     font-size: 23px;
 }
-
+.font8
+{
+    margin-bottom: 10px;
+}
 
 
 /*//end of fonts*/
@@ -172,10 +175,6 @@ margin-right: 0px
     border-radius: 20px;
 }
 .knowledge_head
-{
-    background-color: #ff9933;
-}
-.panel-footer
 {
     background-color: #ff9933;
 }
@@ -204,6 +203,7 @@ margin-right: 0px
     padding: 0px;
     
 }
+
 .home_cover
 {
     position: relative;
@@ -329,3 +329,89 @@ margin-right: 0px
     padding: 3px;
     padding-left: 10px;
 }
+/*//new blog for tickets*/
+.ticket_cover
+{
+    position: relative;
+    border:1px solid#eee;
+    overflow: hidden;
+    border-radius: 5px;
+}
+.ticket_right
+{
+    border-left: 1px solid#eee;
+}
+.ticket_issues
+{
+    background-color: #e89424;
+    float: right;
+    padding: 3px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #fff;
+}
+.ticket_footer_link
+{
+    float: right;
+}
+.sorting_header
+{
+    border: 1px solid #eee;
+}
+.sort_panels
+{
+    border-bottom: 1px solid#eee;
+}
+/*//search box*/
+.search
+{
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+}
+#tfheader{
+    background-color:#fff;
+  }
+  #tfnewsearch{
+    padding-top: 20px;
+    padding-bottom: 10px;
+  }
+  .tftextinput{
+    margin: 0;
+    padding: 8px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:14px;
+    border:1px solid #0076a3; border-right:0px;
+    border-top-left-radius: 5px 5px;
+    border-bottom-left-radius: 5px 5px;
+  }
+  .tfbutton {
+    margin: 0;
+    padding: 8px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:14px;
+    outline: none;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    color: #ffffff;
+    border: solid 1px #0076a3; border-right:0px;
+    background: #0095cd;
+    background: -webkit-gradient(linear, left top, left bottom, from(#00adee), to(#0078a5));
+    background: -moz-linear-gradient(top,  #00adee,  #0078a5);
+    border-top-right-radius: 5px 5px;
+    border-bottom-right-radius: 5px 5px;
+  }
+  .tfbutton:hover {
+    text-decoration: none;
+    background: #007ead;
+    background: -webkit-gradient(linear, left top, left bottom, from(#0095cc), to(#00678e));
+    background: -moz-linear-gradient(top,  #0095cc,  #00678e);
+  }
+  /* Fixes submit button height problem in Firefox */
+  .tfbutton::-moz-focus-inner {
+    border: 0;
+  }
+  .tfclear{
+    clear:both;
