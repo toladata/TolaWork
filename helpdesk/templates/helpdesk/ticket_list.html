@@ -3,16 +3,17 @@
 {% block helpdesk_head %}
 <style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>
 
+
 {% endblock %}
   
 {% block content %}
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <div class="container">
-
+<h3>Submitted Tickets</h3>
 <!-- main div -->
   <div class="home_cover">
         <div class="col-md-9 col-sm-9 ">
-            <h2>Tickets</h2>
+
             {% for ticket in tickets.object_list %}
               <div class="panel panel-info">
                 <div class="panel-heading"> <strong class="font8"> {{ ticket.title }} </strong> <br>
@@ -20,7 +21,10 @@
                 <div class="panel-body"> 
                 {{ ticket.description }}
                 </div>
-                <div class="panel-footer"><b><span class="glyphicon glyphicon-tags"></span></b> <strong> Tags</strong></div>
+                <div class="panel-footer">
+                    <span class="glyphicon glyphicon-tags"></span> <strong> Tags</strong> | <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
+                </div>
+
               </div>
             {% endfor %}
         </div>
