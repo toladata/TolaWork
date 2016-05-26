@@ -721,8 +721,8 @@ def ticket_list(request):
         data_sorting(request,query_params)
 
     tickets = Ticket.objects.select_related()
+    num_tickets = tickets.count()
     queue_choices = Queue.objects.all()
-    num_tickets = len(tickets)
 
     try:
        ticket_qs = apply_query(tickets, query_params)
