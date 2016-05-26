@@ -722,7 +722,7 @@ def ticket_list(request):
 
     tickets = Ticket.objects.select_related()
     queue_choices = Queue.objects.all()
-
+    num_tickets = len(tickets)
 
     try:
        ticket_qs = apply_query(tickets, query_params)
@@ -771,6 +771,7 @@ def ticket_list(request):
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
+            num_tickets=num_tickets,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
             status_choices=Ticket.STATUS_CHOICES,

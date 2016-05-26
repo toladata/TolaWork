@@ -12,7 +12,7 @@
 <!-- main div -->
   <div class="home_cover">
         <div class="col-md-9 col-sm-9 ">
-            <h2> Available Tickets</h2>
+            <h2>Tickets</h2>
             {% for ticket in tickets.object_list %}
               <div class="panel panel-info">
                 <div class="panel-heading"> <strong class="font8"> {{ ticket.title }} </strong> <br>
@@ -36,7 +36,7 @@
           <div>
             <div class="panel panel-info ">
               <div class="panel-heading"> 
-                <strong>Issues</strong> 
+                <strong>Issues <span class="badge">{{ num_tickets }}</span></strong>
                 <a href="/helpdesk/tickets/submit">
                   <div class="ticket_issues"> 
                     <span class="glyphicon glyphicon-plus"></span>New Issue
