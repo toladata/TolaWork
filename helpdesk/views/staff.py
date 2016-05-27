@@ -380,6 +380,7 @@ def view_ticket(request, ticket_id):
     if ticket.github_issue_id:
         repo = queue_repo(ticket)
         response = get_issue_status(repo,ticket)
+
         if response == 200:
             #synced status wth github
             ticket_state = get_object_or_404(Ticket, id=ticket_id)
@@ -391,7 +392,7 @@ def view_ticket(request, ticket_id):
             print 'Ticket status in Github is: [' + str(state) + ']'
         else:
             print 'Check ticket status in GitHub'
-        print response
+
     ticket_state = get_object_or_404(Ticket, id=ticket_id)
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
@@ -415,7 +416,7 @@ def view_ticket(request, ticket_id):
 
     if 'close' in request.GET and ticket_state.status == Ticket.RESOLVED_STATUS:
         if not ticket_state.assigned_to:
-            owner = 0
+            owner = ''
         else:
             owner = ticket_state.assigned_to.id
 
@@ -432,7 +433,7 @@ def view_ticket(request, ticket_id):
         return update_ticket(request, ticket_id)
 
     users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-
+    q = Queue.objects.all()
 
     # TODO: shouldn't this template get a form to begin with?
     form = TicketForm(initial={'due_date':ticket_state.due_date})
@@ -445,6 +446,8 @@ def view_ticket(request, ticket_id):
             'form': form,
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
+            'ticket_type': Ticket.TICKET_TYPE,
+            'ticket_queue': q,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
             'ticketcc_string': ticketcc_string,
             'SHOW_SUBSCRIBE': SHOW_SUBSCRIBE,
@@ -1281,32 +1284,39 @@ allow non-admin users to use saved_queries
 ticket_list = staff_member_required(ticket_list)
 """
 
-
-def edit_ticket(request, ticket_id):
+def ticket_edit(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
-        form = EditTicketForm(request.POST, instance=ticket)
+        form = CommentTicketForm(request.POST)
         if form.is_valid():
+            ticket_id = ticket.id
+            title = request.POST.get('title')
+            if ticket.github_issue_id:
+                queue = ticket.queue_id
+            else:
+                queue = request.POST.get('queue')
 
-            ticket = form.save()
-
-            return HttpResponseRedirect(ticket.get_absolute_url())
-    else:
-        form = EditTicketForm(instance=ticket)
-
-    return render_to_response('helpdesk/edit_ticket.html',
-        RequestContext(request, {
-            'form': form,
-        }))
-edit_ticket = staff_member_required(edit_ticket)
-
+            type = request.POST.get('type')
+            owner = request.POST.get('owner')
+            priority = request.POST.get('priority')
+            error_msg = request.POST.get('error_msg')
+            description = request.POST.get('description')
+            email = request.POST.get('email')
+            due_date = ticket.due_date
+            update_comments = Ticket(id=ticket_id, title=title, description=description, assigned_to_id=owner,
+                                     submitter_email=email, priority=priority, due_date=due_date,
+                                     queue_id=queue, type=type, error_msg=error_msg)
+            update_comments.save(update_fields=['title','queue_id','type','assigned_to_id','error_msg','priority','description','submitter_email', 'due_date'])
+    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
 def create_ticket(request):
+    #user authentication
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
 
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     messages.add_message(request, messages.SUCCESS, 'We recommend that you search for your issue or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!')
+
     if request.method == 'POST':
 
         if request.user.is_staff:
@@ -1362,8 +1372,6 @@ def create_ticket(request):
             initial_data['submitter_email'] = request.user.email
         if 'queue' in request.GET:
             initial_data['queue'] = request.GET['queue']
-
-
 
         if request.user.is_staff:
             form = TicketForm(initial=initial_data)
