@@ -10,8 +10,13 @@
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <div class="container">
 <h3>Submitted Tickets</h3>
+
+        {% if not number_of_tickets%}
+    <strong> <span class="badge"> No records found</span></strong>
+    {%else%}
     <strong> <span class="badge">{{number_of_tickets }} Record(s) found</span></strong>
-<!-- main div -->
+    {%endif%}
+    <!-- main div -->
   <div class="ticket_cover">
         <div class="col-md-9 col-sm-9 ">
 
@@ -28,8 +33,12 @@
 
               </div>
             {% endfor %}
-            <div >
-               <ul class="pagination">
+
+            {% if not number_of_tickets%}
+
+            <div hidden="true">
+
+               <ul class="pagination" >
                  {% if tickets.has_previous %}
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "<<" %} </a></li>
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {{tickets.previous_page_number}} </a></li>
@@ -42,9 +51,11 @@
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans ">>" %}</a></li>
 
                  {% endif %}
+
                 </ul>
 
             </div>
+            {%endif%}
 
         </div>
         <div class="col-md-3 col-sm-3 ticket_right">
