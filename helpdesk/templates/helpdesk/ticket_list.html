@@ -10,13 +10,14 @@
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <div class="container">
 <h3>Submitted Tickets</h3>
+    <strong> <span class="badge">{{number_of_tickets }} Record(s) found</span></strong>
 <!-- main div -->
   <div class="ticket_cover">
         <div class="col-md-9 col-sm-9 ">
 
             {% for ticket in tickets.object_list %}
               <div class="panel panel-info">
-                <div class="panel-heading"> <strong class="font8"> {{ ticket.title }} </strong> <br>
+                <div class="panel-heading"> <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}}</a> <strong class="font8"> {{ ticket.title }} </strong> <br>
                 Reported on {{ ticket.created | date}}, {{ ticket.created | time}} by {{ ticket.submitter_email }}  </div>
                 <div class="panel-body"> 
                 {{ ticket.description }}
@@ -66,8 +67,8 @@
                 </a>
               </div>
               <div class="panel-body"> 
-              My Issues 
-              </div>
+              My Issues
+                   </div>
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Sort By</strong></div>
