@@ -735,7 +735,7 @@ def ticket_list(request):
         ticket_qs = apply_query(tickets, query_params)
 
 
-    ticket_paginator = paginator.Paginator(ticket_qs, len(tickets))
+    ticket_paginator = paginator.Paginator(ticket_qs, 4)
     try:
         page = int(request.GET.get('page', '1'))
     except ValueError:

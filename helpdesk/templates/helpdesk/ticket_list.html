@@ -11,7 +11,7 @@
 <div class="container">
 <h3>Submitted Tickets</h3>
 <!-- main div -->
-  <div class="home_cover">
+  <div class="ticket_cover">
         <div class="col-md-9 col-sm-9 ">
 
             {% for ticket in tickets.object_list %}
@@ -27,6 +27,24 @@
 
               </div>
             {% endfor %}
+            <div >
+               <ul class="pagination">
+                 {% if tickets.has_previous %}
+                     <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "<<" %} </a></li>
+                     <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {{tickets.previous_page_number}} </a></li>
+                 {% endif %}
+                  {% blocktrans with tickets.number as ticket_num %}
+                      <li><a class="active" href=" page= {tickets.paginator.num_pages as num_pages %} "> {{ ticket_num }}</a></li> 
+                  {% endblocktrans %}
+                 {% if tickets.has_next %}
+                     <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{{ tickets.next_page_number }}</a></li>
+                     <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans ">>" %}</a></li>
+
+                 {% endif %}
+                </ul>
+
+            </div>
+
         </div>
         <div class="col-md-3 col-sm-3 ticket_right">
           <div class="search" >
