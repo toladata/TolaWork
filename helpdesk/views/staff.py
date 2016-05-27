@@ -721,8 +721,8 @@ def ticket_list(request):
         data_sorting(request,query_params)
 
     tickets = Ticket.objects.select_related()
+    num_tickets = tickets.count()
     queue_choices = Queue.objects.all()
-
 
     try:
        ticket_qs = apply_query(tickets, query_params)
@@ -735,7 +735,7 @@ def ticket_list(request):
         ticket_qs = apply_query(tickets, query_params)
 
 
-    ticket_paginator = paginator.Paginator(ticket_qs, len(tickets))
+    ticket_paginator = paginator.Paginator(ticket_qs, 4)
     try:
         page = int(request.GET.get('page', '1'))
     except ValueError:
@@ -771,6 +771,8 @@ def ticket_list(request):
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
+            number_of_tickets = len(tickets),
+            num_tickets=num_tickets,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
             status_choices=Ticket.STATUS_CHOICES,
@@ -1631,6 +1633,7 @@ def kb_list(request):
 #KEYWORD SEARCHING
 def key_word_searching(request, context, query_params):
     q = request.GET.get('q', None)
+
     if q:
         qset = (
             Q(title__icontains=q) |
@@ -1638,10 +1641,12 @@ def key_word_searching(request, context, query_params):
             Q(resolution__icontains=q) |
             Q(submitter_email__icontains=q)
         )
-        context = dict(context, query=q)
+
+        context = dict(context, query=q,
+                       )
 
         query_params['other_filter'] = qset
-    return
+    return qset
 
 #SORTING
 def data_sorting(request,query_params):

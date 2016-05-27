@@ -222,6 +222,7 @@ THIRD_PARTY_APPS = (
     #'fluent_dashboard',
     'tinymce',
     'easy_select2',
+    'tasks',
 
 )
 
