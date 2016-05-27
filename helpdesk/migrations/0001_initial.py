@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#Tolawork Migration File
 from __future__ import unicode_literals
 
 from django.db import models, migrations
@@ -6,7 +7,6 @@ from django.conf import settings
 import django.utils.timezone
 import tinymce.models
 import helpdesk.models
-
 
 class Migration(migrations.Migration):
 
@@ -158,7 +158,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'ordering': ['title'],
-                'verbose_name': 'KnCatowledge base category',
+                'verbose_name': 'Knowledge base category',
                 'verbose_name_plural': 'Knowledge base categories',
             },
         ),
