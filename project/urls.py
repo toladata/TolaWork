@@ -4,7 +4,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth.views import login, logout
 from views import profile, register, faq, contact, home, documentation
-
 from django.contrib import admin
 admin.autodiscover()
 
@@ -47,7 +46,7 @@ urlpatterns = patterns('',
 
     #app include of activitydb urls
     url(r'^helpdesk/', include('helpdesk.urls')),
-
+    url(r'^tasks/', include('tasks.urls')),
     #tinymce formatting
     url(r'^tinymce/', include('tinymce.urls')),
 
