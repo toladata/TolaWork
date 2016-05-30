@@ -30,6 +30,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.core import paginator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from helpdesk.forms import PublicTicketForm
 try:
     from django.utils import timezone
 except ImportError:
@@ -50,6 +51,336 @@ staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is
 
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
 
+###------>>>>>>>>>>>>>>>>>>>>>PUBLIC VIEW<<<<<<<<<<<<<<<<<<<<<<<----###
+def homepage(request):
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('login'))
+
+    if (request.user.is_staff or (request.user.is_authenticated())):
+        try:
+            if getattr(request.user.usersettings.settings, 'login_view_ticketlist', False):
+                return HttpResponseRedirect(reverse('helpdesk_list'))
+            else:
+                return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+        except UserSettings.DoesNotExist:
+            return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+
+    if request.method == 'POST':
+        form = PublicTicketForm(request.POST, request.FILES)
+        form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.filter(allow_public_submission=True)]
+        if form.is_valid():
+            if text_is_spam(form.cleaned_data['body'], request):
+                # This submission is spam. Let's not save it.
+                return render_to_response('helpdesk/public_spam.html', RequestContext(request, {}))
+            else:
+                ticket = form.save()
+                return HttpResponseRedirect('%s?ticket=%s&email=%s'% (
+                    reverse('helpdesk_public_view'),
+                    ticket.ticket_for_url,
+                    ticket.submitter_email)
+                    )
+    else:
+        try:
+            queue = Queue.objects.get(slug=request.GET.get('queue', None))
+        except Queue.DoesNotExist:
+            queue = None
+        initial_data = {}
+        if queue:
+            initial_data['queue'] = queue.id
+
+        if request.user.is_authenticated() and request.user.email:
+            initial_data['submitter_email'] = request.user.email
+
+        form = PublicTicketForm(initial=initial_data)
+        form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.filter(allow_public_submission=True)]
+
+    knowledgebase_categories = KBCategory.objects.all()
+
+    return render_to_response('helpdesk/public_homepage.html',
+        RequestContext(request, {
+            'form': form,
+            'kb_categories': knowledgebase_categories
+        }))
+
+
+def view_ticket(request):
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('login'))
+    ticket_req = request.GET.get('ticket', '')
+    ticket = False
+    email = request.GET.get('email', '')
+    error_message = ''
+
+    if ticket_req and email:
+        parts = ticket_req.split('-')
+        queue = '-'.join(parts[0:-1])
+        ticket_id = parts[-1]
+
+        try:
+            ticket = Ticket.objects.get(id=ticket_id, queue__slug__iexact=queue, submitter_email__iexact=email)
+        except:
+            ticket = False
+            error_message = _('Invalid ticket ID or e-mail address. Please try again.')
+
+        if ticket:
+
+            if request.user.is_staff:
+                redirect_url = reverse('helpdesk_view', args=[ticket_id])
+                if 'close' in request.GET:
+                    redirect_url += '?close'
+                return HttpResponseRedirect(redirect_url)
+
+            if 'close' in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
+                from helpdesk.views.staff import update_ticket
+                # Trick the update_ticket() view into thinking it's being called with
+                # a valid POST.
+                request.POST = {
+                    'new_status': Ticket.CLOSED_STATUS,
+                    'public': 1,
+                    'title': ticket.title,
+                    'comment': _('Submitter accepted resolution and closed ticket'),
+                    }
+                if ticket.assigned_to:
+                    request.POST['owner'] = ticket.assigned_to.id
+                request.GET = {}
+
+                return update_ticket(request, ticket_id, public=True)
+
+            # redirect user back to this ticket if possible.
+            redirect_url = ''
+
+            return render_to_response('helpdesk/public_view_ticket.html',
+                RequestContext(request, {
+                    'ticket': ticket,
+                    'next': redirect_url,
+                }))
+
+    return render_to_response('helpdesk/public_view_form.html',
+        RequestContext(request, {
+            'ticket': ticket,
+            'email': email,
+            'error_message': error_message
+        }))
+
+
+def public_ticket_list(request):
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('login'))
+    context = {}
+
+    # Query_params will hold a dictionary of parameters relating to
+    # a query, to be saved if needed:
+    query_params = data_query_params()
+
+    from_saved_query = False
+
+    # If the user is coming from the header/navigation search box, lets' first
+    # look at their query to see if they have entered a valid ticket number. If
+    # they have, just redirect to that ticket number. Otherwise, we treat it as
+    # a keyword search.
+
+    if request.GET.get('search_type', None) == 'header':
+        query = request.GET.get('q')
+        filter = None
+        if query.find('-') > 0:
+            try:
+                queue, id = query.split('-')
+                id = int(id)
+            except ValueError:
+                id = None
+
+            if id:
+                filter = {'queue__slug': queue, 'id': id }
+        else:
+            try:
+                query = int(query)
+            except ValueError:
+                query = None
+
+            if query:
+                filter = {'id': int(query) }
+
+        if filter:
+            try:
+                ticket = Ticket.objects.get(**filter)
+                return HttpResponseRedirect(ticket.staff_url)
+            except Ticket.DoesNotExist:
+                # Go on to standard keyword searching
+                pass
+
+    saved_query = None
+    if request.GET.get('saved_query', None):
+        from_saved_query = True
+        try:
+            saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
+        except SavedSearch.DoesNotExist:
+            return HttpResponseRedirect(reverse('helpdesk_list'))
+        if not (saved_query.shared or saved_query.user == request.user):
+            return HttpResponseRedirect(reverse('helpdesk_list'))
+
+        try:
+            import pickle
+        except ImportError:
+            import cPickle as pickle
+        from helpdesk.lib import b64decode
+        query_params = pickle.loads(b64decode(str(saved_query.query)))
+    elif not (  'queue' in request.GET
+            or  'assigned_to' in request.GET
+            or  'status' in request.GET
+            or  'q' in request.GET
+            or  'sort' in request.GET
+            or  'sortreverse' in request.GET
+                ):
+
+        # Fall-back if no querying is being done, force the list to only
+        # show open/reopened/resolved (not closed) cases sorted by creation
+        # date.
+
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3]},
+            'sorting': 'created',
+        }
+    else:
+        queues = request.GET.getlist('queue')
+        if queues:
+            try:
+                queues = [int(q) for q in queues]
+                query_params['filtering']['queue__id__in'] = queues
+            except ValueError:
+                pass
+
+        owners = request.GET.getlist('assigned_to')
+        if owners:
+            try:
+                owners = [int(u) for u in owners]
+                query_params['filtering']['assigned_to__id__in'] = owners
+            except ValueError:
+                pass
+
+        statuses = request.GET.getlist('status')
+        if statuses:
+            try:
+                statuses = [int(s) for s in statuses]
+                query_params['filtering']['status__in'] = statuses
+            except ValueError:
+                pass
+
+        types = request.GET.getlist('types')
+        if types:
+            try:
+                types = [int(s) for s in types]
+                query_params['filtering']['type__in'] = types
+            except ValueError:
+                pass
+
+        date_from = request.GET.get('date_from')
+        if date_from:
+            query_params['filtering']['created__gte'] = date_from
+
+        date_to = request.GET.get('date_to')
+        if date_to:
+            query_params['filtering']['created__lte'] = date_to
+
+        ### KEYWORD SEARCHING
+        key_word_searching(request, context, query_params)
+
+        ### SORTING
+        data_sorting(request,query_params)
+        
+
+    tickets = Ticket.objects.select_related()
+    queue_choices = Queue.objects.all()
+
+    #query and paination
+    tickets = data_query_pagination(tickets, query_params)
+
+    search_message = ''
+
+    from helpdesk.lib import b64encode
+
+    try:
+        import pickle
+    except ImportError:
+        import cPickle as pickle
+    urlsafe_query = b64encode(pickle.dumps(query_params))
+
+    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
+
+    querydict = request.GET.copy()
+    querydict.pop('page', 1)
+
+    print "TICKET TYPES:"
+    print Ticket.TICKET_TYPE
+
+    return render_to_response('helpdesk/public_ticket_list.html',
+        RequestContext(request, dict(
+            context,
+            query_string=querydict.urlencode(),
+            tickets=tickets,
+            user_choices=User.objects.filter(is_active=True,is_staff=True),
+            queue_choices=queue_choices,
+            status_choices=Ticket.STATUS_CHOICES,
+            type_choices=Ticket.TICKET_TYPE,
+            urlsafe_query=urlsafe_query,
+            user_saved_queries=user_saved_queries,
+            query_params=query_params,
+            from_saved_query=from_saved_query,
+            saved_query=saved_query,
+            search_message=search_message,
+        )))
+
+
+def change_language(request):
+    return_to = ''
+    if 'return_to' in request.GET:
+        return_to = request.GET['return_to']
+
+    return render_to_response('helpdesk/public_change_language.html',
+        RequestContext(request, {'next': return_to}))
+
+def vote_up(request, id):
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('login'))
+    current_user = request.user
+    date = datetime.now()
+    ticket = Ticket.objects.get(id=id)
+    user_vote = UserVotes(current_user=current_user, ticket_voted=ticket, user_vote='1', vote_date=date)
+    ticket_new_value = ticket.votes + 1
+    #pull out the record with the same ticket_id and user_id as the currently logged in user
+    try:
+        voted_ticket = UserVotes.objects.get(ticket_voted=ticket,current_user=current_user)
+        messages.add_message(request, messages.SUCCESS, 'You can\'t vote on this ticket...See, you already voted for this ticket. Can you vote again? Certainly not!')
+    except UserVotes.DoesNotExist:
+        voted_ticket = None
+    if voted_ticket == None:
+        user_vote.save()
+        Ticket.objects.filter(id=id).update(votes=ticket_new_value)
+        messages.add_message(request, messages.SUCCESS, 'Vote counted. You just voted up for this ticket. Now, let us hope more folks will vote too!')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'),RequestContext(request))
+
+def vote_down(request, id):
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('login'))
+
+    current_user = request.user
+    date = datetime.now()
+    ticket = Ticket.objects.get(id=id)
+    user_vote = UserVotes(current_user=current_user, ticket_voted=ticket, user_vote='-1', vote_date=date)
+
+    ticket_new_value = ticket.votes - 1
+    try:
+        voted_ticket = UserVotes.objects.get(ticket_voted=ticket,current_user=current_user)
+        messages.add_message(request, messages.SUCCESS, 'You can\'t vote down this ticket...See, you already voted for this ticket. Can you vote again? Certainly not!')
+    except UserVotes.DoesNotExist:
+        voted_ticket = None
+
+    if voted_ticket == None:
+        user_vote.save()
+        Ticket.objects.filter(id=id).update(votes=ticket_new_value)
+        messages.add_message(request, messages.SUCCESS, 'Vote counted. You just voted down for this ticket. Now, let us hope more folks will vote too!')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'),RequestContext(request))
+
+###------>>>>>>>>>>>>>>>>>>>>>END OF PUBLIC VIEW<<<<<<<<<<<<<<<<----###
 def post_comment(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
@@ -401,13 +732,7 @@ def tickets_dependency(request,ticket_id):
 
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
-    query_params = {
-        'filtering': {},
-        'sorting': None,
-        'sortreverse': True,
-        'keyword': None,
-        'other_filter': None,
-        }
+    query_params = data_query_params()
 
     from_saved_query = False
 
@@ -529,27 +854,7 @@ def tickets_dependency(request,ticket_id):
     tickets = Ticket.objects.select_related()
     queue_choices = Queue.objects.all()
 
-    try:
-       ticket_qs = apply_query(tickets, query_params)
-    except ValidationError:
-       # invalid parameters in query, return default query
-        query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
-            'sorting': 'created',
-        }
-        ticket_qs = apply_query(tickets, query_params)
-
-    ticket_paginator = paginator.Paginator(ticket_qs, 15)
-    try:
-        page = int(request.GET.get('page', '1'))
-    except ValueError:
-         page = 1
-
-    try:
-        tickets = ticket_paginator.page(page)
-    except (paginator.EmptyPage, paginator.InvalidPage):
-        tickets = ticket_paginator.page(ticket_paginator.num_pages)
-
+    tickets = data_query_pagination(tickets, query_params)
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
         search_message = _('<p><strong>Note:</strong> The keyword search is case sensitive. This means the search will <strong>not</strong> be accurate.')
@@ -597,13 +902,7 @@ def ticket_list(request):
 
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
-    query_params = {
-        'filtering': {},
-        'sorting': None,
-        'sortreverse': True,
-        'keyword': None,
-        'other_filter': None,
-        }
+    query_params = data_query_params()
 
     from_saved_query = False
 
@@ -721,30 +1020,12 @@ def ticket_list(request):
         data_sorting(request,query_params)
 
     tickets = Ticket.objects.select_related()
+
     num_tickets = tickets.count()
     queue_choices = Queue.objects.all()
 
-    try:
-       ticket_qs = apply_query(tickets, query_params)
-    except ValidationError:
-       # invalid parameters in query, return default query
-        query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
-            'sorting': 'created',
-        }
-        ticket_qs = apply_query(tickets, query_params)
-
-
-    ticket_paginator = paginator.Paginator(ticket_qs, 4)
-    try:
-        page = int(request.GET.get('page', '1'))
-    except ValueError:
-         page = 1
-
-    try:
-        tickets = ticket_paginator.page(page)
-    except (paginator.EmptyPage, paginator.InvalidPage):
-        tickets = ticket_paginator.page(ticket_paginator.num_pages)
+    #Query and Pagination
+    tickets = data_query_pagination(request, tickets, query_params)
 
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
@@ -824,7 +1105,6 @@ def create_ticket(request):
     messages.add_message(request, messages.SUCCESS, 'We recommend that you search for your issue or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!')
 
     if request.method == 'POST':
-
         if request.user.is_staff:
 
             form = TicketForm(request.POST, request.FILES)
@@ -838,6 +1118,11 @@ def create_ticket(request):
         if form.is_valid():
 
             ticket = form.save(user=request.POST.get('assigned_to'))
+            #save tickettags
+            tags = request.POST.getlist('tags')
+            for tag in tags:
+                ticket.tags.add(tag)
+
             #ticket.comment = ''
             comment = ""
             f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
@@ -1444,13 +1729,7 @@ def kb_list(request):
 
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
-    query_params = {
-        'filtering': {},
-        'sorting': None,
-        'sortreverse': True,
-        'keyword': None,
-        'other_filter': None,
-        }
+    query_params = data_query_params()
 
     from_saved_query = False
 
@@ -1569,26 +1848,8 @@ def kb_list(request):
 
     kb_items = KBItem.objects.select_related()
     queue_choices = Queue.objects.all()
-    try:
-       kb_item_qs = apply_query(kb_items, query_params)
-    except ValidationError:
-       # invalid parameters in query, return default query
-        query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
-            'sorting': 'created',
-        }
-        kb_item_qs = apply_query(kb_items, query_params)
-
-    kb_item_paginator = paginator.Paginator(ticket_qs, 20)
-    try:
-        page = int(request.GET.get('page', '1'))
-    except ValueError:
-         page = 1
-
-    try:
-        kb_items = kb_item_paginator.page(page)
-    except (paginator.EmptyPage, paginator.InvalidPage):
-        kb_items = kb_item_paginator.page(kb_item_paginator.num_pages)
+    
+    kb_items = data_query_pagination(kb_items, )
 
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
@@ -1630,7 +1891,7 @@ def kb_list(request):
 
 ###-------------COMMON SUB-FUNCTIONS---------------------------------####
 
-#KEYWORD SEARCHING
+#Keyword Searching
 def key_word_searching(request, context, query_params):
     q = request.GET.get('q', None)
 
@@ -1646,9 +1907,9 @@ def key_word_searching(request, context, query_params):
                        )
 
         query_params['other_filter'] = qset
-    return qset
+    return
 
-#SORTING
+#Sorting
 def data_sorting(request,query_params):
     sort = request.GET.get('sort', None)
     if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
@@ -1659,7 +1920,7 @@ def data_sorting(request,query_params):
     query_params['sortreverse'] = sortreverse
 
     return
-#FILE ATTACHMENT
+#File Attachment
 def file_attachment(request,f):
     files = []
     if request.FILES:
@@ -1683,3 +1944,48 @@ def file_attachment(request,f):
                 except NotImplementedError:
                     pass
     return
+
+#Data querying and pagination
+def data_query_pagination(request, data_items, query_params):
+    try:
+        data_item_qs = apply_query(data_items, query_params)
+    except ValidationError:
+        # invalid parameters in query, return default query
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3]},
+            'sorting': 'created',
+        }
+        data_item_qs = apply_query(data_items, query_params)
+
+    data_item_paginator = paginator.Paginator(data_item_qs, 20)
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+        page = 1
+
+    try:
+        data_items = data_item_paginator.page(page)
+    except (paginator.EmptyPage, paginator.InvalidPage):
+        data_items = data_item_paginator.page(data_item_paginator.num_pages)
+
+    return data_items
+
+#Ticket query_params
+def data_query_params():
+    query_params = {
+        'filtering': {},
+        'sorting': None,
+        'sortreverse': True,
+        'keyword': None,
+        'other_filter': None,
+        }
+
+    return query_params
+
+#Save Ticket-tags
+# def save_ticket_tags(tags, ticket_id):
+#     for tag in tags:
+        
+#     return
+
+    
