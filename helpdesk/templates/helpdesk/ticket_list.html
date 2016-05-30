@@ -29,7 +29,10 @@
                 {{ ticket.description }}
                 </div>
                 <div class="panel-footer">
-                    <span class="glyphicon glyphicon-tags"></span> <strong> Tags</strong> | <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
+                    <span class="glyphicon glyphicon-tags"></span> <strong> Tags:</strong> {% for tag in ticket.tags.all %}
+                      <span class="label label-info">{{tag}}</span>
+                    {% endfor %} 
+    | <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
                 </div>
 
               </div>

@@ -302,7 +302,8 @@ class Tag(models.Model):
 
     def __unicode__(self):
         return self.name
-
+   
+        
 class Ticket(models.Model):
     """
     To allow a ticket to be entered as quickly as possible, only the
@@ -502,6 +503,9 @@ class Ticket(models.Model):
 
         super(Ticket, self).save(*args, **kwargs)
 
+# class Ticket_Tags(models.Model):
+#     ticket_id = models.IntegerField(_('Ticket Id'),default=0)
+#     tag_id = models.IntegerField(_('Tag Id'),default=0)
 
 class FollowUpManager(models.Manager):
     def private_followups(self):
