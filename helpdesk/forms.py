@@ -163,9 +163,11 @@ class TicketForm(forms.Form):
         required=False,
         label=_('Due on'),
         )
-    # tags = forms.ModelMultipleChoiceField(
-    #     queryset=Tag.objects.all(),
-    #     )
+    tags = forms.ModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        widget=forms.SelectMultiple(), 
+        required=False,
+        )
 
     def clean_due_date(self):
         data = self.cleaned_data['due_date']
