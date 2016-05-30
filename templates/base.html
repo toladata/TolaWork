@@ -74,6 +74,9 @@
                     {% endif %}
                     <li><a href='{% url 'helpdesk_submit' %}'><span class="glyphicon glyphicon-plus"></span> <span class="nav-text"><font class="font6">New Ticket</font></span></a></li>
                     {% if user.is_staff %}
+                    {% if user.is_staff %}
+                        <li><a href='{% url 'task_list' %}'><span class="glyphicon glyphicon-dashboard"></span> <span class="nav-text"><font class="font6">My Tasks</font></span></a></li>
+                    {% endif %}
                         <li><a href='{% url 'helpdesk_report_index' %}'><span class="glyphicon glyphicon-stats"></span> <span class="nav-text"><font class="font6">Stats</font></span></a></li>
                     {% endif %}
                     <li class="font8"><a href="#" class="dropdown-toggle " data-toggle="dropdown"><font class="font8">Knowledgebase</font><b class="caret"></b></a>

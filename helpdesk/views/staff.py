@@ -494,6 +494,17 @@ def post_comment(request, ticket_id):
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
+def taskview(request):
+
+    return render_to_response('tasks/task_index.html',
+        RequestContext(request, {
+
+
+        }))
+taskview = staff_member_required(taskview)
+
+
+
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     repo = queue_repo(ticket)
@@ -1025,7 +1036,36 @@ def ticket_list(request):
     queue_choices = Queue.objects.all()
 
     #Query and Pagination
-    tickets = data_query_pagination(request, tickets, query_params)
+
+    all_tickets_reported_by_current_user = ''
+    email_current_user = request.user.email
+    if email_current_user:
+        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
+            submitter_email=email_current_user,
+        ).order_by('status')
+        mine=len(all_tickets_reported_by_current_user)
+
+    try:
+        ticket_qs = apply_query(tickets, query_params)
+    except ValidationError:
+        # invalid parameters in query, return default query
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3]},
+            'sorting': 'created',
+        }
+        ticket_qs = apply_query(tickets, query_params)
+
+    ticket_paginator = paginator.Paginator(ticket_qs, 5)
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+        page = 1
+
+    try:
+        tickets = ticket_paginator.page(page)
+    except (paginator.EmptyPage, paginator.InvalidPage):
+        tickets = ticket_paginator.page(ticket_paginator.num_pages)
+
 
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
@@ -1052,7 +1092,8 @@ def ticket_list(request):
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
-            number_of_tickets = len(tickets),
+            number_of_tickets=len(ticket_qs),
+            mine=mine,
             num_tickets=num_tickets,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
@@ -1066,10 +1107,10 @@ def ticket_list(request):
             search_message=search_message,
 
         )))
-"""
-allow non-admin users to use saved_queries
-ticket_list = staff_member_required(ticket_list)
-"""
+    ticket_list = staff_member_required(ticket_list)
+
+
+
 
 def ticket_edit(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -1944,7 +1985,7 @@ def data_query_pagination(request, data_items, query_params):
         }
         data_item_qs = apply_query(data_items, query_params)
 
-    data_item_paginator = paginator.Paginator(data_item_qs, 20)
+    data_item_paginator = paginator.Paginator(data_item_qs, 5)
     try:
         page = int(request.GET.get('page', '1'))
     except ValueError:
@@ -1956,6 +1997,7 @@ def data_query_pagination(request, data_items, query_params):
         data_items = data_item_paginator.page(data_item_paginator.num_pages)
 
     return data_items
+    
 #File Attachment
 def file_attachment(request,f):
     files = []
@@ -1980,5 +2022,3 @@ def file_attachment(request,f):
                 except NotImplementedError:
                     pass
     return
-
-    
