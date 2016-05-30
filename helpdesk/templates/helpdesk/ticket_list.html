@@ -5,21 +5,27 @@
 
 
 {% endblock %}
-  
+
 {% block content %}
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <div class="container">
 <h3>Submitted Tickets</h3>
-    <strong> <span class="badge">{{ number_of_tickets }} Record(s) found</span></strong>
+
+ 
+    {% if not number_of_tickets%}
+    <strong> <span class="badge"> No records found</span></strong>
+    {%else%}
+    <strong> <span class="badge">{{number_of_tickets }} Record(s) found</span></strong>
+    {%endif%}
+
 <!-- main div -->
   <div class="ticket_cover">
         <div class="col-md-9 col-sm-9 ticket_right">
-
             {% for ticket in tickets.object_list %}
               <div class="panel panel-info">
                 <div class="panel-heading"> <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}}</a> <strong class="font8"> {{ ticket.title }} </strong> <br>
                 Reported on {{ ticket.created | date}}, {{ ticket.created | time}} by {{ ticket.submitter_email }}  </div>
-                <div class="panel-body"> 
+                <div class="panel-body">
                 {{ ticket.description }}
                 </div>
                 <div class="panel-footer">
@@ -28,26 +34,27 @@
 
               </div>
             {% endfor %}
+
             <!-- start paginator -->
-            <div >
+          <div>
                <ul class="pagination">
                  {% if tickets.has_previous %}
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "<<" %} </a></li>
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {{tickets.previous_page_number}} </a></li>
                  {% endif %}
                   {% blocktrans with tickets.number as ticket_num %}
-                      <li><a class="active" href=" page= {tickets.paginator.num_pages as num_pages %} "> {{ ticket_num }}</a></li> 
+                      <li><a class="active" href=" page= {tickets.paginator.num_pages as num_pages %} "> {{ ticket_num }}</a></li>
                   {% endblocktrans %}
                  {% if tickets.has_next %}
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{{ tickets.next_page_number }}</a></li>
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans ">>" %}</a></li>
 
                  {% endif %}
-                </ul>
 
+                </ul>
+               
             </div>
             <!-- end paginator -->
-
         </div>
         <div class="col-md-3 col-sm-3 ">
        <!-- start search -->
@@ -64,31 +71,34 @@
           <!-- start filters -->
           <div>
             <div class="panel panel-info ">
-              <div class="panel-heading"> 
+              <div class="panel-heading">
                 <strong>Issues <span class="badge">{{ num_tickets }}</span></strong>
                 <a href="/helpdesk/tickets/submit">
-                  <div class="ticket_issues"> 
+                  <div class="ticket_issues">
                     <span class="glyphicon glyphicon-plus"></span>New Issue
                   </div>
                 </a>
               </div>
-              <div class="panel-body"> 
-              My Issues
-                   </div>
+              <div class="panel-body sort_panels">
+                Issues Created By Me <strong> <span class="badge col-md-offset-3">{{ mine }}</span></strong>
+              </div>
+              <div class="panel-body">
+                Issues Assigned to Me
+              </div>
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Sort By</strong></div>
                 <div class="panel-body sort_panels">
-                Most Up Votes 
+                Most Up Votes
                 </div>
                 <div class="panel-body">
-                Clear Filter and Sort 
+                Clear Filter and Sort
                 </div>
               </div>
               <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Issues By Year/Month</strong></div>
                 <div class="panel-body sort_panels">
-                <b><span class="glyphicon glyphicon-plus"></span></b>2016 
+                <b><span class="glyphicon glyphicon-plus"></span></b>2016
                 </div>
               </div>
               <div class="panel panel-info">
@@ -114,5 +124,5 @@
         </div>
 </div>
 </div>
-
+</div>
 {% endblock content %}
