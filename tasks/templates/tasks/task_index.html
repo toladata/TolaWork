@@ -1,0 +1,88 @@
+{% extends "base.html" %}{% load i18n %}
+{% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
+{% block helpdesk_head %}
+<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>
+
+
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<div class="container">
+<h3>My Tasks</h3>
+<!-- main div -->
+  <div class="home_cover">
+        <div class="col-md-9 col-sm-9 ">
+
+            {% for task in tasks.object_list %}
+              <div class="panel panel-info">
+                <div class="panel-heading"> <strong class="font8"> {{ tasks.name }} </strong> <br>
+                Created on {{ task.created | date}}, {{ task.created | time}} by {{ task.submitter_email }}  </div>
+                <div class="panel-body">
+                {{ task.note }}
+                </div>
+                <div class="panel-footer">
+                    <span class="glyphicon glyphicon-tags"></span> <strong> Tags</strong> | <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
+                </div>
+
+              </div>
+            {% endfor %}
+        </div>
+        <div class="col-md-3 col-sm-3 ticket_right">
+          <div class="search" >
+            <div id="tfheader">
+              <form class="navbar-form navbar-left" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
+                      <input type='text' name='q' size='15' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/>
+                  <button type="submit" class="tfbutton"><span class="glyphicon glyphicon-search"></span> </button>
+              </form>
+            </div>
+          </div>
+          <div>
+            <div class="panel panel-info ">
+              <div class="panel-heading">
+                <strong>Tasks <span class="badge">{{ tasks }}</span></strong>
+                <a href="/helpdesk/tickets/submit">
+                  <div class="ticket_issues">
+                    <span class="glyphicon glyphicon-plus"></span>New Task
+                  </div>
+                </a>
+              </div>
+              <div class="panel-body">
+              My Tasks
+              </div>
+            </div>
+            <div class="panel panel-info">
+                <div class="panel-heading"> <strong>Sort By</strong></div>
+                <div class="panel-body sort_panels">
+                Priority
+                </div>
+                <div class="panel-body">
+                Clear Filter and Sort
+                </div>
+              </div>
+              <div class="panel panel-info">
+                <div class="panel-heading"> <strong>Issues By Year/Month</strong></div>
+                <div class="panel-body sort_panels">
+                <b><span class="glyphicon glyphicon-plus"></span></b>2016
+                </div>
+              </div>
+
+              <div class="panel panel-info">
+                <div class="panel-heading"> <strong>Filter task By Status</strong></div>
+                <div class="panel-body sort_panels">
+                Active tasks
+                </div>
+                <div class="panel-body">
+                Completed tasks
+                </div>
+                  <div class="panel-body">
+                Cancelled
+                </div>
+              </div>
+          </div>
+
+        </div>
+</div>
+</div>
+
+{% endblock content %}

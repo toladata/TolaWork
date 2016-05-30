@@ -163,6 +163,17 @@ def post_comment(request, ticket_id):
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
+def taskview(request):
+
+    return render_to_response('tasks/task_index.html',
+        RequestContext(request, {
+
+
+        }))
+taskview = staff_member_required(taskview)
+
+
+
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     repo = queue_repo(ticket)
@@ -785,10 +796,10 @@ def ticket_list(request):
             search_message=search_message,
 
         )))
-"""
-allow non-admin users to use saved_queries
-ticket_list = staff_member_required(ticket_list)
-"""
+    ticket_list = staff_member_required(ticket_list)
+
+
+
 
 def ticket_edit(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
