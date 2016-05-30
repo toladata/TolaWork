@@ -735,6 +735,14 @@ def ticket_list(request):
     num_tickets = tickets.count()
     queue_choices = Queue.objects.all()
 
+    all_tickets_reported_by_current_user = ''
+    email_current_user = request.user.email
+    if email_current_user:
+        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
+            submitter_email=email_current_user,
+        ).order_by('status')
+        mine=len(all_tickets_reported_by_current_user)
+
     try:
        ticket_qs = apply_query(tickets, query_params)
     except ValidationError:
@@ -783,6 +791,7 @@ def ticket_list(request):
             query_string=querydict.urlencode(),
             tickets=tickets,
             number_of_tickets=len(ticket_qs),
+            mine=mine,
             num_tickets=num_tickets,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
