@@ -17,7 +17,7 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
-from tasks.models import Tasks
+from tasks.models import Task
 
 
 class TaskForm(forms.Form):
@@ -45,7 +45,7 @@ class TaskForm(forms.Form):
         )
 
     priority = forms.ChoiceField(
-        choices=Tasks.PRIORITY_CHOICES,
+        choices=Task.PRIORITY_CHOICES,
         required=False,
         initial='3',
         label=_('Priority'),
@@ -99,11 +99,11 @@ class TaskForm(forms.Form):
         Writes and returns a Ticket() object
         """
 
-        t = Tasks( task = self.cleaned_data['title'],
+        t = Task( task = self.cleaned_data['title'],
                     submitter_email = self.cleaned_data['submitter_email'],
                     created = timezone.now(),
                     completed_date=self.cleaned_data['completed_date'],
-                    status = Tasks.OPEN_STATUS,
+                    status = Task.OPEN_STATUS,
                     note = self.cleaned_data['Note'],
                     priority = self.cleaned_data['priority'],
                     due_date = self.cleaned_data['due_date'],

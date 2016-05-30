@@ -12,7 +12,7 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
-class Tasks(models.Model):
+class Task(models.Model):
 
 
     ACTIVE_STATUS = 1
@@ -62,7 +62,7 @@ class Tasks(models.Model):
         # If Item is being marked complete, set the completed_date
         if self.completed_date:
             self.completed_date = datetime.datetime.now()
-        super(Tasks, self).save()
+        super(Task, self).save()
 
     class Meta:
         ordering = ["priority"]
