@@ -15,7 +15,7 @@
   <div class="ticket_cover">
         <div class="col-md-9 col-sm-9 ">
 
-            {% for ticket in tickets.object_list %}
+            {% for ticket in tickets %}
               <div class="panel panel-info">
                 <div class="panel-heading"> <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}}</a> <strong class="font8"> {{ ticket.title }} </strong> <br>
                 Reported on {{ ticket.created | date}}, {{ ticket.created | time}} by {{ ticket.submitter_email }}  </div>
@@ -23,7 +23,10 @@
                 {{ ticket.description }}
                 </div>
                 <div class="panel-footer">
-                    <span class="glyphicon glyphicon-tags"></span> <strong> Tags</strong> | <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
+                    <span class="glyphicon glyphicon-tags"></span> <strong> Tags:</strong> {% for tag in ticket.tags.all %}
+                      <span class="label label-info">{{tag}}</span>
+                    {% endfor %} 
+    | <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
                 </div>
 
               </div>
