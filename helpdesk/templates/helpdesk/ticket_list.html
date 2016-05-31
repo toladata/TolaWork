@@ -11,7 +11,7 @@
 <div class="container">
 <h3>Submitted Tickets</h3>
 
- 
+
     {% if not number_of_tickets%}
     <strong> <span class="badge"> No records found</span></strong>
     {%else%}
@@ -31,7 +31,7 @@
                 <div class="panel-footer">
                     <span class="glyphicon glyphicon-tags"></span> <strong> Tags:</strong> {% for tag in ticket.tags.all %}
                       <span class="label label-info">{{tag}}</span>
-                    {% endfor %} 
+                    {% endfor %}
     | <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
                 </div>
 
@@ -55,7 +55,7 @@
                  {% endif %}
 
                 </ul>
-               
+
             </div>
             <!-- end paginator -->
         </div>
@@ -82,12 +82,18 @@
                   </div>
                 </a>
               </div>
+                <form action="" method="post">
               <div class="panel-body sort_panels">
-                Issues Created By Me <strong> <span class="badge col-md-offset-3">{{ mine }}</span></strong>
+                  <input type='radio' name='created_by_me' id='created_by_me'> Created By Me <strong> <span class="badge col-md-offset-3">{{ mine }}</span></strong>
+
               </div>
               <div class="panel-body">
-                Issues Assigned to Me
+                <input type='radio' name='assigned_to_me' id='assigned_to_me'> Assigned to Me <strong> <span class="badge col-md-offset-3">{{ assigned }}</span></strong>
               </div>
+                    <div class="panel-body">
+                        <input type='radio' name='resolved_by_me ' id='resolved_by_me'> Resolved By Me <strong> <span class="badge col-md-offset-3"></span></strong>
+                    </div>
+                    </form>
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Sort By</strong></div>

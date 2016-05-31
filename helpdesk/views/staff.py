@@ -1036,7 +1036,15 @@ def ticket_list(request):
     queue_choices = Queue.objects.all()
 
     #Query and Pagination
+# Tickets assigned to current user
+    assigned_to_me = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user,
+     ).exclude(
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+    )
+    assigned=len(assigned_to_me)
 
+# Tickets created by current user
     all_tickets_reported_by_current_user = ''
     email_current_user = request.user.email
     if email_current_user:
@@ -1044,6 +1052,7 @@ def ticket_list(request):
             submitter_email=email_current_user,
         ).order_by('status')
         mine=len(all_tickets_reported_by_current_user)
+
 
     try:
         ticket_qs = apply_query(tickets, query_params)
@@ -1094,6 +1103,7 @@ def ticket_list(request):
             tickets=tickets,
             number_of_tickets=len(ticket_qs),
             mine=mine,
+            assigned=assigned,
             num_tickets=num_tickets,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
