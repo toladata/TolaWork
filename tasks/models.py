@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User, Group
 from django.conf import settings
 from datetime import datetime
+from django.utils import timezone
 from helpdesk.models import Queue
 from django.utils.translation import ugettext_lazy as _
 
@@ -38,10 +39,10 @@ class Task(models.Model):
     )
 
     task = models.CharField(max_length=140)
-    created_date = models.DateField(auto_now=True)
-    due_date = models.DateField(blank=True, null=True, )
+    created_date = models.DateTimeField(auto_now=True)
+    due_date = models.DateTimeField(blank=True, null=True, )
     status = models.IntegerField(choices=STATUS_CHOICES, default=ACTIVE_STATUS)
-    completed_date = models.DateField(blank=True, null=True)
+    completed_date = models.DateTimeField(blank=True, null=True)
     created_by = models.ForeignKey(User,blank=True,null=True,verbose_name=_('User'), related_name='task_created_by')
     assigned_to = models.ForeignKey(User,blank=True,null=True,verbose_name=_('User'),related_name='task_assigned_to')
     note = models.TextField(blank=True, null=True)
