@@ -10,19 +10,20 @@
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <div class="container">
 <h3>My Tasks</h3>
-<!-- main div -->
+
+
   <div class="home_cover">
         <div class="col-md-9 col-sm-9 ">
 
-            {% for task in tasks.object_list %}
+            {% for task in task %}
               <div class="panel panel-info">
-                <div class="panel-heading"> <strong class="font8"> {{ tasks.name }} </strong> <br>
-                Created on {{ task.created | date}}, {{ task.created | time}} by {{ task.submitter_email }}  </div>
+                <div class="panel-heading"> <strong><a href='{{ task.get_absolute_url }}'>{{ task.task | upper}}</a></strong><br>
+               Created on {{ task.created_date | date}}, {{ task.created_date | time}} by {{ task.created_by }}  </div>
                 <div class="panel-body">
                 {{ task.note }}
                 </div>
                 <div class="panel-footer">
-                    <span class="glyphicon glyphicon-tags"></span> <strong> Tags</strong> | <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
+                    <span class="glyphicon glyphicon-tags"></span> <strong> Comment</strong> | <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
                 </div>
 
               </div>
