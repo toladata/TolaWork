@@ -97,7 +97,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('question', tinymce.models.HTMLField(null=True, blank=True)),
-                ('answer', tinymce.models.HTMLField(null=True, blank=True)),
+                ('answer', tinymce.models.HTMLField(verbose_name='Answer')),
                 ('create_date', models.DateTimeField(null=True, blank=True)),
             ],
             options={
