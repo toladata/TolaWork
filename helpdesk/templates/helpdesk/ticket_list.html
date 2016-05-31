@@ -26,15 +26,15 @@
                 <div class="panel-heading"> <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}}</a> <strong class="font8"> {{ ticket.title }} </strong> <br>
                 Reported on {{ ticket.created | date}}, {{ ticket.created | time}} by {{ ticket.submitter_email }}  </div>
                 <div class="panel-body">
-                {{ ticket.description }}
+                <p class="description">{{ ticket.description }}</p>
                 </div>
                 <div class="panel-footer">
                     <span class="glyphicon glyphicon-tags"></span> <strong> Tags:</strong> {% for tag in ticket.tags.all %}
                       <span class="label label-info">{{tag}}</span>
                     {% endfor %}
-    | <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
+    |               <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
+                    <!-- <div class="read_more"><a href="#">Read More...</a></div> -->
                 </div>
-
               </div>
             {% endfor %}
 
@@ -84,14 +84,14 @@
               </div>
                 <form action="" method="post">
               <div class="panel-body sort_panels">
-                  <input type='radio' name='created_by_me' id='created_by_me'> Created By Me <strong> <span class="badge col-md-offset-3">{{ mine }}</span></strong>
+                  <input type='radio' name='created_by_me' id='created_by_me'> Created By Me <strong> <span class="badge issues_badge">{{ mine }}</span></strong>
 
               </div>
               <div class="panel-body">
-                <input type='radio' name='assigned_to_me' id='assigned_to_me'> Assigned to Me <strong> <span class="badge col-md-offset-3">{{ assigned }}</span></strong>
+                <input type='radio' name='assigned_to_me' id='assigned_to_me'> Assigned to Me <strong> <span class="badge issues_badge">{{ assigned }}</span></strong>
               </div>
                     <div class="panel-body">
-                        <input type='radio' name='resolved_by_me ' id='resolved_by_me'> Resolved By Me <strong> <span class="badge col-md-offset-3"></span></strong>
+                        <input type='radio' name='resolved_by_me ' id='resolved_by_me'> Resolved By Me <strong> <span class="badge issues_badge"></span></strong>
                     </div>
                     </form>
             </div>
@@ -134,4 +134,42 @@
 </div>
 </div>
 </div>
+<script type="text/javascript">
+  $(document).ready(function() {
+      // Configure/customize these variables.
+      var showChar = 230;  // How many characters are shown by default
+      var ellipsestext = "...";
+      var moretext = "Show more >";
+      var lesstext = "Show less";
+      
+
+      $('.description').each(function() {
+          var content = $(this).html();
+   
+          if(content.length > showChar) {
+   
+              var c = content.substr(0, showChar);
+              var h = content.substr(showChar, content.length - showChar);
+   
+              var html = c  + ellipsestext+ '<span class="morecontent"><span>' + h + '</span><a href="" class="morelink read_more">' + moretext + '</a></span>';
+   
+              $(this).html(html);
+          }
+   
+      });
+   
+      $(".morelink").click(function(){
+          if($(this).hasClass("less")) {
+              $(this).removeClass("less");
+              $(this).html(moretext);
+          } else {
+              $(this).addClass("less");
+              $(this).html(lesstext);
+          }
+          $(this).parent().prev().toggle();
+          $(this).prev().toggle();
+          return false;
+      });
+  });
+</script>
 {% endblock content %}
