@@ -42,7 +42,7 @@
             <div class="panel panel-info ">
               <div class="panel-heading">
                 <strong>Tasks <span class="badge">{{ tasks }}</span></strong>
-                <a href="/helpdesk/tickets/submit">
+                <a href='{{ task.get_absolute_url }}'>
                   <div class="ticket_issues">
                     <span class="glyphicon glyphicon-plus"></span>New Task
                   </div>
