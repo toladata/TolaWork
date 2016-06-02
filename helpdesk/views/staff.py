@@ -847,6 +847,14 @@ def tickets_dependency(request,ticket_id):
                 query_params['filtering']['type__in'] = types
             except ValueError:
                 pass
+        votes = request.GET.getlist('votes')
+
+        if types:
+            try:
+                votes = [int(s) for s in votes]
+                query_params['filtering']['votes__in'] = votes
+            except ValueError:
+                pass
 
         date_from = request.GET.get('date_from')
         if date_from:

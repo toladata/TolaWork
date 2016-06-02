@@ -95,14 +95,43 @@
                       <option  value="created_by_me">Created By Me ({{ mine }})</option>
                       <option value="">Assigned to Me ({{ assigned }})</option>
                       <option value="">Resolved & Closed by Me ({{reclosed}})</option>
-                      </select>
+                  </select>
                 </div>
                 </form>
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Sort By</strong></div>
                 <div class="panel-body sort_panels">
-                Most Up Votes
+                
+                    <form method='get' action='./'>
+                    <select id='id_sort' name='sort'>
+                            <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
+                                {% trans "Created" %}
+                            </option>
+                            <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %}>
+                                {% trans "Title" %}
+                            </option>
+                            <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %}>
+                                {% trans "Queue" %}
+                            </option>
+                            <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
+                                {% trans "Status" %}
+                            </option>
+                            <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>
+                                {% trans "Priority" %}
+                            </option>
+                            <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %}>
+                                {% trans "Owner" %}
+                            </option>
+                            <option value='assigned_to'{% ifequal query_params.sorting "type"%} selected='selected'{% endifequal %}>
+                                {% trans "Type" %}
+                            </option>
+                            <option value='votes'{% ifequal query_params.sorting "votes"%} selected='selected'{% endifequal %}>
+                                {% trans "Most Vote Up" %}
+                            </option
+                        </select>
+                        <input class="btn btn-primary" type='submit' value='{% trans "Apply sort" %}' />
+                        </form>
                 </div>
                 <div class="panel-body">
                 Clear Filter and Sort
