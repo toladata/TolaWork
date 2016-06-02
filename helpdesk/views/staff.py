@@ -1053,7 +1053,16 @@ def ticket_list(request):
         ).order_by('status')
         mine=len(all_tickets_reported_by_current_user)
 
-
+# Tickets resolved by current user
+    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user, status=Ticket.CLOSED_STATUS)
+    resolved=len(tickets_closed_resolved)
+    unassigned_tickets = Ticket.objects.select_related('queue').filter(
+        assigned_to__isnull=True,
+    ).exclude(
+        status=Ticket.CLOSED_STATUS,
+    )
+    num_unassigned_tickets=len(unassigned_tickets)
     try:
         ticket_qs = apply_query(tickets, query_params)
     except ValidationError:
@@ -1104,7 +1113,10 @@ def ticket_list(request):
             number_of_tickets=len(ticket_qs),
             mine=mine,
             assigned=assigned,
+            resolved=resolved,
             num_tickets=num_tickets,
+            num_unassigned_tickets=num_unassigned_tickets,
+            reclosed=num_unassigned_tickets+resolved,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
             status_choices=Ticket.STATUS_CHOICES,
@@ -2032,3 +2044,4 @@ def file_attachment(request,f):
                 except NotImplementedError:
                     pass
     return
+

@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
+
 {% block helpdesk_head %}
 <style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>
 
@@ -7,6 +8,9 @@
 {% endblock %}
 
 {% block content %}
+{% load in_list %}
+
+
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <div class="container">
 <h3>Submitted Tickets</h3>
@@ -21,7 +25,7 @@
 <!-- main div -->
   <div class="ticket_cover">
         <div class="col-md-9 col-sm-9 ticket_right">
-            {% for ticket in tickets.object_list %}
+              {% for ticket in tickets.object_list %}
               <div class="panel panel-info">
                 <div class="panel-heading"> <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}}</a> <strong class="font8"> {{ ticket.title }} </strong> <br>
                 Reported on {{ ticket.created | date}}, {{ ticket.created | time}} by {{ ticket.submitter_email }}  </div>
@@ -37,6 +41,8 @@
                 </div>
               </div>
             {% endfor %}
+
+
 
             <!-- start paginator -->
           <div>
@@ -82,18 +88,16 @@
                   </div>
                 </a>
               </div>
-                <form action="" method="post">
+                <form action="" method="get" action="./" >
               <div class="panel-body sort_panels">
-                  <input type='radio' name='created_by_me' id='created_by_me'> Created By Me <strong> <span class="badge issues_badge">{{ mine }}</span></strong>
-
-              </div>
-              <div class="panel-body">
-                <input type='radio' name='assigned_to_me' id='assigned_to_me'> Assigned to Me <strong> <span class="badge issues_badge">{{ assigned }}</span></strong>
-              </div>
-                    <div class="panel-body">
-                        <input type='radio' name='resolved_by_me ' id='resolved_by_me'> Resolved By Me <strong> <span class="badge issues_badge"></span></strong>
-                    </div>
-                    </form>
+                  <select id="issues" name="my_issues">
+                      <option  value="" selected="selected">---See Issues---</option>
+                      <option  value="created_by_me">Created By Me ({{ mine }})</option>
+                      <option value="">Assigned to Me ({{ assigned }})</option>
+                      <option value="">Resolved & Closed by Me ({{reclosed}})</option>
+                      </select>
+                </div>
+                </form>
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Sort By</strong></div>
@@ -141,23 +145,23 @@
       var ellipsestext = "...";
       var moretext = "Show more >";
       var lesstext = "Show less";
-      
+
 
       $('.description').each(function() {
           var content = $(this).html();
-   
+
           if(content.length > showChar) {
-   
+
               var c = content.substr(0, showChar);
               var h = content.substr(showChar, content.length - showChar);
-   
+
               var html = c  + ellipsestext+ '<span class="morecontent"><span>' + h + '</span><a href="" class="morelink read_more">' + moretext + '</a></span>';
-   
+
               $(this).html(html);
           }
-   
+
       });
-   
+
       $(".morelink").click(function(){
           if($(this).hasClass("less")) {
               $(this).removeClass("less");
