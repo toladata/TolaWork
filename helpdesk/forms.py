@@ -30,10 +30,13 @@ from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, Ti
 
 class CommentTicketForm(forms.ModelForm):
     class Meta:
-        #associate model to ModelForm
         model = Ticket
-        #which fields do we need? not all fields in the model
         fields = ['title','description']
+
+class CommentFollowUpForm(forms.ModelForm):
+    class Meta:
+        model = FollowUp
+        fields = ['title','comment','new_status']
 
 class EditTicketForm(forms.ModelForm):
     class Meta:
@@ -96,7 +99,6 @@ class EditFollowUpForm(forms.ModelForm):
     class Meta:
         model = FollowUp
         exclude = ('date', 'user',)
-
 
 class TicketForm(forms.Form):
 

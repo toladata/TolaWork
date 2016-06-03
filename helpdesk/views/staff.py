@@ -38,10 +38,9 @@ except ImportError:
 
 import requests
 import json
-from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
+from helpdesk.forms import TicketForm, CommentTicketForm, CommentFollowUpForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
-from helpdesk.models import KBCategory, KBItem
+from helpdesk.models import Ticket, Queue, KBCategory, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
 from helpdesk.postfix import close_notify, open_notify, reopen_notify, resolve_notify, duplicate_notify
@@ -380,12 +379,10 @@ def vote_down(request, id):
         messages.add_message(request, messages.SUCCESS, 'Vote counted. You just voted down for this ticket. Now, let us hope more folks will vote too!')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'),RequestContext(request))
 
-###------>>>>>>>>>>>>>>>>>>>>>END OF PUBLIC VIEW<<<<<<<<<<<<<<<<----###
 def post_comment(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
-
-        form = CommentTicketForm(request.POST)
+        form = CommentFollowUpForm(request.POST)
 
         if form.is_valid():
             ticket_id = ticket.id
@@ -486,7 +483,8 @@ def post_comment(request, ticket_id):
                                      github_issue_url=github_url, type=type, votes=votes,
                                      error_msg=error, slack_status=slack_status)
             update_comments.save(update_fields=['status'])
-            new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status, )
+
+            new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status)
             new_followup.save()
 
             #Attch a File
