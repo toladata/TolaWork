@@ -32,6 +32,10 @@ class CommentTicketForm(forms.ModelForm):
         model = Ticket
         #which fields do we need? not all fields in the model
         fields = ['title','description']
+class CommentFollowUpForm(forms.ModelForm):
+    class Meta:
+        model = FollowUp
+        fields = ['title','comment', 'new_status']
 
 class EditTicketForm(forms.ModelForm):
     class Meta:
