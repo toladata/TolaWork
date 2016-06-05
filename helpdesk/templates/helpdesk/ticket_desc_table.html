@@ -47,13 +47,24 @@
                                     <th>{% trans "Description of Issue:" %}</th>
                                     <td colspan="3"><textarea name="description" rows="4" cols="40"> {{ ticket.description|escape }} </textarea></td>
                                 </tr>
-
+ 
 
                                 <tr>
                                     <th>{% trans "Submitter Email:" %}</th>
                                     <td colspan="3"><input type='text' name='email' id='id_email' size='30' value='{{ ticket.submitter_email|escape }}' /></td>
                                     <th>{% trans "Due Date:" %}</th>
                                     <td colspan="3">{{ form.due_date }}</td>
+                                </tr>
+                                <tr>
+                                    <th>{% trans "Tags:" %}</th>
+                                     <td colspan="8">
+                                            <select class = "col-md-12" multiple = "multiple" id='id_tags' name='tags'>
+                                                {% for q in tags %}
+                                                    <option value='{{ q.id }}'{% endfor %} {{form.tags }}
+                                                    </option>
+                                            </select>
+                                    </td>
+                
                                 </tr>
                                 <tr>
                                     <td colspan="8"><input class="btn btn-primary" type='submit' value='{% trans "Save Changes" %}' /></td>
@@ -179,13 +190,28 @@
         {% endfor %}
     </td>
 </tr>
+<tr>
+    <th>{% trans "Tags" %}</th>
+    <td>
+        {% for tag in ticket.tags.all %}
+          <span class="label label-info">{{tag}}</span>
+        {% endfor %} 
+    </td>
+</tr>
 
 <tr>
     <th>{% trans "Votes" %}</th>
-    <td>{{ ticket.votes }} &nbsp; <a href="{% url 'vote_up' ticket.id %}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>&nbsp; <a href="{% url 'vote_down' ticket.id %}""><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
+    <td>{{ ticket.votes }} &nbsp; <a href="{% url 'vote_up' ticket.id %}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>&nbsp; <a href="{% url 'vote_down' ticket.id %}"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
         <br>{% if messages %}{% for message in messages %}{{ message }}{% endfor %}{% endif %}
         <br>{{voted_ticket.vote_date}}
     </td>
 </tr>
 </tbody>
 </table>
+<script>
+    $("#id_tags").select2({
+                tags: true,
+                allowClear: false,
+
+        });
+</script>
