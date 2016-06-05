@@ -403,7 +403,7 @@ def post_comment(request, ticket_id):
                 status_text = 'OPEN'
 
                 if ticket.github_issue_id:
-                    #if there are comments, update github
+
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
@@ -413,11 +413,11 @@ def post_comment(request, ticket_id):
                 status_text = 'RE-OPENED'
 
                 if ticket.github_issue_id:
-                    #if there are comments, update github
+
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
-                    #Re-open issue in github
+
                     response = open_issue(repo,ticket)
 
                     if int(response) == 200:
@@ -435,11 +435,10 @@ def post_comment(request, ticket_id):
                 status_text = 'CLOSED'
 
                 if ticket.github_issue_id:
-                    #if there are comments, update github
+
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
-                    #close issue in github
                     response=close_issue(repo,ticket)
 
                     if int(response) == 200:
@@ -495,7 +494,7 @@ def post_comment(request, ticket_id):
             new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status)
             new_followup.save()
 
-            #Attch a File
+            #Attach a File
             file_attachment(request, new_followup)
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
@@ -508,8 +507,6 @@ def taskview(request):
 
         }))
 taskview = staff_member_required(taskview)
-
-
 
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -525,7 +522,6 @@ def send_to_github(request, ticket_id):
         print response
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
-
 
 #@method_decorator(staff_member_required)
 def delete_ticket(request, ticket_id):
@@ -1189,7 +1185,7 @@ def create_ticket(request):
             file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            #post_tola_slack(ticket.id)
+            post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
