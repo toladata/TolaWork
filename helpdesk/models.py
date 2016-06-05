@@ -373,7 +373,7 @@ class Ticket(models.Model):
     github_issue_id = models.CharField(max_length=255, null=True, blank=True)
     type = models.IntegerField(_('Ticket Type'), choices=TICKET_TYPE, default=PROBLEM, help_text="Type of Ticket")
     votes = models.IntegerField(default=0)
-    tags = models.ManyToManyField(Tag, related_name='+')
+    tags = models.ManyToManyField(Tag, related_name='ticket_tags', blank=True)
 
 
     def _get_assigned_to(self):
