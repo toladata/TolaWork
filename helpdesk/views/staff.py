@@ -28,29 +28,25 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
+
 from django.core import paginator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from helpdesk.forms import PublicTicketForm
+
 try:
     from django.utils import timezone
 except ImportError:
     from datetime import datetime as timezone
-
-import requests
-import json
 from helpdesk.forms import TicketForm, CommentTicketForm, CommentFollowUpForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, Queue, KBCategory, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
-from helpdesk.postfix import close_notify, open_notify, reopen_notify, resolve_notify, duplicate_notify
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
-
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
 
-###------>>>>>>>>>>>>>>>>>>>>>PUBLIC VIEW<<<<<<<<<<<<<<<<<<<<<<<----###
 def homepage(request):
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('login'))
@@ -379,6 +375,18 @@ def vote_down(request, id):
         messages.add_message(request, messages.SUCCESS, 'Vote counted. You just voted down for this ticket. Now, let us hope more folks will vote too!')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'),RequestContext(request))
 
+def email(ticket,comment, status_text):
+
+    if ticket.assigned_to:
+        assignee = ticket.assigned_to.email
+    else:
+        assignee = ticket.submitter_email
+
+    message = render_to_string('email/notify.txt', {
+            'ticket': ticket, 'status': status_text, 'comment': comment, 'assignee': assignee})
+    send_mail('[TolaWork] ' + ticket.title, message,'TolaWork <no-reply@tola.work>',[ticket.submitter_email, assignee],
+              fail_silently=False)
+
 def post_comment(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
@@ -392,17 +400,17 @@ def post_comment(request, ticket_id):
             status = request.POST.get('new_status')
 
             if int(status) == 1:
-                status_text = 'Open'
+                status_text = 'OPEN'
 
                 if ticket.github_issue_id:
                     #if there are comments, update github
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
-                open_notify(ticket,comment)
+                email(ticket,comment, status_text)
 
             elif int(status) == 2:
-                status_text = 'Re-Opened'
+                status_text = 'RE-OPENED'
 
                 if ticket.github_issue_id:
                     #if there are comments, update github
@@ -417,14 +425,14 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem re-opening the ticket in GitHub')
                     print response
-                reopen_notify(ticket,comment)
+                email(ticket,comment, status_text)
 
             elif int(status) == 3:
-                status_text = 'Resolved'
-                resolve_notify(ticket,comment)
+                status_text = 'RESOLVED'
+                email(ticket,comment, status_text)
 
             elif int(status) == 4:
-                status_text = 'Closed'
+                status_text = 'CLOSED'
 
                 if ticket.github_issue_id:
                     #if there are comments, update github
@@ -439,11 +447,11 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
                     print response
-                close_notify(ticket,comment)
+                email(ticket,comment, status_text)
 
             elif int(status) == 5:
-                status_text = 'Duplicate'
-                duplicate_notify(ticket,comment)
+                status_text = 'DUPLICATE'
+                email(ticket,comment, status_text)
 
             else:
                 status_text = 'Not a status'
