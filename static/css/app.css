@@ -151,7 +151,10 @@ margin-right: 0px
 {
     margin-bottom: 10px;
 }
-
+.font9
+{
+    text-align: center;
+}
 
 /*//end of fonts*/
 .collapselist
@@ -409,4 +412,15 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 }
 .morelink {
     display: block;
+}
+/*//tasks page*/
+.center
+{
+    text-align: right;
+}
+.scores ul li
+{
+    margin: 0px;
+    padding: 0px;
+    list-style: none;
 }
