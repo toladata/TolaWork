@@ -62,7 +62,7 @@ def email(ticket,comment, status_text):
 
     message = render_to_string('helpdesk/email/notify.txt', {
             'ticket': ticket, 'status': status_text, 'comment': comment, 'assignee': assignee})
-    send_mail('[TolaWork] ' + ticket.title, message,'no-reply@tola.work',[ticket.submitter_email, assignee],
+    send_mail('[TolaWork] ' + ticket.title, message,'TolaWork <no-reply@tola.work>',[ticket.submitter_email, assignee],
               fail_silently=False)
 
 def post_comment(request, ticket_id):
