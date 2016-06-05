@@ -151,7 +151,10 @@ margin-right: 0px
 {
     margin-bottom: 10px;
 }
-
+.font9
+{
+    text-align: center;
+}
 
 /*//end of fonts*/
 .collapselist
@@ -354,7 +357,7 @@ margin-right: 0px
     font-weight: bold;
     color: #fff;
 }
-.ticket_footer_link
+.issues_badge
 {
     float: right;
 }
@@ -399,3 +402,25 @@ ul.pagination li a.active {
 }
 
 ul.pagination li a:hover:not(.active) {background-color: #ddd;}
+/*// limiting numebr of words displayed in ticket description*/
+.read_more
+{
+    float: right;
+}
+.morecontent span {
+    display: none;
+}
+.morelink {
+    display: block;
+}
+/*//tasks page*/
+.center
+{
+    text-align: right;
+}
+.scores ul li
+{
+    margin: 0px;
+    padding: 0px;
+    list-style: none;
+}

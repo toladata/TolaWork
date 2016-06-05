@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
+
 {% block helpdesk_head %}
 <style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>
 
@@ -7,11 +8,14 @@
 {% endblock %}
 
 {% block content %}
+{% load in_list %}
+
+
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <div class="container">
 <h3>Submitted Tickets</h3>
 
- 
+
     {% if not number_of_tickets%}
     <strong> <span class="badge"> No records found</span></strong>
     {%else%}
@@ -21,22 +25,24 @@
 <!-- main div -->
   <div class="ticket_cover">
         <div class="col-md-9 col-sm-9 ticket_right">
-            {% for ticket in tickets.object_list %}
+              {% for ticket in tickets.object_list %}
               <div class="panel panel-info">
                 <div class="panel-heading"> <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}}</a> <strong class="font8"> {{ ticket.title }} </strong> <br>
                 Reported on {{ ticket.created | date}}, {{ ticket.created | time}} by {{ ticket.submitter_email }}  </div>
                 <div class="panel-body">
-                {{ ticket.description }}
+                <p class="description">{{ ticket.description }}</p>
                 </div>
                 <div class="panel-footer">
                     <span class="glyphicon glyphicon-tags"></span> <strong> Tags:</strong> {% for tag in ticket.tags.all %}
                       <span class="label label-info">{{tag}}</span>
-                    {% endfor %} 
-    | <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
+                    {% endfor %}
+    |               <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
+                    <!-- <div class="read_more"><a href="#">Read More...</a></div> -->
                 </div>
-
               </div>
             {% endfor %}
+
+
 
             <!-- start paginator -->
           <div>
@@ -55,7 +61,7 @@
                  {% endif %}
 
                 </ul>
-               
+
             </div>
             <!-- end paginator -->
         </div>
@@ -82,17 +88,50 @@
                   </div>
                 </a>
               </div>
+                <form action="" method="get" action="./" >
               <div class="panel-body sort_panels">
-                Issues Created By Me <strong> <span class="badge col-md-offset-3">{{ mine }}</span></strong>
-              </div>
-              <div class="panel-body">
-                Issues Assigned to Me
-              </div>
+                  <select id="issues" name="my_issues">
+                      <option  value="" selected="selected">---See Issues---</option>
+                      <option  value="created_by_me">Created By Me ({{ mine }})</option>
+                      <option value="">Assigned to Me ({{ assigned }})</option>
+                      <option value="">Resolved & Closed by Me ({{reclosed}})</option>
+                  </select>
+                </div>
+                </form>
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Sort By</strong></div>
                 <div class="panel-body sort_panels">
-                Most Up Votes
+
+                    <form method='get' action='./'>
+                    <select id='id_sort' name='sort'>
+                            <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
+                                {% trans "Created" %}
+                            </option>
+                            <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %}>
+                                {% trans "Title" %}
+                            </option>
+                            <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %}>
+                                {% trans "Queue" %}
+                            </option>
+                            <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
+                                {% trans "Status" %}
+                            </option>
+                            <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>
+                                {% trans "Priority" %}
+                            </option>
+                            <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %}>
+                                {% trans "Owner" %}
+                            </option>
+                            <option value='assigned_to'{% ifequal query_params.sorting "type"%} selected='selected'{% endifequal %}>
+                                {% trans "Type" %}
+                            </option>
+                            <option value='votes'{% ifequal query_params.sorting "votes"%} selected='selected'{% endifequal %}>
+                                {% trans "Most Vote Up" %}
+                            </option
+                        </select>
+                        <input class="btn btn-primary" type='submit' value='{% trans "Apply sort" %}' />
+                        </form>
                 </div>
                 <div class="panel-body">
                 Clear Filter and Sort
@@ -128,4 +167,42 @@
 </div>
 </div>
 </div>
+<script type="text/javascript">
+  $(document).ready(function() {
+      // Configure/customize these variables.
+      var showChar = 230;  // How many characters are shown by default
+      var ellipsestext = "...";
+      var moretext = "Show more >";
+      var lesstext = "Show less";
+
+
+      $('.description').each(function() {
+          var content = $(this).html();
+
+          if(content.length > showChar) {
+
+              var c = content.substr(0, showChar);
+              var h = content.substr(showChar, content.length - showChar);
+
+              var html = c  + ellipsestext+ '<span class="morecontent"><span>' + h + '</span><a href="" class="morelink read_more">' + moretext + '</a></span>';
+
+              $(this).html(html);
+          }
+
+      });
+
+      $(".morelink").click(function(){
+          if($(this).hasClass("less")) {
+              $(this).removeClass("less");
+              $(this).html(moretext);
+          } else {
+              $(this).addClass("less");
+              $(this).html(lesstext);
+          }
+          $(this).parent().prev().toggle();
+          $(this).prev().toggle();
+          return false;
+      });
+  });
+</script>
 {% endblock content %}

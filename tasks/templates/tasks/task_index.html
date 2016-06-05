@@ -8,64 +8,119 @@
 
 {% block content %}
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css">
 <div class="container">
 <h3>My Tasks</h3>
-<!-- main div -->
-  <div class="home_cover">
-        <div class="col-md-9 col-sm-9 ">
 
-            {% for task in tasks.object_list %}
-              <div class="panel panel-info">
-                <div class="panel-heading"> <strong class="font8"> {{ tasks.name }} </strong> <br>
-                Created on {{ task.created | date}}, {{ task.created | time}} by {{ task.submitter_email }}  </div>
-                <div class="panel-body">
-                {{ task.note }}
-                </div>
-                <div class="panel-footer">
-                    <span class="glyphicon glyphicon-tags"></span> <strong> Tags</strong> | <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
-                </div>
 
-              </div>
-            {% endfor %}
-        </div>
-        <div class="col-md-3 col-sm-3 ticket_right">
-          <div class="search" >
-            <div id="tfheader">
-              <form class="navbar-form navbar-left" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
-                      <input type='text' name='q' size='15' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/>
-                  <button type="submit" class="tfbutton"><span class="glyphicon glyphicon-search"></span> </button>
-              </form>
+  <div class="ticket_cover">
+        <div class="col-md-9 col-sm-9 ticket_right">
+         <!-- start search -->
+         <div class="col-md-12 row">
+           <div class="search col-md-8" >
+              <form class="input-group" id='searchform' method='get' action="">
+                  <input type="text" name='q' class="form-control" placeholder="Search Tasks" id='search_query'>
+                  <span class="input-group-btn">
+                    <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                  </span>
+                </form>
             </div>
-          </div>
+         </div>
+          <!-- end search -->
+          <!-- start table -->
+            <div class=" col-md-12 table-responsive">
+              <table class="table table-striped table-bordered">
+                <tr class="info">
+                  <td><strong>TASK TITLE</strong></td>
+                  <td><strong>START DATE</strong></td>
+                  <td><strong>DUE DATE</strong></td>
+                  <td><strong>DURATION</strong></td>
+                  <td><strong>STATUS</strong></td>
+                  <td><strong>ASSIGNED TO</strong></td>
+                </tr>
+                {% for task in task %}
+                <tr>
+                  <td><strong><a href= '{{ task.get_absolute_url }}'>{{ task.task | upper}}</a></strong></td>
+                  <td>{{ task.created_date | date}}</td>
+                  <td>{{ task.due_date | date}}</td>
+                  <td>Duration</td>
+                  <td>{{task.status}}</td>
+                  <td>{{task.assigned_to_id}}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                  <td colspan="6">
+                    <button class="btn btn-success" type="submit"><span class="glyphicon glyphicon-plus"></span><strong> Add Task</strong></button>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <!-- end table -->
+            <!-- start gaming -->
+            <div class="col-md-12 row">
+            <h3 class="font9">Problem solution Game</h3>
+              <div class="col-md-6">
+                <div class="panel panel-primary">
+                  <div class="panel-heading"><strong>Leaders Draw Board</strong></div>
+                  <div class="panel-body">
+                  <ol>
+                    <li >Participant 1</li>
+                    <li >Participant 2</li>
+                    <li >Participant 3</li>
+                    <li >Participant 4</li>
+                    <li >Participant 5</li>
+                  </ol>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="panel panel-primary scores">
+                  <div class="panel-heading"><strong>Personal performance</strong></div>
+                  <div class="panel-body">
+                  <ul>
+                    <li >My Points</li>
+                    <li >My Tasks</li>
+                    <li >My Assigned Tasks</li>
+                  </ul>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <!-- end gaming -->
+        </div>
+
+        <div class="col-md-3 col-sm-3 ticket_right">
           <div>
             <div class="panel panel-info ">
               <div class="panel-heading">
                 <strong>Tasks <span class="badge">{{ tasks }}</span></strong>
-                <a href="/helpdesk/tickets/submit">
-                  <div class="ticket_issues">
-                    <span class="glyphicon glyphicon-plus"></span>New Task
-                  </div>
-                </a>
+              </div>
+              <div class="panel-body sort_panels">
+              My Tasks
               </div>
               <div class="panel-body">
-              My Tasks
+              Due Tasks
               </div>
             </div>
             <div class="panel panel-info">
-                <div class="panel-heading"> <strong>Sort By</strong></div>
+                <div class="panel-heading"> <strong>Filter By Priority</strong></div>
                 <div class="panel-body sort_panels">
-                Priority
+                Normal
+                </div>
+                <div class="panel-body sort_panels">
+                High
                 </div>
                 <div class="panel-body">
-                Clear Filter and Sort
+                low
                 </div>
+            </div>
+            <div class="panel panel-info">
+              <div class="panel-heading"> <strong>Issues By Year/Month</strong></div>
+              <div class="panel-body sort_panels">
+              <b><span class="glyphicon glyphicon-plus"></span></b>2016
               </div>
-              <div class="panel panel-info">
-                <div class="panel-heading"> <strong>Issues By Year/Month</strong></div>
-                <div class="panel-body sort_panels">
-                <b><span class="glyphicon glyphicon-plus"></span></b>2016
-                </div>
-              </div>
+            </div>
 
               <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Filter task By Status</strong></div>

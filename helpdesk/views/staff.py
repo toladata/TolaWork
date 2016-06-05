@@ -843,6 +843,14 @@ def tickets_dependency(request,ticket_id):
                 query_params['filtering']['type__in'] = types
             except ValueError:
                 pass
+        votes = request.GET.getlist('votes')
+
+        if types:
+            try:
+                votes = [int(s) for s in votes]
+                query_params['filtering']['votes__in'] = votes
+            except ValueError:
+                pass
 
         date_from = request.GET.get('date_from')
         if date_from:
@@ -1032,8 +1040,37 @@ def ticket_list(request):
     queue_choices = Queue.objects.all()
 
     #Query and Pagination
+<<<<<<< HEAD
     mine = search_tickets_by_user(request)
+=======
+# Tickets assigned to current user
+    assigned_to_me = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user,
+     ).exclude(
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+    )
+    assigned=len(assigned_to_me)
 
+# Tickets created by current user
+    all_tickets_reported_by_current_user = ''
+    email_current_user = request.user.email
+    if email_current_user:
+        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
+            submitter_email=email_current_user,
+        ).order_by('status')
+        mine=len(all_tickets_reported_by_current_user)
+>>>>>>> 2537c6f387b4186241bcee41ea3097f181e6aa2d
+
+# Tickets resolved by current user
+    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user, status=Ticket.CLOSED_STATUS)
+    resolved=len(tickets_closed_resolved)
+    unassigned_tickets = Ticket.objects.select_related('queue').filter(
+        assigned_to__isnull=True,
+    ).exclude(
+        status=Ticket.CLOSED_STATUS,
+    )
+    num_unassigned_tickets=len(unassigned_tickets)
     try:
         ticket_qs = apply_query(tickets, query_params)
     except ValidationError:
@@ -1083,7 +1120,11 @@ def ticket_list(request):
             tickets=tickets,
             number_of_tickets=len(ticket_qs),
             mine=mine,
+            assigned=assigned,
+            resolved=resolved,
             num_tickets=num_tickets,
+            num_unassigned_tickets=num_unassigned_tickets,
+            reclosed=num_unassigned_tickets+resolved,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
             status_choices=Ticket.STATUS_CHOICES,
@@ -2017,7 +2058,6 @@ def file_attachment(request,f):
                 except NotImplementedError:
                     pass
     return
-
 #Filter and Search Tickets by Tags
 def filter_tickets_by_tags(taglist):
     tickets = Ticket.objects.annotate(count=Count('tags')).filter(tags=taglist[0])
@@ -2037,4 +2077,3 @@ def search_tickets_by_user(request,):
         my_tickets = len(all_tickets_reported_by_current_user)
 
     return my_tickets
-    
