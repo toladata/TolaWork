@@ -6,7 +6,7 @@ views/staff.py - The bulk of the application - provides most business logic and
 
 from __future__ import unicode_literals
 from datetime import datetime, timedelta
-
+from django.contrib.auth.decorators import login_required
 try:
     from django.contrib.auth import get_user_model
     User = get_user_model()
@@ -38,9 +38,9 @@ except ImportError:
 
 import requests
 import json
-from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
+from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
+from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Tag, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.models import KBCategory, KBItem
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
@@ -52,11 +52,10 @@ staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
 
 ###------>>>>>>>>>>>>>>>>>>>>>PUBLIC VIEW<<<<<<<<<<<<<<<<<<<<<<<----###
+@login_required
 def homepage(request):
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('login'))
 
-    if (request.user.is_staff or (request.user.is_authenticated())):
+    if (request.user.is_staff):
         try:
             if getattr(request.user.usersettings.settings, 'login_view_ticketlist', False):
                 return HttpResponseRedirect(reverse('helpdesk_list'))
@@ -88,7 +87,7 @@ def homepage(request):
         if queue:
             initial_data['queue'] = queue.id
 
-        if request.user.is_authenticated() and request.user.email:
+        if request.user.email:
             initial_data['submitter_email'] = request.user.email
 
         form = PublicTicketForm(initial=initial_data)
@@ -102,10 +101,8 @@ def homepage(request):
             'kb_categories': knowledgebase_categories
         }))
 
-
+@login_required
 def view_ticket(request):
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('login'))
     ticket_req = request.GET.get('ticket', '')
     ticket = False
     email = request.GET.get('email', '')
@@ -162,10 +159,8 @@ def view_ticket(request):
             'error_message': error_message
         }))
 
-
+@login_required
 def public_ticket_list(request):
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('login'))
     context = {}
 
     # Query_params will hold a dictionary of parameters relating to
@@ -292,7 +287,7 @@ def public_ticket_list(request):
     queue_choices = Queue.objects.all()
 
     #query and paination
-    tickets = data_query_pagination(tickets, query_params)
+    tickets = data_query_pagination(request, tickets, query_params)
 
     search_message = ''
 
@@ -338,9 +333,8 @@ def change_language(request):
     return render_to_response('helpdesk/public_change_language.html',
         RequestContext(request, {'next': return_to}))
 
+@login_required
 def vote_up(request, id):
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('login'))
     current_user = request.user
     date = datetime.now()
     ticket = Ticket.objects.get(id=id)
@@ -357,11 +351,8 @@ def vote_up(request, id):
         Ticket.objects.filter(id=id).update(votes=ticket_new_value)
         messages.add_message(request, messages.SUCCESS, 'Vote counted. You just voted up for this ticket. Now, let us hope more folks will vote too!')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'),RequestContext(request))
-
+@login_required
 def vote_down(request, id):
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('login'))
-
     current_user = request.user
     date = datetime.now()
     ticket = Ticket.objects.get(id=id)
@@ -459,6 +450,7 @@ def post_comment(request, ticket_id):
             resolution = ticket.resolution
             priority = ticket.priority
             due_date = ticket.due_date
+            tags = [t.pk for t in ticket.tags.all()]
             last_escalation = ticket.last_escalation
             assigned = ticket.assigned_to
             github_id = ticket.github_issue_id
@@ -484,7 +476,7 @@ def post_comment(request, ticket_id):
                                      last_escalation=last_escalation, assigned_to=assigned,
                                      queue=queue, github_issue_id=github_id, github_issue_number=github_no,
                                      github_issue_url=github_url, type=type, votes=votes,
-                                     error_msg=error, slack_status=slack_status)
+                                     error_msg=error, slack_status=slack_status, tags=tags)
             update_comments.save(update_fields=['status'])
             new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status, )
             new_followup.save()
@@ -605,8 +597,9 @@ def followup_delete(request, ticket_id, followup_id):
 followup_delete = staff_member_required(followup_delete)
 
 
+@login_required
 def view_ticket(request, ticket_id):
-    if not (request.user.is_authenticated() and request.user.is_active):
+    if not (request.user.is_active):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if ticket.github_issue_id:
@@ -668,7 +661,9 @@ def view_ticket(request, ticket_id):
     q = Queue.objects.all()
 
     # TODO: shouldn't this template get a form to begin with?
-    form = TicketForm(initial={'due_date':ticket_state.due_date})
+    tags = [t.pk for t in ticket.tags.all()]
+    form = TicketForm(initial={'due_date':ticket_state.due_date, 'tags':tags})
+    tags = Tag.objects.all()
 
     ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
 
@@ -676,6 +671,7 @@ def view_ticket(request, ticket_id):
         RequestContext(request, {
             'ticket': ticket_state,
             'form': form,
+            'tags': tags,
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
             'ticket_type': Ticket.TICKET_TYPE,
@@ -865,7 +861,7 @@ def tickets_dependency(request,ticket_id):
     tickets = Ticket.objects.select_related()
     queue_choices = Queue.objects.all()
 
-    tickets = data_query_pagination(tickets, query_params)
+    tickets = data_query_pagination(request, tickets, query_params)
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
         search_message = _('<p><strong>Note:</strong> The keyword search is case sensitive. This means the search will <strong>not</strong> be accurate.')
@@ -1036,14 +1032,7 @@ def ticket_list(request):
     queue_choices = Queue.objects.all()
 
     #Query and Pagination
-
-    all_tickets_reported_by_current_user = ''
-    email_current_user = request.user.email
-    if email_current_user:
-        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
-            submitter_email=email_current_user,
-        ).order_by('status')
-        mine=len(all_tickets_reported_by_current_user)
+    mine = search_tickets_by_user(request)
 
     try:
         ticket_qs = apply_query(tickets, query_params)
@@ -1131,17 +1120,22 @@ def ticket_edit(request, ticket_id):
             description = request.POST.get('description')
             email = request.POST.get('email')
             due_date = ticket.due_date
+            tags = request.POST.getlist('tags')
             update_comments = Ticket(id=ticket_id, title=title, description=description, assigned_to_id=owner,
                                      submitter_email=email, priority=priority, due_date=due_date,
                                      queue_id=queue, type=type, error_msg=error_msg)
             update_comments.save(update_fields=['title','queue_id','type','assigned_to_id','error_msg','priority','description','submitter_email', 'due_date'])
+            
+            #updating tags
+            Ticket.tags.through.objects.filter(ticket_id = ticket_id).delete()
+            for tag in tags:
+                ticket.tags.add(tag)
+                
+
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
+@login_required
 def create_ticket(request):
-    #user authentication
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('login'))
-
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     messages.add_message(request, messages.SUCCESS, 'We recommend that you search for your issue or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!')
 
@@ -1159,6 +1153,7 @@ def create_ticket(request):
         if form.is_valid():
 
             ticket = form.save(user=request.POST.get('assigned_to'))
+
             #save tickettags
             tags = request.POST.getlist('tags')
             for tag in tags:
@@ -1890,7 +1885,7 @@ def kb_list(request):
     kb_items = KBItem.objects.select_related()
     queue_choices = Queue.objects.all()
     
-    kb_items = data_query_pagination(kb_items, )
+    kb_items = data_query_pagination(request, kb_items,query_params )
 
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
@@ -2022,3 +2017,24 @@ def file_attachment(request,f):
                 except NotImplementedError:
                     pass
     return
+
+#Filter and Search Tickets by Tags
+def filter_tickets_by_tags(taglist):
+    tickets = Ticket.objects.annotate(count=Count('tags')).filter(tags=taglist[0])
+    for tag in taglist[1:]:
+        tickets = tickets.filter(taglist=tag)
+    tickets = tickets.filter(count=len(taglist))
+    return tickets
+
+#Search tickets submitted by a logged in User
+def search_tickets_by_user(request,):
+    all_tickets_reported_by_current_user = ''
+    email_current_user = request.user.email
+    if email_current_user:
+        all_tickets_reported_by_current_user = Ticket.objects.filter(
+            submitter_email = email_current_user,
+        ).order_by('status')
+        my_tickets = len(all_tickets_reported_by_current_user)
+
+    return my_tickets
+    
