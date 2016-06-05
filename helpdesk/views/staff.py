@@ -1040,10 +1040,8 @@ def ticket_list(request):
     queue_choices = Queue.objects.all()
 
     #Query and Pagination
-<<<<<<< HEAD
-    mine = search_tickets_by_user(request)
-=======
-# Tickets assigned to current user
+
+    # Tickets assigned to current user
     assigned_to_me = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
      ).exclude(
@@ -1051,17 +1049,10 @@ def ticket_list(request):
     )
     assigned=len(assigned_to_me)
 
-# Tickets created by current user
-    all_tickets_reported_by_current_user = ''
-    email_current_user = request.user.email
-    if email_current_user:
-        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
-            submitter_email=email_current_user,
-        ).order_by('status')
-        mine=len(all_tickets_reported_by_current_user)
->>>>>>> 2537c6f387b4186241bcee41ea3097f181e6aa2d
-
-# Tickets resolved by current user
+    # Tickets created by current user
+    mine = search_tickets_by_user(request)
+    
+    # Tickets resolved by current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user, status=Ticket.CLOSED_STATUS)
     resolved=len(tickets_closed_resolved)
