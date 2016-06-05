@@ -1125,7 +1125,7 @@ def ticket_edit(request, ticket_id):
                                      submitter_email=email, priority=priority, due_date=due_date,
                                      queue_id=queue, type=type, error_msg=error_msg)
             update_comments.save(update_fields=['title','queue_id','type','assigned_to_id','error_msg','priority','description','submitter_email', 'due_date'])
-            
+
             #updating tags
             Ticket.tags.through.objects.filter(ticket_id = ticket_id).delete()
             for tag in tags:
@@ -1168,7 +1168,7 @@ def create_ticket(request):
             file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            #post_tola_slack(ticket.id)
+            post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
