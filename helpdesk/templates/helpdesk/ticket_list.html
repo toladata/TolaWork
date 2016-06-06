@@ -48,19 +48,32 @@
           <div>
                <ul class="pagination">
                  {% if tickets.has_previous %}
-                     <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "<<" %} </a></li>
+                     <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "Previous" %} </a></li>
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {{tickets.previous_page_number}} </a></li>
                  {% endif %}
                   {% blocktrans with tickets.number as ticket_num %}
                       <li><a class="active" href=" page= {tickets.paginator.num_pages as num_pages %} "> {{ ticket_num }}</a></li>
                   {% endblocktrans %}
+                  
                  {% if tickets.has_next %}
-                     <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{{ tickets.next_page_number }}</a></li>
-                     <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans ">>" %}</a></li>
+                     <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}"> {{ tickets.next_page_number }}</a></li>
+                     {% blocktrans with tickets.paginator.num_pages as num_pages %}
+                      <li><a href="#">...</a></li>
+                    <li><a href="#">{{ num_pages }} </a></li>
+                  {% endblocktrans %}
+                     <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a></li>
 
                  {% endif %}
-
-                </ul>
+                 </ul>
+                 <!-- <div class="read_more">
+                 <ul class="pagination">
+                   <li><a class="active" href="#">5</a></li>
+                   <li><a href="#">10</a></li>
+                   <li><a href="#">20</a></li>
+                   <li><a href="#">per page</a></li>
+                 </ul>
+                 </div> -->
+                 
 
             </div>
             <!-- end paginator -->

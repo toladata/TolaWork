@@ -413,6 +413,7 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 .morelink {
     display: block;
 }
+
 /*//tasks page*/
 .center
 {
@@ -423,4 +424,41 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
     margin: 0px;
     padding: 0px;
     list-style: none;
+}
+
+/*ticket edit form*/
+.ticket_edit
+{
+    margin-bottom: 5px;
+}
+
+.ticket_edit label {
+    float: left;
+    text-align: left;
+}
+.ticket_padding
+{
+    margin-bottom: 13px;
+}
+.multi_select
+{
+    width:352px;
+}
+.ticket_form
+{
+    background-color: #d6f5f5;
+    position: relative;
+    overflow: hidden;
+    padding: 5px;
+    padding-top: 15px;
+    border-radius: 5px;
+}
+.ticket_form_cover
+{
+    position: relative;
+    border:1px solid#eee;
+    overflow: hidden;
+    padding: 5px;
+    border-radius: 5px;
+
 }
