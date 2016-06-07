@@ -382,9 +382,9 @@ def email(ticket,comment, status_text):
     else:
         assignee = ticket.submitter_email
 
-    message = render_to_string('email/notify.txt', {
+    message = render_to_string('email/notify.html', {
             'ticket': ticket, 'status': status_text, 'comment': comment, 'assignee': assignee})
-    send_mail('[TolaWork] ' + ticket.title, message,'TolaWork <no-reply@tola.work>',[ticket.submitter_email, assignee],
+    send_mail('[TolaWork] ' + ticket.title, message,'TolaData <toladatawork@gmail.com>',[ticket.submitter_email, assignee],
               fail_silently=False)
 
 def post_comment(request, ticket_id):
