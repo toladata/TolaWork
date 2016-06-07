@@ -102,22 +102,21 @@
                 </a>
               </div>
                 <form action="" method="get" action="./" >
-              <div class="panel-body sort_panels">
-                  <select id="issues" name="my_issues">
-                      <option  value="" selected="selected">---See Issues---</option>
-                      <option  value="created_by_me">Created By Me ({{ mine }})</option>
-                      <option value="">Assigned to Me ({{ assigned }})</option>
-                      <option value="">Resolved & Closed by Me ({{reclosed}})</option>
-                  </select>
-                </div>
+                  <div class="panel-body ">
+                      <select class="btn btn-default dropdown-toggle" id="issues" name="my_issues">
+                          <option  value="" selected="selected">---See Issues---</option>
+                          <option  value="created_by_me">Created By Me ({{ mine }})</option>
+                          <option value="">Assigned to Me ({{ assigned }})</option>
+                          <option value="">Resolved by Me ({{reclosed}})</option>
+                      </select>
+                    </div>
                 </form>
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Sort By</strong></div>
-                <div class="panel-body sort_panels">
-
+                <div class="panel-body ">
                     <form method='get' action='./'>
-                    <select id='id_sort' name='sort'>
+                        <select   class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
                             <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
                                 {% trans "Created" %}
                             </option>
@@ -141,37 +140,40 @@
                             </option>
                             <option value='votes'{% ifequal query_params.sorting "votes"%} selected='selected'{% endifequal %}>
                                 {% trans "Most Vote Up" %}
-                            </option
-                        </select>
-                        <input class="btn btn-primary" type='submit' value='{% trans "Apply sort" %}' />
+                            </option>
+                          </select>
+                         <input class="btn btn-primary read_more " type='submit' value='{% trans "Apply " %}' />
                         </form>
-                </div>
-                <div class="panel-body">
-                Clear Filter and Sort
                 </div>
               </div>
               <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Issues By Year/Month</strong></div>
                 <div class="panel-body sort_panels">
-                <b><span class="glyphicon glyphicon-plus"></span></b>2016
+                <b><span class="glyphicon glyphicon-plus"></span></b> 2016
                 </div>
               </div>
               <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Filter Issues By Type</strong></div>
-                <div class="panel-body sort_panels">
-                Feature Request
-                </div>
-                <div class="panel-body">
-                Suggestion
+                <div class="panel-body ">
+                <form>
+                <select class="btn btn-default dropdown-toggle">
+                    <option>Feature Request</option>
+                    <option>Suggestion</option>
+                  </select>
+                  <input class="btn btn-primary read_more " type='submit' value='{% trans "Apply " %}' />
+                </form>
                 </div>
               </div>
               <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Filter Issues By Status</strong></div>
-                <div class="panel-body sort_panels">
-                Feature Request
-                </div>
-                <div class="panel-body">
-                Suggestion
+                <div class="panel-body ">
+                <form>
+                  <select class="btn btn-default dropdown-toggle">
+                    <option>Feature Request</option>
+                    <option>Suggestion</option>
+                  </select>
+                  <input class="btn btn-primary read_more " type='submit' value='{% trans "Apply " %}' />
+                </form>
                 </div>
               </div>
           </div>

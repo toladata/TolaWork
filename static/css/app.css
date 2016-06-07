@@ -357,6 +357,10 @@ margin-right: 0px
     font-weight: bold;
     color: #fff;
 }
+.issues
+{
+    padding: 0px;
+}
 .issues_badge
 {
     float: right;
