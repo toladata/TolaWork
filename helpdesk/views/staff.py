@@ -407,6 +407,8 @@ def post_comment(request, ticket_id):
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
+
+                #email notification for 'Open' issue
                 email(ticket,comment, status_text)
 
             elif int(status) == 2:
@@ -418,6 +420,7 @@ def post_comment(request, ticket_id):
                     if not comment == '':
                         add_comments(comment,repo,ticket)
 
+                    #re-open issue in GitHUb
                     response = open_issue(repo,ticket)
 
                     if int(response) == 200:
@@ -425,10 +428,14 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem re-opening the ticket in GitHub')
                     print response
+
+                #email notification for 'Re-Opened' issue
                 email(ticket,comment, status_text)
 
             elif int(status) == 3:
                 status_text = 'RESOLVED'
+
+                #email notification for 'Resolved' issue
                 email(ticket,comment, status_text)
 
             elif int(status) == 4:
@@ -439,6 +446,8 @@ def post_comment(request, ticket_id):
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
+
+                    #close issue in GitHUb
                     response=close_issue(repo,ticket)
 
                     if int(response) == 200:
@@ -446,10 +455,14 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
                     print response
+
+                #email notification for 'Closed' issue
                 email(ticket,comment, status_text)
 
             elif int(status) == 5:
                 status_text = 'DUPLICATE'
+
+                #email notification for 'Duplicate' issue
                 email(ticket,comment, status_text)
 
             else:
@@ -611,9 +624,12 @@ def view_ticket(request, ticket_id):
     if not (request.user.is_authenticated() and request.user.is_active):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
     ticket = get_object_or_404(Ticket, id=ticket_id)
+
     if ticket.github_issue_id:
         repo = queue_repo(ticket)
+        #check status of ticket in GitHub
         response = get_issue_status(repo,ticket)
+        print "Response = " + str(response)
 
         if response == 200:
             #synced status wth github
