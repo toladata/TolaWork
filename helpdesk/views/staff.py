@@ -30,6 +30,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.core import paginator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.utils.safestring import mark_safe
 from helpdesk.forms import PublicTicketForm
 try:
     from django.utils import timezone
@@ -1041,7 +1042,7 @@ def ticket_list(request):
 
     #Query and Pagination
 
-    # Tickets assigned to current user
+# Tickets assigned to current user
     assigned_to_me = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
      ).exclude(
@@ -1771,9 +1772,12 @@ def category(request, slug):
             'items': items,
         }))
 
-
 def item(request, item):
+    
+    from django.utils.html import escape, format_html
     item = get_object_or_404(KBItem, pk=item)
+    item.answer = format_html(item.answer) 
+
     return render_to_response('helpdesk/kb_item.html',
         RequestContext(request, {
             'item': item
