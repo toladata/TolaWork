@@ -37,7 +37,7 @@
                     {% if item.category_id == category.id %}
                         <tr>
                             <td><a href='{{ item.get_absolute_url }}'>{{ item.title }}</a></td>
-                            <td>{{ item.answer | safe | urlize}}</a></td>
+                            <td>{{ item.answer | safe }}</a></td>
                             <td><span title='{{ ticket.created|date:"r" }}'>{{ item.last_updated }}</span></td>
 
                         </tr>
