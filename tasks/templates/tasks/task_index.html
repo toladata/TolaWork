@@ -111,16 +111,17 @@
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Filter By Priority</strong></div>
-                <div class="panel-body sort_panels">
-                Normal
+                <div class="panel-body ">
+                <form>
+                  <select class="btn btn-default dropdown-toggle">
+                    <option>Normal</option>
+                    <option>High</option>
+                    <option>Low</option>
+                  </select>
+                  <input class="btn btn-primary read_more " type='submit' value='{% trans "Apply " %}' />
+                </form>
                 </div>
-                <div class="panel-body sort_panels">
-                High
-                </div>
-                <div class="panel-body">
-                low
-                </div>
-            </div>
+             </div>
             <div class="panel panel-info">
               <div class="panel-heading"> <strong>Issues By Year/Month</strong></div>
               <div class="panel-body sort_panels">
@@ -130,14 +131,15 @@
 
               <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Filter task By Status</strong></div>
-                <div class="panel-body sort_panels">
-                Active tasks
-                </div>
-                <div class="panel-body">
-                Completed tasks
-                </div>
-                  <div class="panel-body">
-                Cancelled
+                <div class="panel-body ">
+                <form>
+                  <select class="btn btn-default dropdown-toggle">
+                    <option> Active tasks</option>
+                    <option>Completed tasks</option>
+                    <option>Cancelled</option>
+                  </select>
+                  <input class="btn btn-primary read_more " type='submit' value='{% trans "Apply " %}' />
+                </form>
                 </div>
               </div>
           </div>
