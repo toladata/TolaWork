@@ -86,7 +86,7 @@ def post_comment(request, ticket_id):
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
-                #send notification email
+                #email notification for 'Open' issue
                 email(ticket, comment, status_text)
 
             elif int(status) == 2:
@@ -97,6 +97,7 @@ def post_comment(request, ticket_id):
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
+
                     #Re-open issue in github
                     response = open_issue(repo,ticket)
 
@@ -105,12 +106,14 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem re-opening the ticket in GitHub')
                     print response
-                #send notification email
+
+                #email notification for 'Re-Opened' issue
                 email(ticket, comment, status_text)
 
             elif int(status) == 3:
                 status_text = 'RESOLVED'
-                #send notification email
+
+                #email notification for 'Resolved' issue
                 email(ticket, comment, status_text)
 
             elif int(status) == 4:
@@ -121,6 +124,7 @@ def post_comment(request, ticket_id):
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
+
                     #close issue in github
                     response=close_issue(repo,ticket)
 
@@ -129,12 +133,14 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
                     print response
-                #send notification email
+
+                #email notification for 'Closed' issue
                 email(ticket, comment, status_text)
 
             elif int(status) == 5:
                 status_text = 'DUPLICATE'
-                #send notification email
+
+                #email notification for 'Duplicate' issue
                 email(ticket, comment, status_text)
 
             else:
@@ -397,6 +403,8 @@ def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if ticket.github_issue_id:
         repo = queue_repo(ticket)
+
+        #check status of ticket in GitHub
         response = get_issue_status(repo,ticket)
 
         if response == 200:
