@@ -8,6 +8,10 @@ urlpatterns = patterns('helpdesk.views.staff',
         'ticket_list',
         name='helpdesk_list'),
 
+    url(r'^tickets/(?P<items_per_page>[0-9]+)/$',
+        'ticket_list',
+        name='helpdesk_list'),
+
     url(r'^tickets/submit/$',
         'create_ticket',
         name='helpdesk_submit'),

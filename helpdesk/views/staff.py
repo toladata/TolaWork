@@ -288,6 +288,7 @@ def public_ticket_list(request):
     queue_choices = Queue.objects.all()
 
     #query and paination
+
     tickets = data_query_pagination(request, tickets, query_params)
 
     search_message = ''
@@ -1040,8 +1041,6 @@ def ticket_list(request):
     num_tickets = tickets.count()
     queue_choices = Queue.objects.all()
 
-    #Query and Pagination
-
 # Tickets assigned to current user
     assigned_to_me = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
@@ -1073,7 +1072,14 @@ def ticket_list(request):
         }
         ticket_qs = apply_query(tickets, query_params)
 
-    ticket_paginator = paginator.Paginator(ticket_qs, 5)
+    #Change items per_page by a user
+    items_per_page = 5
+    user_choice_pageItems = request.GET.get('items_per_page')
+
+    if user_choice_pageItems:
+        items_per_page = user_choice_pageItems
+
+    ticket_paginator = paginator.Paginator(ticket_qs, items_per_page)
     try:
         page = int(request.GET.get('page', '1'))
     except ValueError:
@@ -1110,6 +1116,7 @@ def ticket_list(request):
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
+            items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
             mine=mine,
             assigned=assigned,
@@ -1773,7 +1780,6 @@ def category(request, slug):
         }))
 
 def item(request, item):
-    
     from django.utils.html import escape, format_html
     item = get_object_or_404(KBItem, pk=item)
     item.answer = format_html(item.answer) 

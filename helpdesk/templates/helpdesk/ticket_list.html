@@ -65,16 +65,24 @@
 
                  {% endif %}
                  </ul>
-                 <!-- <div class="read_more">
+                 <div class="read_more">
                  <ul class="pagination">
-                   <li><a class="active" href="#">5</a></li>
-                   <li><a href="#">10</a></li>
-                   <li><a href="#">20</a></li>
+                   <li>
+                      <a class = "{% if items_per_page == 5 %} active {% endif %}"
+                        href="{% url 'helpdesk_list' %}?items_per_page=5">5</a>
+                    </li>
+                   <li>
+                      <a class = "{% if items_per_page == 10 %} active {% endif %}"
+                        href="{% url 'helpdesk_list' %}?items_per_page=10">10 </a>
+                    </li>
+                   <li>
+                      <a class = "{% if items_per_page == 20 %} active {% endif %}"
+                        href="{% url 'helpdesk_list' %}?items_per_page=20" >20</a>
+                    </li>
                    <li><a href="#">per page</a></li>
                  </ul>
-                 </div> -->
+                 </div>
                  
-
             </div>
             <!-- end paginator -->
         </div>
