@@ -2,7 +2,7 @@
 
 Dear {{ ticket.submitter_email }},
 
-The status of your ticket #:{{ ticket.id }} - {{ ticket.title|escape }}, submitted to Tola.Work on {{ ticket.created|date:"r" }} has been changed to [{{ status }}].
+<p>The status of your ticket #:{{ ticket.id }} - {{ ticket.title|escape }}, submitted to Tola.Work on {{ ticket.created|date:"r" }} has been changed to [{{ status }}].<br/>
     -------------------
     Ticket Description: {{ ticket.description|escape }}
 
@@ -16,12 +16,12 @@ The status of your ticket #:{{ ticket.id }} - {{ ticket.title|escape }}, submitt
 
     Number of Votes: {{ ticket.votes}}
     -------------------
-
-To view this ticket in Tola.Work, click on the link below:
+</p>
+<p>To view this ticket in Tola.Work, click on the link below:
 http://dev.tola.work/helpdesk/tickets/{{ ticket.id }}/
 
 Remember to submit and vote on the tickets in Tola.Work or initiate a discussions on Tola-Users Slack group. By having the discussion in Slack, you're helping us keep decision transparent and allows all users to participate in topics they are interested in.
 Report your feedback in Tola.Work and use the 'Post to Slack' button to ask your team members to join in the discussions!
 
-Best regards from the Tola.Work Support team.
+Best regards from the Tola.Work Support team.</p>
 {% endblock content %}
