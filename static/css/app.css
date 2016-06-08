@@ -357,10 +357,7 @@ margin-right: 0px
     font-weight: bold;
     color: #fff;
 }
-.issues
-{
-    padding: 0px;
-}
+
 .issues_badge
 {
     float: right;
@@ -429,7 +426,15 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
     padding: 0px;
     list-style: none;
 }
-
+.modal-body
+{
+    position: absolute;
+    overflow: hidden;
+}
+.modal_button
+{
+    margin-top: 10px;
+}
 /*ticket edit form*/
 .ticket_edit
 {

@@ -55,13 +55,98 @@
                 {% endfor %} <tr>
                   <td colspan="6">
 
-                  <a href= '{{ task.tasks_submit }}' button class="btn btn-success" type="submit"><span class="glyphicon glyphicon-plus"></span></b><strong></strong> Create a Task</strong>  </button></a>
-
+                  <!-- <a href= '{{ task.tasks_submit }}'> --> <button class="btn btn-success" type="submit" data-toggle="modal" data-target="#myModal" ><b><span class="glyphicon glyphicon-plus"></span></b><strong></strong> Create a Task</strong>  </button><!-- </a>
+ -->
                   </td>
                 </tr>
               </table>
             </div>
             <!-- end table -->
+            <!-- Modal -->
+  <div class="modal fade " id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h3 class="modal-title font9">Add Task</h3>
+        </div>
+        <div class="modal-body">
+          <form>
+          <div class="col-md-12 row">
+          <div class="col-md-8 row ticket_edit">
+             <label class="col-md-3"><p><strong> {% trans "Title:" %}</strong></p></label>
+              <input class="col-md-9" type="text" id='' name="task_title">
+          </div>
+          </div>
+            <div class="col-md-12 row">
+                <div class="col-md-6 row ticket_edit">
+                    <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
+                    <input class="col-md-8" type="text" name="">
+                </div>
+                <div class="col-md-3 row ticket_edit">
+                    <label class="col-md-5"><p><strong>{% trans "Status:" %}</strong></p></label>
+                    <select class="col-md-7" id='' name="">
+                      <option>Active</option>
+                      <option>Reopened</option>
+                      <option>Completed</option>
+                      <option>Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3 row ticket_edit">
+                   <label class="col-md-5"><p><strong>{% trans "Priority:" %}</strong></p></label>
+                    <select class="col-md-7" id='' name="">
+                      <option>Normal</option>
+                      <option>High</option>
+                      <option>Low</option>
+                    </select>
+                </div>
+              </div>
+              <div class="col-md-12 row">
+                <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
+                  <input class="col-md-8" type="Date" name="">
+                </div>
+                <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong>{% trans "Completed Date:" %}</strong></p></label>
+                  <input class="col-md-8" type="Date" name="">
+                </div>
+              </div>
+              <div class="col-md-12 row">
+                <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong>{% trans "Created by:" %}</strong></p></label>
+                  <select class="col-md-7" name="">
+                    <option>Tola</option>
+                  </select><a href="" class="col-md-1" ><span class="glyphicon glyphicon-plus primary" title="Add New User"></span></a>
+                </div>
+                <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong></p></label>
+                  <select class="col-md-7" name="">
+                    <option>Tola</option>
+                  </select><a href="" class="col-md-1" ><span class="glyphicon glyphicon-plus primary" title="Add New User"></span></a>
+                </div>
+              </div>
+              <div class="col-md-12 row">
+                <div class="col-md-8 row ticket_edit">
+                  <label class="col-md-3"><p><strong>{% trans "Note:" %}</strong></p></label>
+                  <textarea class="col-md-9" rows="4" ></textarea>
+                </div>
+              </div>
+              <div class="col-md-12 row modal_button">
+                <label class= "col-md-6 row ticket_edit">
+                    <input class="btn btn-primary col-md-offset-4" type='submit' value='{% trans "Submit" %}' />
+                </label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
             <!-- start gaming -->
            <!-- <div class="col-md-12 row">
             <h3 class="font9">Task Solving Game</h3>
