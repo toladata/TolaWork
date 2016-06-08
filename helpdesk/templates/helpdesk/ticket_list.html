@@ -66,23 +66,22 @@
                  {% endif %}
                  </ul>
                  <div class="read_more">
-                 <ul class="pagination">
-                   <li>
-                      <a class = "{% if items_per_page == 5 %} active {% endif %}"
-                        href="{% url 'helpdesk_list' %}?items_per_page=5">5</a>
-                    </li>
-                   <li>
-                      <a class = "{% if items_per_page == 10 %} active {% endif %}"
-                        href="{% url 'helpdesk_list' %}?items_per_page=10">10 </a>
-                    </li>
-                   <li>
-                      <a class = "{% if items_per_page == 20 %} active {% endif %}"
-                        href="{% url 'helpdesk_list' %}?items_per_page=20" >20</a>
-                    </li>
-                   <li><a href="#">per page</a></li>
-                 </ul>
-                 </div>
-                 
+                   <ul class="pagination">
+                     <li>
+                        <a class = "{% if items_per_page == 5 %} active {% endif %}"
+                          href="{% url 'helpdesk_list' %}?items_per_page=5">5</a>
+                      </li>
+                     <li>
+                        <a class = "{% if items_per_page == 10 %} active {% endif %}"
+                          href="{% url 'helpdesk_list' %}?items_per_page=10">10 </a>
+                      </li>
+                     <li>
+                        <a class = "{% if items_per_page == 20 %} active {% endif %}"
+                          href="{% url 'helpdesk_list' %}?items_per_page=20" >20</a>
+                      </li>
+                     <li><a href="#">per page</a></li>
+                   </ul>
+                 </div> 
             </div>
             <!-- end paginator -->
         </div>
@@ -111,7 +110,7 @@
               </div>
                 <form action="" method="get" action="./" >
                   <div class="panel-body ">
-                      <select class="btn btn-default dropdown-toggle" id="issues" name="my_issues">
+                      <select class="btn btn-default form-control dropdown-toggle" id="issues" name="my_issues">
                           <option  value="" selected="selected">---See Issues---</option>
                           <option  value="created_by_me">Created By Me ({{ mine }})</option>
                           <option value="">Assigned to Me ({{ assigned }})</option>

@@ -1073,7 +1073,7 @@ def ticket_list(request):
         ticket_qs = apply_query(tickets, query_params)
 
     #Change items per_page by a user
-    items_per_page = 5
+    items_per_page = 5 
     user_choice_pageItems = request.GET.get('items_per_page')
 
     if user_choice_pageItems:
