@@ -4,21 +4,21 @@ Dear {{ ticket.submitter_email }},
 
 <p>The status of your ticket #:{{ ticket.id }} - {{ ticket.title|escape }}, submitted to Tola.Work on {{ ticket.created|date:"r" }} has been changed to [{{ status }}].<br/>
     -------------------<br/>
-    Ticket Description: {{ ticket.description|escape }}<br/>
+    <strong>Ticket Description:</strong> {{ ticket.description|escape }}<br/>
 
-    Assigned to: {{ assignee }}<br/>
+    <strong>Assigned to:</strong> {{ assignee }}<br/>
 
-    Priority: {{ ticket.get_priority_display }}<br/>
+    <strong>Priority:</strong> {{ ticket.get_priority_display }}<br/>
 
-    Type: {{ ticket.get_type_display }}<br/>
+    <strong>Type:</strong> {{ ticket.get_type_display }}<br/>
 
-    Comments: {{ comment|escape }}<br/>
+    <strong>Comments:</strong> {{ comment|escape }}<br/>
 
-    Number of Votes: {{ ticket.votes}}<br/>
+    <strong>Number of Votes:</strong> {{ ticket.votes}}<br/>
     -------------------<br/>
 </p>
 <p>To view this ticket in Tola.Work, click on the link below:<br/>
-http://dev.tola.work/helpdesk/tickets/{{ ticket.id }}/
+http://tola.work/helpdesk/tickets/{{ ticket.id }}/
 
 <br/>Remember to submit and vote on the tickets in Tola.Work or initiate a discussions on Tola-Users Slack group. By having the discussion in Slack, you're helping us keep decision transparent and allows all users to participate in topics they are interested in.
 Report your feedback in Tola.Work and use the 'Post to Slack' button to ask your team members to join in the discussions!
