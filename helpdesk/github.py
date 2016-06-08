@@ -41,7 +41,7 @@ def get_issue_status(repo,ticket):
         update_ticket.status = status
         update_ticket.save()
 
-    return status
+    return r.status_code
 
 def new_issue(repo,ticket):
 
