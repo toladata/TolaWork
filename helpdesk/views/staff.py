@@ -60,10 +60,10 @@ def email(ticket,comment, status_text):
     else:
         assignee = ticket.submitter_email
 
-    message = render_to_string('helpdesk/email/notify.txt', {
-            'ticket': ticket, 'status': status_text, 'comment': comment, 'assignee': assignee})
-    send_mail('[TolaWork] ' + ticket.title, message,'TolaWork <no-reply@tola.work>',[ticket.submitter_email, assignee],
-              fail_silently=False)
+    txt_message = render_to_string('email/notify.txt', {'ticket': ticket, 'status': status_text, 'comment': comment, 'assignee': assignee})
+    html_message = render_to_string('email/notify.html', {'ticket': ticket, 'status': status_text, 'comment': comment, 'assignee': assignee})
+
+    send_mail('[TolaWork] ' + ticket.title, txt_message,'TolaData <toladatawork@gmail.com>',[ticket.submitter_email, assignee],fail_silently=False, html_message=html_message)
 
 def post_comment(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
