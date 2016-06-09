@@ -8,17 +8,17 @@ urlpatterns = patterns('helpdesk.views.staff',
         'ticket_list',
         name='helpdesk_list'),
 
-    url(r'^tickets/(?P<items_per_page>[0-9]+)/$',
-        'ticket_list',
-        name='helpdesk_list'),
-
-    url(r'^tickets/submit/$',
+       url(r'^tickets/submit/$',
         'create_ticket',
         name='helpdesk_submit'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/$',
         'view_ticket',
         name='helpdesk_view'),
+
+    url(r'^tickets/(?P<page>[0-9]+)/$',
+        'ticket_list',
+        name='helpdesk_list'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/followup_edit/(?P<followup_id>[0-9]+)/$',
         'followup_edit',
