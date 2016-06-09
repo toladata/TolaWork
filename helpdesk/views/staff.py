@@ -141,6 +141,7 @@ def view_ticket(request):
 
                 return update_ticket(request, ticket_id, public=True)
 
+
             # redirect user back to this ticket if possible.
             redirect_url = ''
 
@@ -148,6 +149,7 @@ def view_ticket(request):
                 RequestContext(request, {
                     'ticket': ticket,
                     'next': redirect_url,
+
                 }))
 
     return render_to_response('helpdesk/public_view_form.html',
@@ -624,7 +626,7 @@ def view_ticket(request, ticket_id):
     if not (request.user.is_authenticated() and request.user.is_active):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
     ticket = get_object_or_404(Ticket, id=ticket_id)
-
+    progress=''
     if ticket.github_issue_id:
         repo = queue_repo(ticket)
         #check status of ticket in GitHub
@@ -643,7 +645,7 @@ def view_ticket(request, ticket_id):
         else:
             print 'Check ticket status in GitHub'
 
-    ticket_state = get_object_or_404(Ticket, id=ticket_id)
+
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
 
@@ -690,10 +692,23 @@ def view_ticket(request, ticket_id):
 
     ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
 
+
+    ticket_state = get_object_or_404(Ticket, id=ticket_id)
+    if ticket:
+        if request.user.is_active:
+            if ticket.assigned_to:
+                if ticket.status ==1:
+                    progress= "Ticket In Progress"
+                elif ticket.status == 2:
+                    progress = "Ticket reopened and is in progress"
+                else:
+                    progress = " "
+
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket_state,
             'form': form,
+            'progress': progress,
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
             'ticket_type': Ticket.TICKET_TYPE,
@@ -926,9 +941,7 @@ def tickets_dependency(request,ticket_id):
 
 
 def ticket_list(request):
-
     context = {}
-
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
     query_params = data_query_params()
@@ -1201,7 +1214,7 @@ def create_ticket(request):
             file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
+            #post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
