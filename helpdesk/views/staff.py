@@ -664,7 +664,7 @@ def view_ticket(request, ticket_id):
         else:
             print 'Check ticket status in GitHub'
 
-
+    ticket_state = get_object_or_404(Ticket, id=ticket_id)
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
 
@@ -712,7 +712,6 @@ def view_ticket(request, ticket_id):
     ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
 
 
-    ticket_state = get_object_or_404(Ticket, id=ticket_id)
     if ticket:
         if request.user.is_active:
             if ticket.assigned_to:
