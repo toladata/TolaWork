@@ -54,7 +54,7 @@ class TaskForm(forms.Form):
         )
 
     status = forms.ChoiceField(
-        choices=Tasks.STATUS_CHOICES,
+        choices=Task.STATUS_CHOICES,
         required=True,
         initial='1',
         label=_('Task status'),

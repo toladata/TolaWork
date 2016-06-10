@@ -32,7 +32,7 @@ except ImportError:
 
 import requests
 import json
-from tasks.forms import TaskForm, CommentTaskForm, EditTaskForm,TaskFollowUp
+from tasks.forms import TaskForm
 from tasks.models import Task
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -76,7 +76,7 @@ def create_task(request):
             task = form.save(user=request.POST.get('assigned_to'))
 
             comment = ""
-            f = TaskFollowUp(task=task, date=timezone.now(), comment=comment)
+            f = TaskForm(task=task, date=timezone.now(), comment=comment)
             print f
             f.save()
 
