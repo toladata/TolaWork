@@ -6,6 +6,9 @@
     <tr class='row_tablehead'>
         <td colspan='2'>
             <h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
+             {%if ticket %}
+            <b>{{progress}}</b>
+            {%endif%}
             <span class='ticket_toolbar'>
                 {% if request.user.is_staff %}
                 <div>
