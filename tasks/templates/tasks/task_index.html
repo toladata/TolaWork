@@ -55,8 +55,10 @@
                 {% endfor %} <tr>
                   <td colspan="6">
 
-                  <!-- <a href= '{{ task.tasks_submit }}'> --> <button class="btn btn-success" type="submit" data-toggle="modal" data-target="#myModal" ><b><span class="glyphicon glyphicon-plus"></span></b><strong></strong> Create a Task</strong>  </button><!-- </a>
+
+                   <!--<a href="/tasks/tasks/submit">  --><button class="btn btn-success" type="submit" data-toggle="modal" data-target="#myModal" ><b><span class="glyphicon glyphicon-plus"></span></b><strong></strong> Create a Task</strong>  </button><!-- </a>
  -->
+
                   </td>
                 </tr>
               </table>
@@ -73,21 +75,23 @@
           <h3 class="modal-title font9">Add Task</h3>
         </div>
         <div class="modal-body">
-          <form>
+          <form action="{% url 'tasks_submit' %}" method="post" name="TaskForm" id="TaskForm">
+
           <div class="col-md-12 row">
           <div class="col-md-8 row ticket_edit">
-             <label class="col-md-3"><p><strong> {% trans "Title:" %}</strong></p></label>
-              <input class="col-md-9" type="text" id='' name="task_title">
+
+             <label class="col-md-3"><p><strong> {% trans "Task Title:" %}</strong></p></label>
+              <input class="col-md-9" type="text" id='task' name="task" value=" {{task.task }} ">
           </div>
           </div>
             <div class="col-md-12 row">
                 <div class="col-md-6 row ticket_edit">
                     <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
-                    <input class="col-md-8" type="text" name="">
+                    <input class="col-md-8" type="text" id = 'submitter_email' name="submitter_email" value="{{submitter_email}}">
                 </div>
                 <div class="col-md-3 row ticket_edit">
-                    <label class="col-md-5"><p><strong>{% trans "Status:" %}</strong></p></label>
-                    <select class="col-md-7" id='' name="">
+                    <label class="col-md-5"><p><strong>{% trans "Status:" %} </strong></p></label>
+                    <select class="col-md-7" id='status' name="status"  value=" {{status}} "  >
                       <option>Active</option>
                       <option>Reopened</option>
                       <option>Completed</option>
@@ -96,7 +100,7 @@
                 </div>
                 <div class="col-md-3 row ticket_edit">
                    <label class="col-md-5"><p><strong>{% trans "Priority:" %}</strong></p></label>
-                    <select class="col-md-7" id='' name="">
+                    <select class="col-md-7" id='priority' name="priority" value=" {{priority}}" >
                       <option>Normal</option>
                       <option>High</option>
                       <option>Low</option>
@@ -106,31 +110,36 @@
               <div class="col-md-12 row">
                 <div class="col-md-6 row ticket_edit">
                   <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
-                  <input class="col-md-8" type="Date" name="">
+                  <input class="col-md-8" type="Date" id = 'due_date' name="due_date" value=" {{due_date}}">
                 </div>
                 <div class="col-md-6 row ticket_edit">
                   <label class="col-md-4"><p><strong>{% trans "Completed Date:" %}</strong></p></label>
-                  <input class="col-md-8" type="Date" name="">
+                  <input class="col-md-8" type="Date" id = 'completed_date' name="completed_date" value = "{{ completed_date }}">
                 </div>
               </div>
               <div class="col-md-12 row">
                 <div class="col-md-6 row ticket_edit">
                   <label class="col-md-4"><p><strong>{% trans "Created by:" %}</strong></p></label>
-                  <select class="col-md-7" name="">
-                    <option>Tola</option>
-                  </select><a href="" class="col-md-1" ><span class="glyphicon glyphicon-plus primary" title="Add New User"></span></a>
+                  <select class="col-md-7" id = 'created_by' name="created_by" value=" {{ user }} ">
+                      <option>Tola1</option>
+                      <option>Tola2</option>
+                  </select>
+                    <a href="" class="col-md-1"> <span class="glyphicon glyphicon-plus primary" title="Add New User"></span></a>
                 </div>
                 <div class="col-md-6 row ticket_edit">
                   <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong></p></label>
-                  <select class="col-md-7" name="">
-                    <option>Tola</option>
+
+                  <select class="col-md-7" id = 'assigned_to' name="assigned_to" value =  >
+                       <option>Tola1</option>
+                      <option>Tola2</option>
+
                   </select><a href="" class="col-md-1" ><span class="glyphicon glyphicon-plus primary" title="Add New User"></span></a>
                 </div>
               </div>
               <div class="col-md-12 row">
                 <div class="col-md-8 row ticket_edit">
                   <label class="col-md-3"><p><strong>{% trans "Note:" %}</strong></p></label>
-                  <textarea class="col-md-9" rows="4" ></textarea>
+                  <textarea class="col-md-9" rows="4" id = 'note' name = "note" value = "{{ note }}"></textarea>
                 </div>
               </div>
               <div class="col-md-12 row modal_button">
@@ -138,6 +147,7 @@
                     <input class="btn btn-primary col-md-offset-4" type='submit' value='{% trans "Submit" %}' />
                 </label>
             </div>
+              {% csrf_token %}
           </form>
         </div>
         <div class="modal-footer">
@@ -185,13 +195,13 @@
           <div>
             <div class="panel panel-info ">
               <div class="panel-heading">
-                <strong>Tasks <span class="badge">{{ tasks }}</span></strong>
+                <strong>Tasks <span class="badge">{{ task.tasks }}</span></strong>
               </div>
               <div class="panel-body sort_panels">
               My Tasks
               </div>
               <div class="panel-body">
-              Due Tasks
+              Due Tasks <span class="badge">{{ task.overdue_status }}</span>
               </div>
             </div>
             <div class="panel panel-info">
