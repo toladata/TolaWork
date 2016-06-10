@@ -293,47 +293,19 @@ class TicketForm(forms.Form):
         messages_sent_to = []
 
         if t.submitter_email:
-            send_templated_mail(
-                'newticket_submitter',
-                context,
-                recipients=t.submitter_email,
-                sender=q.from_address,
-                fail_silently=True,
-
-                )
+            email(t,t.description,"OPEN",t.submitter_email)
             messages_sent_to.append(t.submitter_email)
 
-        if t.assigned_to != user and t.assigned_to and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
-            send_templated_mail(
-                'assigned_owner',
-                context,
-                recipients=t.assigned_to.email,
-                sender=q.from_address,
-                fail_silently=True,
-
-                )
+        if t.assigned_to and t.assigned_to != user and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
+            email(t,t.description,"OPEN",t.assigned_to.email)
             messages_sent_to.append(t.assigned_to.email)
 
         if q.new_ticket_cc and q.new_ticket_cc not in messages_sent_to:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=q.new_ticket_cc,
-                sender=q.from_address,
-                fail_silently=True,
-
-                )
+            email(t,t.description,"OPEN",q.new_ticket_cc)
             messages_sent_to.append(q.new_ticket_cc)
 
         if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc and q.updated_ticket_cc not in messages_sent_to:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=q.updated_ticket_cc,
-                sender=q.from_address,
-                fail_silently=True,
-
-                )
+            email(t,t.description,"OPEN",q.updated_ticket_cc)
 
         return t
 
