@@ -39,9 +39,10 @@ except ImportError:
     from datetime import datetime as timezone
 from helpdesk.forms import TicketForm, CommentTicketForm, CommentFollowUpForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, KBCategory, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
+from helpdesk.models import Ticket, UserVotes, Queue, UserSettings, KBCategory, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
+from helpdesk.email import email
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -56,9 +57,9 @@ def homepage(request):
             if getattr(request.user.usersettings.settings, 'login_view_ticketlist', False):
                 return HttpResponseRedirect(reverse('helpdesk_list'))
             else:
-                return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+                return HttpResponseRedirect(reverse('helpdesk_list'))
         except UserSettings.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+            return HttpResponseRedirect(reverse('helpdesk_list'))
 
     if request.method == 'POST':
         form = PublicTicketForm(request.POST, request.FILES)
@@ -375,18 +376,6 @@ def vote_down(request, id):
         messages.add_message(request, messages.SUCCESS, 'Vote counted. You just voted down for this ticket. Now, let us hope more folks will vote too!')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'),RequestContext(request))
 
-def email(ticket,comment, status_text):
-
-    if ticket.assigned_to:
-        assignee = ticket.assigned_to.email
-    else:
-        assignee = ticket.submitter_email
-
-    txt_message = render_to_string('email/notify.txt', {'ticket': ticket, 'status': status_text, 'comment': comment, 'assignee': assignee})
-    html_message = render_to_string('email/notify.html', {'ticket': ticket, 'status': status_text, 'comment': comment, 'assignee': assignee})
-
-    send_mail('[TolaWork] ' + ticket.title, txt_message,'TolaData <toladatawork@gmail.com>',[ticket.submitter_email, assignee],fail_silently=False, html_message=html_message)
-
 def post_comment(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
@@ -409,7 +398,13 @@ def post_comment(request, ticket_id):
                         add_comments(comment,repo,ticket)
 
                 #email notification for 'Open' issue
-                email(ticket,comment, status_text)
+                messages_sent_to = []
+                email(ticket,comment,status_text,ticket.submitter_email)
+                messages_sent_to.append(ticket.submitter_email)
+
+                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+                    email(ticket,comment,status_text,ticket.assigned_to.email)
+                    messages_sent_to.append(ticket.assigned_to.email)
 
             elif int(status) == 2:
                 status_text = 'RE-OPENED'
@@ -430,13 +425,25 @@ def post_comment(request, ticket_id):
                     print response
 
                 #email notification for 'Re-Opened' issue
-                email(ticket,comment, status_text)
+                messages_sent_to = []
+                email(ticket,comment,status_text,ticket.submitter_email)
+                messages_sent_to.append(ticket.submitter_email)
+
+                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+                    email(ticket,comment,status_text,ticket.assigned_to.email)
+                    messages_sent_to.append(ticket.assigned_to.email)
 
             elif int(status) == 3:
                 status_text = 'RESOLVED'
 
                 #email notification for 'Resolved' issue
-                email(ticket,comment, status_text)
+                messages_sent_to = []
+                email(ticket,comment,status_text,ticket.submitter_email)
+                messages_sent_to.append(ticket.submitter_email)
+
+                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+                    email(ticket,comment,status_text,ticket.assigned_to.email)
+                    messages_sent_to.append(ticket.assigned_to.email)
 
             elif int(status) == 4:
                 status_text = 'CLOSED'
@@ -457,13 +464,25 @@ def post_comment(request, ticket_id):
                     print response
 
                 #email notification for 'Closed' issue
-                email(ticket,comment, status_text)
+                messages_sent_to = []
+                email(ticket,comment,status_text,ticket.submitter_email)
+                messages_sent_to.append(ticket.submitter_email)
+
+                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+                    email(ticket,comment,status_text,ticket.assigned_to.email)
+                    messages_sent_to.append(ticket.assigned_to.email)
 
             elif int(status) == 5:
                 status_text = 'DUPLICATE'
 
                 #email notification for 'Duplicate' issue
-                email(ticket,comment, status_text)
+                messages_sent_to = []
+                email(ticket,comment,status_text,ticket.submitter_email)
+                messages_sent_to.append(ticket.submitter_email)
+
+                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+                    email(ticket,comment,status_text,ticket.assigned_to.email)
+                    messages_sent_to.append(ticket.assigned_to.email)
 
             else:
                 status_text = 'Not a status'

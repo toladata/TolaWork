@@ -293,19 +293,19 @@ class TicketForm(forms.Form):
         messages_sent_to = []
 
         if t.submitter_email:
-            email(t,t.description,"OPEN",t.submitter_email)
+            email(t,t.description,"NEW",t.submitter_email)
             messages_sent_to.append(t.submitter_email)
 
         if t.assigned_to and t.assigned_to != user and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
-            email(t,t.description,"OPEN",t.assigned_to.email)
+            email(t,t.description,"NEW",t.assigned_to.email)
             messages_sent_to.append(t.assigned_to.email)
 
         if q.new_ticket_cc and q.new_ticket_cc not in messages_sent_to:
-            email(t,t.description,"OPEN",q.new_ticket_cc)
+            email(t,t.description,"NEW",q.new_ticket_cc)
             messages_sent_to.append(q.new_ticket_cc)
 
         if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc and q.updated_ticket_cc not in messages_sent_to:
-            email(t,t.description,"OPEN",q.updated_ticket_cc)
+            email(t,t.description,"NEW",q.updated_ticket_cc)
 
         return t
 
