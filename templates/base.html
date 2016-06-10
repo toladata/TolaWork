@@ -134,8 +134,19 @@
             <p>{% block helpdesk %}{% endblock %}</p>
 
         </div><!-- .container collapse -->
-        <div id="footer" class="col-md-12 col-sm-12">
+
+        <div id="footer"  class="col-md-12 col-sm-12">
             <!-- Sticky Footer -->
+            <div class="container">
+                <div class="col-md-6 text-left">
+                    <a href="http://www.toladata.com" class="text-muted"><b>Tola</b>Data: Built by</a> <a href="http://www.mercycorps.org" class="text-muted">MercyCorps</a>
+                </div>
+
+                <div class="col-md-6 text-right"> <a href="http://tola.work/documentation" class="text-muted">Documentation</a> | <a href="http://tola.work/faq" class="text-muted">FAQ</a> | <a href="http://tola.work/helpdesk/tickets/submit/" class="text-muted">Feedback</a> | <a href="https://github.com/toladata/TolaActivity/blob/master/LICENSE" class="text-muted">License</a>
+                </div>
+            </div>
+       <!-- <div id="footer" class="col-md-12 col-sm-12">
+
             <div class="container">
                 <div class="col-md-4 text-left">
                     <a href="https://github.com/toladata/tola-work/blob/master/LICENSE" class="text-muted">GNU GENERAL PUBLIC LICENSE Version 2</a>
@@ -147,7 +158,9 @@
                     <a href="{% url 'documentation' %}" class="text-muted">Documentation</a> | <a href="{% url 'faq' %}" class="text-muted">FAQ</a>
                 </div>
             </div>
-        </div><!-- .footer collapse -->
+        </div> -->
+
+        <!-- .footer collapse -->
         <!-- jQuery UI (necessary for datepicker as well as dataTables library -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.10.4.min.js"></script>
         <!-- data tables jquery javascript library -->
