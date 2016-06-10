@@ -4,6 +4,7 @@ except ImportError:
     from io import StringIO
 
 from crispy_forms.helper import FormHelper
+from django.utils.datastructures import MultiValueDict, MergeDict
 from django import forms
 from easy_select2 import Select2Multiple
 from easy_select2 import select2_modelform
@@ -27,6 +28,13 @@ except ImportError:
 
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency,Tag
+from helpdesk.email import email
+
+class M2MSelect(forms.SelectMultiple):
+    def value_from_datadict(self, data, files, name):
+        if isinstance(data, (MultiValueDict, MergeDict)):
+            return data.getlist(name)
+        return data.get(name, None)
 
 class CommentTicketForm(forms.ModelForm):
     class Meta:
@@ -165,11 +173,7 @@ class TicketForm(forms.Form):
         required=False,
         label=_('Due on'),
         )
-    tags = forms.ModelMultipleChoiceField(
-        queryset=Tag.objects.all(),
-        widget=forms.SelectMultiple(), 
-        required=False,
-        )
+    tags = forms.ModelMultipleChoiceField(queryset=Tag.objects.all(),widget=M2MSelect, required=False,)
 
     def clean_due_date(self):
         data = self.cleaned_data['due_date']
@@ -281,9 +285,11 @@ class TicketForm(forms.Form):
             #     except NotImplementedError:
             #         pass
 
+
         context = safe_template_context(t)
         context['comment'] = f.comment
 
+        #send email notifications for new ticket
         messages_sent_to = []
 
         if t.submitter_email:
