@@ -27,7 +27,7 @@
         <div class="col-md-9 col-sm-9 ticket_right">
               {% for ticket in tickets.object_list %}
               <div class="panel panel-info">
-                <div class="panel-heading"> <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}}</a> <strong class="font8"> {{ ticket.title }} </strong> <br>
+                <div class="panel-heading"> <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong> </a> <br>
                 Reported on {{ ticket.created | date}}, {{ ticket.created | time}} by {{ ticket.submitter_email }}  </div>
                 <div class="panel-body">
                 <p class="description">{{ ticket.description }}</p>
@@ -161,7 +161,8 @@
               </div>
               <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Filter Issues By Type</strong></div>
-                <div class="panel-body ">
+
+                      <div class="panel-body ">
                 <form>
                 <select class="btn btn-default dropdown-toggle">
                     <option>Feature Request</option>
