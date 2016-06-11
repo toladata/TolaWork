@@ -667,12 +667,24 @@ def view_ticket(request, ticket_id):
     form = TicketForm(initial={'due_date':ticket_state.due_date, 'tags':tags})
     tags = Tag.objects.all()
 
+    progress = ''
+    if ticket:
+       if request.user.is_active:
+           if ticket.assigned_to:
+               if ticket.status ==1:
+                   progress= "Ticket In Progress"
+               elif ticket.status == 2:
+                   progress = "Ticket reopened and is in progress"
+               else:
+                   progress = " "
+
     ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket_state,
             'form': form,
+            'progress': progress,
             'tags': tags,
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
@@ -1108,6 +1120,17 @@ def ticket_list(request):
     querydict = request.GET.copy()
     querydict.pop('page', 1)
 
+    progress = ''
+    for ticket in tickets:
+       if request.user.is_active:
+           if ticket.assigned_to:
+               if ticket.status ==1:
+                   ticket.progress= "Ticket In Progress"
+               elif ticket.status == 2:
+                   ticket.progress = "Ticket reopened and is in progress"
+               else:
+                   ticket.progress = " "
+
     print "TICKET TYPES:"
     print Ticket.TICKET_TYPE
 
@@ -1116,6 +1139,7 @@ def ticket_list(request):
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
+            progress=progress,
             items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
             mine=mine,
