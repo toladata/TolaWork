@@ -11,4 +11,8 @@ urlpatterns = patterns('tasks.views',
     url(r'^tasks/submit/$',
         'create_task',
         name='task_submit'),
+
+    url(r'^tasks/task_list/$',
+        'task_list',
+        name='task_list'),
 )

@@ -11,8 +11,6 @@
 <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css">
 <div class="container">
 <h3>My Tasks</h3>
-
-
   <div class="ticket_cover">
         <div class="col-md-9 col-sm-9 ticket_right">
          <!-- start search -->
@@ -55,8 +53,10 @@
                 {% endfor %} <tr>
                   <td colspan="6">
 
-                  <!-- <a href= '{{ task.tasks_submit }}'> --> <button class="btn btn-success" type="submit" data-toggle="modal" data-target="#myModal" ><b><span class="glyphicon glyphicon-plus"></span></b><strong></strong> Create a Task</strong>  </button><!-- </a>
+
+                   <!--<a href="/tasks/tasks/submit">  --><button class="btn btn-success" type="submit" data-toggle="modal" data-target="#myModal" ><b><span class="glyphicon glyphicon-plus"></span></b><strong></strong> Create a Task</strong>  </button><!-- </a>
  -->
+
                   </td>
                 </tr>
               </table>
@@ -126,6 +126,7 @@
                     {% for user in assignable_users%}
                       <option value='{{user.id}}'>{{user.username}}</option>
                     {% endfor %}
+
                   </select><a href="" class="col-md-1" ><span class="glyphicon glyphicon-plus primary" title="Add New User"></span></a>
                 </div>
               </div>
@@ -188,13 +189,13 @@
           <div>
             <div class="panel panel-info ">
               <div class="panel-heading">
-                <strong>Tasks <span class="badge">{{ tasks }}</span></strong>
+                <strong>Tasks <span class="badge">{{ task.tasks }}</span></strong>
               </div>
               <div class="panel-body sort_panels">
               My Tasks
               </div>
               <div class="panel-body">
-              Due Tasks
+              Due Tasks <span class="badge">{{ task.overdue_status }}</span>
               </div>
             </div>
             <div class="panel panel-info">
