@@ -27,8 +27,16 @@
         <div class="col-md-9 col-sm-9 ticket_right">
               {% for ticket in tickets.object_list %}
               <div class="panel panel-info">
-                <div class="panel-heading"> <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}}</a> <strong class="font8"> {{ ticket.title }} </strong> <br>
-                Reported on {{ ticket.created | date}}, {{ ticket.created | time}} by {{ ticket.submitter_email }}  </div>
+                <div class="panel-heading"> 
+                      <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}}</a> <strong class="font8"> {{ ticket.title }} </strong> 
+                      {% if ticket.progress %}
+                      <div class="read_more">
+                        <strong> <span class="badge">{{ticket.progress}} </span></strong>
+                      </div>
+                      {% endif %}
+                      <br>
+                    Reported on {{ ticket.created | date}}, {{ ticket.created | time}} by {{ ticket.submitter_email }}  
+                </div>
                 <div class="panel-body">
                 <p class="description">{{ ticket.description }}</p>
                 </div>
@@ -37,7 +45,6 @@
                       <span class="label label-info">{{tag}}</span>
                     {% endfor %}
     |               <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
-                    <!-- <div class="read_more"><a href="#">Read More...</a></div> -->
                 </div>
               </div>
             {% endfor %}
