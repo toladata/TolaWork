@@ -5,6 +5,11 @@
 <thead>
     <tr class='row_tablehead'>
         <td colspan='2'>
+            {% if progress %}
+              <div class="read_more">
+                <strong> <span class="badge">{{progress}} </span></strong>
+              </div>
+            {% endif %}
             <h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
             <span class='ticket_toolbar'>
                 {% if request.user.is_staff %}

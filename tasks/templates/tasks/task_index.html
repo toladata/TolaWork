@@ -11,8 +11,6 @@
 <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css">
 <div class="container">
 <h3>My Tasks</h3>
-
-
   <div class="ticket_cover">
         <div class="col-md-9 col-sm-9 ticket_right">
          <!-- start search -->
@@ -39,7 +37,7 @@
                   <td><strong>Priority</strong></td>
                   <td><strong>Assigned To</strong></td>
                 </tr>
-                {% for task in task %}
+                {% for task in tasks %}
 
                 <tr>
                   <td><strong><a href= '{{ task.get_absolute_url }}'>{{ task.task }}</a></strong></td>
@@ -75,63 +73,59 @@
           <h3 class="modal-title font9">Add Task</h3>
         </div>
         <div class="modal-body">
-          <form action="{% url 'tasks_submit' %}" method="post" name="TaskForm" id="TaskForm">
-
+          <form method= "POST" action='{% url 'task_submit'%}'>
           <div class="col-md-12 row">
           <div class="col-md-8 row ticket_edit">
-
-             <label class="col-md-3"><p><strong> {% trans "Task Title:" %}</strong></p></label>
-              <input class="col-md-9" type="text" id='task' name="task" value=" {{task.task }} ">
+             <label class="col-md-3"><p><strong> {% trans "Title:" %}</strong></p></label>
+              <input class="col-md-9" type="text" id='id_title' name='title'>
           </div>
           </div>
             <div class="col-md-12 row">
                 <div class="col-md-6 row ticket_edit">
                     <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
-                    <input class="col-md-8" type="text" id = 'submitter_email' name="submitter_email" value="{{submitter_email}}">
+                    <input class="col-md-8" type="text" name='submitter_mail' id='id_submitter_mail' value="{{created_by.email}}">
                 </div>
                 <div class="col-md-3 row ticket_edit">
-                    <label class="col-md-5"><p><strong>{% trans "Status:" %} </strong></p></label>
-                    <select class="col-md-7" id='status' name="status"  value=" {{status}} "  >
-                      <option>Active</option>
-                      <option>Reopened</option>
-                      <option>Completed</option>
-                      <option>Cancelled</option>
-                    </select>
+                    <label class="col-md-5"><p><strong>{% trans "Status:" %}</strong></p></label>
+                    <select class="col-md-7" id='id_status' name='status'>
+                      <option value='1'>Active</option>
+                      <option value='2'>Reopened</option>
+                      <option value='3'>Completed</option>
+                      <option value='4'>Cancelled</option>
+                    </select >
                 </div>
                 <div class="col-md-3 row ticket_edit">
                    <label class="col-md-5"><p><strong>{% trans "Priority:" %}</strong></p></label>
-                    <select class="col-md-7" id='priority' name="priority" value=" {{priority}}" >
-                      <option>Normal</option>
-                      <option>High</option>
-                      <option>Low</option>
+                    <select class="col-md-7" id='id_priority' name='priority'>
+                      <option value="1">Normal</option>
+                      <option alue="2">High</option>
+                      <option alue="3">Low</option>
                     </select>
                 </div>
               </div>
               <div class="col-md-12 row">
                 <div class="col-md-6 row ticket_edit">
                   <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
-                  <input class="col-md-8" type="Date" id = 'due_date' name="due_date" value=" {{due_date}}">
+                  <input class="col-md-8" type="date" name='due_date' id='id_due_date'>
                 </div>
                 <div class="col-md-6 row ticket_edit">
                   <label class="col-md-4"><p><strong>{% trans "Completed Date:" %}</strong></p></label>
-                  <input class="col-md-8" type="Date" id = 'completed_date' name="completed_date" value = "{{ completed_date }}">
+                  <input class="col-md-8" type="Date" name='completed_date' id='id_completed_date'>
                 </div>
               </div>
               <div class="col-md-12 row">
                 <div class="col-md-6 row ticket_edit">
                   <label class="col-md-4"><p><strong>{% trans "Created by:" %}</strong></p></label>
-                  <select class="col-md-7" id = 'created_by' name="created_by" value=" {{ user }} ">
-                      <option>Tola1</option>
-                      <option>Tola2</option>
-                  </select>
-                    <a href="" class="col-md-1"> <span class="glyphicon glyphicon-plus primary" title="Add New User"></span></a>
+                  <select class="col-md-7" name='created_by' id='id_created_by'>
+                    <option value="{{created_by.id}}">{{created_by.username}}</option>
+                  </select><a href="" class="col-md-1" ><span class="glyphicon glyphicon-plus primary" title="Add New User"></span></a>
                 </div>
                 <div class="col-md-6 row ticket_edit">
                   <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong></p></label>
-
-                  <select class="col-md-7" id = 'assigned_to' name="assigned_to" value =  >
-                       <option>Tola1</option>
-                      <option>Tola2</option>
+                  <select class="col-md-7" name='assigned_to' id='id_assigned_to'>
+                    {% for user in assignable_users%}
+                      <option value='{{user.id}}'>{{user.username}}</option>
+                    {% endfor %}
 
                   </select><a href="" class="col-md-1" ><span class="glyphicon glyphicon-plus primary" title="Add New User"></span></a>
                 </div>
@@ -139,7 +133,7 @@
               <div class="col-md-12 row">
                 <div class="col-md-8 row ticket_edit">
                   <label class="col-md-3"><p><strong>{% trans "Note:" %}</strong></p></label>
-                  <textarea class="col-md-9" rows="4" id = 'note' name = "note" value = "{{ note }}"></textarea>
+                  <textarea class="col-md-9" rows="4" name='note' id='id_note' ></textarea>
                 </div>
               </div>
               <div class="col-md-12 row modal_button">
@@ -147,7 +141,7 @@
                     <input class="btn btn-primary col-md-offset-4" type='submit' value='{% trans "Submit" %}' />
                 </label>
             </div>
-              {% csrf_token %}
+            {% csrf_token %}
           </form>
         </div>
         <div class="modal-footer">

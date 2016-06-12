@@ -39,7 +39,7 @@ class Task(models.Model):
     )
 
     task = models.CharField(max_length=140)
-    created_date = models.DateTimeField(auto_now=True)
+    created_date = models.DateTimeField(auto_now=True, blank=True)
     due_date = models.DateTimeField(blank=True, null=True, )
     status = models.IntegerField(choices=STATUS_CHOICES, default=ACTIVE_STATUS)
     completed_date = models.DateTimeField(blank=True, null=True)
@@ -85,8 +85,8 @@ class Task(models.Model):
             self.priority = 3
         self.modified = timezone.now()
         # If Item is being marked complete, set the completed_date
-        if self.completed_date:
-            self.completed_date = datetime.datetime.now()
+        # if self.completed_date:
+        #     self.completed_date = datetime.datetime.now()
         super(Task, self).save(*args, **kwargs)
 
 
