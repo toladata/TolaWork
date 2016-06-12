@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader, Context
 from django.contrib.auth.models import User
@@ -43,17 +44,14 @@ staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is
 
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
 # Create your views here.
-
+@login_required
 def task_list(request):
-    tasks = Task.objects.all()
-    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-    created_by = ''
-    if request.user.is_authenticated():
-    	created_by = request.user
-    task = Task.objects.all()
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('login'))
 
+    created_by = request.user
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+
+    tasks = Task.objects.all()
+    created_by = request.user
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     return render_to_response('tasks/task_index.html',
@@ -64,8 +62,13 @@ def task_list(request):
 
         }))
 
+@login_required
 def create_task(request):
-	if request.method == 'POST':
+    
+    created_by = request.user
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+
+    if request.method == 'POST':
 		title = request.POST.get('title')
 		submitter_mail = request.POST.get('submitter_mail')
 		status = request.POST.get('status')
@@ -80,11 +83,13 @@ def create_task(request):
 		task.save()
 
 		print (task)
-	tasks = Task.objects.all()
 
-	return render_to_response('tasks/task_index.html',
+    tasks = Task.objects.all()
+    return render_to_response('tasks/task_index.html',
         RequestContext(request, {
-        	'tasks':tasks,
+        	'tasks':Task.objects.all(),
+            'assignable_users': assignable_users,
+            'created_by': created_by,
             
         }))
 
