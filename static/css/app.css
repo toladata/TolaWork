@@ -471,3 +471,70 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
     border-radius: 5px;
 
 }
+/*tickets filter section*/
+.filter_form
+{
+    margin-top: 10px;
+}
+form .thumbnail
+{
+    margin-top: 8px;
+    padding-top: 5px;
+
+}
+.thumbnail label
+{
+    float: left;
+    margin-right: 7px;
+}
+.sorting_form
+{
+    position: relative;
+    overflow: hidden;
+}
+.reverse_sort
+{
+    margin-top: 5px;
+}
+.sort_add
+{
+    margin-left:9px;
+}
+.sort_select
+{
+    margin-left:9px;
+    width: 135px;
+}
+.owners_select
+{
+    width: 130px;
+}
+.status_select
+{
+    width: 125px;
+}
+.date_input
+{
+    width: 115px;
+}
+.date_to input
+{
+    margin-left: 19px;
+}
+.date_to 
+{
+    margin-top: 7px;
+    margin-bottom: 7px;
+}
+.keywords
+{
+    margin-bottom: 5px;
+}
+.keywords input
+{
+    width: 128px;
+}
+.types_select
+{
+    width: 155px;
+}
