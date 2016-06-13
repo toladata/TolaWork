@@ -162,6 +162,9 @@
                         <input   type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
                         <p class='filterHelp'>{% trans "Ordering applied to tickets" %}</p>
                         </div>
+                         <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' />
+                         </form>
+                    </div>
                     </div>
 
 
@@ -187,7 +190,7 @@
                     </select>
                     <input class="btn sort_add" type='button' id='filterBuilderButton' value='+' />
                 {% csrf_token %}</form>
-
+                <form method='get' action='./'>
                 <div class='thumbnail sorting_form filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %}' id='filterBoxOwner'>
                         <div class="keywords">
                             <label  for='id_owners'>{% trans "Owner(s): " %}</label>
