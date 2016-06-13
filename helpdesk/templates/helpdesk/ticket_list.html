@@ -167,11 +167,11 @@
 
                 <div class="panel panel-info">
             <div class="panel-heading"> 
-                <strong>{% trans "Filter tickets" %}</strong>
+                <strong>{% trans "Filter Tickets" %}</strong>
             </div>
            
-            <div class="panel-body">
-            <div class="row">
+            <div class="panel-body" id="ko">
+            <div class="row" id="ko1">
                 <div class=" col-md-12">         
                     <strong>Click</strong> on <strong>"+"</strong> to add filters to query on and  <strong>"-"</strong>  to remove a filter.
                 </div>
@@ -369,5 +369,34 @@ $(document).ready(function() {
     });
 });
 
+</script>
+
+<script type='text/javascript' language='javascript'>
+    $(function(){
+    $("#filterBoxOwner").hide();
+    $("#filterBoxOwner").hover(function() {
+        $("filterBoxOwner").slideToggle("fast");
+    });
+    $("#filterBoxQueue").hide();
+    $("#filterBoxQueue").hover(function() {
+        $("filterBoxQueue").slideToggle("fast");
+    });
+    $("#filterBoxStatus").hide();
+    $("#filterBoxStatus").hover(function() {
+        $("filterBoxStatus").slideToggle("fast");
+    });
+    $("#filterBoxDates").hide();
+    $("#filterBoxDates").hover(function() {
+        $("filterBoxDates").slideToggle("fast");
+    });
+    $("#filterBoxType").hide();
+    $("#filterBoxType").hover(function() {
+        $("filterBoxType").slideToggle("fast");
+    });
+    $("#filterBoxKeywords").hide();
+    $("#filterBoxKeywords").hover(function() {
+    $("filterBoxKeywords").slideToggle("fast");
+    });
+});
 </script>
 {% endblock content %}
