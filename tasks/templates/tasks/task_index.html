@@ -64,7 +64,7 @@
             <!-- end table -->
             <!-- Modal -->
   <div class="modal fade " id="myModal" role="dialog">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog task_form modal-lg">
     
       <!-- Modal content-->
       <div class="modal-content">
@@ -75,70 +75,87 @@
         <div class="modal-body">
           <form method= "POST" action='{% url 'task_submit'%}'>
           <div class="col-md-12 row">
-          <div class="col-md-8 row ticket_edit">
-             <label class="col-md-3"><p><strong> {% trans "Title:" %}</strong></p></label>
-              <input class="col-md-9" type="text" id='id_title' name='title'>
+          <div class="col-md-6 row ticket_edit">
+             <label class="col-md-4"><p><strong> {% trans "Title:" %}</strong></p></label>
+             <div class="col-md-8">
+                <input class="form-control" type="text" id='id_title' name='title'>
+             </div>
           </div>
+          <div class="col-md-6 row ticket_edit">
+                <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
+                <div class="col-md-8" >
+                  <input class="form-control" type="text" name='submitter_mail' id='id_submitter_mail' value="{{created_by.email}}">
+                </div>
+            </div>
           </div>
-            <div class="col-md-12 row">
+            <div class="col-md-12 row task_spacing">
+             <div class="col-md-6 row ticket_edit">
+                    <label class="col-md-4"><p><strong>{% trans "Status:" %}</strong></p></label>
+                    <div class="col-md-8">
+                      <select class="form-control" id='id_status' name='status'>
+                        <option value='1'>Active</option>
+                        <option value='2'>Reopened</option>
+                        <option value='3'>Completed</option>
+                        <option value='4'>Cancelled</option>
+                      </select >
+                    </div>
+                </div>
                 <div class="col-md-6 row ticket_edit">
-                    <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
-                    <input class="col-md-8" type="text" name='submitter_mail' id='id_submitter_mail' value="{{created_by.email}}">
-                </div>
-                <div class="col-md-3 row ticket_edit">
-                    <label class="col-md-5"><p><strong>{% trans "Status:" %}</strong></p></label>
-                    <select class="col-md-7" id='id_status' name='status'>
-                      <option value='1'>Active</option>
-                      <option value='2'>Reopened</option>
-                      <option value='3'>Completed</option>
-                      <option value='4'>Cancelled</option>
-                    </select >
-                </div>
-                <div class="col-md-3 row ticket_edit">
-                   <label class="col-md-5"><p><strong>{% trans "Priority:" %}</strong></p></label>
-                    <select class="col-md-7" id='id_priority' name='priority'>
-                      <option value="1">Normal</option>
-                      <option alue="2">High</option>
-                      <option alue="3">Low</option>
-                    </select>
+                   <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
+                   <div class="col-md-8">
+                     <select class="form-control" id='id_priority' name='priority'>
+                        <option value="1">Normal</option>
+                        <option alue="2">High</option>
+                        <option alue="3">Low</option>
+                      </select>
+                   </div>
                 </div>
               </div>
               <div class="col-md-12 row">
                 <div class="col-md-6 row ticket_edit">
                   <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
-                  <input class="col-md-8" type="date" name='due_date' id='id_due_date'>
+                  <div class="col-md-8">
+                  <input class="form-control" type="date" name='due_date' id='id_due_date'>
+                  </div>
                 </div>
                 <div class="col-md-6 row ticket_edit">
                   <label class="col-md-4"><p><strong>{% trans "Completed Date:" %}</strong></p></label>
-                  <input class="col-md-8" type="Date" name='completed_date' id='id_completed_date'>
+                  <div class="col-md-8">
+                     <input class="form-control" type="Date" name='completed_date' id='id_completed_date'>
+                  </div>
                 </div>
               </div>
-              <div class="col-md-12 row">
+              <div class="col-md-12 row task_spacing">
                 <div class="col-md-6 row ticket_edit">
                   <label class="col-md-4"><p><strong>{% trans "Created by:" %}</strong></p></label>
-                  <select class="col-md-7" name='created_by' id='id_created_by'>
-                    <option value="{{created_by.id}}">{{created_by.username}}</option>
-                  </select><a href="" class="col-md-1" ><span class="glyphicon glyphicon-plus primary" title="Add New User"></span></a>
+                  <div class="col-md-8">
+                    <select class=" form-control" name='created_by' id='id_created_by'>
+                      <option value="{{created_by.id}}">{{created_by.username}}</option>
+                    </select>
+                  </div>
                 </div>
                 <div class="col-md-6 row ticket_edit">
                   <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong></p></label>
-                  <select class="col-md-7" name='assigned_to' id='id_assigned_to'>
-                    {% for user in assignable_users%}
-                      <option value='{{user.id}}'>{{user.username}}</option>
-                    {% endfor %}
-
-                  </select><a href="" class="col-md-1" ><span class="glyphicon glyphicon-plus primary" title="Add New User"></span></a>
+                  <div class="col-md-8">
+                    <select class="form-control" name='assigned_to' id='id_assigned_to'>
+                      {% for user in assignable_users%}
+                        <option value='{{user.id}}'>{{user.username}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
                 </div>
               </div>
               <div class="col-md-12 row">
                 <div class="col-md-8 row ticket_edit">
-                  <label class="col-md-3"><p><strong>{% trans "Note:" %}</strong></p></label>
-                  <textarea class="col-md-9" rows="4" name='note' id='id_note' ></textarea>
+                  <label class="col-md-2"><p><strong>{% trans "Note:" %}</strong></p></label>
+                  <div class="col-md-9 task_title">
+                      <textarea class="form-control" rows="4" name='note' id='id_note' ></textarea>
+                  </div>
                 </div>
               </div>
               <div class="col-md-12 row modal_button">
                 <label class= "col-md-6 row ticket_edit">
-                    <input class="btn btn-primary col-md-offset-4" type='submit' value='{% trans "Submit" %}' />
+                    <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Submit" %}' />
                 </label>
             </div>
             {% csrf_token %}
