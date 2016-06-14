@@ -58,19 +58,24 @@
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "Previous" %} </a></li>
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {{tickets.previous_page_number}} </a></li>
                  {% endif %}
-                  {% blocktrans with tickets.number as ticket_num %}
-                      <li><a class="active" href=" page= {tickets.paginator.num_pages as num_pages %} "> {{ ticket_num }}</a></li>
+                  {% blocktrans with tickets.number as ticket_num and tickets.paginator.num_pages as num_pages %}
+                      <li><a class="active" href=""> {{ ticket_num }}</a></li>
                   {% endblocktrans %}
                   
                  {% if tickets.has_next %}
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}"> {{ tickets.next_page_number }}</a></li>
-                     {% blocktrans with tickets.paginator.num_pages as num_pages %}
-                      <li><a href="#">...</a></li>
-                    <li><a href="#">{{ num_pages }} </a></li>
-                  {% endblocktrans %}
+                      {% ifnotequal tickets.next_page_number tickets.paginator.num_pages %}
+                       {% blocktrans with tickets.paginator.num_pages as num_pages %}
+                        <li><a href="">...</a></li>
+                        <li><a href="?page={{ num_pages }}"> {{ num_pages }}  </a></li>
+                      {% endblocktrans %}
+                    {% endifnotequal %}
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a></li>
-
+               
                  {% endif %}
+
+                 
+
                  </ul>
                  <div class="read_more">
                    <ul class="pagination">
