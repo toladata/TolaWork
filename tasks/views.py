@@ -74,12 +74,12 @@ def create_task(request):
 		status = request.POST.get('status')
 		priority = request.POST.get('priority')
 		due_date = datetime.strptime(request.POST.get('due_date'), "%Y-%m-%d")
-		completed_date = datetime.strptime(request.POST.get('completed_date'),"%Y-%m-%d")
+		created_date = datetime.strptime(request.POST.get('created_date'),"%Y-%m-%d")
 		created_by = request.POST.get('created_by')
 		assigned_to = request.POST.get('assigned_to')
 		note = request.POST.get('note')
 
-		task = Task(task=title, submitter_email=submitter_mail, status=status, priority=priority, due_date=due_date, completed_date=completed_date,created_by_id=created_by, assigned_to_id=assigned_to, note=note)
+		task = Task(task=title, submitter_email=submitter_mail, status=status, priority=priority, due_date=due_date, created_date=created_date,created_by_id=created_by, assigned_to_id=assigned_to, note=note)
 		task.save()
 
 		print (task)
@@ -90,81 +90,63 @@ def create_task(request):
         	'tasks':Task.objects.all(),
             'assignable_users': assignable_users,
             'created_by': created_by,
+
             
         }))
 
+@login_required
+def view_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    task_state = get_object_or_404(Task, id=task_id)
 
+    if 'take' in request.GET:
+
+        request.POST = {
+            'owner': request.user.id,
+            'public': 1,
+            'title': task_state.title,
+            'comment': ''
+        }
+        return task(request, task_id)
+
+
+
+    users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    return render_to_response('tasks/task_view.html',
+        RequestContext(request, {
+            'task': task_state,
+            'active_users': users,
+            'created_by': task_state.created_by,
+            'assigned_to': task_state.assigned_to,
+            'priority': task_state.priority,
+            'due_date': task_state.due_date,
+            'state': task_state.status,
+            'submitter_email': task_state.submitter_email
+
+        }))
 def task_edit(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     if request.method == 'POST':
-        form = CommentTaskForm(request.POST)
-        if form.is_valid():
-            task_id = task.id
-            task = request.POST.get('task')
-            owner = request.POST.get('owner')
-            priority = request.POST.get('priority_choices')
-            note = request.POST.get('note')
-            email = request.POST.get('email')
-            due_date = task.due_date
-            update_comments = Task(id=task_id, task=task, note=note, assigned_to_id=owner,
+        task_id = task.id
+        task = request.POST.get('task')
+        owner = request.POST.get('owner')
+        priority = request.POST.get('priority_choices')
+        note = request.POST.get('note')
+        email = request.POST.get('email')
+        due_date = task.due_date
+        update_comments = Task(id=task_id, task=task, note=note, assigned_to_id=owner,
                                      submitter_email=email, priority=priority, due_date=due_date,)
-            update_comments.save(update_fields=['task','assigned_to_id','priority','note','submitter_email', 'due_date'])
-    return HttpResponseRedirect(reverse('task_view', args=[task.id]))
-
-
-def view_task(request):
-    task_req = request.GET.get('task', '')
-    task = False
-    email = request.GET.get('email', '')
-    error_message = ''
-
-    if task_req and email:
-        parts = task_req.split('-')
-        task_id = parts[-1]
-
-        try:
-            task = Task.objects.get(id=task_id,submitter_email__iexact=email)
-        except:
-            task = False
-            error_message = _('Invalid task ID or e-mail address. Please try again.')
-
-        if task:
-
-            if request.user.is_staff:
-                redirect_url = reverse('tasks_view', args=[task_id])
-                if 'close' in request.GET:
-                    redirect_url += '?close'
-                return HttpResponseRedirect(redirect_url)
-
-            if 'close' in request.GET and task.status == Task.CANCELLED_STATUS:
-
-                request.POST = {
-                    'new_status': Task.CLOSED_STATUS,
-                    'public': 1,
-                    'title': task.title,
-                    'comment': _('Submitter accepted resolution and closed task'),
-                    }
-                if task.assigned_to:
-                    request.POST['owner'] = task.assigned_to.id
-                request.GET = {}
-
-                return task(request, task_id, public=True)
-
-            # redirect user back to this task if possible.
-            redirect_url = ''
-
-            return render_to_response('tasks/task_index.html',
-                RequestContext(request, {
-                    'task': task,
-                    'next': redirect_url,
-                }))
-
-    return render_to_response('tasks/task_index.html',
+        update_comments.save(update_fields=['task','assigned_to_id','priority','note','submitter_email', 'due_date'])
+    return render_to_response('tasks/task_view.html',
         RequestContext(request, {
-            'task': task,
-            'email': email,
-            'error_message': error_message
+        	'task': request.POST.get('task'),
+            'owner': request.POST.get('owner'),
+            'priority': request.POST.get('priority'),
+
+
+
         }))
+
 
 def delete_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
