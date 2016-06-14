@@ -3,7 +3,9 @@
 {% block helpdesk_head %}
 <style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css' xmlns="http://www.w3.org/1999/html"></style>
 
-
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -253,5 +255,19 @@
         </div>
 </div>
 </div>
+  <script>
+  $(function() {
+    $( "#id_due_date" ).datepicker({
+      dateFormat: "yy-mm-dd",
+    });
+    /*document.getElementById("id_due_date").setAttribute('value', new Date());*/
+    var date = new Date();
+   var datestring = ('0000' + date.getFullYear()).slice(-4) + '-' + ('00' + (date.getMonth() + 1)).slice(-2) + '-' + ('00' + date.getDate()).slice(-2);
+   document.getElementById('id_due_date').value = datestring;
 
+    $( "#id_completed_date" ).datepicker({
+      dateFormat: "yy-mm-dd"
+    });
+  });
+  </script>
 {% endblock content %}
