@@ -17,6 +17,7 @@
 
 
     {% if not number_of_tickets%}
+
     <strong> <span class="badge"> No records found</span></strong>
     {%else%}
     <strong> <span class="badge">{{number_of_tickets }} Record(s) found</span></strong>
@@ -46,8 +47,13 @@
                     {% endfor %}
     |               <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
                 </div>
+
               </div>
             {% endfor %}
+            {% if all_tickets_reported_by_current_user %}
+            {% trans "All Tickets submitted by you" as ticket_list_caption %}
+            {% include 'helpdesk/include/tickets.html' with ticket_list=all_tickets_reported_by_current_user ticket_list_empty_message="" %}
+            {% endif %}
 
 
 
@@ -121,13 +127,10 @@
               </div>
                 <form action="" method="get" action="./" >
                   <div class="panel-body ">
-                      <select class="btn btn-default form-control dropdown-toggle" id="issues" name="my_issues">
-                          <option  value="" selected="selected">---See Issues---</option>
-                          <option  value="created_by_me">Created By Me ({{ mine }})</option>
-                          <option value="">Assigned to Me ({{ assigned }})</option>
-                          <option value="">Resolved by Me ({{reclosed}})</option>
-                      </select>
-                    </div>
+                      <p><a href="/helpdesk/my_tickets/"> Created By Me</a></p>
+                      <p><a href=""> Assigned to Me </a></p>
+                     <p><a href=""> Resolved/Closed by me</a></p>
+                      </div>
                 </form>
             </div>
         <div class="panel panel-info">
@@ -407,4 +410,6 @@ $(document).ready(function() {
     });
 });
 </script>
+
+
 {% endblock content %}

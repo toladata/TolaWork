@@ -1062,7 +1062,7 @@ def ticket_list(request):
     assigned=len(assigned_to_me)
 
     # Tickets created by current user
-    mine = search_tickets_by_user(request)
+    mine = my_tickets(request)
     
     # Tickets resolved by current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
@@ -1119,11 +1119,11 @@ def ticket_list(request):
 
     querydict = request.GET.copy()
     querydict.pop('page', 1)
-
+    
     progress = ''
     for ticket in tickets:
        if request.user.is_active:
-           if ticket.assigned_to:
+          if ticket.assigned_to:
                if ticket.status ==1:
                    ticket.progress= "Ticket In Progress"
                elif ticket.status == 2:
@@ -2092,7 +2092,9 @@ def filter_tickets_by_tags(taglist):
     return tickets
 
 #Search tickets submitted by a logged in User
-def search_tickets_by_user(request,):
+def my_tickets(request,):
+    context={}
+    query_params = data_query_params()
     all_tickets_reported_by_current_user = ''
     email_current_user = request.user.email
     if email_current_user:
@@ -2101,4 +2103,39 @@ def search_tickets_by_user(request,):
         ).order_by('status')
         my_tickets = len(all_tickets_reported_by_current_user)
 
-    return my_tickets
+    tickets = Ticket.objects.select_related()
+    queue_choices = Queue.objects.all()
+
+    try:
+        ticket_qs = apply_query(tickets, query_params)
+    except ValidationError:
+        # invalid parameters in query, return default query
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3]},
+            'sorting': 'created',
+        }
+        ticket_qs = apply_query(tickets, query_params)
+    items_per_page = 5
+    user_choice_pageItems = request.GET.get('items_per_page')
+
+    if user_choice_pageItems:
+        items_per_page = user_choice_pageItems
+
+    ticket_paginator = paginator.Paginator(ticket_qs, items_per_page)
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+        page = 1
+
+    try:
+        tickets = ticket_paginator.page(page)
+    except (paginator.EmptyPage, paginator.InvalidPage):
+        tickets = ticket_paginator.page(ticket_paginator.num_pages)
+
+    return render_to_response('helpdesk/ticket_list.html',
+        RequestContext(request, dict(
+            context,
+            items_per_page=items_per_page,
+            all_tickets_reported_by_current_user=all_tickets_reported_by_current_user,
+            my_tickets=my_tickets,
+        )))
