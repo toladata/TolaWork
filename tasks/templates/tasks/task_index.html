@@ -133,6 +133,98 @@
                 </label>
             </div>
   </div>
+  <div id="tasktab{{ task.id }}" class="tab-pane fade">
+    <p> <strong>Use this form to make any chnages to the task</strong></p>
+    <form >
+    <div class="col-md-12 row">
+          <div class="col-md-6 row ticket_edit">
+             <label class="col-md-4"><p><strong> {% trans "Title:" %}</strong></p></label>
+             <div class="col-md-8">
+                <input class="form-control" type="text" id='id_title' name='title' required Value= '{{task.task}}'>
+             </div>
+          </div>
+          <div class="col-md-6 row ticket_edit">
+                <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
+                <div class="col-md-8" >
+                  <input class="form-control" type="text" name='submitter_mail' id='id_submitter_mail' value="{{task.submitter_email}}">
+                </div>
+            </div>
+          </div>
+            <div class="col-md-12 row task_spacing">
+             <div class="col-md-6 row ticket_edit">
+                    <label class="col-md-4"><p><strong>{% trans "Status:" %}</strong></p></label>
+                    <div class="col-md-8">
+                      <select class="form-control" id='id_status' name='status'>
+                      <option value='{% if task.status == 1 %} Open {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}'>{% if task.status == 1 %} Open {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %} </option>
+                        <option value='1'>Active</option>
+                        <option value='2'>Reopened</option>
+                        <option value='3'>Completed</option>
+                        <option value='4'>Cancelled</option>
+                      </select >
+                    </div>
+                </div>
+                <div class="col-md-6 row ticket_edit">
+                   <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
+                   <div class="col-md-8">
+                     <select class="form-control" id='id_priority' name='priority'>
+                     <option >{% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</option>
+                        <option value="1">Normal</option>
+                        <option alue="2">High</option>
+                        <option alue="3">Low</option>
+                      </select>
+                   </div>
+                </div>
+              </div>
+              <div class="col-md-12 row">
+
+                <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
+                  <div class="col-md-8">
+                     <input class="form-control" type="Date" name='created_date' id='id_edit_created_date' value="{{ task.created_date | date}}">
+                  </div>
+                </div>
+                  <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
+                  <div class="col-md-8">
+                  <input class="form-control" type="date" name='due_date' id='id_edit_due_date' Value="{{ task.due_date | date}}">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12 row">
+                <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong>{% trans "Created by:" %}</strong></p></label>
+                  <div class="col-md-8">
+                    <select class=" form-control" name='created_by' id='id_created_by'>
+                      <option value="{{created_by.id}}">{{created_by.username}}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong></p></label>
+                  <div class="col-md-8">
+                    <select class="form-control" name='assigned_to' id='id_assigned_to'>
+                      {% for user in assignable_users%}
+                        <option value='{{user.id}}'>{{user.username}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12 row">
+                <div class="col-md-8 row ticket_edit">
+                  <label class="col-md-3"><p><strong>{% trans "Note:" %}</strong></p></label>
+                  <div class="col-md-8 ">
+                      <textarea class="form-control" rows="4" name='note' id='id_note' required value='{{ task.note}}'>{{ task.note}}</textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12 row modal_button">
+                <label class= "col-md-6 row ticket_edit">
+                    <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Submit" %}' />
+                </label>
+            </div>
+            </form>
+  </div>
 </div>
 
                   </div>
