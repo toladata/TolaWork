@@ -447,6 +447,18 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 {
     margin-left: 40px;
 }
+.tab-pane 
+{
+    margin-top: 10px;
+    background-color: #fff;
+    position: relative;
+    overflow: hidden;
+    padding: 5px;
+}
+.view_note
+{
+    margin-left: 50px;
+}
 /*ticket edit form*/
 .task_spacing
 {

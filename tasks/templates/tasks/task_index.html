@@ -29,7 +29,7 @@
           <!-- end search -->
           <!-- start table -->
             <div class=" col-md-12 table-responsive">
-              <table class="table table-striped table-bordered">
+              <table class="table table-striped table-bordered" style="border-collapse:collapse;">
                 <tr class="info">
                   <td><strong>Task Title</strong></td>
                   <td><strong>Start Date</strong></td>
@@ -40,9 +40,9 @@
                   <td><strong>Assigned To</strong></td>
                 </tr>
                 {% for task in tasks %}
+                  <tr data-toggle="collapse" data-target="#{{ task.id }}" class="accordion-toggle">
 
-
-                  <td><strong><a href='{% url 'view_task' task.id %}'>{{ task.task }}</a></strong></td>
+                  <td><strong><a href= "#">{{ task.task }}</a></strong></td>
                   <td>{{ task.created_date | date}}</td>
                   <td>{{ task.due_date | date}}</td>
                   <td>duration </td>
@@ -51,8 +51,97 @@
 
                   <td>{{task.assigned_to}}</td>
                 </tr>
+                <tr>
+                  <td colspan="12" class="hiddenRow">
+                  
+                  <div class="accordian-body collapse" id="{{ task.id }}"> 
+                  
+                    <ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#task{{ task.id }}">View Task</a></li>
+  <li><a data-toggle="tab" href="#" data-target="#tasktab{{ task.id }}">Edit Task</a></li>
+</ul>
 
-                {% endfor %} <tr>
+<div class="tab-content">
+  <div id="task{{ task.id }}" class="tab-pane fade in active">
+    <h3>Details</h3>
+    <div class="col-md-12 row">
+          <div class="col-md-6 row ticket_edit">
+             <label class="col-md-4"><p><strong> {% trans "Title:" %}</strong></p></label>
+             <div class="col-md-8">
+                <p>{{task.task}}</p>
+             </div>
+          </div>
+          <div class="col-md-6 row ticket_edit">
+                <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
+                <div class="col-md-8" >
+                  <p>{{task.submitter_email}}</p>
+                </div>
+            </div>
+          </div>
+            <div class="col-md-12 row task_spacing">
+             <div class="col-md-6 row ticket_edit">
+                    <label class="col-md-4"><p><strong>{% trans "Status:" %}</strong></p></label>
+                    <div class="col-md-8">
+                      <p>{% if task.status == 1 %} Open {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</p>
+                    </div>
+                </div>
+                <div class="col-md-6 row ticket_edit">
+                   <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
+                   <div class="col-md-8">
+                     <p>{% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</p>
+                   </div>
+                </div>
+              </div>
+              <div class="col-md-12 row">
+
+                <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
+                  <div class="col-md-8">
+                     <p>{{ task.created_date | date}}</p>
+                  </div>
+                </div>
+                  <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
+                  <div class="col-md-8">
+                    <p>{{ task.due_date | date}}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12 row">
+                <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong>{% trans "Created by:" %}</strong></p></label>
+                  <div class="col-md-8">
+                    <p>{{created_by}}</p>
+                  </div>
+                </div>
+                <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong></p></label>
+                  <div class="col-md-8">
+                    <p>{{task.assigned_to}}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12 row">
+                  <label class="col-md-1"><p><strong>{% trans "Note:" %}</strong></p></label>
+                  <div class="col-md-10 view_note">
+                      <p>{{ task.note}}</p>
+                  </div>
+              </div>
+              <div class="col-md-12 row modal_button">
+                <label class= "col-md-6 row ticket_edit">
+                    <input class="btn btn-primary col-md-offset-5" type='submit' data-toggle="tab" href="#" data-target="#tasktab{{ task.id }}" value='{% trans "Edit" %}' />
+                </label>
+            </div>
+  </div>
+</div>
+
+                  </div>
+                  
+                  </td>
+                </tr>
+
+                {% endfor %} 
+                <tr>
                   <td colspan="6">
 
 
@@ -62,6 +151,7 @@
                   </td>
                 </tr>
               </table>
+
             </div>
             <!-- end table -->
             <!-- Modal -->
@@ -268,6 +358,14 @@
    document.getElementById('id_due_date').value = datestring;
 
     $( "#id_created_date" ).datepicker({
+      dateFormat: "yy-mm-dd"
+    });
+
+    $( "#id_edit_due_date" ).datepicker({
+      dateFormat: "yy-mm-dd"
+    });
+
+    $( "#id_edit_created_date" ).datepicker({
       dateFormat: "yy-mm-dd"
     });
   });
