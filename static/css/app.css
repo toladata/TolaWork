@@ -369,7 +369,11 @@ margin-right: 0px
 .sort_panels
 {
     border-bottom: 1px solid#eee;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 3px;
 }
+
 /*//search box*/
 .search
 {
@@ -450,14 +454,32 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 .tab-pane 
 {
     margin-top: 10px;
-    background-color: #fff;
     position: relative;
     overflow: hidden;
     padding: 5px;
 }
-.view_note
+.view_table
 {
-    margin-left: 50px;
+    margin-left: 15px;
+}
+.task_view
+{
+    background-color: #eee;
+}
+.task_edit
+{
+    position: relative;
+    background-color: #fff;
+    border:1px solid#eee;
+    overflow: hidden;
+    padding: 5px;
+    padding-top: 10px;
+    border-radius: 5px;
+
+}
+.edit_note
+{
+    margin-left: 5px;
 }
 /*ticket edit form*/
 .task_spacing
