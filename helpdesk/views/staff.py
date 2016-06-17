@@ -1067,10 +1067,15 @@ def ticket_list(request):
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
     )
     assigned=len(assigned_to_me)
-
+    
     # Tickets created by current user
 
-    
+    created_by_me = Ticket.objects.select_related('queue').filter(
+       submitter_email=request.user.email,
+    ).exclude(
+       status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+   )
+    my_tickets= len(created_by_me)
     # Tickets resolved by current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user, status=Ticket.CLOSED_STATUS)
@@ -1146,6 +1151,7 @@ def ticket_list(request):
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
+            my_tickets=my_tickets,
             progress=progress,
             items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
