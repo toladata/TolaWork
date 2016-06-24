@@ -49,7 +49,7 @@ def task_list(request):
 
     created_by = request.user
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-
+    context = {}
     tasks = Task.objects.all()
     created_by = request.user
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
@@ -69,7 +69,7 @@ def create_task(request):
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     if request.method == 'POST':
-		title = request.POST.get('title')
+		title = request.POST.get('task')
 		submitter_mail = request.POST.get('submitter_mail')
 		status = request.POST.get('status')
 		priority = request.POST.get('priority')
@@ -112,7 +112,7 @@ def view_task(request, task_id):
 
 
     users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-    return render_to_response('tasks/task_view.html',
+    return render_to_response('tasks/task_index.html',
         RequestContext(request, {
             'task': task_state,
             'active_users': users,
@@ -124,39 +124,40 @@ def view_task(request, task_id):
             'submitter_email': task_state.submitter_email
 
         }))
+
+@login_required
 def task_edit(request, task_id):
     task = get_object_or_404(Task, id=task_id)
+
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     if request.method == 'POST':
         task_id = task.id
-        task = request.POST.get('task')
-        owner = request.POST.get('owner')
-        priority = request.POST.get('priority_choices')
+        created_by = request.user
+        title = request.POST.get('task')
+        priority = request.POST.get('priority')
+        status = request.POST.get('status')
         note = request.POST.get('note')
-        email = request.POST.get('email')
+        submitter_email = request.POST.get('submitter_email')
+        assigned_to= request.POST.get('assigned_to')
         due_date = task.due_date
-        update_comments = Task(id=task_id, task=task, note=note, assigned_to_id=owner,
-                                     submitter_email=email, priority=priority, due_date=due_date,)
-        update_comments.save(update_fields=['task','assigned_to_id','priority','note','submitter_email', 'due_date'])
-    return render_to_response('tasks/task_view.html',
-        RequestContext(request, {
-        	'task': request.POST.get('task'),
-            'owner': request.POST.get('owner'),
-            'priority': request.POST.get('priority'),
+        update_comments = Task(id= task_id, task=title, submitter_email=submitter_email, status=status, priority=priority, due_date=due_date,  created_by_id=created_by, assigned_to_id=assigned_to, note=note)
 
+	update_comments.save(update_fields=['task','submitter_email','priority','assigned_to_id','status','due_date','note','created_by_id',])
+        return HttpResponseRedirect(reverse('task_list'))
 
-
-        }))
-
-
+@login_required
 def delete_task(request, task_id):
+    def get_object(self, queryset=None):
+        obj = super(delete_task, self).get_object()
+        if not obj.owner == self.request.user:
+         raise Http404
     task = get_object_or_404(Task, id=task_id)
 
     if request.method == 'GET':
-        return render_to_response('tasks/delete_task.html',
+        return render_to_response('tasks/task_index.html',
             RequestContext(request, {
                 'task': task,
             }))
     else:
         task.delete()
         return HttpResponseRedirect(reverse('task_list'))
-delete_task = staff_member_required(delete_task)

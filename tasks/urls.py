@@ -19,7 +19,7 @@ urlpatterns = patterns('tasks.views',
     url(r'^tasks/(?P<task_id>[0-9]+)/task_edit/$',
         'task_edit',
         name='task_edit'),
-    url(r'^tasks/(?P<task_id>[0-9]+)/task_delete/$',
+    url(r'^tasks/(?P<task_id>[0-9]+)/delete/$',
         'delete_task',
         name='delete_task'),
 

@@ -10,7 +10,7 @@
 {% block helpdesk_body %}
 <h2>{% trans "Delete Task" %}</h2>
 
-<p>{% blocktrans with task.task as task_task %}Are you sure you want to delete the task (<strong>{{ task_task }}</strong>)? All traces of the task, including task_followups, attachments, and updates will be irreversibly removed.{% endblocktrans %}</p>
+<p>{% blocktrans with task.task as task_task %}Are you sure you want to delete the task <strong>{{ task_task }}</strong>? All traces of the task, including task_followups, attachments, and updates will be irreversibly removed.{% endblocktrans %}</p>
 
 <p><a href='{% url 'view_task' task.id %}'>{% trans "No, Don't Delete It" %}</a></p>
 
