@@ -41,7 +41,7 @@ import requests
 import json
 from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Tag, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
+from helpdesk.models import Ticket, Queue, UserVotes,FollowUp, UserSettings,TicketChange, PreSetReply, Tag, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.models import KBCategory, KBItem
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
@@ -632,7 +632,7 @@ def view_ticket(request, ticket_id):
             'title': ticket_state.title,
             'comment': ''
         }
-        return update_ticket(request, ticket_id)
+        return post_comment(request, ticket_id)
 
     if 'subscribe' in request.GET:
         # Allow the user to subscribe him/herself to the ticket whilst viewing it.
@@ -657,7 +657,7 @@ def view_ticket(request, ticket_id):
             'comment': _('Accepted resolution and closed ticket'),
             }
 
-        return update_ticket(request, ticket_id)
+        return post_comment(request, ticket_id)
 
     users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     q = Queue.objects.all()
@@ -667,6 +667,7 @@ def view_ticket(request, ticket_id):
     form = TicketForm(initial={'due_date':ticket_state.due_date, 'tags':tags})
     tags = Tag.objects.all()
 
+    """
     progress = ''
     if ticket:
        if request.user.is_active:
@@ -678,21 +679,22 @@ def view_ticket(request, ticket_id):
                else:
                    progress = " "
 
-    ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
+    """
+    #ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket_state,
             'form': form,
-            'progress': progress,
+            #'progress': progress,
             'tags': tags,
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
             'ticket_type': Ticket.TICKET_TYPE,
             'ticket_queue': q,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
-            'ticketcc_string': ticketcc_string,
-            'SHOW_SUBSCRIBE': SHOW_SUBSCRIBE,
+            #'ticketcc_string': ticketcc_string,
+            #'SHOW_SUBSCRIBE': SHOW_SUBSCRIBE,
         }))
 
 def return_ticketccstring_and_show_subscribe(user, ticket):
