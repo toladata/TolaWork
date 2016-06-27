@@ -346,6 +346,7 @@ margin-right: 0px
 .ticket_right
 {
     border-right: 1px solid#eee;
+    margin-bottom: 5px;
 }
 .ticket_issues
 {

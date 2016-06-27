@@ -52,7 +52,8 @@
             {% endfor %}
 
             <!-- start paginator -->
-          <div>
+          <div class="row">
+            <div class="col-md-4">
                <ul class="pagination">
                  {% if tickets.has_previous %}
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "Previous" %} </a></li>
@@ -74,29 +75,30 @@
                
                  {% endif %}
 
-                 
-
-                 </ul>
-                 <div class="read_more">
-                   <ul class="pagination">
-                     <li>
-                        <a class = "{% if items_per_page == 5 %} active {% endif %}"
-                          href="{% url 'helpdesk_list' %}?items_per_page=5">5</a>
-                      </li>
-                     <li>
-                        <a class = "{% if items_per_page == 10 %} active {% endif %}"
-                          href="{% url 'helpdesk_list' %}?items_per_page=10">10 </a>
-                      </li>
-                     <li>
-                        <a class = "{% if items_per_page == 20 %} active {% endif %}"
-                          href="{% url 'helpdesk_list' %}?items_per_page=20" >20</a>
-                      </li>
-                     <li><a href="#">per page</a></li>
-                   </ul>
-                 </div> 
+              </ul>
+            </div>
+             <div class="read_more">
+               <ul class="pagination">
+                 <li>
+                    <a class = "{% if items_per_page == 5 %} active {% endif %}"
+                      href="{% url 'helpdesk_list' %}?items_per_page=5">5</a>
+                  </li>
+                 <li>
+                    <a class = "{% if items_per_page == 10 %} active {% endif %}"
+                      href="{% url 'helpdesk_list' %}?items_per_page=10">10 </a>
+                  </li>
+                 <li>
+                    <a class = "{% if items_per_page == 20 %} active {% endif %}"
+                      href="{% url 'helpdesk_list' %}?items_per_page=20" >20</a>
+                  </li>
+                 <li><a href="#">per page</a></li>
+               </ul>
+             </div> 
             </div>
             <!-- end paginator -->
-        </div>
+          </div>
+
+          
         <div class="col-md-3 col-sm-3 ">
        <!-- start search -->
           <div class="search" >
@@ -169,17 +171,17 @@
                         <p class='filterHelp'>{% trans "Ordering applied to tickets" %}</p>
                         </div>
                          <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' />
-                         </form>
                     </div>
-                    </div>
+                </form>
+        </div>
 
 
-                <div class="panel panel-info">
+        <div class="panel panel-info">
             <div class="panel-heading"> 
                 <strong>{% trans "Filter Tickets" %}</strong>
             </div>
            
-            <div class="panel-body" id="ko">
+        <div class="panel-body" id="ko">
             <div class="row" id="ko1">
                 <div class=" col-md-12">         
                     <strong>Click</strong> on <strong>"+"</strong> to add filters to query on and  <strong>"-"</strong>  to remove a filter.
@@ -196,120 +198,111 @@
                         <option value='Type'>{% trans "Type" %}</option>
                     </select>
                     <input class="btn sort_add" type='button' id='filterBuilderButton' value='+' />
-                {% csrf_token %}</form>
+                  {% csrf_token %}
+                </form>
                 <form method='get' action='./'>
                 <div class='thumbnail sorting_form filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %}' id='filterBoxOwner'>
-                        <div class="keywords">
-                            <label  for='id_owners'>{% trans "Owner(s): " %}</label>
-                            <select id='id_owners' name='assigned_to' multiple='selected' rows="4" class="owners_select">
-                                {% for u in user_choices %}
-                                <option value='{{ u.id }}'{% if u.id|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
-                                    {% trans "Assigned to Me" %}
-                                </option>
-                                {% endfor %}
-
-                            </select>
-
-                        </div>
-                        <p class='filterHelp'>{% trans "Ctrl-Click to select multiple options" %}</p>
-                        <input type='button' class='filterBuilderRemove' value='-' />
-                    </div>
-                    <div class='thumbnail sorting_form filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxCreated'>
-                        <div class="keywords">
-                            <label for='id_owners'>{% trans "Created by Me: " %}</label>
-                            <select id='id_owners1' name='submitter_email' multiple='selected' rows="4" class="owners_select">
-                                {% for u in user_choices %}
-                                <option value='{{ u.email }}'{% if u.email|in_list:query_params.filtering.submitter_email__in %} selected='selected'{% endif %}>
-                                    {%trans "Created By Me"%}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
-                        <input type='button' class='filterBuilderRemove' value='-' />
-                    </div>
-
-                    <div class='thumbnail sorting_form filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxQueue'>
-                        <div class="keywords">
-                            <label for='id_queues'>{% trans "Queue(s): " %}</label>
-                            <select id='id_queues' name='queue' multiple='selected' rows="4" class="owners_select">
-                                {% for q in queue_choices %}
-                                <option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected='selected'{% endif %}>
-                                    {{ q.title }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
-                        <input type='button' class='filterBuilderRemove' value='-' />
-                    </div>
-
-                    <div class='thumbnail sorting_form filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
                     <div class="keywords">
-                        <label for='id_statuses'>{% trans "Status(es): " %}</label>
-                        <select id='id_statuses' name='status' multiple='selected' rows="4" class="status_select" >{% for s in status_choices %}
-                            <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}
+                        <label  for='id_owners'>{% trans "Owner(s): " %}</label>
+                        <select id='id_owners' name='assigned_to' multiple='selected' rows="4" class="owners_select">
+                            {% for u in user_choices %}
+                            <option value='{{ u.id }}'{% if u.id|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
+                                {% trans "Assigned to Me" %}
+                            </option>
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+                    <p class='filterHelp'>{% trans "Ctrl-Click to select multiple options" %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
+                </div>
+                <div class='thumbnail sorting_form filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxCreated'>
+                    <div class="keywords">
+                        <label for='id_owners'>{% trans "Created by Me: " %}</label>
+                        <select id='id_owners1' name='submitter_email' multiple='selected' rows="4" class="owners_select">
+                            {% for u in user_choices %}
+                            <option value='{{ u.email }}'{% if u.email|in_list:query_params.filtering.submitter_email__in %} selected='selected'{% endif %}>
+                                {%trans "Created By Me"%}
+                            </option>
+                            {% endfor %}
                         </select>
                     </div>
                     <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
                     <input type='button' class='filterBuilderRemove' value='-' />
-                    </div>
+                </div>
 
-                    <div class='thumbnail sorting_form filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}' id='filterBoxDates'>
-                        <label for='id_date_from'>{% trans "Date (From): " %}</label>
-                        <input class="date_input" type='text' name='date_from' value='{{ query_params.filtering.created__gte }}' id='id_date_from' />
-                        <div class="date_to">
-                            
-                        <label for='id_date_to'>{% trans "Date (To): " %}</label>
-                        <input  class="date_input" type='text' name='date_to' value='{{ query_params.filtering.created__lte }}' id='id_date_to' />
-                        </div>
-                        <p class='filterHelp'>{% trans "Use YYYY-MM-DD date format, eg 2011-05-29" %}</p>
-                        <input type='button' class='filterBuilderRemove' value='-' />
+                <div class='thumbnail sorting_form filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxQueue'>
+                    <div class="keywords">
+                        <label for='id_queues'>{% trans "Queue(s): " %}</label>
+                        <select id='id_queues' name='queue' multiple='selected' rows="4" class="owners_select">
+                            {% for q in queue_choices %}
+                            <option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected='selected'{% endif %}>
+                                {{ q.title }}
+                            </option>
+                            {% endfor %}
+                        </select>
                     </div>
+                    <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
+                </div>
 
-                    <div class='thumbnail  sorting_form filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
+                <div class='thumbnail sorting_form filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
+                  <div class="keywords">
+                      <label for='id_statuses'>{% trans "Status(es): " %}</label>
+                      <select id='id_statuses' name='status' multiple='selected' rows="4" class="status_select" >{% for s in status_choices %}
+                          <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}
+                      </select>
+                  </div>
+                  <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                  <input type='button' class='filterBuilderRemove' value='-' />
+                </div>
+
+                <div class='thumbnail sorting_form filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}' id='filterBoxDates'>
+                    <label for='id_date_from'>{% trans "Date (From): " %}</label>
+                    <input class="date_input" type='text' name='date_from' value='{{ query_params.filtering.created__gte }}' id='id_date_from' />
+                    <div class="date_to">
+                        
+                      <label for='id_date_to'>{% trans "Date (To): " %}</label>
+                      <input  class="date_input" type='text' name='date_to' value='{{ query_params.filtering.created__lte }}' id='id_date_to' />
+                    </div>
+                    <p class='filterHelp'>{% trans "Use YYYY-MM-DD date format, eg 2011-05-29" %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
+                </div>
+
+                <div class='thumbnail  sorting_form filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
                     <div class="keywords">
                         <label for='id_query'>{% trans "Keywords: " %}</label>
                         <input class="status_select" type='text' name='q' value='{{ query }}' id='id_query' />
                     </div>
-                        <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
-                        <input type='button' class='filterBuilderRemove' value='-' />
-                    </div>
+                    <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
+                </div>
 
                 <div class='thumbnail  sorting_form filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxType'>
-                <div class="keywords">
-                    <label for='id_types'>{% trans "Types: " %}</label>
-                    <select id='id_types' name='types' multiple='selected' rows="4" class="types_select">{% for s in type_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.type__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
-                </div>
-                <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
-                <input type='button' class='filterBuilderRemove' value='-' />
+                    <div class="keywords">
+                        <label for='id_types'>{% trans "Types: " %}</label>
+                        <select id='id_types' name='types' multiple='selected' rows="4" class="types_select">{% for s in type_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.type__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
+                    </div>
+                    <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
                 </div>
 
                 <hr style='clear: both;' />
-                <input class="btn btn-primary" type='submit' value='{% trans "Apply Filter" %}' />
-                {% if from_saved_query and saved_query.user == user %}
-                <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %} <a href='{% url 'helpdesk_delete_query' saved_query.id %}'>{% trans "Delete Saved Query" %}</a></p>
-                {% endif %}
-                {% if from_saved_query %}
-                <p>{% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}</p>
-                {% endif %}
-                {% csrf_token %}
+                  <input class="btn btn-primary" type='submit' value='{% trans "Apply Filter" %}' />
+                  {% if from_saved_query and saved_query.user == user %}
+                  <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %} <a href='{% url 'helpdesk_delete_query' saved_query.id %}'>{% trans "Delete Saved Query" %}</a></p>
+                  {% endif %}
+                  {% if from_saved_query %}
+                  <p>{% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}</p>
+                  {% endif %}
+                  {% csrf_token %}
                 </form>
             </div>
         </div>
-    <!-- <div class="panel panel-info">
-        <div class="panel-heading"> <strong>Issues By Year/Month</strong></div>
-        <div class="panel-body ">
-        <b><span class="glyphicon glyphicon-plus"></span></b> 2016
-        </div>
-      </div>
     </div>
-    </div>
-          <!-- end filters
-        </div> -->
 </div>
-</div>
-</div>
+
 <script type="text/javascript">
   $(document).ready(function() {
       // Configure/customize these variables.

@@ -1067,15 +1067,17 @@ def ticket_list(request):
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
     )
     assigned=len(assigned_to_me)
-    
+
     # Tickets created by current user
 
     created_by_me = Ticket.objects.select_related('queue').filter(
-       submitter_email=request.user.email,
-    ).exclude(
-       status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-   )
-    my_tickets= len(created_by_me)
+           submitter_email=request.user.email,
+        ).exclude(
+           status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+       )
+
+    my_tickets = len(created_by_me)
+    
     # Tickets resolved by current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user, status=Ticket.CLOSED_STATUS)
@@ -1151,8 +1153,8 @@ def ticket_list(request):
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
-            my_tickets=my_tickets,
             progress=progress,
+            my_tickets=my_tickets,
             items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
             assigned=assigned,
@@ -2103,5 +2105,11 @@ def filter_tickets_by_tags(taglist):
     tickets = tickets.filter(count=len(taglist))
     return tickets
 
-#Search tickets submitted by a logged in User
+# ###Tola Tools API Views
+# def get_TolaActivity_data():
+#     import requests
+#     url = 'http://activity.toladata.io/activitydb/'
+#     access_token = ''
 
+#     response = requests.get(url, headers = {'access_token': access_token})
+#     print(response)
