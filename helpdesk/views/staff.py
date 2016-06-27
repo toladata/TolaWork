@@ -1060,32 +1060,22 @@ def ticket_list(request):
     num_tickets = tickets.count()
     queue_choices = Queue.objects.all()
 
-# Tickets assigned to current user
-    assigned_to_me = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-     ).exclude(
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-    )
-    assigned=len(assigned_to_me)
-    
-    # Tickets created by current user
 
-    created_by_me = Ticket.objects.select_related('queue').filter(
-       submitter_email=request.user.email,
-    ).exclude(
-       status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-   )
-    my_tickets= len(created_by_me)
+    # Tickets assigned to current user
+    #assigned_to_me = Ticket.objects.select_related('queue').filter(assigned_to=request.user,).exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+    #assigned=len(assigned_to_me)
+
+    # Tickets created by current user
+    #created_by_me = Ticket.objects.select_related('queue').filter(submitter_email=request.user.email,).exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+    #my_tickets= len(created_by_me)
+
     # Tickets resolved by current user
-    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user, status=Ticket.CLOSED_STATUS)
-    resolved=len(tickets_closed_resolved)
-    unassigned_tickets = Ticket.objects.select_related('queue').filter(
-        assigned_to__isnull=True,
-    ).exclude(
-        status=Ticket.CLOSED_STATUS,
-    )
-    num_unassigned_tickets=len(unassigned_tickets)
+    #tickets_closed_resolved = Ticket.objects.select_related('queue').filter(assigned_to=request.user, status=Ticket.CLOSED_STATUS)
+    #resolved=len(tickets_closed_resolved)
+
+    #unassigned_tickets = Ticket.objects.select_related('queue').filter(assigned_to__isnull=True,).exclude(status=Ticket.CLOSED_STATUS,)
+    #num_unassigned_tickets=len(unassigned_tickets)
+
     try:
         ticket_qs = apply_query(tickets, query_params)
     except ValidationError:
@@ -1097,7 +1087,7 @@ def ticket_list(request):
         ticket_qs = apply_query(tickets, query_params)
 
     #Change items per_page by a user
-    items_per_page = 5 
+    items_per_page = 5
     user_choice_pageItems = request.GET.get('items_per_page')
 
     if user_choice_pageItems:
@@ -1131,7 +1121,8 @@ def ticket_list(request):
 
     querydict = request.GET.copy()
     querydict.pop('page', 1)
-    
+
+    """
     progress = ''
     for ticket in tickets:
        if request.user.is_active:
@@ -1142,7 +1133,7 @@ def ticket_list(request):
                    ticket.progress = "Ticket reopened and is in progress"
                else:
                    ticket.progress = " "
-
+    """
     print "TICKET TYPES:"
     print Ticket.TICKET_TYPE
 
@@ -1151,15 +1142,15 @@ def ticket_list(request):
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
-            my_tickets=my_tickets,
-            progress=progress,
+            #my_tickets=my_tickets,
+            #progress=progress,
             items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
-            assigned=assigned,
-            resolved=resolved,
+            #assigned=assigned,
+            #resolved=resolved,
             num_tickets=num_tickets,
-            num_unassigned_tickets=num_unassigned_tickets,
-            reclosed=num_unassigned_tickets+resolved,
+            #num_unassigned_tickets=num_unassigned_tickets,
+            #reclosed=num_unassigned_tickets+resolved,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
             status_choices=Ticket.STATUS_CHOICES,
