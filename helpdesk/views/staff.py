@@ -41,7 +41,7 @@ import requests
 import json
 from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, TicketChange, PreSetReply, Tag, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
+from helpdesk.models import Ticket, Queue, UserVotes,FollowUp, UserSettings,TicketChange, PreSetReply, Tag, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.models import KBCategory, KBItem
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
@@ -632,7 +632,7 @@ def view_ticket(request, ticket_id):
             'title': ticket_state.title,
             'comment': ''
         }
-        return update_ticket(request, ticket_id)
+        return post_comment(request, ticket_id)
 
     if 'subscribe' in request.GET:
         # Allow the user to subscribe him/herself to the ticket whilst viewing it.
@@ -657,7 +657,7 @@ def view_ticket(request, ticket_id):
             'comment': _('Accepted resolution and closed ticket'),
             }
 
-        return update_ticket(request, ticket_id)
+        return post_comment(request, ticket_id)
 
     users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     q = Queue.objects.all()
@@ -667,6 +667,7 @@ def view_ticket(request, ticket_id):
     form = TicketForm(initial={'due_date':ticket_state.due_date, 'tags':tags})
     tags = Tag.objects.all()
 
+    """
     progress = ''
     if ticket:
        if request.user.is_active:
@@ -678,21 +679,22 @@ def view_ticket(request, ticket_id):
                else:
                    progress = " "
 
-    ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
+    """
+    #ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket_state,
             'form': form,
-            'progress': progress,
+            #'progress': progress,
             'tags': tags,
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
             'ticket_type': Ticket.TICKET_TYPE,
             'ticket_queue': q,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
-            'ticketcc_string': ticketcc_string,
-            'SHOW_SUBSCRIBE': SHOW_SUBSCRIBE,
+            #'ticketcc_string': ticketcc_string,
+            #'SHOW_SUBSCRIBE': SHOW_SUBSCRIBE,
         }))
 
 def return_ticketccstring_and_show_subscribe(user, ticket):
@@ -1054,6 +1056,24 @@ def ticket_list(request):
 
         ### SORTING
         data_sorting(request,query_params)
+        # all tickets, reported by current user
+    all_tickets_reported_by_current_user=''
+    email_current_user = request.user.email
+    if email_current_user:
+        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
+                submitter_email=email_current_user,
+            ).order_by('status')
+        # open & reopened tickets, assigned to current user
+    assigned_to_me = Ticket.objects.select_related('queue').filter(
+            assigned_to=request.user,
+        ).exclude(
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        )
+
+    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user,
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+
 
     tickets = Ticket.objects.select_related()
 
@@ -1068,8 +1088,8 @@ def ticket_list(request):
     )
     assigned=len(assigned_to_me)
 
-    # Tickets created by current user
 
+    # Tickets created by current user
     created_by_me = Ticket.objects.select_related('queue').filter(
            submitter_email=request.user.email,
         ).exclude(
@@ -1077,17 +1097,7 @@ def ticket_list(request):
        )
 
     my_tickets = len(created_by_me)
-    
-    # Tickets resolved by current user
-    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user, status=Ticket.CLOSED_STATUS)
-    resolved=len(tickets_closed_resolved)
-    unassigned_tickets = Ticket.objects.select_related('queue').filter(
-        assigned_to__isnull=True,
-    ).exclude(
-        status=Ticket.CLOSED_STATUS,
-    )
-    num_unassigned_tickets=len(unassigned_tickets)
+
     try:
         ticket_qs = apply_query(tickets, query_params)
     except ValidationError:
@@ -1099,7 +1109,7 @@ def ticket_list(request):
         ticket_qs = apply_query(tickets, query_params)
 
     #Change items per_page by a user
-    items_per_page = 5 
+    items_per_page = 5
     user_choice_pageItems = request.GET.get('items_per_page')
 
     if user_choice_pageItems:
@@ -1133,7 +1143,7 @@ def ticket_list(request):
 
     querydict = request.GET.copy()
     querydict.pop('page', 1)
-    
+
     progress = ''
     for ticket in tickets:
        if request.user.is_active:
@@ -1144,7 +1154,7 @@ def ticket_list(request):
                    ticket.progress = "Ticket reopened and is in progress"
                else:
                    ticket.progress = " "
-
+                   
     print "TICKET TYPES:"
     print Ticket.TICKET_TYPE
 
@@ -1157,11 +1167,10 @@ def ticket_list(request):
             my_tickets=my_tickets,
             items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
-            assigned=assigned,
-            resolved=resolved,
+            assigned_to_me=len(assigned_to_me),
             num_tickets=num_tickets,
-            num_unassigned_tickets=num_unassigned_tickets,
-            reclosed=num_unassigned_tickets+resolved,
+            tickets_closed_resolved=len(tickets_closed_resolved),
+            all_tickets_reported_by_current_user=len(all_tickets_reported_by_current_user),
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
             status_choices=Ticket.STATUS_CHOICES,

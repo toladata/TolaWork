@@ -29,7 +29,7 @@
               {% for ticket in tickets.object_list %}
               <div class="panel panel-info">
                 <div class="panel-heading"> 
-                      <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}}</a> <strong class="font8"> {{ ticket.title }} </strong> 
+                      <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong> </a>
                       {% if ticket.progress %}
                       <div class="read_more">
                         <strong> <span class="badge">{{ticket.progress}} </span></strong>
@@ -45,7 +45,7 @@
                     <span class="glyphicon glyphicon-tags"></span> <strong> Tags:</strong> {% for tag in ticket.tags.all %}
                       <span class="label label-info">{{tag}}</span>
                     {% endfor %}
-    |               <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
+                   <span class="glyphicon glyphicon-cog"></span><strong> Tasks</strong>
                 </div>
 
               </div>
@@ -99,7 +99,7 @@
           </div>
 
           
-        <div class="col-md-3 col-sm-3 ">
+      <div class="col-md-3 col-sm-3 ">
        <!-- start search -->
           <div class="search" >
             <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
@@ -126,13 +126,14 @@
                   Created By Me <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong>
                 </div> 
                 <div class="sort_panels">
-                   Assigned to Me <span class="badge read_more"> {{ assigned }} </span></strong>
+                   Assigned to Me <span class="badge read_more"> {{ assigned_to_me }} </span></strong>
                 </div>
                  <div class="sort_panels">  
-                  Resolved & Closed by Me <span class="badge read_more"> {{ reclosed }} </span></strong>
+                  Resolved & Closed by Me <span class="badge read_more"> {{ tickets_closed_resolved }} </span></strong>
                  </div>
               </div>
-            </div>
+          </div>
+
         <div class="panel panel-info">
             <div class="panel-heading"> <strong>Sort Tickets</strong></div>
 
@@ -302,7 +303,7 @@
         </div>
     </div>
 </div>
-
+</div>
 <script type="text/javascript">
   $(document).ready(function() {
       // Configure/customize these variables.
