@@ -1144,17 +1144,18 @@ def ticket_list(request):
     querydict = request.GET.copy()
     querydict.pop('page', 1)
 
+    """
     progress = ''
     for ticket in tickets:
-       if request.user.is_active:
-          if ticket.assigned_to:
+       if request.user.is_active and ticket.assigned_to :
                if ticket.status ==1:
                    ticket.progress= "Ticket In Progress"
                elif ticket.status == 2:
                    ticket.progress = "Ticket reopened and is in progress"
                else:
                    ticket.progress = " "
-                   
+    """
+
     print "TICKET TYPES:"
     print Ticket.TICKET_TYPE
 
@@ -1163,7 +1164,7 @@ def ticket_list(request):
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
-            progress=progress,
+            #progress=progress,
             my_tickets=my_tickets,
             items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
