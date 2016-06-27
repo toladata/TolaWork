@@ -34,7 +34,6 @@
                   <td><strong>Task Title</strong></td>
                   <td><strong>Start Date</strong></td>
                   <td><strong>Due Date</strong></td>
-                  <td><strong>Duration</strong></td>
                   <td><strong>Status</strong></td>
                   <td><strong>Priority</strong></td>
                   <td><strong>Assigned To</strong></td>
@@ -45,7 +44,6 @@
                   <td><strong><a href= "#">{{ task.task }}</a></strong></td>
                   <td>{{ task.created_date | date}}</td>
                   <td>{{ task.due_date | date}}</td>
-                  <td>duration </td>
                    <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</td>
                     <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
 
