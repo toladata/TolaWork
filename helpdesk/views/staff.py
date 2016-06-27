@@ -1054,6 +1054,24 @@ def ticket_list(request):
 
         ### SORTING
         data_sorting(request,query_params)
+        # all tickets, reported by current user
+    all_tickets_reported_by_current_user=''
+    email_current_user = request.user.email
+    if email_current_user:
+        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
+                submitter_email=email_current_user,
+            ).order_by('status')
+        # open & reopened tickets, assigned to current user
+    assigned_to_me = Ticket.objects.select_related('queue').filter(
+            assigned_to=request.user,
+        ).exclude(
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        )
+        ###
+    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user,
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+
 
     tickets = Ticket.objects.select_related()
 
@@ -1142,15 +1160,13 @@ def ticket_list(request):
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
-            #my_tickets=my_tickets,
             #progress=progress,
             items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
-            #assigned=assigned,
-            #resolved=resolved,
+            assigned_to_me=len(assigned_to_me),
             num_tickets=num_tickets,
-            #num_unassigned_tickets=num_unassigned_tickets,
-            #reclosed=num_unassigned_tickets+resolved,
+            tickets_closed_resolved=len(tickets_closed_resolved),
+            all_tickets_reported_by_current_user=len(all_tickets_reported_by_current_user),
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
             status_choices=Ticket.STATUS_CHOICES,
