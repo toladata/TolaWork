@@ -36,16 +36,35 @@
                 <div class="panel-footer">
                    <div class="panel-heading home-paneltitle"><a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask">
 
-                  <div class="new_task"><span class="glyphicon glyphicon-plus"></span>&nbsp;Create a Task</div></a>
+                  <div class="new_task"><span class="glyphicon glyphicon-tasks"></span>&nbsp;Ticket Tasks</div></a>
                        &nbsp;Ticket Status: </strong><font class="font5">In Progress </font>&nbsp;<span class="badge"> 2 </span>&nbsp;&nbsp;<span class="glyphicon glyphicon-tags"></span> <strong> Tags:</strong> {% for tag in ticket.tags.all %}
                       <span class="label label-info">{{tag}}</span>
                     {% endfor %}
 
                   </div>
                   <div id="addTask" class="panel-collapse collapse">
-
+                      <div class="info">
+                          <table class="table table-hover table-bordered table-striped">
+                            <thead>
+                                <tr class='row_tablehead'>
+                                    <td>Date</td>
+                                    <td>Task</td>
+                                    <td>Assigned To</td>
+                                    <td>Status</td>
+                                </tr>
+                             </thead>
+                            <tbody>
+                            <tr>
+                                <td>Display Date</td>
+                                <td>Display Task</td>
+                                <td>Display Assigned To</td>
+                                <td>Display Status</td>
+                                </tr>
+                            </tbody>
+                          </table>
+                      </div>
                       <div class="panel-body">
-                        <p>{% blocktrans %}<strong>Create a task for this ticket. </strong><br/>Tasks break down a ticket into deliverables that can be acted upon and show progress being made.{% endblocktrans %}</p>
+                        <p>{% blocktrans %}<strong>Create a new task for this ticket. </strong><br/>Tasks break down a ticket into deliverables that can be acted upon and show progress being made.{% endblocktrans %}</p>
 
                         <!-- Tasks dynamic form -->
                         <div class="task_border">
