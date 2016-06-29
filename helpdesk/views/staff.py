@@ -28,32 +28,38 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
+
 from django.core import paginator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 from django.utils.safestring import mark_safe
-from helpdesk.forms import PublicTicketForm
+
+
 try:
     from django.utils import timezone
 except ImportError:
     from datetime import datetime as timezone
 
+
 import requests
 import json
-from helpdesk.forms import TicketForm, CommentTicketForm, EmailIgnoreForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
+
+from helpdesk.forms import TicketForm, UserSettingsForm, CommentTicketForm, CommentFollowUpForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, Queue, UserVotes,FollowUp, UserSettings,TicketChange, PreSetReply, Tag, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
-from helpdesk.models import KBCategory, KBItem
+from helpdesk.models import Ticket, UserVotes, Queue, UserSettings, KBCategory, Tag, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo
 from helpdesk.slack import post_slack,post_tola_slack
-from helpdesk.postfix import close_notify, open_notify, reopen_notify, resolve_notify, duplicate_notify
+from helpdesk.email import email
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
-
 superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
+
 
 ###------>>>>>>>>>>>>>>>>>>>>>PUBLIC VIEW<<<<<<<<<<<<<<<<<<<<<<<----###
 @login_required
+
 def homepage(request):
 
     if (request.user.is_staff):
@@ -61,9 +67,9 @@ def homepage(request):
             if getattr(request.user.usersettings.settings, 'login_view_ticketlist', False):
                 return HttpResponseRedirect(reverse('helpdesk_list'))
             else:
-                return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+                return HttpResponseRedirect(reverse('helpdesk_list'))
         except UserSettings.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk_dashboard'))
+            return HttpResponseRedirect(reverse('helpdesk_list'))
 
     if request.method == 'POST':
         form = PublicTicketForm(request.POST, request.FILES)
@@ -144,6 +150,7 @@ def view_ticket(request):
 
                 return update_ticket(request, ticket_id, public=True)
 
+
             # redirect user back to this ticket if possible.
             redirect_url = ''
 
@@ -151,6 +158,7 @@ def view_ticket(request):
                 RequestContext(request, {
                     'ticket': ticket,
                     'next': redirect_url,
+
                 }))
 
     return render_to_response('helpdesk/public_view_form.html',
@@ -373,12 +381,10 @@ def vote_down(request, id):
         messages.add_message(request, messages.SUCCESS, 'Vote counted. You just voted down for this ticket. Now, let us hope more folks will vote too!')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'),RequestContext(request))
 
-###------>>>>>>>>>>>>>>>>>>>>>END OF PUBLIC VIEW<<<<<<<<<<<<<<<<----###
 def post_comment(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
-
-        form = CommentTicketForm(request.POST)
+        form = CommentFollowUpForm(request.POST)
 
         if form.is_valid():
             ticket_id = ticket.id
@@ -388,24 +394,33 @@ def post_comment(request, ticket_id):
             status = request.POST.get('new_status')
 
             if int(status) == 1:
-                status_text = 'Open'
+                status_text = 'OPEN'
 
                 if ticket.github_issue_id:
-                    #if there are comments, update github
+
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
-                open_notify(ticket,comment)
+
+                #email notification for 'Open' issue
+                messages_sent_to = []
+                email(ticket,comment,status_text,ticket.submitter_email)
+                messages_sent_to.append(ticket.submitter_email)
+
+                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+                    email(ticket,comment,status_text,ticket.assigned_to.email)
+                    messages_sent_to.append(ticket.assigned_to.email)
 
             elif int(status) == 2:
-                status_text = 'Re-Opened'
+                status_text = 'RE-OPENED'
 
                 if ticket.github_issue_id:
-                    #if there are comments, update github
+
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
-                    #Re-open issue in github
+
+                    #re-open issue in GitHUb
                     response = open_issue(repo,ticket)
 
                     if int(response) == 200:
@@ -413,21 +428,38 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem re-opening the ticket in GitHub')
                     print response
-                reopen_notify(ticket,comment)
+
+                #email notification for 'Re-Opened' issue
+                messages_sent_to = []
+                email(ticket,comment,status_text,ticket.submitter_email)
+                messages_sent_to.append(ticket.submitter_email)
+
+                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+                    email(ticket,comment,status_text,ticket.assigned_to.email)
+                    messages_sent_to.append(ticket.assigned_to.email)
 
             elif int(status) == 3:
-                status_text = 'Resolved'
-                resolve_notify(ticket,comment)
+                status_text = 'RESOLVED'
+
+                #email notification for 'Resolved' issue
+                messages_sent_to = []
+                email(ticket,comment,status_text,ticket.submitter_email)
+                messages_sent_to.append(ticket.submitter_email)
+
+                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+                    email(ticket,comment,status_text,ticket.assigned_to.email)
+                    messages_sent_to.append(ticket.assigned_to.email)
 
             elif int(status) == 4:
-                status_text = 'Closed'
+                status_text = 'CLOSED'
 
                 if ticket.github_issue_id:
-                    #if there are comments, update github
+
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
-                    #close issue in github
+
+                    #close issue in GitHUb
                     response=close_issue(repo,ticket)
 
                     if int(response) == 200:
@@ -435,11 +467,27 @@ def post_comment(request, ticket_id):
                     else:
                         messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
                     print response
-                close_notify(ticket,comment)
+
+                #email notification for 'Closed' issue
+                messages_sent_to = []
+                email(ticket,comment,status_text,ticket.submitter_email)
+                messages_sent_to.append(ticket.submitter_email)
+
+                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+                    email(ticket,comment,status_text,ticket.assigned_to.email)
+                    messages_sent_to.append(ticket.assigned_to.email)
 
             elif int(status) == 5:
-                status_text = 'Duplicate'
-                duplicate_notify(ticket,comment)
+                status_text = 'DUPLICATE'
+
+                #email notification for 'Duplicate' issue
+                messages_sent_to = []
+                email(ticket,comment,status_text,ticket.submitter_email)
+                messages_sent_to.append(ticket.submitter_email)
+
+                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+                    email(ticket,comment,status_text,ticket.assigned_to.email)
+                    messages_sent_to.append(ticket.assigned_to.email)
 
             else:
                 status_text = 'Not a status'
@@ -480,10 +528,11 @@ def post_comment(request, ticket_id):
                                      github_issue_url=github_url, type=type, votes=votes,
                                      error_msg=error, slack_status=slack_status, tags=tags)
             update_comments.save(update_fields=['status'])
-            new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status, )
+
+            new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status)
             new_followup.save()
 
-            #Attch a File
+            #Attach a File
             file_attachment(request, new_followup)
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
@@ -496,8 +545,6 @@ def taskview(request):
 
         }))
 taskview = staff_member_required(taskview)
-
-
 
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -513,7 +560,6 @@ def send_to_github(request, ticket_id):
         print response
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
-
 
 #@method_decorator(staff_member_required)
 def delete_ticket(request, ticket_id):
@@ -604,9 +650,12 @@ def view_ticket(request, ticket_id):
     if not (request.user.is_active):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    progress=''
     if ticket.github_issue_id:
         repo = queue_repo(ticket)
+        #check status of ticket in GitHub
         response = get_issue_status(repo,ticket)
+        print "Response = " + str(response)
 
         if response == 200:
             #synced status wth github
@@ -681,6 +730,17 @@ def view_ticket(request, ticket_id):
 
     """
     #ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
+
+
+    if ticket:
+        if request.user.is_active:
+            if ticket.assigned_to:
+                if ticket.status ==1:
+                    progress= "Ticket In Progress"
+                elif ticket.status == 2:
+                    progress = "Ticket reopened and is in progress"
+                else:
+                    progress = " "
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
@@ -928,9 +988,7 @@ def tickets_dependency(request,ticket_id):
 
 
 def ticket_list(request):
-
     context = {}
-
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
     query_params = data_query_params()
@@ -1186,9 +1244,6 @@ def ticket_list(request):
         )))
     ticket_list = staff_member_required(ticket_list)
 
-
-
-
 def ticket_edit(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
@@ -1218,7 +1273,6 @@ def ticket_edit(request, ticket_id):
             Ticket.tags.through.objects.filter(ticket_id = ticket_id).delete()
             for tag in tags:
                 ticket.tags.add(tag)
-                
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
@@ -1236,7 +1290,6 @@ def create_ticket(request):
         else:
             form = PublicTicketForm(request.POST, request.FILES)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-
 
         if form.is_valid():
 
@@ -1276,13 +1329,11 @@ def create_ticket(request):
             form = PublicTicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
 
-
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
             'form': form,
             'helper': form.helper,
         }))
-
 
 def raw_details(request, type):
     # TODO: This currently only supports spewing out 'PreSetReply' objects,

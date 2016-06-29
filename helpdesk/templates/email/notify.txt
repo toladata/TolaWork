@@ -1,0 +1,18 @@
+Dear {{ ticket.submitter_email }},
+
+The status of your ticket #:{{ ticket.id }}
+{{ ticket.title|escape }},
+
+Submitted to Tola.Work on {{ ticket.created }} has been changed to [{{ status }}].
+    -------------------
+    Ticket Description: {{ ticket.description|escape }}
+
+    Comments: {{ comment|escape }}
+
+    Number of Votes: {{ ticket.votes}}
+    -------------------
+
+To view this ticket in Tola.Work, click on the link below:
+http://dev.tola.work/helpdesk/tickets/{{ ticket.id }}/
+
+Best regards from the Tola.Work Support team.

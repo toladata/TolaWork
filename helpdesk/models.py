@@ -505,10 +505,6 @@ class Ticket(models.Model):
 
         super(Ticket, self).save(*args, **kwargs)
 
-# class Ticket_Tags(models.Model):
-#     ticket_id = models.IntegerField(_('Ticket Id'),default=0)
-#     tag_id = models.IntegerField(_('Tag Id'),default=0)
-
 class FollowUpManager(models.Manager):
     def private_followups(self):
         return self.filter(public=False)

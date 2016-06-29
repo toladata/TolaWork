@@ -11,19 +11,14 @@ except ImportError:
 
 
 def get_issue_status(repo,ticket):
-    #get github issue status and update ticket
 
     repo = repo + "/issues/" + ticket.github_issue_number
     r = requests.get(repo)
-    status = None	
 
     if int(r.status_code) == 200:
         data = json.loads(r.content)
 
         title = data['title']
-        #closed_by = data['closed_by']
-        #person = closed_by['login']
-
         updated_date = data['updated_at']
 
         state = data['state']
@@ -46,7 +41,7 @@ def get_issue_status(repo,ticket):
         update_ticket.status = status
         update_ticket.save()
 
-    return status
+    return r.status_code
 
 def new_issue(repo,ticket):
 
@@ -90,7 +85,6 @@ def new_issue(repo,ticket):
 
 
 def add_comments(comment,repo,ticket):
-    #repo = queue_repo(ticket)
     payload = {}
     payload['title'] = ticket.title
     payload['state'] = "open"
