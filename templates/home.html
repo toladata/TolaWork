@@ -69,7 +69,7 @@ $(function () {
             <a href="/helpdesk/tickets/submit" class="btn btn-lg btn-success"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
             <br/>
         </div>
-       <div class="row col-md-3 col-sm-3 col-md-offset-1 pie read_more">
+       <div class="row col-md-3 col-sm-3 col-md-offset-1 pie">
        <!-- //the pie chart  -->
           <div>
               <div id="pie_container">
@@ -80,22 +80,27 @@ $(function () {
 </div>
 <h3>Tickets, Tasks and Tola Tools Summary</h3>
 <div class="home-bottom">
-<div class="main_home">
+<div class="panel_bottom">
    <div class="panel-group" id="accordion">
     <div class="panel home-panel">
       <div class="panel-heading home-paneltitle">
         <h4 class="panel-title">
-          <a data-toggle="collapse" data-parent="#accordion" href="#collapse1"><font class="font5"><span class="glyphicon glyphicon-tags"></span>  Tickets</font></a>
+          <a data-toggle="collapse" data-parent="#accordion" href="#tickets"><font class="font5"><span class="glyphicon glyphicon-tags"></span>  Tickets</font></a>
         </h4>
       </div>
-      <div id="collapse1" class="panel-collapse collapse">
+      <div id="tickets" class="panel-collapse collapse">
         <div class="panel-body">
           <ul class="nav nav-tabs">
             <li class="active">
-                <a data-toggle="tap" href="#enhancements">
-                <font><b><span class="glyphicon glyphicon-plus-sign"></span></b> Top Enhancement Requests </font></a>
+                <a data-toggle="tab" href="#enhancements">
+                <b><span class="glyphicon glyphicon-plus-sign"></span></b> Top Enhancement Requests</a>
             </li>
-            <li><a data-toggle="tab" href="#Recent"><b><span class="glyphicon glyphicon-plus-sign"></span></b>  Recent Tickets </font></a></li>
+            <li>
+              <a data-toggle="tab" href="#Recent"><b><span class="glyphicon glyphicon-plus-sign"></span></b>  Recent Tickets</a>
+            </li>
+            <li>
+              <a data-toggle="tab" href="#Preview"><b><span class="glyphicon glyphicon-plus-sign"></span></b>  Tickets Preview</a>
+            </li>
           </ul>
 
           <div class="tab-content">
@@ -136,6 +141,30 @@ $(function () {
                       {% endfor %}
                   </table>
                 </div>
+            </div>
+            <div id="Preview" class="tab-pane fade">
+            <div class="col-md-2"></div>
+               <div class="panel panel-info col-md-8 ">
+                <div class="panel-heading">
+                  <strong>Issues <span class="badge">{{ num_tickets }}</span></strong>
+                  <a href="/helpdesk/tickets/submit">
+                    <div class="ticket_issues">
+                      <span class="glyphicon glyphicon-plus"></span>New Issue
+                    </div>
+                  </a>
+                </div>
+                <div class="panel-body">
+                  <div class="sort_panels">
+                    Created By Me <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong>
+                  </div> 
+                  <div class="sort_panels">
+                     Assigned to Me <strong><span class="badge read_more"> {{ assigned_to_me }} </span></strong>
+                  </div>
+                   <div class="sort_panels">  
+                    Resolved & Closed by Me <strong> <span class="badge read_more"> {{ closed_resolved }} </span></strong>
+                   </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -211,7 +240,9 @@ $(function () {
               </div>
           </div>
           <div id="ona" class="tab-pane fade">
-             Start using <a href="https://ona.io/home/">Ona</a> and easily collect your data in the field. Are you already using Ona and you'd like the enterprise features? Just fill out this <a href="https://docs.google.com/forms/d/1dhhDPNgr7a8gEBI9U1dr_b61v6rlOP5ca3e2g6Box_g/viewform?edit_requested=true">form</a> and your Ona account will be added to one of our enterprise organizations.<hr/>
+            <div class="list-group-item col-md-6">
+            Start using <a href="https://ona.io/home/">Ona</a> and easily collect your data in the field. Are you already using Ona and you'd like the enterprise features? Just fill out this <a href="https://docs.google.com/forms/d/1dhhDPNgr7a8gEBI9U1dr_b61v6rlOP5ca3e2g6Box_g/viewform?edit_requested=true">form</a> and your Ona account will be added to one of our enterprise organizations.<hr/>
+            </div>
           </div>
         </div>
       </div>

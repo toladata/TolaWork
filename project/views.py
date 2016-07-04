@@ -53,10 +53,40 @@ def home(request):
     votes_tickets = Ticket.objects.all().exclude(status__in='4').filter(type=2).order_by('-votes')[:5]
     tasks = Task.objects.all()
 
+    # open & reopened tickets, assigned to current user
+    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user,
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+    )
+    closed_resolved = len(tickets_closed_resolved)
+
+    # Tickets assigned to current user
+    assigned_to_me = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user,
+     ).exclude(
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+    )
+    assigned_to_me=len(assigned_to_me)
+
+
+    # Tickets created by current user
+    created_by_me = Ticket.objects.select_related('queue').filter(
+           submitter_email=request.user.email,
+        ).exclude(
+           status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+       )
+
+    my_tickets = len(created_by_me)
+
+   #all tickets
+    tickets = Ticket.objects.select_related()
+    num_tickets = tickets.count()
+
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
                                          'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
-                                         'recent_tickets': recent_tickets,'votes_tickets': votes_tickets, 'tasks': tasks})
+                                         'recent_tickets': recent_tickets,'votes_tickets': votes_tickets, 'num_tickets': num_tickets, 'tasks': tasks, \
+                                         'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'my_tickets':my_tickets})
 
 
 def contact(request):
