@@ -1122,12 +1122,6 @@ def ticket_list(request):
                 submitter_email=email_current_user,
             ).order_by('status')
         # open & reopened tickets, assigned to current user
-    assigned_to_me = Ticket.objects.select_related('queue').filter(
-            assigned_to=request.user,
-        ).exclude(
-            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-        )
-
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
