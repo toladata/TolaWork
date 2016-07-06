@@ -86,6 +86,10 @@ def home(request):
     tickets = Ticket.objects.select_related()
     num_tickets = tickets.count()
 
+#----Data From TolaActivity API----####
+    # response = get_TolaActivity_data()
+    # tolaActivityData = response.json()
+
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
                                          'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
@@ -182,3 +186,10 @@ def permission_denied(request):
     Something unauthorized happened
     """
     return render(request, '401.html')
+
+###Tola Tools API Views
+def get_TolaActivity_data():
+    import requests
+    url = 'http://activity.toladata.io/tolaactivitydata' #TolaActivity Url
+    response = requests.get(url)
+    return response

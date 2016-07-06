@@ -2159,12 +2159,3 @@ def filter_tickets_by_tags(taglist):
         tickets = tickets.filter(taglist=tag)
     tickets = tickets.filter(count=len(taglist))
     return tickets
-
-# ###Tola Tools API Views
-# def get_TolaActivity_data():
-#     import requests
-#     url = 'http://activity.toladata.io/activitydb/'
-#     access_token = ''
-
-#     response = requests.get(url, headers = {'access_token': access_token})
-#     print(response)
