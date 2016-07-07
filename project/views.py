@@ -94,13 +94,16 @@ def home(request):
 
 #----Data From TolaActivity API----####
     # response = get_TolaActivity_data()
+
+    # tolaActivityData = {}
     # tolaActivityData = response.json()
 
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
                                          'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
                                          'recent_tickets': recent_tickets,'votes_tickets': votes_tickets, 'num_tickets': num_tickets, 'tasks': tasks, \
-                                         'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'created_by_me':created_by_me,'closed':closed,'tome':tome,'byme':byme})
+                                         'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'created_by_me':created_by_me,\
+                                         'closed':closed,'tome':tome,'byme':byme})
 
 
 def contact(request):
@@ -196,6 +199,6 @@ def permission_denied(request):
 ###Tola Tools API Views
 def get_TolaActivity_data():
     import requests
-    url = 'http://activity.toladata.io/tolaactivitydata' #TolaActivity Url
+    url = '' #TolaActivity Url
     response = requests.get(url)
     return response

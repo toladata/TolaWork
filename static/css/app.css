@@ -323,11 +323,15 @@ margin-right: 0px
     border:1px solid#eee;
     overflow: hidden;
     padding: 5px;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
     border-radius: 5px;
 
 }
 
+.activity_details
+{
+    margin-top: 10px;
+}
 
 .form_register_btn
 {
@@ -410,6 +414,10 @@ margin-right: 0px
 }
 
 /*//paginator for the tickets page*/
+.ticket_paginator
+{
+    margin-right: 15px;
+}
 ul.pagination {
     display: inline-block;
     padding: 0;
