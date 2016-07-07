@@ -163,12 +163,14 @@ $(function () {
                                 <th>Title</th>
                                 <th>Date Created</th>
                             </tr>
+                            {% for ticket in byme %}
                             <tr>
-                                <td>Ticket status</td>
-                                <td>ticket queue</td>
-                                <td> <a href="#">ticket title </a></td>
-                                <td> ticket date</td>
+                                <td> {{ticket.status}}</td>
+                                <td>{{ticket.queue}}</td>
+                                <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
+                                <td> {{ticket.created}}</td>
                             </tr>
+                            {%endfor%}
                         </table>
                       </div>
                     </div> 
@@ -186,12 +188,14 @@ $(function () {
                                 <th>Title</th>
                                 <th>Date Created</th>
                             </tr>
+                            {% for ticket in tome %}
                             <tr>
-                                <td>Ticket status</td>
-                                <td>ticket queue</td>
-                                <td> <a href="#">ticket title </a></td>
-                                <td> ticket date</td>
+                                <td> {{ticket.status}}</td>
+                                <td>{{ticket.queue}}</td>
+                                <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
+                                <td> {{ticket.created}}</td>
                             </tr>
+                            {%endfor%}
                         </table>
                       </div>
                     </div> 
@@ -202,23 +206,29 @@ $(function () {
                      </div>  
                      <div id="closed_resolved" class="collapse">
                       <div class="table-responsive">
+
                         <table class="table table-striped">
+
                             <tr>
                                 <th>Status</th>
                                 <th>Queue</th>
                                 <th>Title</th>
                                 <th>Date Created</th>
                             </tr>
+                            {% for ticket in closed %}
                             <tr>
-                                <td>Ticket status</td>
-                                <td>ticket queue</td>
-                                <td> <a href="#">ticket title </a></td>
-                                <td> ticket date</td>
+                                <td> {{ticket.status}}</td>
+                                <td>{{ticket.queue}}</td>
+                                <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
+                                <td> {{ticket.created}}</td>
                             </tr>
+                            {%endfor%}
                         </table>
+
                       </div>
-                    </div>
+                     </div>
                    </div>
+                    <strong>This preview only shows five latest tickets.</strong>
                 </div>
               </div>
             </div>
