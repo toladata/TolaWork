@@ -58,29 +58,32 @@ def home(request):
     created_by_me = 0
     if (request.user.is_authenticated()):
         # open & reopened tickets, assigned to current user
-        closed_resolved = Ticket.objects.select_related('queue').filter(
+        closedresolved = Ticket.objects.select_related('queue').filter(
             assigned_to=request.user,
             status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
         )
-        closed_resolved = len(closed_resolved)
+        closed=(closedresolved)[:5]
+        closed_resolved = len(closedresolved)
 
         # Tickets assigned to current user
-        assigned_to_me = Ticket.objects.select_related('queue').filter(
+        assigned_tome = Ticket.objects.select_related('queue').filter(
             assigned_to=request.user,
          ).exclude(
             status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
         )
-        assigned_to_me=len(assigned_to_me)
+        tome=(assigned_tome)[:5]
+        assigned_to_me=len(assigned_tome)
 
 
         # Tickets created by current user
-        created_by_me = Ticket.objects.select_related('queue').filter(
+        created_byme = Ticket.objects.select_related('queue').filter(
                submitter_email=request.user.email,
             ).exclude(
                status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
            )
+        byme=(created_byme)[:5]
 
-        created_by_me = len(created_by_me)
+        created_by_me = len(created_byme)
 
    #all tickets
     tickets = Ticket.objects.select_related()
@@ -94,7 +97,7 @@ def home(request):
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
                                          'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
                                          'recent_tickets': recent_tickets,'votes_tickets': votes_tickets, 'num_tickets': num_tickets, 'tasks': tasks, \
-                                         'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'created_by_me':created_by_me})
+                                         'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'created_by_me':created_by_me,'closed':closed,'tome':tome,'byme':byme})
 
 
 def contact(request):
