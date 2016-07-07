@@ -34,23 +34,26 @@
                 <p class="description">{{ ticket.description }}</p>
                 </div>
                 <div class="panel-footer">
-                   <div class="panel-heading home-paneltitle"><a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask">
+                   <div class="panel-heading"><a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
 
                   <div class="new_task"><span class="glyphicon glyphicon-tasks"></span>&nbsp;Ticket Tasks</div></a>
-                       &nbsp;Ticket Status: </strong><font class="font5">In Progress </font>&nbsp;<span class="badge"> 2 </span>&nbsp;&nbsp;<span class="glyphicon glyphicon-tags"></span> <strong> Tags:</strong> {% for tag in ticket.tags.all %}
+                       <strong>Ticket Status: </strong><font>In Progress </font>&nbsp;<span class="badge"> 2 </span>&nbsp;&nbsp;<span class="glyphicon glyphicon-tags"></span> <strong> Tags:</strong> {% for tag in ticket.tags.all %}
                       <span class="label label-info">{{tag}}</span>
                     {% endfor %}
 
                   </div>
-                  <div id="addTask" class="panel-collapse collapse">
-                      <div class="info">
-                          <table class="table table-hover table-bordered table-striped">
+                  <div id="addTask{{ticket.id}}" class="panel-collapse collapse addTask">
+                  <div class="ticket_task">
+                    <div class="panel-body">
+                      <h5><strong>Details of tasks for this ticket</strong></h5>
+                      <div class="table-responsive ticket_task_form">
+                          <table class="table table-hover table-striped ">
                             <thead>
-                                <tr class='row_tablehead'>
-                                    <td>Date</td>
-                                    <td>Task</td>
-                                    <td>Assigned To</td>
-                                    <td>Status</td>
+                                <tr class="info">
+                                    <td> <strong>Date</strong></td>
+                                    <td><strong>Task</strong></td>
+                                    <td><strong>Assigned To</strong></td>
+                                    <td><strong>Status</strong></td>
                                 </tr>
                              </thead>
                             <tbody>
@@ -63,41 +66,61 @@
                             </tbody>
                           </table>
                       </div>
-                      <div class="panel-body">
-                        <p>{% blocktrans %}<strong>Create a new task for this ticket. </strong><br/>Tasks break down a ticket into deliverables that can be acted upon and show progress being made.{% endblocktrans %}</p>
+                    </div>
+                    <div class="panel-body">
+                      <h5><strong>Create a new task for this ticket. </strong> </h5>
+                      <p>Tasks break down a ticket into deliverables that can be acted upon and show progress being made.</p>
 
-                        <!-- Tasks dynamic form -->
-                        <div class="task_border">
-                            <div class="info">
-                                <form  method='post' action='create_task/' enctype='multipart/form-data' >
-                                        <div class="col-md-12 ">
-                                                <label class="col-md-2"><p><strong>{% trans "New Task:" %}</strong></p></Label>
-                                                <input type='text' name='task_title' id='id_title' class="col-md-10" value='' />
-                                        </div>
-                                    <div class="col-md-12 ">
-                                        <div class="col-md-6 ">
-                                            <label class="col-md-4"><p><strong><span class="glyphicon glyphicon-user"></span>{% trans "User:" %}</strong></p></label>
-
-                                        </div>
-                                        <div class="col-md-6 ">
-                                            <label class="col-md-4"><p><strong><span class="glyphicon glyphicon-calendar"></span>{% trans "Due:" %}</strong></p></label>
-
-
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-12">
-                                        <label class= "col-md-6 ">
-                                            <input class="btn btn-primary" type='submit' value='{% trans "Save Changes" %}' />
-                                        </label>
-                                    </div>
-                                     {% csrf_token %}
-                                    </form>
+                      <!-- Tasks dynamic form -->
+                      <div class="ticket_form">
+                        <form  method='post' action='create_task/' enctype='multipart/form-data' >
+                        <div class="col-md-12 row task_spacing">
+                          <div class="col-md-6 row ticket_edit">
+                             <label class="col-md-4"><p><strong> {% trans "New Task:" %}</strong></p></label>
+                             <div class="col-md-8">
+                                <input class="form-control" type="text" id="" name="" required>
+                             </div>
+                          </div>
+                          <div class="col-md-6 row ticket_edit">
+                                <label class="col-md-4"><p><strong>{% trans " User:" %}</strong></p></label>
+                                <div class="col-md-8" >
+                                  <input class="form-control" type="text"  id="" name="" value="">
                                 </div>
                             </div>
+                          </div>
+                          <div class="col-md-12 row ">
+                            <div class="col-md-6 row ticket_edit">
+                              <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
+                              <div class="col-md-8">
+                                 <input class="form-control" type="Date" id="" name="" value="">
+                              </div>
+                            </div>
+                            <div class="col-md-6 row ticket_edit">
+                              <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
+                              <div class="col-md-8">
+                              <input class="form-control" type="date" id="" name="" value="" required>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-12 row">
+                            <div class="col-md-11 row ticket_edit">
+                              <label class="col-md-2"><p><strong>{% trans "Note:" %}</strong></p></label>
+                              <div class="col-md-9 edit_note">
+                                  <textarea class="form-control" rows="4" name='note' id='id_note' required></textarea>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-12 row modal_button">
+                            <label class= "col-md-6 row ticket_edit">
+                                <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />
+                            </label>
+                          </div>
+                           {% csrf_token %}
+                            </form>
+                          </div>
                         </div>
-
-                  </div>
+                      </div>
+                    </div>
                 </div>
 
               </div>
@@ -476,14 +499,13 @@ $(document).ready(function() {
 
 });
 </script>
- <script type="text/javascript">
-      $(document).ready(function()
-      {
-         $("#assigned").click(function() {
-         $("#mine").show()
-         });
+<script type="text/javascript">
+    $(document).ready(function()
+    {
+       $("#assigned").click(function() {
+       $("#mine").show()
        });
-   </script>
-
+     });
+ </script>
 
 {% endblock content %}

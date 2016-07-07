@@ -374,7 +374,16 @@ margin-right: 0px
     font-weight: bold;
     color: #fff;
 }
-.new_task{background-color:#0c6d74;float:right;padding:4px;border-radius:4px;font-size:12px;font-weight:bold;color:#fff;}
+.new_task
+{
+    background-color:#0c6d74;
+    float:right;
+    padding:4px;
+    border-radius:4px;
+    font-size:12px;
+    font-weight:bold;
+    color:#fff;
+}
 
 .issues_badge
 {
@@ -535,8 +544,32 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
     border-radius: 5px;
 
 }
-.task_border{position: relative;border:2px solid#fff;overflow: hidden;padding: 5px;border-radius: 5px;}
-
+.task_border
+{ 
+    position: relative;
+    border:2px solid#fff;
+    overflow: hidden;
+    padding: 5px;
+    border-radius: 5px;
+}
+.addTask
+{
+    background-color: #e6e6ff;
+    padding: 5PX;
+}
+.ticket_task
+{
+    background-color: #fff;
+}
+.ticket_task_form
+{
+    background-color: #fff;
+    position: relative;
+    overflow: hidden;
+    padding: 5px;
+    padding-top: 15px;
+    border-radius: 5px;
+}
 /*tickets filter section*/
 .filter_form
 {
