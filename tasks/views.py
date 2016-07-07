@@ -39,6 +39,7 @@ import requests
 import json
 from tasks.forms import TaskForm
 from tasks.models import Task
+
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
 
@@ -47,18 +48,32 @@ superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_ac
 @login_required
 def task_list(request):
 
+    # Query_params will hold a dictionary of parameters relating to
+    # a query, to be saved if needed:
+
     created_by = request.user
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     context = {}
-    tasks = Task.objects.all()
+
     created_by = request.user
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+
+
+    tasks = Task.objects.select_related()
+    sort = request.GET.get('sort', None)
+    if sort:
+        tasks = Task.objects.all().order_by(sort)
+
+
+
 
     return render_to_response('tasks/task_index.html',
         RequestContext(request, {
         'tasks': tasks,
         'assignable_users': assignable_users,
         'created_by': created_by,
+
+
 
         }))
 
@@ -161,3 +176,5 @@ def delete_task(request, task_id):
     else:
         task.delete()
         return HttpResponseRedirect(reverse('task_list'))
+
+
