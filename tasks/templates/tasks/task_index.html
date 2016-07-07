@@ -8,7 +8,9 @@
   <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 {% endblock %}
 
+
 {% block content %}
+{% load in_list %}
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css">
 <div class="container">
@@ -401,15 +403,32 @@
               </div>
             </div>
             <div class="panel panel-info">
-                <div class="panel-heading"> <strong>Filter By Priority</strong></div>
-                <div class="panel-body ">
-                <form>
-                  <select class="btn btn-default dropdown-toggle">
-                    <option>Normal</option>
-                    <option>High</option>
-                    <option>Low</option>
-                  </select>
-                  <input class="btn btn-primary read_more " type='submit' value='{% trans "Apply " %}' />
+                <div class="panel-heading"> <strong>Sort Tasks</strong></div>
+                     <form method='get' action='./'>
+                    <div class="panel-body ">
+                    <select   class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
+                        <option value='task'{% ifequal query_params.sorting "task"%} selected='selected'{% endifequal %}>
+                            {% trans "Title" %}
+                        </option>
+                        <option value='created_date'{% ifequal query_params.sorting "created_date"%} selected='selected'{% endifequal %}>
+                            {% trans "Start" %}
+                        </option>
+                        <option value='due_date'{% ifequal query_params.sorting "due_date"%} selected='selected'{% endifequal %}>
+                            {% trans "Due" %}
+                        </option>
+                        <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
+                            {% trans "Status" %}
+                        </option>
+                        <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>
+                            {% trans "Priority" %}
+                        </option>
+                        <option value='assigned_to_id'{% ifequal query_params.sorting "assigned_to_id"%} selected='selected'{% endifequal %}>
+                            {% trans "Assigned to" %}
+                        </option>
+                      </select>
+                       
+                         <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' />
+                    </div>
                 </form>
                 </div>
              </div>
