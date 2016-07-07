@@ -56,13 +56,16 @@ def home(request):
     closed_resolved = 0
     assigned_to_me = 0
     created_by_me = 0
+    closed = []
+    tome = []
+    byme = []
     if (request.user.is_authenticated()):
         # open & reopened tickets, assigned to current user
         closedresolved = Ticket.objects.select_related('queue').filter(
             assigned_to=request.user,
             status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
         )
-        closed=(closedresolved)[:5]
+        closed=(closedresolved).order_by('-created')[:5]
         closed_resolved = len(closedresolved)
 
         # Tickets assigned to current user
@@ -71,7 +74,7 @@ def home(request):
          ).exclude(
             status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
         )
-        tome=(assigned_tome)[:5]
+        tome=(assigned_tome).order_by('-created')[:5]
         assigned_to_me=len(assigned_tome)
 
 
@@ -81,7 +84,7 @@ def home(request):
             ).exclude(
                status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
            )
-        byme=(created_byme)[:5]
+        byme=(created_byme).order_by('-created')[:5]
 
         created_by_me = len(created_byme)
 
