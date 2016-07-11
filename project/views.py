@@ -17,7 +17,7 @@ import os
 
 def splash(request):
     if request.user.is_authenticated():
-        return render(request, "home.html")
+        return home(request) 
         
     return render(request, "splash.html")
 
