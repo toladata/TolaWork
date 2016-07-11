@@ -94,7 +94,13 @@ def home(request):
 
 #----Data From Tola Tools APIs----####
     tolaActivityData = get_TolaActivity_data()
-    tolaTablesData = get_TolaTables_data()
+
+    tolaTablesData = {}
+    if request.user.is_authenticated():
+
+        tolaTablesData = get_TolaTables_data(request)
+
+    #print tolaTablesData
 
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
@@ -219,11 +225,17 @@ def get_TolaActivity_data():
 
         return {}
 
-def get_TolaTables_data():
+def get_TolaTables_data(request):
+    import json
 
-    url = 'http://.../tolatablesdata' #TolaActivity Url
+    url = 'http://127.0.0.1:8200/api/tolatablesdata' #TolaActivity Url
+    email = request.user.email
+
+    payload = {'email': email}
+
+    #print email
     try:
-        response = requests.get(url)
+        response = requests.get(url, params = payload)
 
         # Consider any status other than 2xx an error
         if not response.status_code // 100 == 2:
