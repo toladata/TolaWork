@@ -225,7 +225,7 @@ $(function () {
                                 <td> {{ticket.created}}</td>
                             </tr>
                             {%endfor%}
-                            <p><strong>Five latest tickets resolved and closed by me</strong></p>
+                            <p><strong>Recent tickets resolved and closed by me</strong></p>
                         </table>
 
                       </div>
@@ -259,7 +259,7 @@ $(function () {
               {% for task in tasks %}
                 <tr data-toggle="collapse" data-target="#{{ task.id }}" class="accordion-toggle">
 
-                <td><strong><a href= "#">{{ task.task }}</a></strong></td>
+                <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
                 <td>{{ task.created_date | date}}</td>
                 <td>{{ task.due_date | date}}</td>
                  <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</td>
@@ -296,11 +296,38 @@ $(function () {
 
         <div class="tab-content">
           <div id="tables" class="tab-pane fade in active">
-            <div class="list-group col-md-4">
-              <li class="list-group-item">Latest Release: <a href="{{ tola_url }}"><span class="badge">{{ tola_number }}</span></a></li>
-              <li class="list-group-item">Status: {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}</li>
-              <li class="list-group-item"><img src="https://travis-ci.org/toladata/TolaTables.svg?branch=master"></li>
-            </div>
+            {% if tolaTablesData %}
+              <h4>Latest Projects</h4>
+              <div class=" table-responsive">
+                <table class="table table-striped">
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Public</th>
+                        <th>Date Created</th>
+                    </tr>
+                    {% for table in tolaTablesData %}
+                      <tr>
+                          <td>{{table.name}}</td>
+                          <td>{{table.description}}</td>
+                          <td>{{table.public}}</td>
+                          <td>{{table.create_date}} </td>
+                      </tr>
+                     {% endfor %}
+                </table>
+                </div>
+              {% endif %}
+            <div class="row activity_details">
+              <div class="col-md-3">
+                 <strong>Latest Release:</strong> <a href="{{ tola_url }}"><span class="badge">{{ tola_number }}</span></a>
+              </div>
+              <div class="col-md-3">
+                  <strong>Status:</strong> {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}
+              </div>
+              <div class="col-md-2">
+                 <img src="https://travis-ci.org/toladata/TolaTables.svg?branch=master">
+              </div>
+            </div>  
           </div>
           <div id="activity" class="tab-pane fade">
             {% if tolaActivityData %}
@@ -318,7 +345,7 @@ $(function () {
                           <td>{{data.project_name}}</td>
                           <td>{{data.program.name}}</td>
                           <td>{{data.approval}}</td>
-                          <td>{{data.create_date}} </td>
+                          <td>{{data.create_date}}</td>
                       </tr>
                      {% endfor %}
                 </table>
