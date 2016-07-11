@@ -51,7 +51,7 @@ def home(request):
 
     recent_tickets = Ticket.objects.all().exclude(status__in='4').order_by('-created')[:5]
     votes_tickets = Ticket.objects.all().exclude(status__in='4').filter(type=2).order_by('-votes')[:5]
-    tasks = Task.objects.all()
+    tasks = Task.objects.all().order_by('-created_date')[:5]
 
     closed_resolved = 0
     assigned_to_me = 0
