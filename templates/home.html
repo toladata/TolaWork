@@ -225,7 +225,7 @@ $(function () {
                                 <td> {{ticket.created}}</td>
                             </tr>
                             {%endfor%}
-                            <p><strong>Five latest tickets resolved and closed by me</strong></p>
+                            <p><strong>Recent tickets resolved and closed by me</strong></p>
                         </table>
 
                       </div>
@@ -296,23 +296,27 @@ $(function () {
 
         <div class="tab-content">
           <div id="tables" class="tab-pane fade in active">
-            <h4>Latest Projects</h4>
-            <div class=" table-responsive">
-              <table class="table table-striped">
-                  <tr>
-                      <th>Project</th>
-                      <th>Program</th>
-                      <th>Status</th>
-                      <th>Date Created</th>
-                  </tr>
-                  <tr>
-                      <td>project name</td>
-                      <td>program name</td>
-                      <td>project status</td>
-                      <td>creation date </td>
-                  </tr>
-              </table>
-            </div>
+            {% if tolaTablesData %}
+              <h4>Latest Projects</h4>
+              <div class=" table-responsive">
+                <table class="table table-striped">
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Public</th>
+                        <th>Date Created</th>
+                    </tr>
+                    {% for table in tolaTablesData %}
+                      <tr>
+                          <td>{{table.name}}</td>
+                          <td>{{table.description}}</td>
+                          <td>{{table.public}}</td>
+                          <td>{{table.create_date}} </td>
+                      </tr>
+                     {% endfor %}
+                </table>
+                </div>
+              {% endif %}
             <div class="row activity_details">
               <div class="col-md-3">
                  <strong>Latest Release:</strong> <a href="{{ tola_url }}"><span class="badge">{{ tola_number }}</span></a>
@@ -341,7 +345,7 @@ $(function () {
                           <td>{{data.project_name}}</td>
                           <td>{{data.program.name}}</td>
                           <td>{{data.approval}}</td>
-                          <td>{{data.create_date}} </td>
+                          <td>{{data.create_date}}</td>
                       </tr>
                      {% endfor %}
                 </table>
