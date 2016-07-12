@@ -12,12 +12,12 @@ from helpdesk.github import latest_release
 from helpdesk.models import Ticket
 from tasks.models import Task
 from django.conf import settings
-from django.db.models import Count
+from django.db.models import Count, Sum
 import os
 
 def splash(request):
     if request.user.is_authenticated():
-        return render(request, "home.html")
+        return home(request)
         
     return render(request, "splash.html")
 
@@ -88,26 +88,26 @@ def home(request):
 
         created_by_me = len(created_byme)
 
-   #all tickets
-    tickets = Ticket.objects.select_related()
-    num_tickets = tickets.count()
+    num_tickets = len(Ticket.objects.all())
 
 #----Data From Tola Tools APIs----####
     tolaActivityData = get_TolaActivity_data()
+
+    print tolaActivityData
 
     tolaTablesData = {}
     if request.user.is_authenticated():
 
         tolaTablesData = get_TolaTables_data(request)
 
-    #print tolaTablesData
+    print tolaActivityData
 
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
                                          'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
                                          'recent_tickets': recent_tickets,'votes_tickets': votes_tickets, 'num_tickets': num_tickets, 'tasks': tasks, \
                                          'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'created_by_me':created_by_me,\
-                                         'closed':closed,'tome':tome,'byme':byme,'tolaActivityData': tolaActivityData, 'tolaTablesData': tolaTablesData})
+                                         'closed':closed,'tome':tome,'byme':byme,'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData})
 
 
 def contact(request):
@@ -205,7 +205,7 @@ import requests
 
 def get_TolaActivity_data():
 
-    url = 'http://.../tolaactivitydata' #TolaActivity Url
+    url = 'http://127.0.0.1:8100/tolaactivitydata' #TolaActivity Url
     try:
         response = requests.get(url)
 
