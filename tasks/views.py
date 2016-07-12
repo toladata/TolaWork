@@ -36,6 +36,7 @@ except ImportError:
     from datetime import datetime as timezone
 
 import requests
+import re
 import json
 from tasks.forms import TaskForm
 from tasks.models import Task
@@ -60,9 +61,25 @@ def task_list(request):
 
 
     tasks = Task.objects.select_related()
+    ## sorting tasks
     sort = request.GET.get('sort', None)
     if sort:
         tasks = Task.objects.all().order_by(sort)
+
+    ## Keyword searching
+    q = request.GET.get('q', None)
+
+    if q:
+        tasks = Task.objects.filter(
+            Q(task__icontains=q) |
+            Q(due_date__icontains=q) |
+            Q(created_date__icontains=q) |
+            Q(status__icontains=q)|
+            Q(priority__icontains=q)
+            
+                   )
+
+
 
 
 
