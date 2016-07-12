@@ -407,22 +407,22 @@
                      <form method='get' action='./'>
                     <div class="panel-body ">
                     <select   class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
-                        <option value='task'{% ifequal query_params.sorting "task"%} selected='selected'{% endifequal %}>
+                        <option value='task'>
                             {% trans "Title" %}
                         </option>
-                        <option value='created_date'{% ifequal query_params.sorting "created_date"%} selected='selected'{% endifequal %}>
+                        <option value='created_date'>
                             {% trans "Start" %}
                         </option>
-                        <option value='due_date'{% ifequal query_params.sorting "due_date"%} selected='selected'{% endifequal %}>
+                        <option value='due_date'>
                             {% trans "Due" %}
                         </option>
-                        <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
+                        <option value='status'>
                             {% trans "Status" %}
                         </option>
-                        <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>
+                        <option value='priority'>
                             {% trans "Priority" %}
                         </option>
-                        <option value='assigned_to_id'{% ifequal query_params.sorting "assigned_to_id"%} selected='selected'{% endifequal %}>
+                        <option value='assigned_to_id'>
                             {% trans "Assigned to" %}
                         </option>
                       </select>
