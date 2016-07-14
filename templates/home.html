@@ -374,18 +374,23 @@ $(function () {
             <div id="pie_container">
             </div>
         </div>
+        <br>
+        <br>
+        <br>
         <div class= "logged_in_users">
-          <h3>Active Users</h3>
-          <p> Total active users in my country<strong><span class="badge read_more">7</span></strong></p>
+          <h4>Active Users</h4>
           
             <div id="active_users">
-                <p><a href="#">User Number 1</a></p>
-                <p><a href="#">User Number 2</a></p>
-                <p><a href="#">User Number 3</a></p>
-                <p><a href="#">User Number 4</a></p>
-                <p><a href="#">User Number 5</a></p>
-                <p><a href="#">User Number 6</a></p>
-                <p><a href="#">User Number 7</a></p>
+              {% if user.is_authenticated %}
+                <p><a href="#"><span class="glyphicon glyphicon-user"></span>  {{ request.user.username }} (You)</a> - TolaWork</p>
+              {% endif %}
+
+              {% if logged_users%}
+              <p> Logged in Users From {{my_country}}<strong><span class="badge read_more">{{logged_users.count}}</span></strong></p>
+                {% for user in logged_users%}
+                  <p><a href="#"><span class="glyphicon glyphicon-user"></span> {{user}}</a> - TolaWork</p>
+                {% endfor %}
+              {% endif %}
             </div>
        </div> 
          

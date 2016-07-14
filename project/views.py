@@ -14,10 +14,11 @@ from tasks.models import Task
 from django.conf import settings
 from django.db.models import Count, Sum
 import os
+from project.models import LoggedUser
 
 def splash(request):
     if request.user.is_authenticated():
-        
+
         return home(request)
         
     return render(request, "splash.html")
@@ -94,21 +95,21 @@ def home(request):
 #----Data From Tola Tools APIs----####
     tolaActivityData = get_TolaActivity_data()
 
-    print tolaActivityData
-
     tolaTablesData = {}
     if request.user.is_authenticated():
 
         tolaTablesData = get_TolaTables_data(request)
 
-    print tolaActivityData
+    logged_users = logged_in_users()
+
+    my_country = get_my_country().upper()
 
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
                                          'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
                                          'recent_tickets': recent_tickets,'votes_tickets': votes_tickets, 'num_tickets': num_tickets, 'tasks': tasks, \
                                          'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'created_by_me':created_by_me,\
-                                         'closed':closed,'tome':tome,'byme':byme,'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData})
+                                         'closed':closed,'tome':tome,'byme':byme,'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData, 'logged_users':logged_users, 'my_country': my_country})
 
 
 def contact(request):
@@ -253,3 +254,39 @@ def get_TolaTables_data(request):
     except ValueError:
 
         return {}
+
+def logged_in_users():
+
+    logged_users = {}
+    
+    logged_users = LoggedUser.objects.all().order_by('username')
+    users_list = []
+
+    # Generate a list of users logged in from the My Country
+    my_country = get_my_country()
+    for user in logged_users:
+        if user.country == my_country:
+
+            users_list.append(user, None)
+
+            logged_users = users_list
+    
+    print logged_users
+    return logged_users
+
+
+from urllib2 import urlopen
+import json
+    
+def get_my_country():
+    try:
+        # Automatically geolocate my IP
+        url = 'http://freegeoip.net/json/'
+
+        response = urlopen(url).read()
+        response = json.loads(response)
+
+        return response['country_name'].lower()
+
+    except Exception, e:
+        pass
