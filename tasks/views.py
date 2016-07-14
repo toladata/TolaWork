@@ -78,7 +78,16 @@ def task_list(request):
             Q(priority__icontains=q)
             
                    )
-
+    ## Task Filtering
+    statuses = request.GET.getlist('status')
+    if statuses:
+        try:
+            statuses = [int(s) for s in statuses]
+            tasks = Task.objects.filter(statuses
+                )
+            print tasks
+        except ValueError:
+            pass
 
 
 
@@ -89,6 +98,7 @@ def task_list(request):
         'tasks': tasks,
         'assignable_users': assignable_users,
         'created_by': created_by,
+            'status_choices':Task.STATUS_CHOICES
 
 
 
