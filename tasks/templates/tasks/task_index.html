@@ -467,6 +467,7 @@
                           <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}
                   </select>
                     <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
                   <input class="btn btn-primary read_more " type='submit' value='{% trans "Apply " %}' />
                 </form>
                       </div>
