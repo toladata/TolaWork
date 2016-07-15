@@ -386,7 +386,7 @@ $(function () {
               {% endif %}
 
               {% if logged_users%}
-              <p> Logged in Users From {{my_country}}<strong><span class="badge read_more">{{logged_users.count}}</span></strong></p>
+              <p> Logged in From {{my_country}}<strong><span class="badge read_more">{{logged_users.count}}</span></strong></p>
                 {% for user in logged_users%}
                   <p><a href="#"><span class="glyphicon glyphicon-user"></span> {{user}}</a> - TolaWork</p>
                 {% endfor %}

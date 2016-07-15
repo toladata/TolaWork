@@ -7,8 +7,8 @@ class LoggedUser(models.Model):
 
   	username = models.CharField(max_length=30, primary_key=True)
   	country = models.CharField(max_length=100, blank=False)
-  
-	def __unicode__(self):
+  	
+  	def __unicode__(self):
 		return self.username
 
 	def login_user(sender, request, user, **kwargs):
@@ -24,18 +24,20 @@ class LoggedUser(models.Model):
 
 		except LoggedUser.DoesNotExist:
 			pass
-
-	def get_user_country(request):
-
-	    # Automatically geolocate the connecting IP
-	    ip = request.META.get('REMOTE_ADDR')
-	    try:
-	        response = urlopen('http://ipinfo.io/'+ip+'/json').read()
-	        response = json.loads(response)
-	        return response['country'].lower()
-
-	    except Exception, e:
-	        pass
 	    
 	user_logged_in.connect(login_user)
 	user_logged_out.connect(logout_user)
+
+
+def get_user_country(request):
+
+    # Automatically geolocate the connecting IP
+    ip = request.META.get('REMOTE_ADDR')
+    try:
+        response = urlopen('http://ipinfo.io/'+ip+'/json').read()
+        response = json.loads(response)
+        return response['country'].lower()
+
+    except Exception, e:
+    	response = "undefined"
+        return response
