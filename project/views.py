@@ -259,17 +259,9 @@ def logged_in_users():
 
     logged_users = {}
     
-    logged_users = LoggedUser.objects.all().order_by('username')
-    users_list = []
-
-    # Generate a list of users logged in from the My Country
     my_country = get_my_country()
-    for user in logged_users:
-        if user.country == my_country:
 
-            users_list.append(user, None)
-
-            logged_users = users_list
+    logged_users = LoggedUser.objects.filter(country=my_country).order_by('username')
     
     print logged_users
     return logged_users
