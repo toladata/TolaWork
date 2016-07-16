@@ -208,8 +208,12 @@ import requests
 def get_TolaActivity_data():
 
     url = 'http://127.0.0.1:8100/tolaactivitydata' #TolaActivity Url
+    country = get_my_country()
+
+    payload = {'country': country}
+
     try:
-        response = requests.get(url)
+        response = requests.get(url, params = payload)
 
         # Consider any status other than 2xx an error
         if not response.status_code // 100 == 2:
@@ -254,7 +258,7 @@ def get_TolaTables_data(request):
     except ValueError:
 
         return {}
-
+#return users logged into TolaWork 
 def logged_in_users():
 
     logged_users = {}
