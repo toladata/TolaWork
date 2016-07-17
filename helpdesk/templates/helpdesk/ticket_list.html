@@ -128,7 +128,7 @@
 
             <!-- start paginator -->
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-8">
                <ul class="pagination">
                  {% if tickets.has_previous %}
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "Previous" %} </a></li>
