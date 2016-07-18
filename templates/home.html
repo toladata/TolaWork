@@ -285,8 +285,8 @@ $(function () {
 
                   <div class="tab-content">
                     <div id="tables" class="tab-pane fade in active">
-                      {% if tolaTablesData %}
-                        <h4>Latest Projects</h4>
+                      {% if tolaTablesData.tables %}
+                        <h4>Your Tables</h4>
                         <div class=" table-responsive">
                           <table class="table table-striped">
                               <tr>
@@ -295,7 +295,7 @@ $(function () {
                                   <th>Public</th>
                                   <th>Date Created</th>
                               </tr>
-                              {% for table in tolaTablesData %}
+                              {% for table in tolaTablesData.tables %}
                                 <tr>
                                     <td>{{table.name}}</td>
                                     <td>{{table.description}}</td>
@@ -378,7 +378,7 @@ $(function () {
         <br>
         <br>
         <div class= "logged_in_users">
-          <h4>Active Users</h4>
+          <h4>Active Users in {{my_country}}</h4>
           
             <div id="active_users">
               {% if user.is_authenticated %}
@@ -394,6 +394,12 @@ $(function () {
               {%if tolaActivityData.activity_logged_users %}
                   {% for user in tolaActivityData.activity_logged_users %}
                      <p><a href="#"><span class="glyphicon glyphicon-user"></span> {{user.username}}</a> - TolaActivity</p>
+                  {% endfor %}
+              {% endif %}
+
+              {%if tolaTablesData.table_logged_users %}
+                  {% for user in tolaTablesData.table_logged_users %}
+                     <p><a href="#"><span class="glyphicon glyphicon-user"></span> {{user.username}}</a> - TolaTables</p>
                   {% endfor %}
               {% endif %}
             </div>

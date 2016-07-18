@@ -236,8 +236,9 @@ def get_TolaTables_data(request):
 
     url = 'http://127.0.0.1:8200/api/tolatablesdata' #TolaActivity Url
     email = request.user.email
+    country = get_my_country()
 
-    payload = {'email': email}
+    payload = {'email': email, 'country': country}
 
     #print email
     try:
