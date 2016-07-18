@@ -83,7 +83,7 @@ def task_list(request):
     if statuses:
         try:
             statuses = [int(s) for s in statuses]
-            tasks = Task.objects.filter(statuses
+            tasks = Task.objects.filter(status=s
                 )
             print tasks
         except ValueError:
