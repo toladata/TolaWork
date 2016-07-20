@@ -285,6 +285,7 @@ $(function () {
 
                   <div class="tab-content">
                     <div id="tables" class="tab-pane fade in active">
+                    {% if user.is_authenticated %}
                       {% if tolaTablesData.tables %}
                         <h4>Your Tables</h4>
                         <div class=" table-responsive">
@@ -305,7 +306,16 @@ $(function () {
                                {% endfor %}
                           </table>
                           </div>
+                        {% else %}
+                        <div class="alert alert-info" role="alert">
+                          <h5>You currently have no tables on Tolatables. Go to <a href="#">TolaTables</a> to create a table(s)</h5>
+                        </div>
                         {% endif %}
+                      {% else %}
+                        <div class="alert alert-info" role="alert">
+                          <h5>Kindly<a href="#"> Login</a> to see a list of Tables you own on TolaTables.</h5>
+                      </div>
+                      {% endif %}
                       <div class="row activity_details">
                         <div class="col-md-3">
                            <strong>Latest Release:</strong> <a href="{{ tola_url }}"><span class="badge">{{ tola_number }}</span></a>
@@ -339,6 +349,11 @@ $(function () {
                                {% endfor %}
                           </table>
                           </div>
+                        {% else %}
+
+                          <div class="alert alert-warning" role="alert">
+                            <h5>There was a Problem loading Project(s) From <a href="#">TolaActivity</a></h5>
+                        </div>
                         {% endif %}
                         <div class="row activity_details">
                           <div class="col-md-3">
@@ -378,7 +393,7 @@ $(function () {
         <br>
         <br>
         <div class= "logged_in_users">
-          <h4>Active Users in {{my_country}}</h4>
+          <h4>Active Users</h4>
           
             <div id="active_users">
               {% if user.is_authenticated %}
