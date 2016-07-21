@@ -500,7 +500,12 @@ def post_comment(request, ticket_id):
             resolution = ticket.resolution
             priority = ticket.priority
             due_date = ticket.due_date
-            tags = [t.pk for t in ticket.tags.all()]
+
+            if ticket.tags.all():
+                tags = [t.pk for t in ticket.tags.all()]
+            else:
+                tags = ""
+
             last_escalation = ticket.last_escalation
             assigned = ticket.assigned_to
             github_id = ticket.github_issue_id
