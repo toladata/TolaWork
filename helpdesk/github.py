@@ -135,7 +135,7 @@ def get_label(repo,ticket):
 
         update_ticket = Ticket.objects.get(id=ticket.id)
         db_label = update_ticket.git_label
-        
+
         if not int(db_label) == int(label_int):
             new_followup = FollowUp(title=ticket.title, ticket_id=ticket.id, comment=comments, public=1, )
             new_followup.save()
