@@ -655,7 +655,6 @@ def view_ticket(request, ticket_id):
         repo = queue_repo(ticket)
         #check status of ticket in GitHub
         response = get_issue_status(repo,ticket)
-        print "Response = " + str(response)
 
         if response == 200:
             #synced status wth github
@@ -669,8 +668,8 @@ def view_ticket(request, ticket_id):
         else:
             print 'Check ticket status in GitHub'
         #check github label
-        response2 = get_label(repo,ticket)
-        print response2
+        label_response = get_label(repo,ticket)
+        print label_response
 
     ticket_state = get_object_or_404(Ticket, id=ticket_id)
     if 'take' in request.GET:

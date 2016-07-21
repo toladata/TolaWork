@@ -9,35 +9,6 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
-def get_label(repo,ticket):
-
-    repo = repo + "/issues/" + ticket.github_issue_number + "/labels"
-    r = requests.get(repo)
-
-    if int(r.status_code) == 200:
-        data = json.loads(r.content)
-
-        for item in range(len(data)):
-            label = data[item]['name']
-
-            if label == "1 - Ready":
-                label_txt = 'Accepted'
-                label_int = '1'
-
-        comments = '[GitHub Sync] Ticket has been ' + str(label_txt) + ' and developers have started working on this ticket'
-
-        update_ticket = Ticket.objects.get(id=ticket.id)
-        current_label = update_ticket.git_label
-
-        if not int(current_label) == int(label_int):
-            new_followup = FollowUp(title=ticket.title, ticket_id=ticket.id, comment=comments, public=1, git_label=label_int, )
-            new_followup.save()
-
-        update_ticket.git_label = label_int
-        update_ticket.save()
-
-    return r.status_code
-
 def get_issue_status(repo,ticket):
 
     repo = repo + "/issues/" + ticket.github_issue_number
@@ -131,6 +102,48 @@ def queue_repo(ticket):
         repo = settings.GITHUB_REPO_2
 
     return repo
+
+def get_label(repo,ticket):
+
+    repo = repo + "/issues/" + ticket.github_issue_number + "/labels"
+    r = requests.get(repo)
+
+    if int(r.status_code) == 200:
+        data = json.loads(r.content)
+        label_txt2 = ""
+        label_int = '0'
+
+        for item in range(len(data)):
+            label = data[item]['name']
+
+            if label == "Tola-Work Ticket":
+                label_txt = 'Submitted from TolaWork '
+
+            elif label == "1 - Ready":
+                label_txt2 = ', accepted by Developers and moved into the Ready Queue'
+                label_int = '1'
+
+            elif label == "2 - Working":
+                label_txt2 = ' and Developers have started working on the Ticket'
+                label_int = '2'
+
+            elif label == "4 - Done":
+                label_txt2 = ' and its Done'
+                label_int = '4'
+
+        comments = '[Progress Update] Ticket ' + str(label_txt) + str(label_txt2)
+
+        update_ticket = Ticket.objects.get(id=ticket.id)
+        db_label = update_ticket.git_label
+        
+        if not int(db_label) == int(label_int):
+            new_followup = FollowUp(title=ticket.title, ticket_id=ticket.id, comment=comments, public=1, )
+            new_followup.save()
+
+            update_ticket.git_label = label_int
+            update_ticket.save()
+
+    return r.status_code
 
 def close_issue(repo,ticket):
     payload = {}

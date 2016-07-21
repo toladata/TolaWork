@@ -367,8 +367,7 @@ class Ticket(models.Model):
     description = models.TextField(_('Description'),blank=True,null=True,help_text=_('The content of the customers query.'),)
     resolution = models.TextField(_('Resolution'),blank=True,null=True,help_text=_('The resolution provided to the customer by our staff.'),)
     priority = models.IntegerField(_('Priority'),choices=PRIORITY_CHOICES,default=3,blank=3,help_text=_('1 = Highest Priority, 5 = Low Priority'),)
-    slack_status = models.IntegerField(_('Slack Status'),default=0)
-    git_label = models.IntegerField(_('Git Label'),default=0)
+    git_label = models.IntegerField(_('Git Label'),default=0,)
     due_date = models.DateTimeField(_('Due on'), blank=True, null=True,)
     last_escalation = models.DateTimeField(blank=True,null=True,editable=False,help_text=_('The date this ticket was last escalated - updated automatically by management/commands/escalate_tickets.py.'),)
     github_issue_number = models.CharField(max_length=255, null=True, blank=True)
@@ -377,7 +376,7 @@ class Ticket(models.Model):
     type = models.IntegerField(_('Ticket Type'), choices=TICKET_TYPE, default=PROBLEM, help_text="Type of Ticket")
     votes = models.IntegerField(default=0)
     tags = models.ManyToManyField(Tag, related_name='ticket_tags', blank=True)
-
+    slack_status = models.IntegerField(_('Slack Status'),default=0)
 
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
@@ -485,7 +484,7 @@ class Ticket(models.Model):
         ordering = ('id',)
         verbose_name = _('Ticket')
         verbose_name_plural = _('Tickets')
-        managed = False
+        #managed = False
 
     def __unicode__(self):
         return u'%s %s' % (self.id, self.title)
