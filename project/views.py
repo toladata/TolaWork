@@ -100,16 +100,14 @@ def home(request):
 
         tolaTablesData = get_TolaTables_data(request)
 
-    logged_users = logged_in_users()
-
-    my_country = get_my_country().upper()
+    logged_users = logged_in_users(request)
 
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
                                          'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
                                          'recent_tickets': recent_tickets,'votes_tickets': votes_tickets, 'num_tickets': num_tickets, 'tasks': tasks, \
                                          'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'created_by_me':created_by_me,\
-                                         'closed':closed,'tome':tome,'byme':byme,'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData, 'logged_users':logged_users, 'my_country': my_country})
+                                         'closed':closed,'tome':tome,'byme':byme,'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData, 'logged_users':logged_users})
 
 
 def contact(request):
@@ -260,15 +258,14 @@ def get_TolaTables_data(request):
 
         return {}
 #return users logged into TolaWork 
-def logged_in_users():
+def logged_in_users(request):
 
     logged_users = {}
-    
-    my_country = get_my_country()
+    username = request.user.username
 
-    logged_users = LoggedUser.objects.filter(country=my_country).order_by('username')
+    logged_users = LoggedUser.objects.all().exclude(username=username).order_by('username')
     
-    print logged_users
+    print username
     return logged_users
 
 

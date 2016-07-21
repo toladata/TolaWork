@@ -308,12 +308,12 @@ $(function () {
                           </div>
                         {% else %}
                         <div class="alert alert-info" role="alert">
-                          <h5>You currently have no tables on Tolatables. Go to <a href="#">TolaTables</a> to create a table(s)</h5>
+                          <h5>You currently have no tables on Tolatables. Go to <a href="#" class="alert-link">TolaTables</a> to create a table(s)</h5>
                         </div>
                         {% endif %}
                       {% else %}
                         <div class="alert alert-info" role="alert">
-                          <h5>Kindly<a href="#"> Login</a> to see a list of Tables you own on TolaTables.</h5>
+                          <h5>Kindly<a href="#" class="alert-link"> Login</a> to see a list of Tables you own on TolaTables.</h5>
                       </div>
                       {% endif %}
                       <div class="row activity_details">
@@ -352,11 +352,11 @@ $(function () {
                         {% else %}
 
                           <div class="alert alert-warning" role="alert">
-                            <h5>There was a Problem loading Project(s) From <a href="#">TolaActivity</a></h5>
+                            <h5>There was a Problem loading Project(s) From <a href="#" class="alert-link">TolaActivity</a></h5>
                         </div>
                         {% endif %}
                         <div class="row activity_details">
-                          <div class="col-md-3">
+                          <div class="col-md-4">
                              <strong>Latest Release:</strong> <a href="{{ tola_activity_url }}"><span class="badge">{{ tola_activity_number }}</span></a>
                           </div>
                           <div class="col-md-3">
@@ -401,7 +401,6 @@ $(function () {
               {% endif %}
 
               {% if logged_users%}
-              <p> Logged in From {{my_country}}<strong><span class="badge read_more">{{logged_users.count}}</span></strong></p>
                 {% for user in logged_users%}
                   <p><a href="#"><span class="glyphicon glyphicon-user"></span> {{user}}</a> - TolaWork</p>
                 {% endfor %}
