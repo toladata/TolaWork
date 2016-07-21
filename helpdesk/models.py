@@ -368,6 +368,7 @@ class Ticket(models.Model):
     resolution = models.TextField(_('Resolution'),blank=True,null=True,help_text=_('The resolution provided to the customer by our staff.'),)
     priority = models.IntegerField(_('Priority'),choices=PRIORITY_CHOICES,default=3,blank=3,help_text=_('1 = Highest Priority, 5 = Low Priority'),)
     slack_status = models.IntegerField(_('Slack Status'),default=0)
+    git_label = models.IntegerField(_('Git Label'),default=0)
     due_date = models.DateTimeField(_('Due on'), blank=True, null=True,)
     last_escalation = models.DateTimeField(blank=True,null=True,editable=False,help_text=_('The date this ticket was last escalated - updated automatically by management/commands/escalate_tickets.py.'),)
     github_issue_number = models.CharField(max_length=255, null=True, blank=True)

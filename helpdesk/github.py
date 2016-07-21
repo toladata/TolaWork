@@ -9,11 +9,40 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
+def get_label(repo,ticket):
+
+    repo = repo + "/issues/" + ticket.github_issue_number + "/labels"
+    r = requests.get(repo)
+
+    if int(r.status_code) == 200:
+        data = json.loads(r.content)
+
+        for item in range(len(data)):
+            label = data[item]['name']
+
+            if label == "1 - Ready":
+                label_txt = 'Accepted'
+                label_int = '1'
+
+        comments = '[GitHub Sync] Ticket has been ' + str(label_txt) + ' and developers have started working on this ticket'
+
+        update_ticket = Ticket.objects.get(id=ticket.id)
+        current_label = update_ticket.git_label
+
+        if not int(current_label) == int(label_int):
+            new_followup = FollowUp(title=ticket.title, ticket_id=ticket.id, comment=comments, public=1, git_label=label_int, )
+            new_followup.save()
+
+        update_ticket.git_label = label_int
+        update_ticket.save()
+
+    return r.status_code
 
 def get_issue_status(repo,ticket):
 
     repo = repo + "/issues/" + ticket.github_issue_number
     r = requests.get(repo)
+
 
     if int(r.status_code) == 200:
         data = json.loads(r.content)
