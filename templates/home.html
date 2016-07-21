@@ -67,29 +67,27 @@ $(function () {
           <br/>
           <a href="/helpdesk/tickets/submit" class="btn btn-lg btn-success"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
           <br/>
-          <h3>Tickets, Tasks and Tola Tools Summary</h3>
+          <h3>Tickets, Tasks and <strong>Tola</strong>Data Tools</h3>
           <div class="home-bottom">
           <div class="panel_bottom">
              <div class="panel-group" id="accordion">
               <div class="panel home-panel">
                 <div class="panel-heading home-paneltitle">
-                  <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#tickets"><font class="font5"><span class="glyphicon glyphicon-tags"></span>  Tickets</font></a>
-                  </h4>
+                    <h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#tickets"><font class="font5"><span class="glyphicon glyphicon-tags"></span>&nbsp;&nbsp;Tickets</font></a></h4>
                 </div>
                 <div id="tickets" class="panel-collapse collapse">
                   <div class="panel-body">
                     <ul class="nav nav-tabs">
                       <li class="active">
                           <a data-toggle="tab" href="#enhancements">
-                          <b><span class="glyphicon glyphicon-th"></span></b> Top Enhancement Requests</a>
+                          <b><span class="glyphicon glyphicon-th"></span></b>&nbsp;&nbsp;Top Enhancement Requests</a>
                       </li>
                       <li>
-                        <a data-toggle="tab" href="#Recent"><b><span class="glyphicon glyphicon-list-alt"></span></b>  Recent Tickets</a>
+                        <a data-toggle="tab" href="#Recent"><b><span class="glyphicon glyphicon-list-alt"></span></b>&nbsp;&nbsp;Recent Tickets</a>
                       </li>
                       {% if user.is_authenticated %}
                         <li>
-                          <a data-toggle="tab" href="#Preview"><b><span class="glyphicon glyphicon-th-list"></span></b>  Tickets Preview</a>
+                          <a data-toggle="tab" href="#Preview"><b><span class="glyphicon glyphicon-th-list"></span></b>&nbsp;&nbsp;Tickets Preview</a>
                         </li>
                       {% endif %}
                     </ul>
@@ -160,14 +158,14 @@ $(function () {
                                           <td> {{ticket.created}}</td>
                                       </tr>
                                       {%endfor%}
-                                      <p><strong> Recent tickets created by Me.</strong></p>
+                                      <p><strong>&nbsp;Recent tickets created by Me.</strong></p>
                                   </table>
                                 </div>
                               </div> 
                             </div>
                             <div class="sort_panels">
                               <div class= "preview_links">
-                                <a href="#assigned_to_me" data-toggle="collapse"> Assigned to Me</a> <strong><span class="badge read_more"> {{ assigned_to_me }} </span></strong>
+                                <a href="#assigned_to_me" data-toggle="collapse">&nbsp;Assigned to Me</a> <strong><span class="badge read_more"> {{ assigned_to_me }} </span></strong>
                               </div>
                                <div id="assigned_to_me" class="collapse">
                                 <div class="table-responsive">
@@ -193,7 +191,7 @@ $(function () {
                             </div>
                              <div class="sort_panels">
                                <div class= "preview_links">
-                                 <a href="#closed_resolved" data-toggle="collapse"> Resolved & Closed by Me </a> <strong> <span class="badge read_more"> {{ closed_resolved }} </span></strong>
+                                 <a href="#closed_resolved" data-toggle="collapse">&nbsp;Resolved & Closed by Me </a> <strong> <span class="badge read_more"> {{ closed_resolved }} </span></strong>
                                </div>  
                                <div id="closed_resolved" class="collapse">
                                 <div class="table-responsive">
@@ -231,7 +229,7 @@ $(function () {
                 <div class="panel panel-success">
                   <div class="panel-heading ">
                     <h4 class="panel-title">
-                      <a data-toggle="collapse" data-parent="#accordion" href="#tasks"> <font > <span class="glyphicon glyphicon-tasks"></span> Tasks</font></a>
+                      <a data-toggle="collapse" data-parent="#accordion" href="#tasks"> <font > <span class="glyphicon glyphicon-tasks"></span>&nbsp;&nbsp;Tasks</font></a>
                     </h4>
                   </div>
                   <div id="tasks" class="panel-collapse collapse">
@@ -265,7 +263,7 @@ $(function () {
               <div class="panel panel-info">
                 <div class="panel-heading ">
                   <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#tools"> <font ><span class="glyphicon glyphicon-cog"></span> Tola Tools</font></a>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#tools"> <font ><span class="glyphicon glyphicon-cog"></span>&nbsp;&nbsp;Tola<strong>Data</strong> Tools</font></a>
                   </h4>
                 </div>
                 <div id="tools" class="panel-collapse collapse in">
@@ -280,7 +278,7 @@ $(function () {
                         <div class="tolaactivity"><img src="{{ STATIC_URL }}img/tola-activity-icon-orange.png" class="icon"> Tola Activity</div>
                       </a>
                     </li>
-                    <li><a data-toggle="tab" href="#ona"><div class="ona">ONA</div></a></li>
+                    <li><a data-toggle="tab" href="#ona"><div class="ona">ONA Mobile Platform</div></a></li>
                   </ul>
 
                   <div class="tab-content">
@@ -393,7 +391,7 @@ $(function () {
         <br>
         <br>
         <div class= "logged_in_users">
-          <h4>Active Users</h4>
+          <h4>Users Online:</h4>
           
             <div id="active_users">
               {% if user.is_authenticated %}

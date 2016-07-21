@@ -48,7 +48,7 @@ import json
 from helpdesk.forms import TicketForm, UserSettingsForm, CommentTicketForm, CommentFollowUpForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, UserVotes, Queue, UserSettings, KBCategory, Tag, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
-from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo
+from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo, get_label
 from helpdesk.slack import post_slack,post_tola_slack
 from helpdesk.email import email
 
@@ -500,7 +500,12 @@ def post_comment(request, ticket_id):
             resolution = ticket.resolution
             priority = ticket.priority
             due_date = ticket.due_date
-            tags = [t.pk for t in ticket.tags.all()]
+
+            if ticket.tags.all():
+                tags = [t.pk for t in ticket.tags.all()]
+            else:
+                tags = ""
+
             last_escalation = ticket.last_escalation
             assigned = ticket.assigned_to
             github_id = ticket.github_issue_id
@@ -655,7 +660,6 @@ def view_ticket(request, ticket_id):
         repo = queue_repo(ticket)
         #check status of ticket in GitHub
         response = get_issue_status(repo,ticket)
-        print "Response = " + str(response)
 
         if response == 200:
             #synced status wth github
@@ -668,6 +672,9 @@ def view_ticket(request, ticket_id):
             print 'Ticket status in Github is: [' + str(state) + ']'
         else:
             print 'Check ticket status in GitHub'
+        #check github label
+        label_response = get_label(repo,ticket)
+        print label_response
 
     ticket_state = get_object_or_404(Ticket, id=ticket_id)
     if 'take' in request.GET:
