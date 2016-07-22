@@ -22,6 +22,17 @@ def splash(request):
         return home(request)
         
     return render(request, "splash.html")
+def user (request):
+    #tickets
+    all_tickets = Ticket.objects.all().values('status').annotate(total=Count('status')).order_by('total')
+    email = request.GET.get('email')
+    tickets = get_tickets_by_user(email)
+
+    #tasks
+    all_tasks = Task.objects.all().values('status').annotate(total=Count('status')).order_by('total')
+    tasks = Task.objects.all().order_by('-created_date')[:5]
+
+    return render(request, "user.html", {'all_tickets': all_tickets,'tickets': tickets, 'all_tasks': all_tasks, 'tasks': tasks  })
 
 def home(request):
 
@@ -284,3 +295,8 @@ def get_my_country():
 
     except Exception, e:
         pass
+
+#get tickets of a logged in user
+def  get_tickets_by_user(email):
+    tickets = Ticket.objects.filter(submitter_email= email).order_by('-created')[:6]
+    return tickets
