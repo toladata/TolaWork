@@ -24,8 +24,8 @@ def splash(request):
     return render(request, "splash.html")
 def user (request):
     #tickets
-    all_tickets = Ticket.objects.all().values('status').annotate(total=Count('status')).order_by('total')
     email = request.GET.get('email')
+    all_tickets = Ticket.objects.filter(submitter_email=email).values('status').annotate(total=Count('status')).order_by('total')
     tickets = get_tickets_by_user(email)
 
     #tasks
