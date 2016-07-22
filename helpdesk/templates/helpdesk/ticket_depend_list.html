@@ -14,6 +14,9 @@
 
 <div class="row">
     {{ search_message|safe }}
+        {% for ticket in tickets.object_list %}
+    <form method='post' action='{% url "helpdesk_mass_update"  d_ticket.id  %}' >
+        {% endfor %}
         <table class="table table-hover table-bordered table-striped">
         <caption>{% trans "Tickets" %}</caption>
         <thead>
@@ -33,7 +36,7 @@
         {% for ticket in tickets.object_list %}
             <tr class="{{ ticket.get_priority_css_class }}">
                 <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket|upper }}</a></td>
-                <td><input type='radio' name='ticket_id' value='{{ ticket.id }}'  /></td>
+                <td><input type='radio' name='ticket_id' value='{{ ticket.id }}' /></td>
                 <td>{{ ticket.get_priority_display }}</td>
                 <td>{{ ticket.get_type_display }}</td>
                 <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
@@ -64,7 +67,7 @@
             </span>
         </div>
         <p>
-        <label ticket>{% trans "With Selected Ticket:" %}</label><br>
+        <label>{% trans "With Selected Ticket:" %}</label><br>
             <select name='action' id='id_mass_action'>
                     <option value='depend'>{% trans "Add Dependency" %}</option>
                 </select>
