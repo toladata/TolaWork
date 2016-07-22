@@ -902,8 +902,6 @@ def tickets_dependency(request,ticket_id):
                 pass
 
         owners = request.GET.getlist('assigned_to')
-
-        owners = request.GET.getlist('assigned_to')
         if owners:
             try:
                 owners = [int(u) for u in owners]
@@ -990,9 +988,28 @@ def tickets_dependency(request,ticket_id):
             search_message=search_message,
             d_ticket=d_ticket,
 
-
         )))
 
+def ticket_dependency_add(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    if request.method == 'POST':
+        form = TicketDependencyForm(request.POST)
+        print "Dependency Form"
+        if form.is_valid():
+            ticketdependency = form.save(commit=False)
+            ticketdependency.ticket = ticket
+            if ticketdependency.ticket != ticketdependency.depends_on:
+                ticketdependency.save()
+            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+    else:
+
+        form = TicketDependencyForm()
+    return render_to_response('helpdesk/ticket_dependency_add.html',
+        RequestContext(request, {
+            'ticket': ticket,
+            'form': form,
+        }))
+ticket_dependency_add = staff_member_required(ticket_dependency_add)
 
 def ticket_list(request):
     context = {}
@@ -1703,24 +1720,6 @@ def ticket_cc_del(request, ticket_id, cc_id):
         }))
 ticket_cc_del = staff_member_required(ticket_cc_del)
 
-def ticket_dependency_add(request, ticket_id):
-    ticket = get_object_or_404(Ticket, id=ticket_id)
-    if request.method == 'POST':
-        form = TicketDependencyForm(request.POST)
-        if form.is_valid():
-            ticketdependency = form.save(commit=False)
-            ticketdependency.ticket = ticket
-            if ticketdependency.ticket != ticketdependency.depends_on:
-                ticketdependency.save()
-            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
-    else:
-        form = TicketDependencyForm()
-    return render_to_response('helpdesk/ticket_depend_list.html',
-        RequestContext(request, {
-            'ticket': ticket,
-            'form': form,
-        }))
-ticket_dependency_add = staff_member_required(ticket_dependency_add)
 
 def ticket_dependency_del(request, ticket_id, dependency_id):
     dependency = get_object_or_404(TicketDependency, ticket__id=ticket_id, id=dependency_id)
@@ -2134,7 +2133,106 @@ def data_query_pagination(request, data_items, query_params):
         data_items = data_item_paginator.page(data_item_paginator.num_pages)
 
     return data_items
-    
+
+def mass_update(request, ticket_id):
+    depend_ticket = Ticket.objects.get(id=ticket_id)
+
+    tickets = request.POST.getlist('ticket_id')
+    action = request.POST.get('action', None)
+    if not (tickets and action):
+        return HttpResponseRedirect(reverse('helpdesk_list'))
+
+    if action.startswith('assign_'):
+        parts = action.split('_')
+        user = User.objects.get(id=parts[1])
+        action = 'assign'
+    elif action == 'take':
+        user = request.user
+        action = 'assign'
+
+    for t in Ticket.objects.filter(id__in=tickets):
+
+
+        if action == 'assign' and t.assigned_to != user:
+            t.assigned_to = user
+            t.save()
+            f = FollowUp(ticket=t, date=timezone.now(), title=_('Assigned to %(username)s in bulk update' % {'username': user.get_username()}), public=True, user=request.user)
+            f.save()
+        elif action == 'depend':
+            d = TicketDependency(ticket=depend_ticket, depends_on=t)
+            if depend_ticket != t:
+                d.save()
+
+        elif action == 'unassign' and t.assigned_to is not None:
+            t.assigned_to = None
+            t.save()
+            f = FollowUp(ticket=t, date=timezone.now(), title=_('Unassigned in bulk update'), public=True, user=request.user)
+            f.save()
+        elif action == 'close' and t.status != Ticket.CLOSED_STATUS:
+            t.status = Ticket.CLOSED_STATUS
+            t.save()
+            f = FollowUp(ticket=t, date=timezone.now(), title=_('Closed in bulk update'), public=False, user=request.user, new_status=Ticket.CLOSED_STATUS)
+            f.save()
+        elif action == 'close_public' and t.status != Ticket.CLOSED_STATUS:
+            t.status = Ticket.CLOSED_STATUS
+            t.save()
+            f = FollowUp(ticket=t, date=timezone.now(), title=_('Closed in bulk update'), public=True, user=request.user, new_status=Ticket.CLOSED_STATUS)
+            f.save()
+            # Send email to Submitter, Owner, Queue CC
+            context = safe_template_context(t)
+            context.update(
+                resolution = t.resolution,
+                queue = t.queue,
+                )
+
+            messages_sent_to = []
+
+            if t.submitter_email:
+                send_templated_mail(
+                    'closed_submitter',
+                    context,
+                    recipients=t.submitter_email,
+                    sender=t.queue.from_address,
+                    fail_silently=True,
+                    )
+                messages_sent_to.append(t.submitter_email)
+
+            for cc in t.ticketcc_set.all():
+                if cc.email_address not in messages_sent_to:
+                    send_templated_mail(
+                        'closed_submitter',
+                        context,
+                        recipients=cc.email_address,
+                        sender=t.queue.from_address,
+                        fail_silently=True,
+                        )
+                    messages_sent_to.append(cc.email_address)
+
+            if t.assigned_to and request.user != t.assigned_to and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
+                send_templated_mail(
+                    'closed_owner',
+                    context,
+                    recipients=t.assigned_to.email,
+                    sender=t.queue.from_address,
+                    fail_silently=True,
+                    )
+                messages_sent_to.append(t.assigned_to.email)
+
+            if t.queue.updated_ticket_cc and t.queue.updated_ticket_cc not in messages_sent_to:
+                send_templated_mail(
+                    'closed_cc',
+                    context,
+                    recipients=t.queue.updated_ticket_cc,
+                    sender=t.queue.from_address,
+                    fail_silently=True,
+                    )
+
+        elif action == 'delete':
+            t.delete()
+
+    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
+mass_update = staff_member_required(mass_update)
+
 #File Attachment
 def file_attachment(request,f):
     files = []
