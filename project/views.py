@@ -10,13 +10,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from helpdesk.github import latest_release
 from helpdesk.models import Ticket
+from tasks.models import Task
 from django.conf import settings
-from django.db.models import Count
+from django.db.models import Count, Sum
 import os
+from project.models import LoggedUser
 
 def splash(request):
     if request.user.is_authenticated():
-        return render(request, "home.html")
+
+        return home(request)
         
     return render(request, "splash.html")
 
@@ -50,11 +53,61 @@ def home(request):
 
     recent_tickets = Ticket.objects.all().exclude(status__in='4').order_by('-created')[:5]
     votes_tickets = Ticket.objects.all().exclude(status__in='4').filter(type=2).order_by('-votes')[:5]
+    tasks = Task.objects.all().order_by('-created_date')[:5]
+
+    closed_resolved = 0
+    assigned_to_me = 0
+    created_by_me = 0
+    closed = []
+    tome = []
+    byme = []
+    if (request.user.is_authenticated()):
+        # open & reopened tickets, assigned to current user
+        closedresolved = Ticket.objects.select_related('queue').filter(
+            assigned_to=request.user,
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        )
+        closed=(closedresolved).order_by('-created')[:5]
+        closed_resolved = len(closedresolved)
+
+        # Tickets assigned to current user
+        assigned_tome = Ticket.objects.select_related('queue').filter(
+            assigned_to=request.user,
+         ).exclude(
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        )
+        tome=(assigned_tome).order_by('-created')[:5]
+        assigned_to_me=len(assigned_tome)
+
+
+        # Tickets created by current user
+        created_byme = Ticket.objects.select_related('queue').filter(
+               submitter_email=request.user.email,
+            ).exclude(
+               status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+           )
+        byme=(created_byme).order_by('-created')[:5]
+
+        created_by_me = len(created_byme)
+
+    num_tickets = len(Ticket.objects.all())
+
+#----Data From Tola Tools APIs----####
+    tolaActivityData = get_TolaActivity_data()
+
+    tolaTablesData = {}
+    if request.user.is_authenticated():
+
+        tolaTablesData = get_TolaTables_data(request)
+
+    logged_users = logged_in_users(request)
 
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
                                          'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
-                                         'recent_tickets': recent_tickets,'votes_tickets': votes_tickets})
+                                         'recent_tickets': recent_tickets,'votes_tickets': votes_tickets, 'num_tickets': num_tickets, 'tasks': tasks, \
+                                         'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'created_by_me':created_by_me,\
+                                         'closed':closed,'tome':tome,'byme':byme,'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData, 'logged_users':logged_users})
 
 
 def contact(request):
@@ -146,3 +199,88 @@ def permission_denied(request):
     Something unauthorized happened
     """
     return render(request, '401.html')
+
+###Tola Tools API Views
+import requests
+
+def get_TolaActivity_data():
+
+    url = 'http://127.0.0.1:8100/tolaactivitydata' #TolaActivity Url
+    country = get_my_country()
+
+    payload = {'country': country}
+
+    try:
+        response = requests.get(url, params = payload)
+
+        # Consider any status other than 2xx an error
+        if not response.status_code // 100 == 2:
+            return {}
+
+        json_obj = response.json()
+
+        return json_obj
+
+    except requests.exceptions.RequestException as e:
+        # A serious problem happened, like an SSLError or InvalidURL
+        return {}
+
+    except ValueError:
+
+        return {}
+
+def get_TolaTables_data(request):
+    import json
+
+    url = 'http://127.0.0.1:8200/api/tolatablesdata' #TolaActivity Url
+    email = request.user.email
+    country = get_my_country()
+
+    payload = {'email': email, 'country': country}
+
+    #print email
+    try:
+        response = requests.get(url, params = payload)
+
+        # Consider any status other than 2xx an error
+        if not response.status_code // 100 == 2:
+            return {}
+
+        json_obj = response.json()
+
+        return json_obj
+
+    except requests.exceptions.RequestException as e:
+        # A serious problem happened, like an SSLError or InvalidURL
+        return {}
+
+    except ValueError:
+
+        return {}
+#return users logged into TolaWork 
+def logged_in_users(request):
+
+    logged_users = {}
+    username = request.user.username
+
+    logged_users = LoggedUser.objects.all().exclude(username=username).order_by('username')
+    
+    print username
+    return logged_users
+
+
+from urllib2 import urlopen
+import json
+    
+def get_my_country():
+    try:
+        # Automatically geolocate my IP
+        url = 'http://freegeoip.net/json/'
+
+        response = urlopen(url).read()
+        response = json.loads(response)
+
+        return response['country_name'].lower()
+
+    except Exception, e:
+        pass

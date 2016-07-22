@@ -36,9 +36,11 @@ except ImportError:
     from datetime import datetime as timezone
 
 import requests
+import re
 import json
 from tasks.forms import TaskForm
 from tasks.models import Task
+
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
 
@@ -47,18 +49,58 @@ superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_ac
 @login_required
 def task_list(request):
 
+    # Query_params will hold a dictionary of parameters relating to
+    # a query, to be saved if needed:
+
     created_by = request.user
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     context = {}
-    tasks = Task.objects.all()
+
     created_by = request.user
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+
+
+    tasks = Task.objects.select_related()
+    ## sorting tasks
+    sort = request.GET.get('sort', None)
+    if sort:
+        tasks = Task.objects.all().order_by(sort)
+
+    ## Keyword searching
+    q = request.GET.get('q', None)
+
+    if q:
+        tasks = Task.objects.filter(
+            Q(task__icontains=q) |
+            Q(due_date__icontains=q) |
+            Q(created_date__icontains=q) |
+            Q(status__icontains=q)|
+            Q(priority__icontains=q)
+            
+                   )
+    ## Task Filtering
+    statuses = request.GET.getlist('status')
+    if statuses:
+        try:
+            statuses = [int(s) for s in statuses]
+            tasks = Task.objects.filter(status=s
+                )
+            print tasks
+        except ValueError:
+            pass
+
+
+
+
 
     return render_to_response('tasks/task_index.html',
         RequestContext(request, {
         'tasks': tasks,
         'assignable_users': assignable_users,
         'created_by': created_by,
+            'status_choices':Task.STATUS_CHOICES
+
+
 
         }))
 
@@ -161,3 +203,5 @@ def delete_task(request, task_id):
     else:
         task.delete()
         return HttpResponseRedirect(reverse('task_list'))
+
+

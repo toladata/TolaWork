@@ -8,7 +8,9 @@
   <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 {% endblock %}
 
+
 {% block content %}
+{% load in_list %}
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css">
 <div class="container">
@@ -401,15 +403,32 @@
               </div>
             </div>
             <div class="panel panel-info">
-                <div class="panel-heading"> <strong>Filter By Priority</strong></div>
-                <div class="panel-body ">
-                <form>
-                  <select class="btn btn-default dropdown-toggle">
-                    <option>Normal</option>
-                    <option>High</option>
-                    <option>Low</option>
-                  </select>
-                  <input class="btn btn-primary read_more " type='submit' value='{% trans "Apply " %}' />
+                <div class="panel-heading"> <strong>Sort Tasks</strong></div>
+                     <form method='get' action='./'>
+                    <div class="panel-body ">
+                    <select   class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
+                        <option value='task'>
+                            {% trans "Title" %}
+                        </option>
+                        <option value='created_date'>
+                            {% trans "Start" %}
+                        </option>
+                        <option value='due_date'>
+                            {% trans "Due" %}
+                        </option>
+                        <option value='status'>
+                            {% trans "Status" %}
+                        </option>
+                        <option value='priority'>
+                            {% trans "Priority" %}
+                        </option>
+                        <option value='assigned_to_id'>
+                            {% trans "Assigned to" %}
+                        </option>
+                      </select>
+                       
+                         <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' />
+                    </div>
                 </form>
                 </div>
              </div>
@@ -421,22 +440,44 @@
             </div>
 
               <div class="panel panel-info">
-                <div class="panel-heading"> <strong>Filter task By Status</strong></div>
+                <div class="panel-heading"> <strong>Filter tasks By:</strong></div>
                 <div class="panel-body ">
+                    <div class=" col-md-12">
+                    <strong>Click</strong> on <strong>"+"</strong> to add filters  and  <strong>"-"</strong>  to remove a filter.
+                </div>
+
+                <form class="filter_form" method='get' action='./'>
+                    <select name='select' id='filterBuilderSelect' class="btn btn-default col-md-8 dropdown-toggle">
+                        <option value='Status'>{% trans "Status" %}</option>
+                        <option value='Priority'>{% trans "Priority" %}</option>
+                        <option value='Assigned to'>{% trans "Assigned to" %}</option>
+                        <option value='Start'>{% trans "Start Date" %}</option>
+                        <option value='Due'>{% trans "Due Date" %}</option>
+
+                    </select>
+                    <input class="btn sort_add" type='button' id='filterBuilderButton' value='+' />
+                  {% csrf_token %}
+                </form>
+                  <div>
+                      <div class='thumbnail sorting_form filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
+                  <div class="keywords">
                 <form>
-                  <select class="btn btn-default dropdown-toggle">
-                    <option>Active tasks</option>
-                    <option>Completed tasks</option>
-                    <option>Cancelled</option>
+                  <select id='id_statuses' name='status'class="status_select" multiple='selected' rows="4">
+                    {% for s in status_choices %}
+                          <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}
                   </select>
+                    <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
                   <input class="btn btn-primary read_more " type='submit' value='{% trans "Apply " %}' />
                 </form>
+                      </div>
                 </div>
               </div>
           </div>
 
         </div>
-</div>
+        </div>
+  </div>
 </div>
   <script>
   $(function() {
@@ -461,4 +502,85 @@
     });
   });
   </script>
+<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+    // Enable Tabs
+    $("#searchtabs").tabs({
+        collapsible:true
+    });
+    // Hide all tabs by default
+    $("#searchtabs > ul > li").removeClass().addClass("ui-corner-top ui-state-default");
+    $("#searchtabs > div").addClass("ui-tabs-hide");
+    $("#select_all").click(function() {
+        $(".ticket_multi_select").attr('checked', true);
+        return false;
+    });
+    $("#select_none").click(function() {
+        $(".ticket_multi_select").attr('checked', false);
+        return false;
+    });
+    $("#select_inverse").click(function() {
+        $(".ticket_multi_select").each(function() {
+            $(this).attr('checked', !$(this).attr('checked'));
+        });
+        return false;
+    });
+
+//show selected query box when '+' button is clicked
+    $("#filterBuilderButton").click(function() {
+        var boxName = "#filterBox" + $("#filterBuilderSelect").val();
+        $(boxName).slideDown();
+        return false;
+    });
+    $(".filterBuilderRemove").click(function() {
+        var boxName = "#" + $(this).parents(".filterBox").attr('id');
+        $(boxName).slideUp();
+        $(boxName).children("input:text").each(function() {
+            $(this).val("");
+        });
+        $(boxName).children("input:checkbox").each(function() {
+            this.checked = false;
+        });
+        $(boxName).children("select").each(function() {
+            this.selectedIndex = -1;
+        });
+        return false;
+    });
+});
+
+</script>
+
+<script type='text/javascript' language='javascript'>
+    $(function(){
+    $("#filterBoxOwner").hide();
+    $("#filterBoxOwner").hover(function() {
+        $("filterBoxOwner").slideToggle("fast");
+    });
+    $("#filterBoxQueue").hide();
+    $("#filterBoxQueue").hover(function() {
+        $("filterBoxQueue").slideToggle("fast");
+    });
+    $("#filterBoxStatus").hide();
+    $("#filterBoxStatus").hover(function() {
+        $("filterBoxStatus").slideToggle("fast");
+    });
+    $("#filterBoxDates").hide();
+    $("#filterBoxDates").hover(function() {
+        $("filterBoxDates").slideToggle("fast");
+    });
+    $("#filterBoxType").hide();
+    $("#filterBoxType").hover(function() {
+        $("filterBoxType").slideToggle("fast");
+    });
+    $("#filterBoxKeywords").hide();
+    $("#filterBoxKeywords").hover(function() {
+    $("filterBoxKeywords").slideToggle("fast");
+    });
+    $("#filterBoxCreated").hide();
+    $("#filterBoxCreated").hover(function() {
+    $("filterBoxCreated").slideToggle("fast");
+    });
+
+});
+</script>
 {% endblock content %}
