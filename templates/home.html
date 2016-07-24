@@ -141,7 +141,7 @@ $(function () {
                               <div class= "preview_links">
                                  <a href="#Created_by_me" data-toggle="collapse">Created By Me </a> <strong> <span class="badge read_more"> {{ created_by_me }} </span></strong>
                               </div>
-                              <div id="Created_by_me" class="collapse">
+                              <div id="Created_by_me" class="collapse in">
                                 <div class="table-responsive">
                                   <table class="table table-striped">
                                       <tr>
@@ -405,7 +405,7 @@ $(function () {
 
               {% if logged_users%}
                 {% for user in logged_users%}
-                  <p><a href="{% url 'user' %}?email={{user.email}}"><span class="glyphicon glyphicon-user"></span> {{user.username}}</a> - TolaWork</p>
+                  <p><a href="{% url 'user' %}?email={{user.email}}&username={{user.username}}"><span class="glyphicon glyphicon-user"></span> {{user.username}}</a> - TolaWork</p>
                 {% endfor %}
               {% endif %}
               {%if tolaActivityData.activity_logged_users %}

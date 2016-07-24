@@ -248,6 +248,14 @@ margin-right: 0px
     background-color: #b20838;
     color:#fff;
 }
+/*user page*/
+.user_pie
+{
+    min-width: 300px;
+    height: 200px; 
+    max-width: 600px; 
+   margin: 0 auto;
+}
 /*//pie chart*/
 #pie_container
 {
