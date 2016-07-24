@@ -400,12 +400,12 @@ $(function () {
           
             <div id="active_users">
               {% if user.is_authenticated %}
-                <p><a href="#"><span class="glyphicon glyphicon-user"></span>  {{ request.user.username }} (You)</a> - TolaWork</p>
+                <p><a href="{% url 'user' %}?email={{request.user.email}}"><span class="glyphicon glyphicon-user"></span>  {{ request.user.username }} (You)</a> - TolaWork</p>
               {% endif %}
 
               {% if logged_users%}
                 {% for user in logged_users%}
-                  <p><a href="#"><span class="glyphicon glyphicon-user"></span> {{user}}</a> - TolaWork</p>
+                  <p><a href="{% url 'user' %}?email={{user.email}}"><span class="glyphicon glyphicon-user"></span> {{user.username}}</a> - TolaWork</p>
                 {% endfor %}
               {% endif %}
               {%if tolaActivityData.activity_logged_users %}

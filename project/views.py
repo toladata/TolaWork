@@ -22,6 +22,17 @@ def splash(request):
         return home(request)
         
     return render(request, "splash.html")
+def user (request):
+    #tickets
+    email = request.GET.get('email')
+    all_tickets = Ticket.objects.filter(submitter_email=email).values('status').annotate(total=Count('status')).order_by('total')
+    tickets = get_tickets_by_user(email)
+
+    #tasks
+    all_tasks = Task.objects.all().values('status').annotate(total=Count('status')).order_by('total')
+    tasks = Task.objects.all().order_by('-created_date')[:5]
+
+    return render(request, "user.html", {'all_tickets': all_tickets,'tickets': tickets, 'all_tasks': all_tasks, 'tasks': tasks  })
 
 def home(request):
 
@@ -263,7 +274,14 @@ def logged_in_users(request):
 
     return logged_users
 
+#get tickets of a logged in user
+def  get_tickets_by_user(email):
 
+    tickets = Ticket.objects.filter(submitter_email= email).order_by('-created')[:6]
+    
+    return tickets
+
+#Update tickets on github
 from django.conf import settings
 from helpdesk.github import  update_issue,get_issue
 
@@ -297,5 +315,6 @@ def update_issue_on_github(request):
 
             #update issue in github with local changes and comments
             update_issue(repo,ticket)
-
     return HttpResponseRedirect('/home')
+
+

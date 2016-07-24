@@ -29,6 +29,7 @@ urlpatterns = patterns('',
     #home
 
     url(r'^home', 'project.views.home', name='home'),
+    url(r'^user', 'project.views.user', name='user'),
     url(r'^contact', 'project.views.contact', name='contact'),
     url(r'^faq', 'project.views.faq', name='faq'),
     url(r'^splash', 'project.views.splash', name='splash'),
