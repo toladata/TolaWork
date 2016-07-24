@@ -185,3 +185,39 @@ def latest_release(repo):
         print r.status_code
         content = None
     return content
+
+#Update issues on github
+def update_issue(repo,ticket):
+
+    payload = {}
+    payload['title'] = ticket.title
+    payload['body'] = ticket.description
+
+    token = settings.GITHUB_AUTH_TOKEN
+    repo = repo + "/issues/" + ticket.github_issue_number
+
+    header = {'Authorization': 'token %s' % token}
+
+    r = requests.post(repo,json.dumps(payload),headers=header)
+    #Update ticket with new github info if created successfully "201" response
+    if int(r.status_code) == 201:
+        print "201"
+
+        getComments = FollowUp.objects.all().filter(ticket=ticket)
+        for comment in getComments:
+            comment_status = add_comments(comment, repo, ticket)
+
+    print r.status_code
+
+    return r.status_code
+
+def get_issue(repo,id):
+    repo = repo + "/issues/" + id
+    r = requests.get(repo)
+    if(r.ok):
+        issue = json.loads(r.text or r.content)
+    else:
+        issue = None
+
+    return issue
+

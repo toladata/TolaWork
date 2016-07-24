@@ -206,12 +206,9 @@ import requests
 def get_TolaActivity_data():
 
     url = 'http://127.0.0.1:8100/tolaactivitydata' #TolaActivity Url
-    country = get_my_country()
-
-    payload = {'country': country}
 
     try:
-        response = requests.get(url, params = payload)
+        response = requests.get(url)
 
         # Consider any status other than 2xx an error
         if not response.status_code // 100 == 2:
@@ -234,9 +231,8 @@ def get_TolaTables_data(request):
 
     url = 'http://127.0.0.1:8200/api/tolatablesdata' #TolaActivity Url
     email = request.user.email
-    country = get_my_country()
 
-    payload = {'email': email, 'country': country}
+    payload = {'email': email}
 
     #print email
     try:
@@ -264,23 +260,42 @@ def logged_in_users(request):
     username = request.user.username
 
     logged_users = LoggedUser.objects.all().exclude(username=username).order_by('username')
-    
-    print username
+
     return logged_users
 
 
-from urllib2 import urlopen
-import json
-    
-def get_my_country():
-    try:
-        # Automatically geolocate my IP
-        url = 'http://freegeoip.net/json/'
+from django.conf import settings
+from helpdesk.github import  update_issue,get_issue
 
-        response = urlopen(url).read()
-        response = json.loads(response)
+@login_required
+def update_issue_on_github(request):
 
-        return response['country_name'].lower()
+    #Update tickets Status in Github
+    tickets = Ticket.objects.select_related('queue').exclude(
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        )
 
-    except Exception, e:
-        pass
+    # check status in github
+    for ticket in tickets:
+
+        #if there is a github issue check it's status in github
+        if ticket.github_issue_number:
+            if str(ticket.queue) == "Tola Tables":
+                repo = settings.GITHUB_REPO_1
+            else:
+                repo = settings.GITHUB_REPO_2
+
+            # getstatus from github
+            github_status = get_issue(repo,ticket.github_issue_number)
+
+            #if status has been updated in github update here
+            if github_status:
+                if github_status['state'] == "open" and ticket.status != 1:
+                    Ticket.objects.filter(id=ticket.id).update(status=1)
+                elif github_status['state'] == "closed" and ticket.status != 3:
+                    Ticket.objects.filter(id=ticket.id).update(status=3)
+
+            #update issue in github with local changes and comments
+            update_issue(repo,ticket)
+
+    return HttpResponseRedirect('/home')

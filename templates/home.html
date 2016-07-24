@@ -382,6 +382,11 @@ $(function () {
   </div>
     <div class="row">
         <div class="col-md-3 col-sm-3 minor_home">
+          {%if user.is_staff%}
+            <div class="col-md-10 col-md-offset-2 githubsync">
+              <a href="{% url 'gitissueupdate' %}" class="btn btn-info"><b><span class="glyphicon glyphicon-refresh"></span></b> Sync Issues with Github</a>
+            </div>
+          {% endif %}
     <!-- //the pie chart -->
         <div class=" pie">
             <div id="pie_container">
