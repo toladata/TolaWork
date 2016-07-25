@@ -36,94 +36,107 @@
                 <div class="panel-footer">
                    <div class="panel-heading"><a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
 
-                  <div class="new_task"><span class="glyphicon glyphicon-tasks"></span>&nbsp;Ticket Tasks</div></a>
+                  <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
                        <strong>Ticket Status: </strong><font>In Progress </font>&nbsp;<span class="badge"> 2 </span>&nbsp;&nbsp;<span class="glyphicon glyphicon-tags"></span> <strong> Tags:</strong> {% for tag in ticket.tags.all %}
                       <span class="label label-info">{{tag}}</span>
                     {% endfor %}
 
                   </div>
                   <div id="addTask{{ticket.id}}" class="panel-collapse collapse addTask">
-                  <div class="ticket_task">
-                    <div class="panel-body">
-                      <h5><strong>Details of tasks for this ticket</strong></h5>
-                      <div class="table-responsive ticket_task_form">
-                          <table class="table table-hover table-striped ">
-                            <thead>
-                                <tr class="info">
-                                    <td> <strong>Date</strong></td>
-                                    <td><strong>Task</strong></td>
-                                    <td><strong>Assigned To</strong></td>
-                                    <td><strong>Status</strong></td>
-                                </tr>
-                             </thead>
-                            <tbody>
-                            <tr>
-                                <td>Display Date</td>
-                                <td>Display Task</td>
-                                <td>Display Assigned To</td>
-                                <td>Display Status</td>
-                                </tr>
-                            </tbody>
-                          </table>
-                      </div>
-                    </div>
-                    <div class="panel-body">
-                      <h5><strong>Create a new task for this ticket. </strong> </h5>
-                      <p>Tasks break down a ticket into deliverables that can be acted upon and show progress being made.</p>
-
-                      <!-- Tasks dynamic form -->
-                      <div class="ticket_form">
-                        <form  method='post' action='create_task/' enctype='multipart/form-data' >
-                        <div class="col-md-12 row task_spacing">
-                          <div class="col-md-6 row ticket_edit">
-                             <label class="col-md-4"><p><strong> {% trans "New Task:" %}</strong></p></label>
-                             <div class="col-md-8">
-                                <input class="form-control" type="text" id="" name="" required>
-                             </div>
+                    <div class="ticket_task">
+                      <div class="panel-body">
+                        <p>{% blocktrans %}<strong>No new details should be entered when editing a ticket. </strong><br/>This form should only be used to fix incorrect details on a ticket or clean up the submission.{% endblocktrans %}</p>
+                      </div> 
+                      <div class="ticket_form_cover">
+                        <div class="ticket_form info">
+                          <form  method='post' action='ticket_edit/' enctype='multipart/form-data' >
+                          <div class=" row task_spacing">
+                            <div class="col-md-12 ticket_padding row ticket_edit">
+                               <label class="col-md-2"><p><strong>{% trans "Title:" %}</strong></p></Label>
+                               <div class=" col-md-9">
+                                  <input class="form-control" type='text' name='title' id='id_title'  value='{{ ticket.title|escape }}' />
+                               </div>
+                            </div> 
                           </div>
-                          <div class="col-md-6 row ticket_edit">
-                                <label class="col-md-4"><p><strong>{% trans " User:" %}</strong></p></label>
-                                <div class="col-md-8" >
-                                  <input class="form-control" type="text"  id="" name="" value="">
-                                </div>
+                          <div class="row">
+                            <div class= "col-md-6 row ticket_edit" >
+                              <label class="col-md-4"><p><strong>{% trans "Queue:" %}</strong></p></label>
+                              <div class="col-md-8">
+                                <select class="form-control" id='id_queue' name='queue'>{% for q in ticket_queue %}<option value='{{ q.id }}'{% ifequal q.id ticket.queue_id %} selected='selected'{% endifequal %}>{{ q }}</option>{% endfor %}</select>
+                              </div>  
+                            </div> 
+                            <div class= "col-md-6 row ticket_edit" >
+                              <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
+                              <div class="col-md-8">
+                                <input class="form-control" type='text' name='email' id='id_email' value='{{ ticket.submitter_email|escape }}' />
+                              </div>
                             </div>
                           </div>
-                          <div class="col-md-12 row ">
-                            <div class="col-md-6 row ticket_edit">
-                              <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
+                          <div class=" row task_spacing">
+                            <div class= "col-md-6 row ticket_edit" >
+                              <label class="col-md-4"><p><strong>{% trans "Error Message:" %}</strong></p></label>
                               <div class="col-md-8">
-                                 <input class="form-control" type="Date" id="" name="" value="">
+                                <textarea class="form-control" name="error_msg" rows="4"  > {{ ticket.error_msg|escape }} </textarea>
+                              </div>
+                            </div>
+                             <div class= "col-md-6 row ticket_edit" >
+                              <label class="col-md-4"><p><strong>{% trans "Description of Issue:" %}</strong></p></label>
+                              <div class="col-md-8">
+                                <textarea class="form-control" name="description" rows="4" > {{ ticket.description|escape }} </textarea>
+                              </div>    
+                            </div>
+                          </div>
+                          <div class=" row">
+                            <div class="col-md-6 row ticket_edit">
+                              <label class="col-md-4"><p><strong>{% trans "Case Owner:" %}</strong></p></label>
+                              <div class="col-md-8">
+                                <select class="form-control" id='id_owner' name='owner'><option value=''>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
                               </div>
                             </div>
                             <div class="col-md-6 row ticket_edit">
+                              <label class="col-md-4"><p><strong> {% trans "Type of Ticket:" %}</strong></p></label>
+                              <div class="col-md-8 ">
+                                <select class="form-control" id='id_type' name='type'>{% for tt in ticket_type %}<option value='{{ tt.0 }}'{% ifequal tt.0 ticket.type %} selected='selected'{% endifequal %}>{{ tt.1 }}</option>{% endfor %}</select>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row ticket_padding">
+                            <div class= "col-md-6 row ticket_edit" >
+                              <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
+                              <div class="col-md-8">
+                                <select class="form-control" id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select>
+                              </div>
+                            </div>                            
+                            <div class= "col-md-6 row ticket_edit">
                               <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
                               <div class="col-md-8">
-                              <input class="form-control" type="date" id="" name="" value="" required>
+                                <input class="form-control" type="date" name='due_date'/>
                               </div>
                             </div>
                           </div>
-                          <div class="col-md-12 row">
-                            <div class="col-md-11 row ticket_edit">
-                              <label class="col-md-2"><p><strong>{% trans "Note:" %}</strong></p></label>
-                              <div class="col-md-9 edit_note">
-                                  <textarea class="form-control" rows="4" name='note' id='id_note' required></textarea>
+                          <div class="row">
+                            <div class= "col-md-6 row ticket_edit task_spacing" >
+                              <label class="col-md-4"><p><strong>{% trans "Tags:" %}</strong></p></label>
+                              <div class="col-md-8">
+                                <select class = " form-control multi_select" style="width:200px" multiple = "multiple" id='id_tags' name='tags'> {% for q in tags %} <option value='{{ q.id }}'{% endfor %} {{form.tags }} </option>
+                              </select>
                               </div>
-                            </div>
+                            </div>  
                           </div>
-                          <div class="col-md-12 row modal_button">
-                            <label class= "col-md-6 row ticket_edit">
-                                <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />
-                            </label>
+                          <div class=" row">
+                              <label class= "col-md-6 row ticket_edit">
+                                  <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />
+                              </label>
                           </div>
                            {% csrf_token %}
-                            </form>
-                          </div>
+                          </form> 
                         </div>
                       </div>
                     </div>
+                  </div>
                 </div>
 
-              </div>
+          </div>
             {% endfor %}
 
             <!-- start paginator -->
@@ -190,11 +203,26 @@
           <div class="panel panel-info ">
               <div class="panel-heading">
                 <strong>Issues <span class="badge">{{ num_tickets }}</span></strong>
-                <a href="/helpdesk/tickets/submit">
-                  <div class="ticket_issues">
-                    <span class="glyphicon glyphicon-plus"></span>New Issue
-                  </div>
-                </a>
+                <button class="btn btn-sm btn-warning read_more" id="add_ticket" type="submit" data-toggle="modal" data-target="#ticketModal" ><b><span class="glyphicon glyphicon-plus"></span></b><strong></strong> New Issue</strong>  </button>
+              </div>
+              <!-- Create ticket modal -->
+              <div class="modal fade " id="ticketModal" role="dialog">
+                <div class="modal-dialog task_form modal-lg">
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h3 class="modal-title font9">Submit a Ticket</h3>
+                      <p class="font9">Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
+                    </div>
+                    <div class="modal-body">
+                      {% include "ticket_modal.html" %}
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                  </div> 
+                </div>
               </div>
               <div class="panel-body">
                 <div class="sort_panels">
@@ -213,40 +241,40 @@
             <div class="panel-heading"> <strong>Sort Tickets</strong></div>
 
                 <form method='get' action='./'>
-                    <div class="panel-body ">
+                  <div class="panel-body ">
                     <select   class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
-                        <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
-                            {% trans "Created" %}
-                        </option>
-                        <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %}>
-                            {% trans "Title" %}
-                        </option>
-                        <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %}>
-                            {% trans "Queue" %}
-                        </option>
-                        <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
-                            {% trans "Status" %}
-                        </option>
-                        <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>
-                            {% trans "Priority" %}
-                        </option>
-                        <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %}>
-                            {% trans "Owner" %}
-                        </option>
-                        <option value='assigned_to'{% ifequal query_params.sorting "type"%} selected='selected'{% endifequal %}>
-                            {% trans "Type" %}
-                        </option>
-                        <option value='votes'{% ifequal query_params.sorting "votes"%} selected='selected'{% endifequal %}>
-                            {% trans "Most Vote Up" %}
-                        </option>
-                      </select>
-                        <div class="col-md-12 row reverse_sort">
+                      <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
+                          {% trans "Created" %}
+                      </option>
+                      <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %}>
+                          {% trans "Title" %}
+                      </option>
+                      <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %}>
+                          {% trans "Queue" %}
+                      </option>
+                      <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
+                          {% trans "Status" %}
+                      </option>
+                      <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>
+                          {% trans "Priority" %}
+                      </option>
+                      <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %}>
+                          {% trans "Owner" %}
+                      </option>
+                      <option value='assigned_to'{% ifequal query_params.sorting "type"%} selected='selected'{% endifequal %}>
+                          {% trans "Type" %}
+                      </option>
+                      <option value='votes'{% ifequal query_params.sorting "votes"%} selected='selected'{% endifequal %}>
+                          {% trans "Most Vote Up" %}
+                      </option>
+                    </select>
+                      <div class="col-md-12 row reverse_sort">
 
-                        <label   for='id_sortreverse'>{% trans "Reverse: " %}</label>
-                        <input   type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
-                        <p class='filterHelp'>{% trans "Ordering applied to tickets" %}</p>
-                        </div>
-                         <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' />
+                      <label for='id_sortreverse'>{% trans "Reverse: " %}</label>
+                      <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
+                      <p class='filterHelp'>{% trans "Ordering applied to tickets" %}</p>
+                      </div>
+                       <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' />
                     </div>
                 </form>
         </div>
@@ -396,7 +424,7 @@
               var c = content.substr(0, showChar);
               var h = content.substr(showChar, content.length - showChar);
 
-              var html = c  + ellipsestext+ '<span class="morecontent"><span>' + h + '</span><a href="" class="morelink read_more">' + moretext + '</a></span>';
+              var html = c  + ellipsestext+ '<span class="morecontent"><span>' + h + '</span><a href="" class="btn btn-default morelink read_more">' + moretext + '</a></span>';
 
               $(this).html(html);
           }
@@ -507,5 +535,55 @@ $(document).ready(function() {
        });
      });
  </script>
+<script>
+  $("#id_tags").select2({
+              tags: true,
+              allowClear: false,
 
+      });
+</script>
+<script>
+    $(document).ready(function() {
+        $("#ShowFurtherEditOptions").click(function() {
+            $("#FurtherEditOptions").fadeIn();
+            $("#ShowFurtherOptPara").show();
+            return false;
+        });
+
+        $("#id_tags").select2({
+                tags: true,
+                allowClear: true,
+        });
+
+        processAddFileClick();
+        $("#ShowFileUpload").click(function() {
+            $("#FileUpload").fadeIn();
+            $("#ShowFileUploadPara").show();
+            return false;
+        });
+
+        $('#id_preset').change(function() {
+            preset = $('#id_preset').val();
+            if (preset != '') {
+                $.get("{% url 'helpdesk_raw' "preset" %}?id=" + preset, function(data) {
+                    $("#commentBox").val(data)
+                });
+            }
+        });
+
+        $("[data-toggle=tooltip]").tooltip();
+    });
+
+    function processAddFileClick() {
+        /* Until jQuery includes some 'livequery' functionality in the core
+           distribution, this will have to do. */
+        $(".AddAnotherFile>a").click(function() {
+            $(this).parent().remove();
+            $("#FileUpload>dl").append("<dt><label>{% trans "Attach another File" %}</label></dt><dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>");
+            processAddFileClick();
+            return false;
+        });
+
+    }
+</script>
 {% endblock content %}
