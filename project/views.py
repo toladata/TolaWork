@@ -23,24 +23,6 @@ def splash(request):
         
     return render(request, "splash.html")
 
-# 
-# def user (request):
-#     #tickets
-#     email = request.GET.get('email')
-#     user = request.GET.get('username')
-#     all_tickets = Ticket.objects.filter(submitter_email=email).values('status').annotate(total=Count('status')).order_by('total')
-#     tickets = get_tickets_by_user(email)
-
-#     #tasks
-#     all_tasks = Task.objects.filter(submitter_email=email).values('status').annotate(total=Count('status')).order_by('total')
-#     tasks = get_tasks_by_user(email)
-
-#     #logged_users
-#     logged_users = logged_in_users(request)
-
-
-#     return render(request, "user.html", {'all_tickets': all_tickets,'tickets': tickets, 'all_tasks': all_tasks, \
-#                                         'tasks': tasks, 'logged_users': logged_users, 'user': user})
 @login_required
 def user (request):
     #tickets
@@ -62,8 +44,9 @@ def user (request):
     created_by_user = len(created)
 
     #assigned to the user
+    user_id = User.objects.get(email=email).id
     assigned = Ticket.objects.select_related('queue').filter(
-            assigned_to=request.user,
+            assigned_to=user_id,
          ).exclude(
             status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
         )
@@ -73,7 +56,7 @@ def user (request):
 
     #closed and resolved by user
     closedresolved = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
+        assigned_to=user_id,
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
     )
     closed = (closedresolved).order_by('-created')[:5]
