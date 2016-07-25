@@ -65,7 +65,25 @@ $(function () {
             <h2> <strong>Tola</strong>Work</h2>
           <p class="font7">Get help setting up, using and configuring Tola Activity, Tola Tables and Mobile Data collection platforms and M&E in general.  Report any issues with tools and request  and vote on new features.</p>
           <br/>
-          <a href="/helpdesk/tickets/submit" class="btn btn-lg btn-success"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
+          <button class="btn btn-lg btn-success" type="submit" data-toggle="modal" data-target="#ticketModal"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</button>
+          <div class="modal fade " id="ticketModal" role="dialog">
+            <div class="modal-dialog task_form modal-lg">
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h3 class="modal-title font9">Submit a Ticket</h3>
+                  <p class="font9">Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
+                </div>
+                <div class="modal-body">
+                  {% include "ticket_modal.html" %}
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div> 
+            </div>
+          </div>
           <br/>
           <h3>Tickets, Tasks and <strong>Tola</strong>Data Tools</h3>
           <div class="home-bottom">
@@ -214,7 +232,6 @@ $(function () {
                                       {%endfor%}
                                       <p><strong>Recent tickets resolved and closed by me</strong></p>
                                   </table>
-
                                 </div>
                                </div>
                              </div>
@@ -426,6 +443,56 @@ $(function () {
     </div>
   </div>
 </div>
+<script>
+  $("#id_tags").select2({
+              tags: true,
+              allowClear: false,
 
+      });
+</script>
+<script>
+    $(document).ready(function() {
+        $("#ShowFurtherEditOptions").click(function() {
+            $("#FurtherEditOptions").fadeIn();
+            $("#ShowFurtherOptPara").show();
+            return false;
+        });
+
+        $("#id_tags").select2({
+                tags: true,
+                allowClear: true,
+        });
+
+        processAddFileClick();
+        $("#ShowFileUpload").click(function() {
+            $("#FileUpload").fadeIn();
+            $("#ShowFileUploadPara").show();
+            return false;
+        });
+
+        $('#id_preset').change(function() {
+            preset = $('#id_preset').val();
+            if (preset != '') {
+                $.get("{% url 'helpdesk_raw' "preset" %}?id=" + preset, function(data) {
+                    $("#commentBox").val(data)
+                });
+            }
+        });
+
+        $("[data-toggle=tooltip]").tooltip();
+    });
+
+    function processAddFileClick() {
+        /* Until jQuery includes some 'livequery' functionality in the core
+           distribution, this will have to do. */
+        $(".AddAnotherFile>a").click(function() {
+            $(this).parent().remove();
+            $("#FileUpload>dl").append("<dt><label>{% trans "Attach another File" %}</label></dt><dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>");
+            processAddFileClick();
+            return false;
+        });
+
+    }
+</script>
 
 {% endblock content %}
