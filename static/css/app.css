@@ -480,9 +480,6 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 {
     float: right;
 }
-.morecontent span {
-    display: none;
-}
 .morelink {
     display: block;
 }
