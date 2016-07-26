@@ -4,60 +4,6 @@
 
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 
-<script src="{{ STATIC_URL }}js/highcharts/js/highcharts.js"></script>
-<script src="{{ STATIC_URL }}js/highcharts/js/modules/exporting.js"></script>
-
-<script>
-
-$(function () {
-
-    $(document).ready(function () {
-
-        // Build the chart
-        $('#pie_container').highcharts({
-            chart: {
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false,
-                type: 'pie',
-                backgroundColor: 'transparent'
-            },
-            title: {
-                text: 'Tickets Open/Closed'
-            },
-            tooltip: {
-                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: false
-                    },
-                    showInLegend: true
-                }
-            },
-
-            series: [{
-                name: "Type",
-                colorByPoint: true,
-                data: [
-                {% for item in tickets %}
-                    {
-                        name: "{% if item.status == 1 %} Open {%elif item.status == 2%}Re-Opened{% elif item.status == 3%}Resolved{% elif item.status == 4%}Closed{% elif item.status == 5%}Duplicate{% endif %}",
-                        y: {{ item.total }}
-                    },
-                {% endfor %}
-                ]
-            }]
-        });
-
-    });
-
-});
-
-</script>
 <div class="container col-md-12">
   <div class="home_cover">
     <div class=" col-md-9 col-sm-9 main_home">
@@ -426,11 +372,7 @@ $(function () {
               <a href="{% url 'gitissueupdate' %}" class="btn btn-info"><b><span class="glyphicon glyphicon-refresh"></span></b> Sync Issues with Github</a>
             </div>
           {% endif %}
-    <!-- //the pie chart -->
-        <div class=" pie">
-            <div id="pie_container">
-            </div>
-        </div>
+
         <br>
         <br>
         <br>
