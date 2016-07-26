@@ -15,7 +15,7 @@ from django.conf import settings
 from django.db.models import Count, Sum
 import os
 from project.models import LoggedUser
-from helpdesk.forms import TicketForm
+from helpdesk.forms import TicketForm, PublicTicketForm
 from datetime import datetime as timezone
 from helpdesk.views.staff import file_attachment
 from helpdesk.slack import post_slack,post_tola_slack
@@ -197,16 +197,18 @@ def home(request):
             return HttpResponseRedirect('/')
     else:
         initial_data = {}
-        if request.user.email:
-            initial_data['submitter_email'] = request.user.email
-        if 'queue' in request.GET:
-            initial_data['queue'] = request.GET['queue']
+        try:
+            if request.user.email:
+                initial_data['submitter_email'] = request.user.email
+            if 'queue' in request.GET:
+                initial_data['queue'] = request.GET['queue']
 
-        if request.user.is_staff:
-            form = TicketForm(initial=initial_data)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        else:
+            if request.user.is_staff:
+                form = TicketForm(initial=initial_data)
+                form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+                form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+            
+        except Exception, e:
             form = PublicTicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
 
