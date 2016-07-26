@@ -406,7 +406,7 @@ margin-right: 0px
 }
 .attach_files
 {
-    margin-left: 3px;
+    margin-left: 50px;
 }
 
 .issues_badge
@@ -549,7 +549,7 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 }
 .ticket_padding
 {
-    margin-bottom: 13px;
+    margin-bottom: 8px;
 }
 .multi_select
 {

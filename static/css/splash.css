@@ -45,24 +45,13 @@ html {
     }
 }
 .item:nth-child(1) {
-    background: url(../img/img4.jpg) no-repeat center center fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-}
-.item:nth-child(2) {
-    background: url(../img/img2.jpg) no-repeat center center fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-}
-.item:nth-child(3) {
-    background: url(../img/img3.png) no-repeat;
+    background: url(../img/img5.jpg) no-repeat;
     background-size: 100% 100%;
 }
-
+.item:nth-child(2) {
+    background: url(../img/img6.jpg) no-repeat;
+    background-size: 100% 100%;
+}
 .carousel {
     z-index: -99;
 }
