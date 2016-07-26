@@ -140,7 +140,7 @@ class TicketForm(forms.Form):
         help_text=_('Was an error message displaced? Please copy and paste this error message here. '),
         )
     body = forms.CharField(
-        widget=forms.Textarea(attrs={'cols': 47, 'rows': 15}),
+        widget=forms.Textarea(attrs={'cols': 47, 'rows': 7}),
         label=_('Description of Issue'),
         required=True,
         )
@@ -203,8 +203,8 @@ class TicketForm(forms.Form):
     helper = FormHelper()
     helper.form_method = 'post'
     helper.form_class = 'form-horizontal'
-    helper.label_class = 'col-sm-2'
-    helper.field_class = 'col-sm-6'
+    helper.label_class = 'col-sm-3'
+    helper.field_class = 'col-sm-8'
     helper.form_error_title = 'Form Errors'
     helper.error_text_inline = True
     helper.help_text_inline = True
