@@ -1399,7 +1399,11 @@ def create_ticket(request):
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
     create_ticket_variables  = {'form': form, 'helper': form.helper,}
 
-    return create_ticket_variables
+    return render_to_response('helpdesk/create_ticket.html',
+        RequestContext(request, {
+            'form': form,
+            'helper': form.helper,
+        }))
 
 def raw_details(request, type):
     # TODO: This currently only supports spewing out 'PreSetReply' objects,
