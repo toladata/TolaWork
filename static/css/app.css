@@ -462,7 +462,11 @@ ul.pagination li a.active {
 }
 
 ul.pagination li a:hover:not(.active) {background-color: #ddd;}
+
 /*// limiting numebr of words displayed in ticket description*/
+.morecontent span {
+    display: none;
+}
 .read_more
 {
     float: right;

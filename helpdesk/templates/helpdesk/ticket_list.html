@@ -34,7 +34,7 @@
                 <p class="description">{{ ticket.description }}</p>
                 <div class="sort_panels">
                               <div class= "preview_links">
-                                <a href="#moredetails{{ticket.id}}" data-toggle="collapse">&nbsp;More Details</a> 
+                                <a href="#moredetails{{ticket.id}}" class="btn btn-success" data-toggle="collapse">&nbsp;More Details for This Ticket</a> 
                               </div>
                                <div id="moredetails{{ticket.id}}" class="collapse">
                                 <div>
@@ -78,12 +78,85 @@
                                             {% endfor %}
                                         </div>
                                 </div>
+                                <div>
+                                  {% if ticket.followup_set.all %}
+                                  <h3>{% trans "Follow-Ups" %}</h3>
+                                  {% load ticket_to_link %}
+                                  {% for followup in ticket.followup_set.all %}
+                                  {% if helpdesk_settings.HELPDESK_FOLLOWUP_MOD %}
+                                      <div class='followup_mod'>
+                                      <div class='title'>
+                                          <span class='byline text-info'>
+                                              {{ followup.user.get_full_name }}&nbsp;&nbsp;&nbsp;&nbsp;{{ followup.date }} ({{ followup.date }})</span>
+                                          <small>{{ followup.title }}</small>
+                                          {% if not followup.public %}
+                                          <span class='private'>({% trans "Private" %})</span>
+                                          {% endif %}
+                                          {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
+                                          {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
+                                          <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
+                                          {% endif %}
+                                          {% endif %}
+                                          {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+                                          <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
+                                          {% endif %}
+                                      </div>
+                                  {% else %}
+                                      <div class='followup well'>
+                                      <div class='title'>
+                                          {{ followup.title }}
+                                          <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %}<span title='{{ followup.date|date:"r" }}'>{{ followup.date }}</span>
+                                              {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
+                                          {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
+                                          {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
+                                          <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
+                                          {% endif %}
+                                          {% endif %}
+                                          {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+                                          <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
+                                          {% endif %}
+                                      </div>
+                                  {% endif %}
+
+                                  <!-- display ticket comments from 'follow.comment' column -->
+                                  <span class='followup-desc'>
+                                      {% if followup.comment %}
+                                          {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
+                                      {% endif %}
+                                  </span>
+
+                                  {% for change in followup.ticketchange_set.all %}
+                                  {% if forloop.first %}
+                                          <div class='changes'>
+                                              <ul>
+                                                  {% endif %}
+                                                  <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
+                                  {% if forloop.last %}
+                                              </ul></div>
+                                          {% endif %}
+                                  {% endfor %}
+
+                                  {% for attachment in followup.attachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
+                                  <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
+                                  {% if followup.user and request.user == followup.user %}
+                                  <a href='{% url 'helpdesk_attachment_del' ticket.id attachment.id %}'>delete</a>
+                                  {% endif %}
+                                  </li>
+                                  {% if forloop.last %}</ul></div>{% endif %}
+                                  {% endfor %}
+                                  </div>
+                                  {% endfor %}
+                                  {% endif %}
+                                  {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
+                                  </div>
+                                  {% endif %}
+                                </div>
                                 <div id='add-followup' class="well">
                                 <h3>{% trans "Respond to this ticket" %}</h3>
                                     <!--
                                     <form method='post' action='update/' enctype='multipart/form-data' class="form-horizontal">
                                     -->
-                                <form method='post' action='post_comment/' enctype='multipart/form-data' class="form-horizontal">
+                                <form method='post' action='/helpdesk/tickets/{{ticket.id}}/post_comment/' enctype='multipart/form-data' class="form-horizontal">
 
                                 <fieldset>
                                     <dl>
@@ -232,7 +305,7 @@
                       </div> 
                       <div class="ticket_form_cover">
                         <div class="ticket_form info">
-                          <form  method='post' action='ticket_edit/' enctype='multipart/form-data' >
+                          <form  method='post' action='ticket_edit/?ticket_id={{ticket.id}}' enctype='multipart/form-data' >
                           <div class=" row task_spacing">
                             <div class="col-md-12 ticket_padding row ticket_edit">
                                <label class="col-md-2"><p><strong>{% trans "Title:" %}</strong></p></Label>
@@ -291,21 +364,19 @@
                               </div>
                             </div>                            
                             <div class= "col-md-6 row ticket_edit">
-                              <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
-                              <div class="col-md-8">
-                                <input class="form-control" type="date" name='due_date'/>
-                              </div>
+                              <label class="col-md-3"><p><strong>{% trans "Due Date:" %}</strong></p></label>
+                              <p class="col-md-9">{{ form.due_date }}</p>
                             </div>
                           </div>
-                          <div class="row">
+                          <!-- <div class="row">
                             <div class= "col-md-6 row ticket_edit task_spacing" >
                               <label class="col-md-4"><p><strong>{% trans "Tags:" %}</strong></p></label>
                               <div class="col-md-8">
-                                <select class = " form-control multi_select" style="width:200px" multiple = "multiple" id='id_tags' name='tags'> {% for q in tags %} <option value='{{ q.id }}'{% endfor %} {{form.tags }} </option>
+                                <select class = " form-control multi_select" style="width:200px" multiple = "multiple" id='id_edit_tags' name='edit_tags'> {% for q in edit_tags %} <option value='{{ q.id }}'{% endfor %} {{form.edit_tags }} </option>
                               </select>
                               </div>
                             </div>  
-                          </div>
+                          </div> -->
                           <div class=" row">
                               <label class= "col-md-6 row ticket_edit">
                                   <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />
@@ -399,7 +470,47 @@
                       <p class="font9">Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
                     </div>
                     <div class="modal-body">
-                      {% include "ticket_modal.html" %}
+                      <div class="alert alert-success" role="alert">
+                        <p>'We recommend that you search for your issue or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!'</p>
+                      </div>
+                      <form class="form-horizontal" method='post' action='./' enctype='multipart/form-data'  name="most">
+
+                            {% load crispy_forms_tags %}
+                            {% crispy form form.helper %}
+                            {% comment %}{% for field in form %}
+                                {% if field.is_hidden %}
+                                    {{ field }}
+                                {% else %}
+                                    <dt><label for='id_{{ field.name }}'>{% trans field.label %}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
+                                    <dd>{{ field }}</dd>
+                                    {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
+                                    {% if field.help_text %}<dd class='form_help_text'>{% trans field.help_text %}</dd>{% endif %}
+
+                                {% endif %}
+                            {% endfor %}
+                            {% endcomment %}
+
+                    <div class = "col-md-offset-2 col-md-10">
+
+                        <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'><b>{% trans "Attach More File(s) &raquo;" %}</b></a></p>
+
+                        <div id='FileUpload' style='display: none;'>
+
+                            <dl>
+
+                                <dt><label for='id_file'> <b>{% trans "Attach a File" %}</b></label></dt>
+                                <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'><b>{% trans "Add Another File" %}</b></a>)</span></dd>
+                            </dl>
+
+                        </div>
+                            <div class='buttons form-group'>
+                                <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
+                        </div>
+                    </div> 
+                    {{ form.media }}
+
+                    {% csrf_token %}</form>
+
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -593,9 +704,9 @@
 <script type="text/javascript">
   $(document).ready(function() {
       // Configure/customize these variables.
-      var showChar = 230;  // How many characters are shown by default
+      var showChar = 235;  // How many characters are shown by default
       var ellipsestext = "...";
-      var moretext = "Show Full Description >>";
+      var moretext = "Show Ticket Full Description";
       var lesstext = "Show less";
 
 
@@ -607,7 +718,8 @@
               var c = content.substr(0, showChar);
               var h = content.substr(showChar, content.length - showChar);
 
-              var html = c  + ellipsestext+ '<span class="morecontent"><span>' + h + '</span><a href="" class="btn btn-default morelink read_more">' + moretext + '</a></span>';
+              /*var html = c  + ellipsestext+ '<span class="morecontent"><span>' + h + '</span><a href="" class="btn btn-default morelink read_more">' + moretext + '</a></span>';*/
+              var html = c + '<span class="moreellipses">' + ellipsestext+ '&nbsp;</span><span class="morecontent"><span>' + h + '</span>&nbsp;&nbsp;<a href="" class="btn btn-default morelink">' + moretext + '</a></span>';
 
               $(this).html(html);
           }
@@ -718,13 +830,6 @@ $(document).ready(function() {
        });
      });
  </script>
-<script>
-  $("#id_tags").select2({
-              tags: true,
-              allowClear: false,
-
-      });
-</script>
 <script>
     $(document).ready(function() {
         $("#ShowFurtherEditOptions").click(function() {
