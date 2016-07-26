@@ -1,0 +1,110 @@
+  <form  method='post' action='ticket_edit/' enctype='multipart/form-data' >
+  <div class=" row task_spacing">
+    <div class="col-md-11 ticket_padding row ticket_edit">
+       <label class="col-md-2"><p><strong>Title:</strong></p></Label>
+       <div class=" col-md-9 edit_note">
+          <input class="form-control" type='text' name='title' id='id_title'/>
+       </div>
+    </div> 
+  </div>
+  <div class="row">
+    <div class= "col-md-6 row ticket_edit" >
+      <label class="col-md-4"><p><strong>Queue:</strong></p></label>
+      <div class="col-md-8">
+        <select class="form-control" id='id_queue' name='queue'>
+          <option>------</option>
+          <option id="">TolaWork</option>
+          <option id="">TolaActivity</option>
+          <option id="">TolaTables</option>
+        </select>
+      </div>  
+    </div> 
+    <div class= "col-md-6 row ticket_edit" >
+      <label class="col-md-4"><p><strong>Submitter Email:</strong></p></label>
+      <div class="col-md-8">
+        <input class="form-control" type='text' name='email' id='id_email'/>
+      </div>
+    </div>
+  </div>
+  <div class=" row task_spacing">
+    <div class= "col-md-6 row ticket_edit" >
+      <label class="col-md-4"><p><strong>Error Message:</strong></p></label>
+      <div class="col-md-8">
+        <textarea class="form-control" name="error_msg" rows="4"> </textarea>
+      </div>
+    </div>
+     <div class= "col-md-6 row ticket_edit" >
+      <label class="col-md-4"><p><strong>Description of Issue:</strong></p></label>
+      <div class="col-md-8">
+        <textarea class="form-control" name="description" rows="4" ></textarea>
+      </div>    
+    </div>
+  </div>
+  <div class=" row task_spacing">
+    <div class="col-md-6 row ticket_edit">
+      <label class="col-md-4"><p><strong>Case Owner:</strong></p></label>
+      <div class="col-md-8">
+        <select class="form-control" id='id_owner' name='owner'>
+          <option id="">-----</option>
+          <option id="">Tola</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-6 row ticket_edit">
+      <label class="col-md-4"><p><strong>Type of Ticket:</strong></p></label>
+      <div class="col-md-8 ">
+        <select class="form-control" id='id_type' name='type'>
+          <option>Problem</option>
+          <option>Enhancement</option>
+          <option>Bug or Error</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="row ticket_padding">
+    <div class= "col-md-6 row ticket_edit" >
+      <label class="col-md-4"><p><strong>Priority:</strong></p></label>
+      <div class="col-md-8">
+        <select class="form-control" id='id_priority' name='priority'>
+          <option>1. Critical</option>
+          <option>2. High</option>
+          <option>3. Normal</option>
+          <option>4. Low</option>
+          <option>5. Very Low</option>
+        </select>
+      </div>
+    </div>                            
+    <div class= "col-md-6 row ticket_edit">
+      <label class="col-md-4"><p><strong>Due Date:</strong></p></label>
+      <div class="col-md-8">
+        <input class="form-control" type="date" name='due_date'>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class= "col-md-6 row ticket_edit task_spacing" >
+      <label class="col-md-4"><p><strong>Tags:</strong></p></label>
+      <div class="col-md-8">
+        <select class = " form-control multi_select" style="width:200px" multiple = "multiple" id='id_tags' name='tags'> {% for q in tags %} <option value='{{ q.id }}'{% endfor %} {{form.tags }} </option>
+      </select>
+      </div>
+    </div>  
+  </div>
+  <div class="row">
+    <div class="col-md-offset-2 attach_files">
+        <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'><b>Attach File(s) &raquo;</b></a></p>
+        <div id='FileUpload' style='display: none;'>
+          <dl>
+            <dt><label for='id_file'> <b>Attach a File</b></label></dt>
+            <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'><b>Add Another File</b></a>)</span></dd>
+          </dl>
+        </div>
+      </div>
+  </div>
+  <div class=" row">
+      <label class= "col-md-6 ticket_edit">
+          <input class="btn btn-primary col-md-offset-5" type='submit' value='Submit' />
+      </label>
+  </div>
+   {% csrf_token %}
+</form> 

@@ -23,6 +23,57 @@ def splash(request):
         
     return render(request, "splash.html")
 
+@login_required
+def user (request):
+    #tickets
+    email = request.GET.get('email')
+    username = request.GET.get('username')
+    all_tickets = Ticket.objects.filter(submitter_email=email).values('status').annotate(total=Count('status')).order_by('total')
+    tickets = get_tickets_by_user(email)
+    total_tickets = len(tickets)
+
+    #created by logged_in user
+    created = Ticket.objects.select_related('queue').filter(
+               submitter_email=email,
+            ).exclude(
+               status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+           )
+
+    by_user = (created).order_by('-created')[:5]
+
+    created_by_user = len(created)
+
+    #assigned to the user
+    user_id = User.objects.get(email=email).id
+    assigned = Ticket.objects.select_related('queue').filter(
+            assigned_to=user_id,
+         ).exclude(
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        )
+    to_user=(assigned).order_by('-created')[:5]
+
+    assigned_to_user=len(assigned)
+
+    #closed and resolved by user
+    closedresolved = Ticket.objects.select_related('queue').filter(
+        assigned_to=user_id,
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+    )
+    closed = (closedresolved).order_by('-created')[:5]
+
+    closed_resolved = len(closedresolved)
+
+    #tasks
+    all_tasks = Task.objects.filter(submitter_email=email).values('status').annotate(total=Count('status')).order_by('total')
+    tasks = get_tasks_by_user(email)
+
+    #logged_users
+    logged_users = logged_in_users(request)
+
+    return render(request, "user.html", {'all_tickets': all_tickets,'total_tickets': total_tickets, 'all_tasks': all_tasks, 'tasks': tasks, \
+                                        'logged_users': logged_users, 'username': username,'by_user': by_user, 'created_by_user':created_by_user, \
+                                        'to_user': to_user, 'assigned_to_user': assigned_to_user, 'closed_resolved': closed_resolved, 'closed': closed})
+
 def home(request):
 
     #Ping Tola servers
@@ -62,7 +113,7 @@ def home(request):
     tome = []
     byme = []
     if (request.user.is_authenticated()):
-        # open & reopened tickets, assigned to current user
+        # open & reopened tickets
         closedresolved = Ticket.objects.select_related('queue').filter(
             assigned_to=request.user,
             status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
@@ -206,12 +257,9 @@ import requests
 def get_TolaActivity_data():
 
     url = 'http://127.0.0.1:8100/tolaactivitydata' #TolaActivity Url
-    country = get_my_country()
-
-    payload = {'country': country}
 
     try:
-        response = requests.get(url, params = payload)
+        response = requests.get(url)
 
         # Consider any status other than 2xx an error
         if not response.status_code // 100 == 2:
@@ -234,9 +282,8 @@ def get_TolaTables_data(request):
 
     url = 'http://127.0.0.1:8200/api/tolatablesdata' #TolaActivity Url
     email = request.user.email
-    country = get_my_country()
 
-    payload = {'email': email, 'country': country}
+    payload = {'email': email}
 
     #print email
     try:
@@ -264,23 +311,56 @@ def logged_in_users(request):
     username = request.user.username
 
     logged_users = LoggedUser.objects.all().exclude(username=username).order_by('username')
-    
-    print username
+
     return logged_users
 
+#get tickets of a logged in user
+def  get_tickets_by_user(email):
 
-from urllib2 import urlopen
-import json
+    tickets = Ticket.objects.filter(submitter_email= email).order_by('-created')[:6]
     
-def get_my_country():
-    try:
-        # Automatically geolocate my IP
-        url = 'http://freegeoip.net/json/'
+    return tickets
 
-        response = urlopen(url).read()
-        response = json.loads(response)
+#get tasks of a logged_in user
+def  get_tasks_by_user(email):
+    tasks = Task.objects.filter(submitter_email= email).order_by('-created_date')[:6]
 
-        return response['country_name'].lower()
+    return tasks
 
-    except Exception, e:
-        pass
+#Update tickets on github
+from django.conf import settings
+from helpdesk.github import  update_issue,get_issue
+
+@login_required
+def update_issue_on_github(request):
+
+    #Update tickets Status in Github
+    tickets = Ticket.objects.select_related('queue').exclude(
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        )
+
+    # check status in github
+    for ticket in tickets:
+
+        #if there is a github issue check it's status in github
+        if ticket.github_issue_number:
+            if str(ticket.queue) == "Tola Tables":
+                repo = settings.GITHUB_REPO_1
+            else:
+                repo = settings.GITHUB_REPO_2
+
+            # getstatus from github
+            github_status = get_issue(repo,ticket.github_issue_number)
+
+            #if status has been updated in github update here
+            if github_status:
+                if github_status['state'] == "open" and ticket.status != 1:
+                    Ticket.objects.filter(id=ticket.id).update(status=1)
+                elif github_status['state'] == "closed" and ticket.status != 3:
+                    Ticket.objects.filter(id=ticket.id).update(status=3)
+
+            #update issue in github with local changes and comments
+            update_issue(repo,ticket)
+    return HttpResponseRedirect('/home')
+
+

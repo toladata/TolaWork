@@ -248,6 +248,7 @@ margin-right: 0px
     background-color: #b20838;
     color:#fff;
 }
+
 /*//pie chart*/
 #pie_container
 {
@@ -403,15 +404,9 @@ margin-right: 0px
     font-weight: bold;
     color: #fff;
 }
-.new_task
+.attach_files
 {
-    background-color:#0c6d74;
-    float:right;
-    padding:4px;
-    border-radius:4px;
-    font-size:12px;
-    font-weight:bold;
-    color:#fff;
+    margin-left: 50px;
 }
 
 .issues_badge
@@ -467,13 +462,14 @@ ul.pagination li a.active {
 }
 
 ul.pagination li a:hover:not(.active) {background-color: #ddd;}
+
 /*// limiting numebr of words displayed in ticket description*/
+.morecontent span {
+    display: none;
+}
 .read_more
 {
     float: right;
-}
-.morecontent span {
-    display: none;
 }
 .morelink {
     display: block;
@@ -553,7 +549,7 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 }
 .ticket_padding
 {
-    margin-bottom: 13px;
+    margin-bottom: 8px;
 }
 .multi_select
 {
@@ -564,9 +560,17 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
     background-color: #d6f5f5;
     position: relative;
     overflow: hidden;
-    padding: 5px;
-    padding-top: 15px;
+    padding: 15px;
     border-radius: 5px;
+}
+.ticket_title
+{
+    margin-left: 15px;
+}
+
+.ticket_padding
+{
+    margin-left: 10px;
 }
 .ticket_form_cover
 {
@@ -593,15 +597,6 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 .ticket_task
 {
     background-color: #fff;
-}
-.ticket_task_form
-{
-    background-color: #fff;
-    position: relative;
-    overflow: hidden;
-    padding: 5px;
-    padding-top: 15px;
-    border-radius: 5px;
 }
 /*tickets filter section*/
 .filter_form
@@ -669,4 +664,9 @@ form .thumbnail
 .types_select
 {
     width: 155px;
+}
+.githubsync
+{
+    margin-bottom: 10px;
+    margin-top: 10px;
 }

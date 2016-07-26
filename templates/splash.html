@@ -2,33 +2,29 @@
 <!DOCTYPE html>
 <html lang="en"> 
 
-<head>	
-	<meta charset="utf-8">
-	<title>TolaData</title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.png" type="image/png">
-	
-	
-	<!-- 	splash screen css files -->
+<head>  
+  <meta charset="utf-8">
+  <title>TolaData</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.png" type="image/png">
+  <!-- fonts -->
+    <script src="https://use.typekit.net/shi4wqr.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+  <!--  splash screen css files -->
     <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="{{ STATIC_URL }}css/splash.css" rel="stylesheet" type="text/css">
     <link href="{{ STATIC_URL }}css/fontawesome-4.2.0.min.css" rel="stylesheet" type="text/css">
-    <!-- fonts -->
-    <script src="https://use.typekit.net/shi4wqr.js"></script>
-    <script>try{Typekit.load({ async: true });}catch(e){}</script>
     <!-- splash screen js files -->
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
 </head>
-		
-<body>		
-<div class="carousel slide carousel-fade" data-ride="carousel" data-interval="60000">
+    
+<body>    
+<div class="carousel slide carousel-fade" data-ride="carousel" data-interval="15000">
     <!-- Wrapper for slides -->
     <div class="carousel-inner" role="listbox">
         <div class="item active">
-        </div>
-        <div class="item">
         </div>
         <div class="item">
         </div>
@@ -38,31 +34,28 @@
 <!-- Remeber to put all the content you want on top of the slider below the slider code -->   
   <header id="header">
     <nav class="navbar navbar-default">
-      <div class="container col-md-12 col-sm-12 row">
-      <div class="col-md-1 col-sm-1"></div>
-        <div class="navbar-header col-md-3 col-sm-3">
+      <div>
+        <div class="navbar-header">
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span> 
           </button>
-          <a class="navbar-brand" href="#"> <img src="{{ STATIC_URL }}img/tola-data-primary-mark-light.png" > </a>
         </div>
-        <div class="collapse navbar-collapse" id="myNavbar">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a id="GoToHome" href="{% url 'home' %}" > <font class="font5">TolaWork</font></a></li>
+          <ul class="nav navbar-nav navbar-fixed-top col-md-12 col-sm-12 row">
+            <li><a id="GoToHome" href="{% url 'home' %}" > <font class="font5"><strong>Tola</strong>Work</font></a></li>
             <li><a id="GoToHome" href="{% url 'documentation' %}" > <font class="font5">About Us</font></a></li>
             <li><a id="GoToAbout" href="#" > <font class="font5">Contact us</font></a></li>
-            <li><a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span class="glyphicon glyphicon-user font9"></span> <font class="font5"> Log In </font><b class="caret font9"></b></a>
+            <li class="dropdown navbar-right"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span class="glyphicon glyphicon-user font9"></span> <font class="font5"> Log In </font><b class="caret font9"></b></a>
                 <ul class="dropdown-menu"> 
-                 <li >
+                 <li>
                  <div class=" col-md-12 col-sm-12">
                     <h5 class="font10">Login via</h5>
                       <a type="button" href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-info "><i class="fa fa-google"></i> Google</a>
                     <h4 class="font10" >OR</h4>
                     <h5 class="font10">Login with Tola Account</h5>
                   </div>
-                  <form class="form col-md-12 col-sm-12" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
+                  <form class=" col-md-12 col-sm-12" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
                       {% csrf_token %}
                     <div class=" row">
                         <div id="input_detail" class="col-md-12 col-sm-12">
@@ -82,17 +75,22 @@
              </ul>
             </li>
           </ul>
-        </div>
       </div>
     </nav>
     
   </header>
     
-  <div class="splash">  
+  <div class="splash"> 
+    <div class="col-md-12 row">
+    <div class="col-md-1"></div>
+      <div class=" col-md-3 logo">
+       <img src="{{ STATIC_URL }}img/tola-data-primary-mark-light.png" >
+    </div> 
+    </div>
     <section id="intro" class="intro-parallax ">
       <div class="container splash_main">               
         <div class="row">
-                  
+              
           <!-- Intro Section Description -->    
           <div id="intro_description" class="col-sm-7 col-md-7">
           
@@ -101,7 +99,7 @@
               
             <!-- Description #1 --> 
             <div class="intro_feature">
-            <p> <font class="font6">TolaData</font> combines ICT and M&E Systems with Open Data and Open Source tools to provide a dynamic platform for data discovery and high-impact analysis. </p>
+            <p> <font class="font6">TolaData</font> We are building an open-source monitoring and evaluation platform that streamlines data, brings transparency and builds capacity for humanitarian projects. </p>
               <h3 class="font8"><img src="{{ STATIC_URL }}img/tola-activity-icon-orange.png" class="icon"> Tola Activity</h3>
               <p>TolaActivity is a collection of standard data forms, reports, and visualizations designed to track the impact of organizations' programs and projects. There are two primary sections of Tola Activity: Project Workflow and Indicator Tracking.
               </p>
@@ -114,7 +112,7 @@
             </div>  
             <div>
               <h3 class="font6"><img src="{{ STATIC_URL }}img/tola-data-icon-red.png" class="icon"> Tola Work</h3>
-              <p>TolaWork is a helpdesk, documentation and support tool for TolaData</p>
+              <p>TolaWork is a helpdesk, documentation and support tool for TolaData.</p>
             </div>
             <div class="intro_button text-center">
               <a class="btn btn-lg button" href="http://toladata.com/">More information</a>
@@ -161,7 +159,7 @@
   </div>
 </body>
 <script type="text/javascript">
-	$('.carousel').carousel();
+  $('.carousel').carousel();
 </script>
 
 <!-- Typekit (Fonts) -->

@@ -29,10 +29,12 @@ urlpatterns = patterns('',
     #home
 
     url(r'^home', 'project.views.home', name='home'),
+    url(r'^user', 'project.views.user', name='user'),
     url(r'^contact', 'project.views.contact', name='contact'),
     url(r'^faq', 'project.views.faq', name='faq'),
     url(r'^splash', 'project.views.splash', name='splash'),
     url(r'^documentation', 'project.views.documentation', name='documentation'),
+    url(r'^update_issue_on_github', 'project.views.update_issue_on_github', name='gitissueupdate'),
 
     #local login
     url(r'^login/$', 'django.contrib.auth.views.login', name='login'),
@@ -49,7 +51,5 @@ urlpatterns = patterns('',
     url(r'^tasks/', include('tasks.urls')),
     #tinymce formatting
     url(r'^tinymce/', include('tinymce.urls')),
-
-
 
 )   + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -531,7 +531,7 @@ def post_comment(request, ticket_id):
                                      last_escalation=last_escalation, assigned_to=assigned,
                                      queue=queue, github_issue_id=github_id, github_issue_number=github_no,
                                      github_issue_url=github_url, type=type, votes=votes,
-                                     error_msg=error, slack_status=slack_status, tags=tags)
+                                     error_msg=error, slack_status=slack_status)
             update_comments.save(update_fields=['status'])
 
             new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status)
@@ -540,7 +540,7 @@ def post_comment(request, ticket_id):
             #Attach a File
             file_attachment(request, new_followup)
 
-    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+    return ticket_list(request)
 
 def taskview(request):
 
@@ -1000,7 +1000,7 @@ def ticket_dependency_add(request, ticket_id):
             ticketdependency.ticket = ticket
             if ticketdependency.ticket != ticketdependency.depends_on:
                 ticketdependency.save()
-            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+            return ticket_list(request)
     else:
 
         form = TicketDependencyForm()
@@ -1023,6 +1023,54 @@ def ticket_list(request):
     # look at their query to see if they have entered a valid ticket number. If
     # they have, just redirect to that ticket number. Otherwise, we treat it as
     # a keyword search.
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+
+    if request.method == 'POST':
+        if request.user.is_staff:
+
+            form = TicketForm(request.POST, request.FILES)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+        else:
+            form = PublicTicketForm(request.POST, request.FILES)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
+        if form.is_valid():
+
+            ticket = form.save(user=request.POST.get('assigned_to'))
+
+            #save tickettags
+            tags = request.POST.getlist('tags')
+            for tag in tags:
+                ticket.tags.add(tag)
+
+            #ticket.comment = ''
+            comment = ""
+            f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+            f.save()
+
+            #Attch a File
+            file_attachment(request, f)
+                   
+            #autopost new ticket to #tola-work slack channel in Tola
+            post_tola_slack(ticket.id)
+
+            messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
+    else:
+        initial_data = {}
+        if request.user.email:
+            initial_data['submitter_email'] = request.user.email
+        if 'queue' in request.GET:
+            initial_data['queue'] = request.GET['queue']
+
+        if request.user.is_staff:
+            form = TicketForm(initial=initial_data)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+        else:
+            form = PublicTicketForm(initial=initial_data)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
 
     if request.GET.get('search_type', None) == 'header':
         query = request.GET.get('q')
@@ -1202,7 +1250,6 @@ def ticket_list(request):
     except (paginator.EmptyPage, paginator.InvalidPage):
         tickets = ticket_paginator.page(ticket_paginator.num_pages)
 
-
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
         search_message = _('<p><strong>Note:</strong> The keyword search is case sensitive. This means the search will <strong>not</strong> be accurate.')
@@ -1231,16 +1278,16 @@ def ticket_list(request):
                else:
                    ticket.progress = " "
     """
-
-    print "TICKET TYPES:"
-    print Ticket.TICKET_TYPE
+    q = Queue.objects.all()
 
     return render_to_response('helpdesk/ticket_list.html',
         RequestContext(request, dict(
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
-            #progress=progress,
+            priorities = Ticket.PRIORITY_CHOICES,
+            ticket_queue=q,
+            ticket_type=Ticket.TICKET_TYPE,
             my_tickets=my_tickets,
             items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
@@ -1258,11 +1305,15 @@ def ticket_list(request):
             from_saved_query=from_saved_query,
             saved_query=saved_query,
             search_message=search_message,
+            form=form,
+            helper=form.helper
 
         )))
     ticket_list = staff_member_required(ticket_list)
 
-def ticket_edit(request, ticket_id):
+def ticket_edit(request):
+    ticket_id = request.GET.get('ticket_id')
+
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
         form = CommentTicketForm(request.POST)
@@ -1292,7 +1343,7 @@ def ticket_edit(request, ticket_id):
             for tag in tags:
                 ticket.tags.add(tag)
 
-    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+    return ticket_list(request)
 
 @login_required
 def create_ticket(request):
@@ -1346,6 +1397,7 @@ def create_ticket(request):
         else:
             form = PublicTicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+    create_ticket_variables  = {'form': form, 'helper': form.helper,}
 
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
@@ -1393,7 +1445,7 @@ def hold_ticket(request, ticket_id, unhold=False):
 
     ticket.save()
 
-    return HttpResponseRedirect(ticket.get_absolute_url())
+    return ticket_list(request)
 #hold_ticket = staff_member_required(hold_ticket)
 
 
