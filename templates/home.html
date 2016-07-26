@@ -420,7 +420,7 @@
           
             <div id="active_users">
               {% if user.is_authenticated %}
-                <p><a href="{% url 'user' %}?email={{request.user.email}}"><span class="glyphicon glyphicon-user"></span>  {{ request.user.username }} (You)</a> - TolaWork</p>
+                <p><a href="{% url 'user' %}?email={{request.user.email}}&username={{request.user.username}}"><span class="glyphicon glyphicon-user"></span>  {{ request.user.username }} (You)</a> - TolaWork</p>
               {% endif %}
 
               {% if logged_users%}
