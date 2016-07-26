@@ -20,7 +20,7 @@
         <div class="col-md-9 col-sm-9 ticket_right">
               {% for ticket in tickets.object_list %}
               <div class="panel panel-info">
-                <div class="panel-heading"> 
+                <div class="panel-heading">
                       <a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong> </a>
                       {% if ticket.progress %}
                       <div class="read_more">
@@ -28,20 +28,19 @@
                       </div>
                       {% endif %}
                       <br>
-                    Reported on {{ ticket.created | date}}, {{ ticket.created | time}} by {{ ticket.submitter_email }}  
+                    Reported on {{ ticket.created | date}}, {{ ticket.created | time}} by {{ ticket.submitter_email }}
                 </div>
                 <div class="panel-body">
                 <p class="description">{{ ticket.description }}</p>
-                <div class="sort_panels">
-                              <div class= "preview_links">
-                                <a href="#moredetails{{ticket.id}}" class="btn btn-info" data-toggle="collapse">&nbsp;More Details for This Ticket</a> 
-                              </div>
-                               <div id="moredetails{{ticket.id}}" class="collapse">
-                                <div>
-                                           <p><b>Dependencies:</b></p>
-                                           <div class="row">
-                                            <div class="col-md-8">
-                                              {% for dep in ticket.ticketdependency.all %}
+                    <div class="sort_panels">
+                        <div class= "preview_links">
+                                <a href="#moredetails{{ticket.id}}" class="btn btn-info" data-toggle="collapse">&nbsp;More Details for This Ticket</a>
+                        </div>
+                        <div id="moredetails{{ticket.id}}" class="collapse">
+                            <p><b>Dependencies:</b></p>
+                             <div class="row">
+                                 <div class="col-md-8">
+                                     {% for dep in ticket.ticketdependency.all %}
                                               {% if forloop.first %}
                                               <p>
                                                   {% trans "This ticket cannot be resolved until the following ticket(s) it depends on are resolved" %}
@@ -58,8 +57,7 @@
                                                   {% endif %}
                                               {% empty %}
                                               <p>{% trans "This ticket has no dependencies. If you want to make this ticket dependent on another ticket, search and add a dependent ticket. " %} </p>
-                                            </div>
-                                            <div class="col-md-4">
+                                     <div class="col-md-4">
                                               <p>
                                               <form class="navbar-form navbar-left" id='searchform' method='get' action='{% url 'helpdesk_ticket_dependency_add' ticket.id %}'>
                                                   <div class="input-group">
@@ -74,34 +72,36 @@
                                               </form>
                                               </p>
                                             </div>
-
-                                            {% endfor %}
-                                        </div>
-                                </div>
-                                <div>
-                                  {% if ticket.followup_set.all %}
+                                     {% endfor %}
+                                 </div>
+                             </div>
+                            <div>
+                                {% if ticket.followup_set.all %}
                                   <h3>{% trans "Follow-Ups" %}</h3>
                                   {% load ticket_to_link %}
                                   {% for followup in ticket.followup_set.all %}
-                                  {% if helpdesk_settings.HELPDESK_FOLLOWUP_MOD %}
+                                    {% if helpdesk_settings.HELPDESK_FOLLOWUP_MOD %}
                                       <div class='followup_mod'>
-                                      <div class='title'>
+                                        <div class='title'>
                                           <span class='byline text-info'>
                                               {{ followup.user.get_full_name }}&nbsp;&nbsp;&nbsp;&nbsp;{{ followup.date }} ({{ followup.date }})</span>
-                                          <small>{{ followup.title }}</small>
+                                                <small>{{ followup.title }}</small>
                                           {% if not followup.public %}
                                           <span class='private'>({% trans "Private" %})</span>
                                           {% endif %}
-                                          {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
-                                          {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-                                          <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
-                                          {% endif %}
-                                          {% endif %}
-                                          {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-                                          <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
-                                          {% endif %}
-                                      </div>
-                                  {% else %}
+
+                                            {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
+                                                {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
+                                                    <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
+                                                {% endif %}
+                                            {% endif %}
+
+                                            {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+                                                <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
+                                            {% endif %}
+                                        </div>
+                                          </div>
+                                        {% else %}
                                       <div class='followup well'>
                                       <div class='title'>
                                           {{ followup.title }}
@@ -116,9 +116,9 @@
                                           <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
                                           {% endif %}
                                       </div>
+                                          </div>
                                   {% endif %}
-
-                                  <!-- display ticket comments from 'follow.comment' column -->
+                                <!-- display ticket comments from 'follow.comment' column -->
                                   <span class='followup-desc'>
                                       {% if followup.comment %}
                                           {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
@@ -135,23 +135,22 @@
                                               </ul></div>
                                           {% endif %}
                                   {% endfor %}
-
-                                  {% for attachment in followup.attachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
+                                {% for attachment in followup.attachment_set.all %}{% if forloop.first %}
+                                <div class='attachments'>
+                                    <ul>{% endif %}
                                   <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
                                   {% if followup.user and request.user == followup.user %}
                                   <a href='{% url 'helpdesk_attachment_del' ticket.id attachment.id %}'>delete</a>
                                   {% endif %}
                                   </li>
-                                  {% if forloop.last %}</ul></div>{% endif %}
+                                  {% if forloop.last %}</ul>
+                                </div>{% endif %}
                                   {% endfor %}
-                                  </div>
+
                                   {% endfor %}
-                                  {% endif %}
-                                  {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
-                                  </div>
-                                  {% endif %}
-                                </div>
-                                <div id='add-followup' class="well">
+                                {%endif%}
+                            </div>
+                            <div id='add-followup' class="well">
                                 <h4><strong>{% trans "Respond to this ticket" %}</strong></h4>
                                     <!--
                                     <form method='post' action='update/' enctype='multipart/form-data' class="form-horizontal">
@@ -232,15 +231,11 @@
 
 
                                 <!-- <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</a></p>
-
                                 <div id='FileUpload' style='display: none;'>
-
                                     <dl>
-
                                         <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
                                         <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>
                                     </dl>
-
                                 </div> -->
 
                                 </fieldset>
@@ -265,7 +260,9 @@
                                       {% csrf_token %}
                                   </form>
                                 </div>
-                                  <div class="col-md-2 col-md-offset-1">
+                            </div>
+                        </div>
+                    <div class="col-md-2 col-md-offset-1">
                                     <a href='#' data-toggle="modal" data-target="#deleteModal"class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
                                     <span>
                                     {% if ticket.on_hold %}
@@ -274,16 +271,16 @@
                                         |<a href='{% url "helpdesk_hold" ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>
                                     {% endif %}</span>
                                     <!-- delete modal -->
-                                    <div id="deleteModal" class="modal fade" role="dialog">
-                                      <div class="modal-dialog">
+                        <div id="deleteModal" class="modal fade" role="dialog">
+                            <div class="modal-dialog">
 
                                         <!-- Modal content-->
-                                        <div class="modal-content">
-                                          <div class="modal-header">
+                                <div class="modal-content">
+                                    <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                                             <h3 class="modal-title font9">Delete Ticket</h3>
-                                          </div>
-                                          <div class="modal-body">
+                                    </div>
+                                    <div class="modal-body">
                                             <p>{% blocktrans with ticket.title as ticket_title %}Are you sure you want to delete this ticket (<em>{{ ticket_title }}</em>)?</p><p> All traces of the ticket, including followups, attachments, and updates will be irreversibly removed.{% endblocktrans %}</p>
 
                                             <p><a href='../'>{% trans "No, Don't Delete It" %}</a></p>
@@ -291,27 +288,25 @@
                                             <form method='post' action='/helpdesk/tickets/{{ticket.id}}/delete/'>
                                               <input class="btn btn-primary" type='submit' value='{% trans "Yes - Delete It" %}' />{% csrf_token %}
                                             </form>
-                                          </div>
-                                          <div class="modal-footer">
+                                    </div>
+                                    <div class="modal-footer">
                                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      </div>
-                                  </div>
+                                    </div>
                                 </div>
-
-                                </div>
-                              </div> 
                             </div>
+                        </div>
+                    </div>
+                        </div>
+
+                    </div>
                 </div>
                 <div class="panel-footer">
                    <div class="panel-heading"><a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
 
                   <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
 
-                     <!-- <strong>Ticket Status: </strong><font>In Progress </font>&nbsp;<span class="badge"> 2 </span>&nbsp;&nbsp;<span class="glyphicon glyphicon-tags"></span> --> 
-                    <strong> Tags:</strong> 
+                     <!-- <strong>Ticket Status: </strong><font>In Progress </font>&nbsp;<span class="badge"> 2 </span>&nbsp;&nbsp;<span class="glyphicon glyphicon-tags"></span> -->
+                    <strong> Tags:</strong>
                     {%if tags %}
 
                       {% for tag in ticket.tags.all %}
@@ -320,14 +315,14 @@
                     {% else %}
                           <span class="label label-warning">No Tags</span>
                     {% endif %}
-                   <strong> Votes:</strong> 
+                   <strong> Votes:</strong>
                     <span class="label label-info">{{ ticket.votes }} &nbsp; <a href="{% url 'vote_up' ticket.id %}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>&nbsp; <a href="{% url 'vote_down' ticket.id %}"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a></span>
                   </div>
                   <div id="addTask{{ticket.id}}" class="panel-collapse collapse addTask">
                     <div class="ticket_task">
                       <div class="panel-body">
                         <p>{% blocktrans %}<strong>No new details should be entered when editing a ticket. </strong><br/>This form should only be used to fix incorrect details on a ticket or clean up the submission.{% endblocktrans %}</p>
-                      </div> 
+                      </div>
                       <div class="ticket_form_cover">
                         <div class="ticket_form info">
                           <form  method='post' action='ticket_edit/?ticket_id={{ticket.id}}' enctype='multipart/form-data' >
@@ -337,15 +332,15 @@
                                <div class=" col-md-9">
                                   <input class="form-control" type='text' name='title' id='id_title'  value='{{ ticket.title|escape }}' />
                                </div>
-                            </div> 
+                            </div>
                           </div>
                           <div class="row">
                             <div class= "col-md-6 row ticket_edit" >
                               <label class="col-md-4"><p><strong>{% trans "Queue:" %}</strong></p></label>
                               <div class="col-md-8">
                                 <select class="form-control" id='id_queue' name='queue'>{% for q in ticket_queue %}<option value='{{ q.id }}'{% ifequal q.id ticket.queue_id %} selected='selected'{% endifequal %}>{{ q }}</option>{% endfor %}</select>
-                              </div>  
-                            </div> 
+                              </div>
+                            </div>
                             <div class= "col-md-6 row ticket_edit" >
                               <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
                               <div class="col-md-8">
@@ -364,7 +359,7 @@
                               <label class="col-md-4"><p><strong>{% trans "Description of Issue:" %}</strong></p></label>
                               <div class="col-md-8">
                                 <textarea class="form-control" name="description" rows="4" > {{ ticket.description|escape }} </textarea>
-                              </div>    
+                              </div>
                             </div>
                           </div>
                           <div class=" row">
@@ -387,7 +382,7 @@
                               <div class="col-md-8">
                                 <select class="form-control" id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select>
                               </div>
-                            </div>                            
+                            </div>
                             <div class= "col-md-6 row ticket_edit">
                               <label class="col-md-3"><p><strong>{% trans "Due Date:" %}</strong></p></label>
                               <p class="col-md-9">{{ form.due_date }}</p>
@@ -400,7 +395,7 @@
                                 <select class = " form-control multi_select" style="width:200px" multiple = "multiple" id='id_edit_tags' name='edit_tags'> {% for q in edit_tags %} <option value='{{ q.id }}'{% endfor %} {{form.edit_tags }} </option>
                               </select>
                               </div>
-                            </div>  
+                            </div>
                           </div> -->
                           <div class=" row">
                               <label class= "col-md-6 row ticket_edit">
@@ -408,7 +403,7 @@
                               </label>
                           </div>
                            {% csrf_token %}
-                          </form> 
+                          </form>
                         </div>
                       </div>
                     </div>
@@ -429,7 +424,7 @@
                   {% blocktrans with tickets.number as ticket_num and tickets.paginator.num_pages as num_pages %}
                       <li><a class="active" href=""> {{ ticket_num }}</a></li>
                   {% endblocktrans %}
-                  
+
                  {% if tickets.has_next %}
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}"> {{ tickets.next_page_number }}</a></li>
                       {% ifnotequal tickets.next_page_number tickets.paginator.num_pages %}
@@ -439,7 +434,7 @@
                       {% endblocktrans %}
                     {% endifnotequal %}
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a></li>
-               
+
                  {% endif %}
 
               </ul>
@@ -460,12 +455,12 @@
                   </li>
                  <li><a href="#">per page</a></li>
                </ul>
-             </div> 
+             </div>
             </div>
             <!-- end paginator -->
           </div>
 
-          
+
       <div class="col-md-3 col-sm-3 ">
        <!-- start search -->
           <div class="search" >
@@ -531,7 +526,7 @@
                             <div class='buttons form-group'>
                                 <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
                         </div>
-                    </div> 
+                    </div>
                     {{ form.media }}
 
                     {% csrf_token %}</form>
@@ -540,17 +535,17 @@
                     <div class="modal-footer">
                       <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
-                  </div> 
+                  </div>
                 </div>
               </div>
               <div class="panel-body">
                 <div class="sort_panels">
                   Created By Me <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong>
-                </div> 
+                </div>
                 <div class="sort_panels">
                    Assigned to Me <strong> <span class="badge read_more"> {{ assigned_to_me }} </span></strong>
                 </div>
-                 <div class="sort_panels">  
+                 <div class="sort_panels">
                   Resolved & Closed by Me <strong> <span class="badge read_more"> {{ tickets_closed_resolved }} </span></strong>
                  </div>
               </div>
@@ -600,13 +595,13 @@
 
 
         <div class="panel panel-info">
-            <div class="panel-heading"> 
+            <div class="panel-heading">
                 <strong>{% trans "Filter Tickets" %}</strong>
             </div>
-           
+
         <div class="panel-body" id="ko">
             <div class="row" id="ko1">
-                <div class=" col-md-12">         
+                <div class=" col-md-12">
                     <strong>Click</strong> on <strong>"+"</strong> to add filters to query on and  <strong>"-"</strong>  to remove a filter.
                 </div>
             </div>
@@ -685,7 +680,7 @@
                     <label for='id_date_from'>{% trans "Date (From): " %}</label>
                     <input class="date_input" type='text' name='date_from' value='{{ query_params.filtering.created__gte }}' id='id_date_from' />
                     <div class="date_to">
-                        
+
                       <label for='id_date_to'>{% trans "Date (To): " %}</label>
                       <input  class="date_input" type='text' name='date_to' value='{{ query_params.filtering.created__lte }}' id='id_date_to' />
                     </div>
