@@ -1000,7 +1000,7 @@ def ticket_dependency_add(request, ticket_id):
             ticketdependency.ticket = ticket
             if ticketdependency.ticket != ticketdependency.depends_on:
                 ticketdependency.save()
-            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+            return ticket_list(request)
     else:
 
         form = TicketDependencyForm()
@@ -1445,7 +1445,7 @@ def hold_ticket(request, ticket_id, unhold=False):
 
     ticket.save()
 
-    return HttpResponseRedirect(ticket.get_absolute_url())
+    return ticket_list(request)
 #hold_ticket = staff_member_required(hold_ticket)
 
 
