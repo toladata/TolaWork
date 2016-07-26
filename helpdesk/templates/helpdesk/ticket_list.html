@@ -285,7 +285,7 @@
 
                                             <p><a href='../'>{% trans "No, Don't Delete It" %}</a></p>
 
-                                            <form method='post' action='./'>
+                                            <form method='post' action='/helpdesk/tickets/{{ticket.id}}/delete/'>
                                               <input class="btn btn-primary" type='submit' value='{% trans "Yes - Delete It" %}' />{% csrf_token %}
                                             </form>
                                     </div>

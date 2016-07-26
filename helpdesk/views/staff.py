@@ -1053,7 +1053,7 @@ def ticket_list(request):
             file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
+            #post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
     else:
@@ -1397,7 +1397,6 @@ def create_ticket(request):
         else:
             form = PublicTicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-    create_ticket_variables  = {'form': form, 'helper': form.helper,}
 
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
