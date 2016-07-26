@@ -9,12 +9,18 @@ from django.contrib.auth.views import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from helpdesk.github import latest_release
-from helpdesk.models import Ticket
+from helpdesk.models import Ticket, Queue, FollowUp
 from tasks.models import Task
 from django.conf import settings
 from django.db.models import Count, Sum
 import os
 from project.models import LoggedUser
+from helpdesk.forms import TicketForm
+from datetime import datetime as timezone
+from helpdesk.views.staff import file_attachment
+from helpdesk.slack import post_slack,post_tola_slack
+
+
 
 def splash(request):
     if request.user.is_authenticated():
@@ -153,12 +159,63 @@ def home(request):
 
     logged_users = logged_in_users(request)
 
+    #create ticket modal
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+
+    if request.method == 'POST':
+        if request.user.is_staff:
+
+            form = TicketForm(request.POST, request.FILES)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+        else:
+            form = PublicTicketForm(request.POST, request.FILES)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
+        if form.is_valid():
+
+            ticket = form.save(user=request.POST.get('assigned_to'))
+
+            #save tickettags
+            tags = request.POST.getlist('tags')
+            for tag in tags:
+                ticket.tags.add(tag)
+
+            #ticket.comment = ''
+            comment = ""
+            f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+            f.save()
+
+            #Attch a File
+            file_attachment(request, f)
+                   
+            #autopost new ticket to #tola-work slack channel in Tola
+            post_tola_slack(ticket.id)
+
+            messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
+
+            return HttpResponseRedirect('/')
+    else:
+        initial_data = {}
+        if request.user.email:
+            initial_data['submitter_email'] = request.user.email
+        if 'queue' in request.GET:
+            initial_data['queue'] = request.GET['queue']
+
+        if request.user.is_staff:
+            form = TicketForm(initial=initial_data)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+        else:
+            form = PublicTicketForm(initial=initial_data)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
                                          'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
                                          'recent_tickets': recent_tickets,'votes_tickets': votes_tickets, 'num_tickets': num_tickets, 'tasks': tasks, \
                                          'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'created_by_me':created_by_me,\
-                                         'closed':closed,'tome':tome,'byme':byme,'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData, 'logged_users':logged_users})
+                                         'closed':closed,'tome':tome,'byme':byme,'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData, 'logged_users':logged_users, 'form':form, 'helper':form.helper})
 
 
 def contact(request):
