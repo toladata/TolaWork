@@ -1058,19 +1058,20 @@ def ticket_list(request):
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
     else:
         initial_data = {}
-        if request.user.email:
-            initial_data['submitter_email'] = request.user.email
-        if 'queue' in request.GET:
-            initial_data['queue'] = request.GET['queue']
+        try:
+            if request.user.email:
+                initial_data['submitter_email'] = request.user.email
+            if 'queue' in request.GET:
+                initial_data['queue'] = request.GET['queue']
 
-        if request.user.is_staff:
-            form = TicketForm(initial=initial_data)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        else:
+            if request.user.is_staff:
+                form = TicketForm(initial=initial_data)
+                form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+                form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+            
+        except Exception, e:
             form = PublicTicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-
 
     if request.GET.get('search_type', None) == 'header':
         query = request.GET.get('q')
