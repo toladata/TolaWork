@@ -1053,7 +1053,7 @@ def ticket_list(request):
             file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            #post_tola_slack(ticket.id)
+            post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
     else:
