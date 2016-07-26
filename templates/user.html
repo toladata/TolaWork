@@ -124,9 +124,10 @@ $(function () {
                 <div class="panel-body">
                   <div class="sort_panels" >
                     <div class= "preview_links">
-                       <a href="#Created_by_user" data-toggle="collapse">Tickets Created By This User </a> <strong> <span class="badge read_more"> {{ created_by_user }} </span></strong>
+                       <a href="#Created_by_user" data-toggle="collapse">Tickets Created </a> <strong> <span class="badge read_more"> {{ created_by_user }} </span></strong>
                     </div>
                     <div id="Created_by_user" class="collapse in">
+                    {% if by_user%}
                       <div class="table-responsive">
                         <table class="table table-striped">
                           <tr>
@@ -145,13 +146,19 @@ $(function () {
                           {% endfor %}
                         </table>
                       </div>
+                      {% else %}
+                      <div class="alert alert-info" role="alert">
+                        <h5>You currently have no tickets. Go to <a href='{% url 'helpdesk_list' %}' class="alert-link">Tickets</a> to create a ticket(s)</h5>
+                      </div>
+                      {% endif %}
                     </div> 
                 </div>
                 <div class="sort_panels">
                   <div class= "preview_links">
-                    <a href="#assigned_to_me" data-toggle="collapse">Tickets Assigned to this user</a> <strong><span class="badge read_more"> {{ assigned_to_user }} </span></strong>
+                    <a href="#assigned_to_me" data-toggle="collapse">Tickets Assigned </a> <strong><span class="badge read_more"> {{ assigned_to_user }} </span></strong>
                   </div>
                    <div id="assigned_to_me" class="collapse">
+                   {% if to_user %}
                     <div class="table-responsive">
                       <table class="table table-striped">
                           <tr>
@@ -170,32 +177,42 @@ $(function () {
                           {%endfor%}
                       </table>
                     </div>
+                    {% else %}
+                      <div class="alert alert-info" role="alert">
+                        <h5>You currently have no tickets assigned to you</h5>
+                      </div>
+                    {% endif %}
                   </div> 
                 </div>
                 <div class="sort_panels">
                <div class= "preview_links">
-                 <a href="#closed_resolved" data-toggle="collapse">&nbsp;Resolved & Closed by Me </a> <strong> <span class="badge read_more"> {{ closed_resolved }} </span></strong>
+                 <a href="#closed_resolved" data-toggle="collapse">&nbsp;Tickets Closed and Resolved </a> <strong> <span class="badge read_more"> {{ closed_resolved }} </span></strong>
                </div>  
                <div id="closed_resolved" class="collapse">
+               {% if closed %}
                 <div class="table-responsive">
-
                   <table class="table table-striped">
-                      <tr>
-                        <th>Status</th>
-                        <th>Queue</th>
-                        <th>Title</th>
-                        <th>Date Created</th>
+                    <tr>
+                      <th>Status</th>
+                      <th>Queue</th>
+                      <th>Title</th>
+                      <th>Date Created</th>
                     </tr>
                     {% for ticket in closed %}
                     <tr>
-                        <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
-                        <td>{{ticket.queue}}</td>
-                        <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
-                        <td> {{ticket.created}}</td>
+                      <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
+                      <td>{{ticket.queue}}</td>
+                      <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
+                      <td> {{ticket.created}}</td>
                     </tr>
                     {%endfor%}
                   </table>
                 </div>
+                {% else %}
+                  <div class="alert alert-info" role="alert">
+                    <h5>You currently have no tickets closed and resolved by you</h5>
+                  </div>
+                {% endif %}
                </div>
              </div> 
             </div>
