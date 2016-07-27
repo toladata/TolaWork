@@ -137,7 +137,7 @@
                       <div id="Preview" class="tab-pane fade">
                          <div class="panel panel-info ">
                           <div class="panel-heading">
-                            <strong>Total Tickets <span class="badge read_more">{{ num_tickets }}</span></strong>
+                            <strong><a href='{% url 'helpdesk_list' %}'>Total Tickets</a> <span class="badge read_more">{{ num_tickets }}</span></strong>
                           </div>
                           <div class="panel-body">
                             <div class="sort_panels" >
@@ -251,30 +251,154 @@
                     </h4>
                   </div>
                   <div id="tasks" class="panel-collapse collapse">
-                  {% if tasks %}
-                    <div class="panel-body table-responsive">
-                      <table class="table table-striped table-bordered">
-                        <tr class="info">
-                          <td><strong>Task Title</strong></td>
-                          <td><strong>Start Date</strong></td>
-                          <td><strong>Due Date</strong></td>
-                          <td><strong>Status</strong></td>
-                          <td><strong>Priority</strong></td>
-                          <td><strong>Assigned To</strong></td>
-                        </tr>
-                        {% for task in tasks %}
-                          <tr data-toggle="collapse" data-target="#{{ task.id }}" class="accordion-toggle">
+                  {% if recent_tasks %}
+                    <div class="panel-body">
+                      <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#recent_tasks"><b><span class="glyphicon glyphicon-list-alt"></span></b>&nbsp;&nbsp;Recent Tasks</a></li>
+                        <li><a data-toggle="tab" href="#tasks_preview"><b><span class="glyphicon glyphicon-th-list"></span></b>&nbsp;&nbsp;Tasks Preview</a></li>
+                      </ul>
+                      <div class="tab-content">
+                        <div id="recent_tasks" class="tab-pane fade in active">
+                          <div class="panel-body table-responsive">
+                            <table class="table table-striped table-bordered">
+                              <tr class="info">
+                                <td><strong>Task Title</strong></td>
+                                <td><strong>Start Date</strong></td>
+                                <td><strong>Due Date</strong></td>
+                                <td><strong>Status</strong></td>
+                                <td><strong>Priority</strong></td>
+                                <td><strong>Assigned To</strong></td>
+                              </tr>
+                              {% for task in recent_tasks %}
+                                <tr data-toggle="collapse" data-target="#{{ task.id }}" class="accordion-toggle">
 
-                          <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
-                          <td>{{ task.created_date | date}}</td>
-                          <td>{{ task.due_date | date}}</td>
-                           <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</td>
-                            <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
+                                <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
+                                <td>{{ task.created_date | date}}</td>
+                                <td>{{ task.due_date | date}}</td>
+                                 <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</td>
+                                  <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
 
-                          <td>{{task.assigned_to}}</td>
-                          {% endfor %}
-                        </tr>
-                        </table>
+                                <td>{{task.assigned_to}}</td>
+                                {% endfor %}
+                              </tr>
+                              </table>
+                          </div>
+                        </div>
+                        <div id="tasks_preview" class="tab-pane fade">
+                          <div class="panel panel-info ">
+                            <div class="panel-heading">
+                              <strong><a href='{% url 'task_list' %}'>Total Tasks</a> <span class="badge read_more">{{ num_tasks }}</span></strong>
+                            </div>
+                            <div class="panel-body">
+                              <div class="sort_panels" >
+                                <div class= "preview_links">
+                                   <a href="#tasks_created" data-toggle="collapse">Tasks Created </a> <strong> <span class="badge read_more"> {{ total_tasks_created }} </span></strong>
+                                </div>
+                                <div id="tasks_created" class="collapse in">
+                                  {% if tasks_created %}
+                                    <div class="table-responsive">
+                                      <table class="table table-striped table-bordered">
+                                        <tr class="info">
+                                          <td><strong>Task Title</strong></td>
+                                          <td><strong>Start Date</strong></td>
+                                          <td><strong>Due Date</strong></td>
+                                          <td><strong>Status</strong></td>
+                                          <td><strong>Priority</strong></td>
+                                          <td><strong>Assigned To</strong></td>
+                                        </tr>
+                                        {% for task in tasks_created %}
+                                        <tr>
+                                          <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
+                                          <td>{{ task.created_date | date}}</td>
+                                          <td>{{ task.due_date | date}}</td>
+                                          <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</td>
+                                          <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
+                                          <td>{{task.assigned_to}}</td>
+                                          {% endfor %}
+                                        </tr>
+                                        </table>
+                                    </div>
+                                  {% else %}
+                                    <div class="alert alert-info" role="alert">
+                                      <h5>You currently have no tasks Go to <a href='{% url 'task_list' %}' class="alert-link">Tasks</a> to create a task(s)</h5>
+                                    </div>
+                                  {% endif %}
+                                  </div>
+                                </div>
+                                <div class="sort_panels" >
+                                  <div class= "preview_links">
+                                     <a href="#tasks_assigned" data-toggle="collapse">Tasks Assigned </a> <strong> <span class="badge read_more"> {{ total_tasks_assigned }} </span></strong>
+                                  </div>
+                                  <div id="tasks_assigned" class="collapse">
+                                    {% if tasks_assigned %}
+                                      <div class="table-responsive">
+                                        <table class="table table-striped table-bordered">
+                                          <tr class="info">
+                                            <td><strong>Task Title</strong></td>
+                                            <td><strong>Start Date</strong></td>
+                                            <td><strong>Due Date</strong></td>
+                                            <td><strong>Status</strong></td>
+                                            <td><strong>Priority</strong></td>
+                                            <td><strong>Assigned To</strong></td>
+                                          </tr>
+                                          {% for task in tasks_assigned %}
+                                          <tr>
+                                            <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
+                                            <td>{{ task.created_date | date}}</td>
+                                            <td>{{ task.due_date | date}}</td>
+                                            <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</td>
+                                            <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
+                                            <td>{{task.assigned_to}}</td>
+                                            {% endfor %}
+                                          </tr>
+                                          </table>
+                                      </div>
+                                    {% else %}
+                                      <div class="alert alert-info" role="alert">
+                                      <h5>You currently have no tasks assigned to you</h5>
+                                      </div>
+                                    {% endif %}
+                                  </div>
+                                </div>
+                                <div class="sort_panels" >
+                                  <div class= "preview_links">
+                                     <a href="#tasks_completed" data-toggle="collapse">Tasks Completed </a> <strong> <span class="badge read_more"> {{ total_tasks_completed }} </span></strong>
+                                  </div>
+                                  <div id="tasks_completed" class="collapse">
+                                    {% if tasks_completed %}
+                                      <div class="table-responsive">
+                                        <table class="table table-striped table-bordered">
+                                          <tr class="info">
+                                            <td><strong>Task Title</strong></td>
+                                            <td><strong>Start Date</strong></td>
+                                            <td><strong>Due Date</strong></td>
+                                            <td><strong>Status</strong></td>
+                                            <td><strong>Priority</strong></td>
+                                            <td><strong>Assigned To</strong></td>
+                                          </tr>
+                                          {% for task in tasks_completed %}
+                                          <tr>
+                                            <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
+                                            <td>{{ task.created_date | date}}</td>
+                                            <td>{{ task.due_date | date}}</td>
+                                            <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</td>
+                                            <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
+                                            <td>{{task.assigned_to}}</td>
+                                            {% endfor %}
+                                          </tr>
+                                          </table>
+                                      </div>
+                                    {% else %}
+                                      <div class="alert alert-info" role="alert">
+                                        <h5>You currently have no tasks completed by you/h5>
+                                      </div>
+                                    {% endif %}
+                                  </div>
+                                </div>
+                              </div>
+                          </div>  
+                        </div>
+                      </div>
                     </div>
                   {% else %}
                     <div class="alert alert-info" role="alert">
