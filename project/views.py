@@ -34,77 +34,59 @@ def user (request):
     #tickets
     email = request.GET.get('email')
     username = request.GET.get('username')
-    all_tickets = {}
-    total_tickets =0 
-    all_tasks = {}
-    total_tasks = 0
-    by_user = {}                                 
-    to_user = {} 
-    created_by_user = 0 
-    assigned_to_user = 0
-    closed_resolved = 0 
-    closed = {}
-    tasks_created = {}
-    total_tasks_created = 0
-    tasks_assigned = {}
-    total_tasks_assigned = 0
-    tasks_completed = {}
-    total_tasks_completed = 0
-    try:
-        all_tickets = Ticket.objects.filter(submitter_email=email).values('status').annotate(total=Count('status')).order_by('total')
-        tickets = get_tickets_by_user(email)
-        total_tickets = len(tickets)
+    all_tickets = Ticket.objects.filter(submitter_email=email).values('status').annotate(total=Count('status')).order_by('total')
+    tickets = get_tickets_by_user(email)
+    total_tickets = len(tickets)
 
-        #created by logged_in user
-        created = Ticket.objects.select_related('queue').filter(
-                   submitter_email=email,
-                ).exclude(
-                   status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-               )
+    #created by logged_in user
+    created = Ticket.objects.select_related('queue').filter(
+               submitter_email=email,
+            ).exclude(
+               status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+           )
 
-        by_user = (created).order_by('-created')[:5]
+    by_user = (created).order_by('-created')[:5]
 
-        created_by_user = len(created)
+    created_by_user = len(created)
 
-        #assigned to the user
-        user_id = User.objects.get(email=email).id
-        assigned = Ticket.objects.select_related('queue').filter(
-                assigned_to=user_id,
-             ).exclude(
-                status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-            )
-        to_user=(assigned).order_by('-created')[:5]
-
-        assigned_to_user=len(assigned)
-
-        #closed and resolved by user
-        closedresolved = Ticket.objects.select_related('queue').filter(
+    #assigned to the user
+    user = User.objects.filter(email=email).values('username').all()[:1]
+    user_id = User.objects.get(username=user).id
+    print user_id
+    assigned = Ticket.objects.select_related('queue').filter(
             assigned_to=user_id,
+         ).exclude(
             status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
         )
-        closed = (closedresolved).order_by('-created')[:5]
+    to_user=(assigned).order_by('-created')[:5]
 
-        closed_resolved = len(closedresolved)
+    assigned_to_user=len(assigned)
 
-        #tasks
-        tasks = get_tasks_by_user(email)
-        all_tasks = (tasks).values('status').annotate(total=Count('status')).order_by('total')
-        total_tasks= len(tasks)
+    #closed and resolved by user
+    closedresolved = Ticket.objects.select_related('queue').filter(
+        assigned_to=user_id,
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+    )
+    closed = (closedresolved).order_by('-created')[:5]
 
-        #tasks created by user
-        tasks_created = (tasks).exclude(status__in=([3,4])).order_by('created_date')[:5]
-        total_tasks_created = len(tasks_created)
+    closed_resolved = len(closedresolved)
 
-        #tasks assigned to the user
-        tasks_assigned = Task.objects.filter(assigned_to_id=user_id).exclude(status__in=([3,4])).order_by('created_date')[:5]
-        total_tasks_assigned = len(tasks_assigned)
+    #tasks
+    tasks = get_tasks_by_user(email)
+    all_tasks = (tasks).values('status').annotate(total=Count('status')).order_by('total')
+    total_tasks= len(tasks)
 
-        #tasks completed by the user
-        tasks_completed = (tasks).filter(status__in='3').order_by('created_date')[:5]
-        total_tasks_completed = len (tasks_completed)
+    #tasks created by user
+    tasks_created = (tasks).exclude(status__in=([3,4])).order_by('created_date')[:5]
+    total_tasks_created = len(tasks_created)
 
-    except Exception, e:
-        pass
+    #tasks assigned to the user
+    tasks_assigned = Task.objects.filter(assigned_to_id=user_id).exclude(status__in=([3,4])).order_by('created_date')[:5]
+    total_tasks_assigned = len(tasks_assigned)
+
+    #tasks completed by the user
+    tasks_completed = (tasks).filter(status__in='3').order_by('created_date')[:5]
+    total_tasks_completed = len (tasks_completed)
 
     #logged_users
     logged_users = logged_in_users(request)
