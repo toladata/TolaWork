@@ -60,7 +60,7 @@ def user (request):
         created_by_user = len(created)
 
         #assigned to the user
-        user_id = User.objects.get(email=email).id
+        user_id = User.objects.get(email=email).id[:1]
         assigned = Ticket.objects.select_related('queue').filter(
                 assigned_to=user_id,
              ).exclude(
