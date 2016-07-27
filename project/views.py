@@ -35,20 +35,21 @@ def user (request):
     email = request.GET.get('email')
     username = request.GET.get('username')
     all_tickets = {}
-    total_tickets ={} 
+    total_tickets =0 
     all_tasks = {}
-    total_tasks = {}
+    total_tasks = 0
     by_user = {}                                 
-    to_user = {}  
-    assigned_to_user = {} 
-    closed_resolved = {} 
+    to_user = {} 
+    created_by_user = 0 
+    assigned_to_user = 0
+    closed_resolved = 0 
     closed = {}
     tasks_created = {}
-    total_tasks_created = {}
+    total_tasks_created = 0
     tasks_assigned = {}
-    total_tasks_assigned = {}
+    total_tasks_assigned = 0
     tasks_completed = {}
-    total_tasks_completed = {}
+    total_tasks_completed = 0
     try:
         all_tickets = Ticket.objects.filter(submitter_email=email).values('status').annotate(total=Count('status')).order_by('total')
         tickets = get_tickets_by_user(email)
@@ -483,4 +484,28 @@ def update_issue_on_github(request):
             update_issue(repo,ticket)
     return HttpResponseRedirect('/home')
 
+# paginator function
+def data_query_pagination(request, data_items, query_params):
+    try:
+        data_item_qs = apply_query(data_items, query_params)
+    except ValidationError:
+        # invalid parameters in query, return default query
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3]},
+            'sorting': 'created',
+        }
+        data_item_qs = apply_query(data_items, query_params)
+
+    data_item_paginator = paginator.Paginator(data_item_qs, 5)
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+        page = 1
+
+    try:
+        data_items = data_item_paginator.page(page)
+    except (paginator.EmptyPage, paginator.InvalidPage):
+        data_items = data_item_paginator.page(data_item_paginator.num_pages)
+
+    return data_items
 
