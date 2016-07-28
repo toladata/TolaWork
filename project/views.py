@@ -202,6 +202,9 @@ def home(request):
     #create ticket modal
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
+    form = PublicTicketForm(initial={})
+    form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
     if request.method == 'POST':
         if request.user.is_staff:
 
