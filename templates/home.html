@@ -548,8 +548,8 @@
               {% endif %}
 
               {% if logged_users%}
-                {% for user in logged_users%}
-                  <p><a href="{% url 'user' %}?email={{user.email}}&username={{user.username}}"><span class="glyphicon glyphicon-user"></span> {{user.username}}</a> - TolaWork</p>
+                {% for logged_user in logged_users%}
+                  <p><a href="{% url 'user' %}?email={{logged_user.email}}&username={{logged_user.username}}"><span class="glyphicon glyphicon-user"></span> {{logged_user.username}}</a> - TolaWork</p>
                 {% endfor %}
               {% endif %}
               {%if tolaActivityData.activity_logged_users %}
