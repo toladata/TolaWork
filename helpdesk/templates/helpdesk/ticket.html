@@ -8,8 +8,6 @@
 
 {% block helpdesk_body %}
 
-{% include "helpdesk/ticket_desc_table.html" %}
-
 {% if ticket.followup_set.all %}
 <h3>{% trans "Follow-Ups" %}</h3>
 {% load ticket_to_link %}
