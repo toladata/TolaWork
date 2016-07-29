@@ -41,6 +41,23 @@ def user (request):
     except Exception, e:
         user_id = 0
 
+    all_tickets = {}
+    total_tickets = 0
+    all_tasks = {}
+    tickets_created = {}
+    total_tickets_created = 0
+    tickets_assigned = {}
+    total_tickets_assigned = 0
+    tickets_closed_resolved = {}
+    total_tickets_closed_resolved = 0
+    tasks_created = {}
+    tasks_assigned = {}
+    total_tasks = {}
+    total_tasks_created = 0
+    total_tasks_assigned = 0
+    tasks_completed = {}
+    total_tasks_completed = 0
+
     #tickets
     if user_id:
         try:
@@ -87,26 +104,10 @@ def user (request):
             total_tasks_completed = len (tasks_completed)
 
         except Exception, e:
-            all_tickets = []
-            total_tickets = 0
-            all_tasks = []
-            tickets_created = []
-            total_tickets_created = 0
-            tickets_assigned = []
-            total_tickets_assigned = 0
-            tickets_closed_resolved = []
-            total_tickets_closed_resolved = 0
-            tasks_created = []
-            tasks_assigned = []
-            total_tasks = []
-            total_tasks_created = 0
-            total_tasks_assigned = 0
-            tasks_completed = []
-            total_tasks_completed = 0
-            
-            
-    
-    #logged_users
+            pass  
+
+
+
     logged_users = logged_in_users(request)
 
     return render(request, "user.html", {'all_tickets': all_tickets,'total_tickets': total_tickets, 'all_tasks': all_tasks, \
