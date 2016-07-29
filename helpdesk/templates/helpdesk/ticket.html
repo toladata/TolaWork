@@ -31,7 +31,9 @@
                     <strong>Ticket CC:&nbsp;</strong>
                     {{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk_ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong>{% trans "Manage" %}</strong></a>{% if SHOW_SUBSCRIBE %}, <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'>{% trans "Subscribe" %}</a></strong>{% endif %}
                     <br/>
-                    <strong>Priority:&nbsp;</strong>[{{ ticket.get_priority_display }}]&nbsp;<strong>Type:&nbsp;</strong>{{ ticket.get_type_display }}
+                    <strong>Priority:&nbsp;</strong>[{{ ticket.get_priority_display }}]&nbsp;<strong>Type:&nbsp;</strong>{{ ticket.get_type_display }}&nbsp;&nbsp;<strong>Developer(s) Progress:</strong>&nbsp;
+                            <span class="label label-info">{% if ticket.git_label == 0 %}In {% blocktrans with ticket.queue as queue %}&nbsp;{{ queue }}{% endblocktrans %}&nbsp;Backlog{% elif ticket.git_label == 1 %}Accepted and moved into the Ready Queue{% elif ticket.git_label == 2 %}Developers have started working on the Ticket{% elif ticket.git_label == 4 %}Done{% endif%}</span>
+
                 </div>
                 <div class="panel-body">
                     <strong>Description:<br/></strong>
