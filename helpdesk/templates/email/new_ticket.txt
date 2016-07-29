@@ -12,6 +12,6 @@ You have successfully submitted a new ticket into TolaWork.
     -------------------
 
 To view this ticket in Tola.Work, click on the link below:
-http://dev.tola.work/helpdesk/tickets/{{ ticket.id }}/
+http://tola.work/helpdesk/tickets/{{ ticket.id }}/
 
 Best regards from the Tola.Work Support team.
