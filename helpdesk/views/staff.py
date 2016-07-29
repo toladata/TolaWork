@@ -383,7 +383,7 @@ def vote_down(request, id):
 
 def email(ticket,comment, status_text):
 
-    if ticket.assigned_to == "":
+    if ticket.assigned_to == "0":
         assignee = ticket.submitter_email
     else:
         assignee = ticket.assigned_to.email
@@ -409,19 +409,13 @@ def post_comment(request, ticket_id):
                 status_text = 'OPEN'
 
                 if ticket.github_issue_id:
-
+                    #if there are comments, update github
                     repo = queue_repo(ticket)
                     if not comment == '':
                         add_comments(comment,repo,ticket)
 
                 #email notification for 'Open' issue
-                messages_sent_to = []
-                email(ticket,comment,status_text,ticket.submitter_email)
-                messages_sent_to.append(ticket.submitter_email)
-
-                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
-                    email(ticket,comment,status_text,ticket.assigned_to.email)
-                    messages_sent_to.append(ticket.assigned_to.email)
+                email(ticket, comment, status_text)
 
             elif int(status) == 2:
                 status_text = 'RE-OPENED'
@@ -442,25 +436,13 @@ def post_comment(request, ticket_id):
                     print response
 
                 #email notification for 'Re-Opened' issue
-                messages_sent_to = []
-                email(ticket,comment,status_text,ticket.submitter_email)
-                messages_sent_to.append(ticket.submitter_email)
-
-                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
-                    email(ticket,comment,status_text,ticket.assigned_to.email)
-                    messages_sent_to.append(ticket.assigned_to.email)
+                email(ticket, comment, status_text)
 
             elif int(status) == 3:
                 status_text = 'RESOLVED'
 
                 #email notification for 'Resolved' issue
-                messages_sent_to = []
-                email(ticket,comment,status_text,ticket.submitter_email)
-                messages_sent_to.append(ticket.submitter_email)
-
-                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
-                    email(ticket,comment,status_text,ticket.assigned_to.email)
-                    messages_sent_to.append(ticket.assigned_to.email)
+                email(ticket, comment, status_text)
 
             elif int(status) == 4:
                 status_text = 'CLOSED'
@@ -487,15 +469,7 @@ def post_comment(request, ticket_id):
                 status_text = 'DUPLICATE'
 
                 #email notification for 'Duplicate' issue
-                messages_sent_to = []
-                email(ticket,comment,status_text,ticket.submitter_email)
-                messages_sent_to.append(ticket.submitter_email)
-
-                if ticket.assigned_to is None:
-                    print "Empty"
-                else:
-                    email(ticket,comment,status_text,ticket.assigned_to.email)
-                    messages_sent_to.append(ticket.assigned_to.email)
+                email(ticket, comment, status_text)
 
             else:
                 status_text = 'Not a status'
