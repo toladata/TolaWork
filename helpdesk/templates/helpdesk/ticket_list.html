@@ -166,10 +166,9 @@
                                 </div>
                                 <div id='add-followup' class="well">
                                 <h4><strong>{% trans "Respond to this ticket" %}</strong></h4>
-                                    <!--
-                                    <form method='post' action='update/' enctype='multipart/form-data' class="form-horizontal">
-                                    -->
-                                <form method='post' action='/helpdesk/tickets/{{ticket.id}}/post_comment/' enctype='multipart/form-data' class="form-horizontal">
+
+                                <form method='post' action='{% url "post_comment" ticket.id %}' enctype='multipart/form-data' class="form-horizontal">
+
 
                                 <fieldset>
                                     <dl>
