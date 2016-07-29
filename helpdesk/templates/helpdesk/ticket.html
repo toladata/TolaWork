@@ -4,10 +4,207 @@
 
 {% endblock %}
 
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<div class="container">
+
 {% block h1_title %}{{ ticket.ticket_for_url|upper }}{% endblock %}
 
 {% block helpdesk_body %}
+{% load in_list %}
 
+<div class="ticket_cover">
+<!-- add ticket table -->
+
+    <div class="col-md-9 col-sm-9 ticket_right">
+    <table class="table table-hover table-bordered table-striped">
+    <thead>
+    <tr class='row_tablehead'>
+        <td colspan='2'>
+            <h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
+            <span class='ticket_toolbar'>
+                {% if request.user.is_staff %}
+                <div>
+                <div class="panel-group" id="dynamicForm">
+                <div class="panel home-panel">
+                  <div class="panel-heading home-paneltitle">
+                    <h4 class="panel-title">
+                      <a data-toggle="collapse" data-parent="#dynamicForm" href="#dynamicEdit">
+                      <font class="font5"><b><span class="glyphicon glyphicon-cog"></span></b>  Edit Ticket </font></a>
+                    </h4>
+                  </div>
+                  <div id="dynamicEdit" class="panel-collapse collapse">
+                    <div class="panel-body">
+                      <div class="panel-body">
+                        <p>{% blocktrans %}<strong>No new details should be entered when editing a ticket. </strong><br/>This form should only be used to fix incorrect details on a ticket or clean up the submission.{% endblocktrans %}</p>
+
+                        <!-- TW#90 - add a dynamic edit form -->
+                          <form method='post' action='ticket_edit/' enctype='multipart/form-data' class="form-horizontal">
+                            <table class="table table-hover table-striped">
+                                <tr>
+                                <th>{% trans "Title:" %}</th>
+                                <td colspan="7"><input type='text' name='title' id='id_title' size='95' value='{{ ticket.title|escape }}' /></td>
+                                </tr>
+                                <tr>
+                                    <th>{% trans "Queue:" %}</th>
+                                    <td><select id='id_queue' name='queue'>{% for q in ticket_queue %}<option value='{{ q.id }}'{% ifequal q.id ticket.queue_id %} selected='selected'{% endifequal %}>{{ q }}</option>{% endfor %}</select></td>
+                                    <th>{% trans "Type of Ticket:" %}</th>
+                                    <td><select id='id_type' name='type'>{% for tt in ticket_type %}<option value='{{ tt.0 }}'{% ifequal tt.0 ticket.type %} selected='selected'{% endifequal %}>{{ tt.1 }}</option>{% endfor %}</select></td>
+
+                                    <th>{% trans "Case Owner:" %}</th>
+                                    <td><select id='id_owner' name='owner'><option value=''>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select></td>
+                                    <th>{% trans "Priority:" %}</th>
+                                    <td><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></td>
+
+                                </tr>
+                                <tr>
+                                <th>{% trans "Error Message:" %}</th>
+                                <td colspan="3"><textarea name="error_msg" rows="4" cols="40"> {{ ticket.error_msg|escape }} </textarea></td>
+                                    <th>{% trans "Description of Issue:" %}</th>
+                                    <td colspan="3"><textarea name="description" rows="4" cols="40"> {{ ticket.description|escape }} </textarea></td>
+                                </tr>
+
+
+                                <tr>
+                                    <th>{% trans "Submitter Email:" %}</th>
+                                    <td colspan="3"><input type='text' name='email' id='id_email' size='30' value='{{ ticket.submitter_email|escape }}' /></td>
+                                    <th>{% trans "Due Date:" %}</th>
+                                    <td colspan="3">{{ form.due_date }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="8"><input class="btn btn-primary" type='submit' value='{% trans "Save Changes" %}' /></td>
+
+                                </tr>
+                            </table>
+                              {% csrf_token %}
+                          </form>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+                <a href='{% url "helpdesk_delete" ticket.id %}' class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+
+                {% endif %}
+                {% if ticket.on_hold %}
+                    | <a href='{% url "helpdesk_unhold" ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>
+                {% else %}
+                    |<a href='{% url "helpdesk_hold" ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>
+                {% endif %}
+            </span>
+
+
+        </td>
+    </tr>
+    <tr>
+        <th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }} {% endblocktrans %}</th>
+    </tr>
+</thead>
+<tbody>
+{% for customfield in ticket.ticketcustomfieldvalue_set.all %}
+<tr>
+    <th>{{ customfield.field.label }}</th>
+    <td>{% ifequal customfield.field.data_type "url" %}<a href='{{ customfield.value }}'>{{ customfield.value }}</a>{% else %}{{ customfield.value }}{% endifequal %}</td>
+</tr>
+{% endfor %}
+
+<tr>
+    <th colspan='2'>{% trans "Description" %}</th>
+</tr>
+<tr>
+    <td id="ticket-description" colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
+</tr>
+
+{% if ticket.resolution %}
+<tr>
+    <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{{ STATIC_URL }}helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
+</tr>
+<tr>
+    <td colspan='2'>{{ ticket.resolution|force_escape|urlizetrunc:50|linebreaksbr }}</td>
+</tr>
+{% endif %}
+<tr>
+    <th>{% trans "Submitted On" %}</th>
+    <td>{{ ticket.created|date:"r" }} ({{ ticket.created }})</td>
+</tr>
+
+<tr>
+    <th>{% trans "Assigned To" %}</th>
+    <td>{{ ticket.get_assigned_to }}
+        {% ifequal ticket.get_assigned_to _('Unassigned') %} <strong><a href='?take'><span class='button button_take'>{% trans "Take" %}</span></a></strong>
+        {% endifequal %}
+    </td>
+</tr>
+
+<tr>
+    <th>{% trans "Submitter E-Mail" %}</th>
+    <td>{{ ticket.submitter_email }}{% if user.is_superuser %} <strong><a href='{% url 'helpdesk_email_ignore_add' %}?email={{ ticket.submitter_email }}'>{% trans "Ignore" %}</a></strong>{% endif %}</td>
+</tr>
+
+<tr>
+    <th>{% trans "Priority" %}</th>
+    <td>{{ ticket.get_priority_display }}</td>
+</tr>
+
+<tr>
+    <th>{% trans "Type" %}</th>
+    <td>{{ ticket.get_type_display }}</td>
+</tr>
+
+<tr>
+    <th>{% trans "Copies To" %}</th>
+    <td>{{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk_ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong>{% trans "Manage" %}</strong></a>{% if SHOW_SUBSCRIBE %}, <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'>{% trans "Subscribe" %}</a></strong>{% endif %}</td>
+</tr>
+
+<tr>
+    <th>{% trans "Dependencies" %}</th>
+    <td>
+        {% for dep in ticket.ticketdependency.all %}
+        {% if forloop.first %}
+        <p>
+            {% trans "This ticket cannot be resolved until the following ticket(s) it depends on are resolved" %}
+        </p>
+            <ul>
+                {% endif %}
+            <li>
+                <a href='{{ dep.depends_on.get_absolute_url }}'>{{ dep.depends_on.ticket }} {{ dep.depends_on.title }}</a>
+                ({{ dep.depends_on.get_status_display }})
+                <a href='{% url 'helpdesk_ticket_dependency_del' ticket.id dep.id %}'>{% trans "Remove Dependency" %}</a>
+            </li>
+            {% if forloop.last %}
+            </ul>
+            {% endif %}
+        {% empty %}
+        <p>{% trans "This ticket has no dependencies. If you want to make this ticket dependent on another ticket, search and add a dependent ticket. " %} </p>
+
+        <p>
+        <form class="navbar-form navbar-left" id='searchform' method='get' action='{% url 'helpdesk_ticket_dependency_add' ticket.id %}'>
+            <div class="input-group">
+                <input type='text' name='q' size='15' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "If you want to make this ticket dependent on another ticket, search and add a depend ticket." %}'/>
+                <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' />
+                <input type='hidden' name='search_type' value='header' />
+                {% csrf_token %}
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span> Go </button>
+                </span>
+            </div>
+        </form>
+        </p>
+        {% endfor %}
+    </td>
+</tr>
+
+<tr>
+    <th>{% trans "Votes" %}</th>
+    <td>{{ ticket.votes }} &nbsp; <a href="{% url 'vote_up' ticket.id %}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>&nbsp; <a href="{% url 'vote_down' ticket.id %}""><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
+        <br>{% if messages %}{% for message in messages %}{{ message }}{% endfor %}{% endif %}
+        <br>{{voted_ticket.vote_date}}
+    </td>
+</tr>
+</tbody>
+</table>
+<!-- end of table -->
 {% if ticket.followup_set.all %}
 <h3>{% trans "Follow-Ups" %}</h3>
 {% load ticket_to_link %}
@@ -81,10 +278,6 @@
 {% endif %}
 
 <div id='add-followup' class="well">
-<h3>{% trans "Respond to this ticket" %}</h3>
-    <!--
-    <form method='post' action='update/' enctype='multipart/form-data' class="form-horizontal">
-    -->
 <form method='post' action='post_comment/' enctype='multipart/form-data' class="form-horizontal">
 
 <fieldset>
@@ -193,6 +386,267 @@
     {% csrf_token %}
 </form>
 
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-3 ">
+       <!-- start search -->
+          <div class="search" >
+            <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
+                <input type="text" name='q' class="form-control" placeholder="Search" id='search_query'>
+                <span class="input-group-btn">
+                  <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                </span>
+              </form>
+          </div>
+          <!-- end search -->
+
+          <!-- start filters -->
+          <div class="panel panel-info ">
+              <div class="panel-heading">
+                <strong>Issues <span class="badge">{{ num_tickets }}</span></strong>
+                <button class="btn btn-sm btn-warning read_more" id="add_ticket" type="submit" data-toggle="modal" data-target="#ticketModal" ><b><span class="glyphicon glyphicon-plus"></span></b><strong></strong> New Issue</strong>  </button>
+              </div>
+              <!-- Create ticket modal -->
+              <div class="modal fade " id="ticketModal" role="dialog">
+                <div class="modal-dialog task_form modal-lg">
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h3 class="modal-title font9">Submit a Ticket</h3>
+                      <p class="font9">Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
+                    </div>
+                    <div class="modal-body">
+                      <div class="alert alert-success" role="alert">
+                        <p>'We recommend that you search for your issue or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!'</p>
+                      </div>
+                      <form class="form-horizontal" method='post' action='./' enctype='multipart/form-data'  name="most">
+
+                            {% load crispy_forms_tags %}
+                            {% crispy form form.helper %}
+                            {% comment %}{% for field in form %}
+                                {% if field.is_hidden %}
+                                    {{ field }}
+                                {% else %}
+                                    <dt><label for='id_{{ field.name }}'>{% trans field.label %}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
+                                    <dd>{{ field }}</dd>
+                                    {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
+                                    {% if field.help_text %}<dd class='form_help_text'>{% trans field.help_text %}</dd>{% endif %}
+
+                                {% endif %}
+                            {% endfor %}
+                            {% endcomment %}
+
+                    <div class = "col-md-offset-2 col-md-10">
+
+                        <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'><b>{% trans "Attach More File(s) &raquo;" %}</b></a></p>
+
+                        <div id='FileUpload' style='display: none;'>
+
+                            <dl>
+
+                                <dt><label for='id_file'> <b>{% trans "Attach a File" %}</b></label></dt>
+                                <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'><b>{% trans "Add Another File" %}</b></a>)</span></dd>
+                            </dl>
+
+                        </div>
+                            <div class='buttons form-group'>
+                                <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
+                        </div>
+                    </div>
+                    {{ form.media }}
+
+                    {% csrf_token %}</form>
+
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="sort_panels">
+                  Created By Me <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong>
+                </div>
+                <div class="sort_panels">
+                   Assigned to Me <strong> <span class="badge read_more"> {{ assigned_to_me }} </span></strong>
+                </div>
+                 <div class="sort_panels">
+                  Resolved & Closed by Me <strong> <span class="badge read_more"> {{ tickets_closed_resolved }} </span></strong>
+                 </div>
+              </div>
+          </div>
+
+        <div class="panel panel-info">
+            <div class="panel-heading"> <strong>Sort Tickets</strong></div>
+
+                <form method='get' action='./'>
+                  <div class="panel-body ">
+                    <select   class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
+                      <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
+                          {% trans "Created" %}
+                      </option>
+                      <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %}>
+                          {% trans "Title" %}
+                      </option>
+                      <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %}>
+                          {% trans "Queue" %}
+                      </option>
+                      <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
+                          {% trans "Status" %}
+                      </option>
+                      <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>
+                          {% trans "Priority" %}
+                      </option>
+                      <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %}>
+                          {% trans "Owner" %}
+                      </option>
+                      <option value='assigned_to'{% ifequal query_params.sorting "type"%} selected='selected'{% endifequal %}>
+                          {% trans "Type" %}
+                      </option>
+                      <option value='votes'{% ifequal query_params.sorting "votes"%} selected='selected'{% endifequal %}>
+                          {% trans "Most Vote Up" %}
+                      </option>
+                    </select>
+                      <div class="col-md-12 row reverse_sort">
+
+                      <label for='id_sortreverse'>{% trans "Reverse: " %}</label>
+                      <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
+                      <p class='filterHelp'>{% trans "Ordering applied to tickets" %}</p>
+                      </div>
+                       <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' />
+                    </div>
+                </form>
+        </div>
+
+
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <strong>{% trans "Filter Tickets" %}</strong>
+            </div>
+
+        <div class="panel-body" id="ko">
+            <div class="row" id="ko1">
+                <div class=" col-md-12">
+                    <strong>Click</strong> on <strong>"+"</strong> to add filters to query on and  <strong>"-"</strong>  to remove a filter.
+                </div>
+            </div>
+                <form class="filter_form">
+                    <select name='select' id='filterBuilderSelect' class="btn btn-default col-md-8 dropdown-toggle">
+                        <option value='Owner'>{% trans "Assigned to me" %}</option>
+                        <option value='Created'>{% trans "Created by Me" %}</option>
+                        <option value='Queue'>{% trans "Queue" %}</option>
+                        <option value='Status'>{% trans "Status" %}</option>
+                        <option value='Keywords'>{% trans "Keywords" %}</option>
+                        <option value='Dates'>{% trans "Date Range" %}</option>
+                        <option value='Type'>{% trans "Type" %}</option>
+                    </select>
+                    <input class="btn sort_add" type='button' id='filterBuilderButton' value='+' />
+                  {% csrf_token %}
+                </form>
+                <form method='get' action='./'>
+                <div class='thumbnail sorting_form filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %}' id='filterBoxOwner'>
+                    <div class="keywords">
+                        <label  for='id_owners'>{% trans "Owner(s): " %}</label>
+                        <select id='id_owners' name='assigned_to' multiple='selected' rows="4" class="owners_select">
+                            {% for u in user_choices %}
+                            <option value='{{ u.id }}'{% if u.id|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
+                                {% trans "Assigned to Me" %}
+                            </option>
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+                    <p class='filterHelp'>{% trans "Ctrl-Click to select multiple options" %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
+                </div>
+                <div class='thumbnail sorting_form filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxCreated'>
+                    <div class="keywords">
+                        <label for='id_owners'>{% trans "Created by Me: " %}</label>
+                        <select id='id_owners1' name='submitter_email' multiple='selected' rows="4" class="owners_select">
+                            {% for u in user_choices %}
+                            <option value='{{ u.email }}'{% if u.email|in_list:query_params.filtering.submitter_email__in %} selected='selected'{% endif %}>
+                                {%trans "Created By Me"%}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
+                </div>
+
+                <div class='thumbnail sorting_form filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxQueue'>
+                    <div class="keywords">
+                        <label for='id_queues'>{% trans "Queue(s): " %}</label>
+                        <select id='id_queues' name='queue' multiple='selected' rows="4" class="owners_select">
+                            {% for q in queue_choices %}
+                            <option value='{{ q.id }}'{% if q.id|in_list:query_params.filtering.queue__id__in %} selected='selected'{% endif %}>
+                                {{ q.title }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
+                </div>
+
+                <div class='thumbnail sorting_form filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
+                  <div class="keywords">
+                      <label for='id_statuses'>{% trans "Status(es): " %}</label>
+                      <select id='id_statuses' name='status' multiple='selected' rows="4" class="status_select" >{% for s in status_choices %}
+                          <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}
+                      </select>
+                  </div>
+                  <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                  <input type='button' class='filterBuilderRemove' value='-' />
+                </div>
+
+                <div class='thumbnail sorting_form filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}' id='filterBoxDates'>
+                    <label for='id_date_from'>{% trans "Date (From): " %}</label>
+                    <input class="date_input" type='text' name='date_from' value='{{ query_params.filtering.created__gte }}' id='id_date_from' />
+                    <div class="date_to">
+
+                      <label for='id_date_to'>{% trans "Date (To): " %}</label>
+                      <input  class="date_input" type='text' name='date_to' value='{{ query_params.filtering.created__lte }}' id='id_date_to' />
+                    </div>
+                    <p class='filterHelp'>{% trans "Use YYYY-MM-DD date format, eg 2011-05-29" %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
+                </div>
+
+                <div class='thumbnail  sorting_form filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
+                    <div class="keywords">
+                        <label for='id_query'>{% trans "Keywords: " %}</label>
+                        <input class="status_select" type='text' name='q' value='{{ query }}' id='id_query' />
+                    </div>
+                    <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
+                </div>
+
+                <div class='thumbnail  sorting_form filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxType'>
+                    <div class="keywords">
+                        <label for='id_types'>{% trans "Types: " %}</label>
+                        <select id='id_types' name='types' multiple='selected' rows="4" class="types_select">{% for s in type_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.type__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
+                    </div>
+                    <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
+                </div>
+
+                <hr style='clear: both;' />
+                  <input class="btn btn-primary" type='submit' value='{% trans "Apply Filter" %}' />
+                  {% if from_saved_query and saved_query.user == user %}
+                  <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %} <a href='{% url 'helpdesk_delete_query' saved_query.id %}'>{% trans "Delete Saved Query" %}</a></p>
+                  {% endif %}
+                  {% if from_saved_query %}
+                  <p>{% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}</p>
+                  {% endif %}
+                  {% csrf_token %}
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
 </div>
 
 <script>

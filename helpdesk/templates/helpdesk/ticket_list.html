@@ -19,8 +19,8 @@
     <div class="col-md-9 col-sm-9 ticket_right">
               {% for ticket in tickets.object_list %}
               <div class="panel panel-info">
-                <div class="panel-heading"> 
-                      {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong>
+                <div class="panel-heading"> <a href='{{ ticket.get_absolute_url }}'>
+                      {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong></a>
                       {% if ticket.progress %}
                       <div class="read_more">
                         <strong> <span class="badge">{{ticket.progress}} </span></strong>
@@ -166,10 +166,9 @@
                                 </div>
                                 <div id='add-followup' class="well">
                                 <h4><strong>{% trans "Respond to this ticket" %}</strong></h4>
-                                    <!--
-                                    <form method='post' action='update/' enctype='multipart/form-data' class="form-horizontal">
-                                    -->
-                                <form method='post' action='/helpdesk/tickets/{{ticket.id}}/post_comment/' enctype='multipart/form-data' class="form-horizontal">
+
+                                <form method='post' action='{% url "post_comment" ticket.id %}' enctype='multipart/form-data' class="form-horizontal">
+
 
                                 <fieldset>
                                     <dl>
