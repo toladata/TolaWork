@@ -381,6 +381,18 @@ def vote_down(request, id):
         messages.add_message(request, messages.SUCCESS, 'Vote counted. You just voted down for this ticket. Now, let us hope more folks will vote too!')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'),RequestContext(request))
 
+def email(ticket,comment, status_text):
+
+    if ticket.assigned_to == "":
+        assignee = ticket.submitter_email
+    else:
+        assignee = ticket.assigned_to.email
+
+    txt_message = render_to_string('email/notify.txt', {'ticket': ticket, 'status': status_text, 'comment': comment, 'assignee': assignee})
+    html_message = render_to_string('email/notify.html', {'ticket': ticket, 'status': status_text, 'comment': comment, 'assignee': assignee})
+
+    send_mail('[TolaWork] ' + ticket.title, txt_message,'TolaData <toladatawork@gmail.com>',[ticket.submitter_email, assignee],fail_silently=False, html_message=html_message)
+
 def post_comment(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
@@ -469,13 +481,7 @@ def post_comment(request, ticket_id):
                     print response
 
                 #email notification for 'Closed' issue
-                messages_sent_to = []
-                email(ticket,comment,status_text,ticket.submitter_email)
-                messages_sent_to.append(ticket.submitter_email)
-
-                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
-                    email(ticket,comment,status_text,ticket.assigned_to.email)
-                    messages_sent_to.append(ticket.assigned_to.email)
+                email(ticket, comment, status_text)
 
             elif int(status) == 5:
                 status_text = 'DUPLICATE'
@@ -485,7 +491,9 @@ def post_comment(request, ticket_id):
                 email(ticket,comment,status_text,ticket.submitter_email)
                 messages_sent_to.append(ticket.submitter_email)
 
-                if ticket.assigned_to and ticket.assigned_to.email and ticket.assigned_to.email not in messages_sent_to:
+                if ticket.assigned_to is None:
+                    print "Empty"
+                else:
                     email(ticket,comment,status_text,ticket.assigned_to.email)
                     messages_sent_to.append(ticket.assigned_to.email)
 
@@ -540,7 +548,7 @@ def post_comment(request, ticket_id):
             #Attach a File
             file_attachment(request, new_followup)
 
-    return ticket_list(request)
+    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
 def taskview(request):
 
@@ -738,16 +746,6 @@ def view_ticket(request, ticket_id):
     """
     #ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
 
-
-    if ticket:
-        if request.user.is_active:
-            if ticket.assigned_to:
-                if ticket.status ==1:
-                    progress= "Ticket In Progress"
-                elif ticket.status == 2:
-                    progress = "Ticket reopened and is in progress"
-                else:
-                    progress = " "
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {

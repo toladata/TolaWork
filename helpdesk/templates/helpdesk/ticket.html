@@ -8,6 +8,196 @@
 
 {% block helpdesk_body %}
 
+<!-- add ticket table -->
+<table class="table table-hover table-bordered table-striped">
+<thead>
+    <tr class='row_tablehead'>
+        <td colspan='2'>
+            <h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
+            <span class='ticket_toolbar'>
+                {% if request.user.is_staff %}
+                <div>
+                <div class="panel-group" id="dynamicForm">
+                <div class="panel home-panel">
+                  <div class="panel-heading home-paneltitle">
+                    <h4 class="panel-title">
+                      <a data-toggle="collapse" data-parent="#dynamicForm" href="#dynamicEdit">
+                      <font class="font5"><b><span class="glyphicon glyphicon-cog"></span></b>  Edit Ticket </font></a>
+                    </h4>
+                  </div>
+                  <div id="dynamicEdit" class="panel-collapse collapse">
+                    <div class="panel-body">
+                      <div class="panel-body">
+                        <p>{% blocktrans %}<strong>No new details should be entered when editing a ticket. </strong><br/>This form should only be used to fix incorrect details on a ticket or clean up the submission.{% endblocktrans %}</p>
+
+                        <!-- TW#90 - add a dynamic edit form -->
+                          <form method='post' action='ticket_edit/' enctype='multipart/form-data' class="form-horizontal">
+                            <table class="table table-hover table-striped">
+                                <tr>
+                                <th>{% trans "Title:" %}</th>
+                                <td colspan="7"><input type='text' name='title' id='id_title' size='95' value='{{ ticket.title|escape }}' /></td>
+                                </tr>
+                                <tr>
+                                    <th>{% trans "Queue:" %}</th>
+                                    <td><select id='id_queue' name='queue'>{% for q in ticket_queue %}<option value='{{ q.id }}'{% ifequal q.id ticket.queue_id %} selected='selected'{% endifequal %}>{{ q }}</option>{% endfor %}</select></td>
+                                    <th>{% trans "Type of Ticket:" %}</th>
+                                    <td><select id='id_type' name='type'>{% for tt in ticket_type %}<option value='{{ tt.0 }}'{% ifequal tt.0 ticket.type %} selected='selected'{% endifequal %}>{{ tt.1 }}</option>{% endfor %}</select></td>
+
+                                    <th>{% trans "Case Owner:" %}</th>
+                                    <td><select id='id_owner' name='owner'><option value=''>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select></td>
+                                    <th>{% trans "Priority:" %}</th>
+                                    <td><select id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select></td>
+
+                                </tr>
+                                <tr>
+                                <th>{% trans "Error Message:" %}</th>
+                                <td colspan="3"><textarea name="error_msg" rows="4" cols="40"> {{ ticket.error_msg|escape }} </textarea></td>
+                                    <th>{% trans "Description of Issue:" %}</th>
+                                    <td colspan="3"><textarea name="description" rows="4" cols="40"> {{ ticket.description|escape }} </textarea></td>
+                                </tr>
+
+
+                                <tr>
+                                    <th>{% trans "Submitter Email:" %}</th>
+                                    <td colspan="3"><input type='text' name='email' id='id_email' size='30' value='{{ ticket.submitter_email|escape }}' /></td>
+                                    <th>{% trans "Due Date:" %}</th>
+                                    <td colspan="3">{{ form.due_date }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="8"><input class="btn btn-primary" type='submit' value='{% trans "Save Changes" %}' /></td>
+
+                                </tr>
+                            </table>
+                              {% csrf_token %}
+                          </form>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+                <a href='{% url "helpdesk_delete" ticket.id %}' class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+
+                {% endif %}
+                {% if ticket.on_hold %}
+                    | <a href='{% url "helpdesk_unhold" ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>
+                {% else %}
+                    |<a href='{% url "helpdesk_hold" ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>
+                {% endif %}
+            </span>
+
+
+        </td>
+    </tr>
+    <tr>
+        <th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }} {% endblocktrans %}</th>
+    </tr>
+</thead>
+<tbody>
+{% for customfield in ticket.ticketcustomfieldvalue_set.all %}
+<tr>
+    <th>{{ customfield.field.label }}</th>
+    <td>{% ifequal customfield.field.data_type "url" %}<a href='{{ customfield.value }}'>{{ customfield.value }}</a>{% else %}{{ customfield.value }}{% endifequal %}</td>
+</tr>
+{% endfor %}
+
+<tr>
+    <th colspan='2'>{% trans "Description" %}</th>
+</tr>
+<tr>
+    <td id="ticket-description" colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
+</tr>
+
+{% if ticket.resolution %}
+<tr>
+    <th colspan='2'>{% trans "Resolution" %}{% ifequal ticket.get_status_display "Resolved" %} <a href='?close'><img src='{{ STATIC_URL }}helpdesk/buttons/accept.png' alt='{% trans "Accept" %}' title='{% trans "Accept and Close" %}' width='60' height='15' /></a>{% endifequal %}</th>
+</tr>
+<tr>
+    <td colspan='2'>{{ ticket.resolution|force_escape|urlizetrunc:50|linebreaksbr }}</td>
+</tr>
+{% endif %}
+<tr>
+    <th>{% trans "Submitted On" %}</th>
+    <td>{{ ticket.created|date:"r" }} ({{ ticket.created }})</td>
+</tr>
+
+<tr>
+    <th>{% trans "Assigned To" %}</th>
+    <td>{{ ticket.get_assigned_to }}
+        {% ifequal ticket.get_assigned_to _('Unassigned') %} <strong><a href='?take'><span class='button button_take'>{% trans "Take" %}</span></a></strong>
+        {% endifequal %}
+    </td>
+</tr>
+
+<tr>
+    <th>{% trans "Submitter E-Mail" %}</th>
+    <td>{{ ticket.submitter_email }}{% if user.is_superuser %} <strong><a href='{% url 'helpdesk_email_ignore_add' %}?email={{ ticket.submitter_email }}'>{% trans "Ignore" %}</a></strong>{% endif %}</td>
+</tr>
+
+<tr>
+    <th>{% trans "Priority" %}</th>
+    <td>{{ ticket.get_priority_display }}</td>
+</tr>
+
+<tr>
+    <th>{% trans "Type" %}</th>
+    <td>{{ ticket.get_type_display }}</td>
+</tr>
+
+<tr>
+    <th>{% trans "Copies To" %}</th>
+    <td>{{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk_ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong>{% trans "Manage" %}</strong></a>{% if SHOW_SUBSCRIBE %}, <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'>{% trans "Subscribe" %}</a></strong>{% endif %}</td>
+</tr>
+
+<tr>
+    <th>{% trans "Dependencies" %}</th>
+    <td>
+        {% for dep in ticket.ticketdependency.all %}
+        {% if forloop.first %}
+        <p>
+            {% trans "This ticket cannot be resolved until the following ticket(s) it depends on are resolved" %}
+        </p>
+            <ul>
+                {% endif %}
+            <li>
+                <a href='{{ dep.depends_on.get_absolute_url }}'>{{ dep.depends_on.ticket }} {{ dep.depends_on.title }}</a>
+                ({{ dep.depends_on.get_status_display }})
+                <a href='{% url 'helpdesk_ticket_dependency_del' ticket.id dep.id %}'>{% trans "Remove Dependency" %}</a>
+            </li>
+            {% if forloop.last %}
+            </ul>
+            {% endif %}
+        {% empty %}
+        <p>{% trans "This ticket has no dependencies. If you want to make this ticket dependent on another ticket, search and add a dependent ticket. " %} </p>
+
+        <p>
+        <form class="navbar-form navbar-left" id='searchform' method='get' action='{% url 'helpdesk_ticket_dependency_add' ticket.id %}'>
+            <div class="input-group">
+                <input type='text' name='q' size='15' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "If you want to make this ticket dependent on another ticket, search and add a depend ticket." %}'/>
+                <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' />
+                <input type='hidden' name='search_type' value='header' />
+                {% csrf_token %}
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span> Go </button>
+                </span>
+            </div>
+        </form>
+        </p>
+        {% endfor %}
+    </td>
+</tr>
+
+<tr>
+    <th>{% trans "Votes" %}</th>
+    <td>{{ ticket.votes }} &nbsp; <a href="{% url 'vote_up' ticket.id %}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>&nbsp; <a href="{% url 'vote_down' ticket.id %}""><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
+        <br>{% if messages %}{% for message in messages %}{{ message }}{% endfor %}{% endif %}
+        <br>{{voted_ticket.vote_date}}
+    </td>
+</tr>
+</tbody>
+</table>
+<!-- end of table -->
 {% if ticket.followup_set.all %}
 <h3>{% trans "Follow-Ups" %}</h3>
 {% load ticket_to_link %}
@@ -81,10 +271,6 @@
 {% endif %}
 
 <div id='add-followup' class="well">
-<h3>{% trans "Respond to this ticket" %}</h3>
-    <!--
-    <form method='post' action='update/' enctype='multipart/form-data' class="form-horizontal">
-    -->
 <form method='post' action='post_comment/' enctype='multipart/form-data' class="form-horizontal">
 
 <fieldset>
