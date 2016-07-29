@@ -35,7 +35,11 @@ def user (request):
     email = request.GET.get('email')
     username = request.GET.get('username')
     user = User.objects.filter(email=email).values('username').all()[:1]
-    user_id = User.objects.get(username=user).id
+
+    try:
+        user_id = User.objects.get(username=user).id
+    except Exception, e:
+        user_id = 0
 
     #tickets
     if user_id:
