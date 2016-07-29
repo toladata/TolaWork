@@ -18,6 +18,7 @@ from project.models import LoggedUser
 from helpdesk.forms import TicketForm, PublicTicketForm
 from datetime import datetime as timezone
 from helpdesk.views.staff import file_attachment
+from helpdesk.views.staff import data_query_pagination
 from helpdesk.slack import post_slack,post_tola_slack
 
 
@@ -31,45 +32,36 @@ def splash(request):
 
 @login_required
 def user (request):
-    #tickets
     email = request.GET.get('email')
     username = request.GET.get('username')
-    all_tickets = Ticket.objects.filter(submitter_email=email).values('status').annotate(total=Count('status')).order_by('total')
+    user = User.objects.filter(email=email).values('username').all()[:1]
+    user_id = User.objects.get(username=user).id
+
+    #tickets
     tickets = get_tickets_by_user(email)
+    all_tickets = (tickets).values('status').annotate(total=Count('status')).order_by('total')
     total_tickets = len(tickets)
 
     #created by logged_in user
-    created = Ticket.objects.select_related('queue').filter(
-               submitter_email=email,
-            ).exclude(
-               status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-           )
-
-    by_user = (created).order_by('-created')[:5]
-
-    created_by_user = len(created)
+    tickets_created = (tickets).select_related('queue').exclude(status__in=([3,4,5])).order_by('-created')[:5]
+    total_tickets_created = len(tickets_created)
 
     #assigned to the user
-    user = User.objects.filter(email=email).values('username').all()[:1]
-    user_id = User.objects.get(username=user).id
-    print user_id
-    assigned = Ticket.objects.select_related('queue').filter(
+    tickets_assigned = Ticket.objects.select_related('queue').filter(
             assigned_to=user_id,
          ).exclude(
-            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-        )
-    to_user=(assigned).order_by('-created')[:5]
+            status__in=([3,4,5]),
+        ).order_by('-created')[:5]
 
-    assigned_to_user=len(assigned)
+    total_tickets_assigned=len(tickets_assigned)
 
     #closed and resolved by user
-    closedresolved = Ticket.objects.select_related('queue').filter(
+    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
         assigned_to=user_id,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-    )
-    closed = (closedresolved).order_by('-created')[:5]
+            status__in=[3,4],
+        ).order_by('-created')[:5]
 
-    closed_resolved = len(closedresolved)
+    total_tickets_closed_resolved = len(tickets_closed_resolved)
 
     #tasks
     tasks = get_tasks_by_user(email)
@@ -92,10 +84,11 @@ def user (request):
     logged_users = logged_in_users(request)
 
     return render(request, "user.html", {'all_tickets': all_tickets,'total_tickets': total_tickets, 'all_tasks': all_tasks, \
-                                        'logged_users': logged_users, 'username': username,'by_user': by_user, 'created_by_user':created_by_user, \
-                                        'to_user': to_user, 'assigned_to_user': assigned_to_user, 'closed_resolved': closed_resolved, 'closed': closed, \
-                                        'tasks_created': tasks_created, 'tasks_assigned': tasks_assigned, 'total_tasks': total_tasks, 'total_tasks_created': total_tasks_created, \
-                                        'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed, 'total_tasks_completed': total_tasks_completed})
+                                        'logged_users': logged_users, 'username': username,'tickets_created': tickets_created, 'total_tickets_created':total_tickets_created, \
+                                        'tickets_assigned': tickets_assigned, 'total_tickets_assigned': total_tickets_assigned, 'tickets_closed_resolved': tickets_closed_resolved, \
+                                        'total_tickets_closed_resolved': total_tickets_closed_resolved,'tasks_created': tasks_created, 'tasks_assigned': tasks_assigned, \
+                                        'total_tasks': total_tasks, 'total_tasks_created': total_tasks_created,'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed,\
+                                         'total_tasks_completed': total_tasks_completed})
 
 def home(request):
 
@@ -423,7 +416,7 @@ def logged_in_users(request):
 #get tickets of a logged in user
 def  get_tickets_by_user(email):
 
-    tickets = Ticket.objects.filter(submitter_email= email).order_by('-created')[:6]
+    tickets = Ticket.objects.filter(submitter_email= email)
     
     return tickets
 
@@ -469,28 +462,5 @@ def update_issue_on_github(request):
             update_issue(repo,ticket)
     return HttpResponseRedirect('/home')
 
-# paginator function
-def data_query_pagination(request, data_items, query_params):
-    try:
-        data_item_qs = apply_query(data_items, query_params)
-    except ValidationError:
-        # invalid parameters in query, return default query
-        query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
-            'sorting': 'created',
-        }
-        data_item_qs = apply_query(data_items, query_params)
 
-    data_item_paginator = paginator.Paginator(data_item_qs, 5)
-    try:
-        page = int(request.GET.get('page', '1'))
-    except ValueError:
-        page = 1
-
-    try:
-        data_items = data_item_paginator.page(page)
-    except (paginator.EmptyPage, paginator.InvalidPage):
-        data_items = data_item_paginator.page(data_item_paginator.num_pages)
-
-    return data_items
 
