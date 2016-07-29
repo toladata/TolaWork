@@ -1173,8 +1173,8 @@ def ticket_list(request):
 
 
     tickets = Ticket.objects.select_related()
-
     num_tickets = tickets.count()
+
     queue_choices = Queue.objects.all()
 
 # Tickets assigned to current user

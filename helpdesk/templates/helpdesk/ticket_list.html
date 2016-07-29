@@ -43,7 +43,9 @@
 
                     <div class="sort_panels">
                         <div class= "preview_links">
-                            <a href="#moredetails{{ticket.id}}" class="btn btn-info" data-toggle="collapse">&nbsp;View More Details</a>
+                            <a href="#moredetails{{ticket.id}}" class="btn btn-info" data-toggle="collapse">&nbsp;View More Details</a>&nbsp;&nbsp;
+                            <strong>Developer(s) Progress:</strong>&nbsp;
+                            {% if ticket.git_label == 0 %}In {% blocktrans with ticket.queue as queue %}&nbsp;{{ queue }}{% endblocktrans %}&nbsp;Backlog{% elif ticket.git_label == 1 %}Accepted and moved into the Ready Queue{% elif ticket.git_label == 2 %}Developers have started working on the Ticket{% elif ticket.git_label == 4 %}Done{% endif%}
                         </div>
                         <div id="moredetails{{ticket.id}}" class="collapse">
 
