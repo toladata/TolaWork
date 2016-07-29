@@ -9,16 +9,113 @@ from django.contrib.auth.views import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from helpdesk.github import latest_release
-from helpdesk.models import Ticket
+from helpdesk.models import Ticket, Queue, FollowUp
+from tasks.models import Task
 from django.conf import settings
-from django.db.models import Count
+from django.db.models import Count, Sum
 import os
+from project.models import LoggedUser
+from helpdesk.forms import TicketForm, PublicTicketForm
+from datetime import datetime as timezone
+from helpdesk.views.staff import file_attachment
+from helpdesk.views.staff import data_query_pagination
+from helpdesk.slack import post_slack,post_tola_slack
+
+
 
 def splash(request):
     if request.user.is_authenticated():
-        return render(request, "home.html")
+
+        return home(request)
         
     return render(request, "splash.html")
+
+@login_required
+def user (request):
+    email = request.GET.get('email')
+    username = request.GET.get('username')
+    user = User.objects.filter(email=email).values('username').all()[:1]
+
+    try:
+        user_id = User.objects.get(username=user).id
+    except Exception, e:
+        user_id = 0
+
+    all_tickets = {}
+    total_tickets = 0
+    all_tasks = {}
+    tickets_created = {}
+    total_tickets_created = 0
+    tickets_assigned = {}
+    total_tickets_assigned = 0
+    tickets_closed_resolved = {}
+    total_tickets_closed_resolved = 0
+    tasks_created = {}
+    tasks_assigned = {}
+    total_tasks = {}
+    total_tasks_created = 0
+    total_tasks_assigned = 0
+    tasks_completed = {}
+    total_tasks_completed = 0
+
+    #tickets
+    if user_id:
+        try:
+            tickets = get_tickets_by_user(email)
+            all_tickets = (tickets).values('status').annotate(total=Count('status')).order_by('total')
+            total_tickets = len(tickets)
+
+            #created by logged_in user
+            tickets_created = (tickets).select_related('queue').exclude(status__in=([3,4,5])).order_by('-created')[:5]
+            total_tickets_created = len(tickets_created)
+
+            #assigned to the user
+            tickets_assigned = Ticket.objects.select_related('queue').filter(
+                    assigned_to=user_id,
+                 ).exclude(
+                    status__in=([3,4,5]),
+                ).order_by('-created')[:5]
+
+            total_tickets_assigned=len(tickets_assigned)
+
+            #closed and resolved by user
+            tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
+                assigned_to=user_id,
+                    status__in=[3,4],
+                ).order_by('-created')[:5]
+
+            total_tickets_closed_resolved = len(tickets_closed_resolved)
+
+            #tasks
+            tasks = get_tasks_by_user(email)
+            all_tasks = (tasks).values('status').annotate(total=Count('status')).order_by('total')
+            total_tasks= len(tasks)
+
+            #tasks created by user
+            tasks_created = (tasks).exclude(status__in=([3,4])).order_by('created_date')[:5]
+            total_tasks_created = len(tasks_created)
+
+            #tasks assigned to the user
+            tasks_assigned = Task.objects.filter(assigned_to_id=user_id).exclude(status__in=([3,4])).order_by('created_date')[:5]
+            total_tasks_assigned = len(tasks_assigned)
+
+            #tasks completed by the user
+            tasks_completed = (tasks).filter(status__in='3').order_by('created_date')[:5]
+            total_tasks_completed = len (tasks_completed)
+
+        except Exception, e:
+            pass  
+
+
+
+    logged_users = logged_in_users(request)
+
+    return render(request, "user.html", {'all_tickets': all_tickets,'total_tickets': total_tickets, 'all_tasks': all_tasks, \
+                                        'logged_users': logged_users, 'username': username,'tickets_created': tickets_created, 'total_tickets_created':total_tickets_created, \
+                                        'tickets_assigned': tickets_assigned, 'total_tickets_assigned': total_tickets_assigned, 'tickets_closed_resolved': tickets_closed_resolved, \
+                                        'total_tickets_closed_resolved': total_tickets_closed_resolved,'tasks_created': tasks_created, 'tasks_assigned': tasks_assigned, \
+                                        'total_tasks': total_tasks, 'total_tasks_created': total_tasks_created,'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed,\
+                                         'total_tasks_completed': total_tasks_completed})
 
 def home(request):
 
@@ -50,11 +147,144 @@ def home(request):
 
     recent_tickets = Ticket.objects.all().exclude(status__in='4').order_by('-created')[:5]
     votes_tickets = Ticket.objects.all().exclude(status__in='4').filter(type=2).order_by('-votes')[:5]
+    recent_tasks = Task.objects.all().order_by('-created_date')[:5]
+    num_tickets = len(Ticket.objects.all())
+    num_tasks = len(Task.objects.all())
+
+    closed_resolved = 0
+    assigned_to_me = 0
+    created_by_me = 0
+    closed = []
+    tome = []
+    byme = []
+    tasks_created = []
+    total_tasks_created = 0
+    tasks_assigned = []
+    total_tasks_assigned = 0
+    tasks_completed = []
+    total_tasks_completed = 0
+    if (request.user.is_authenticated()):
+        #tickets
+        # open & reopened tickets
+        closedresolved = Ticket.objects.select_related('queue').filter(
+            assigned_to=request.user,
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        )
+        closed=(closedresolved).order_by('-created')[:5]
+        closed_resolved = len(closedresolved)
+
+        # Tickets assigned to current user
+        assigned_tome = Ticket.objects.select_related('queue').filter(
+            assigned_to=request.user,
+         ).exclude(
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        )
+        tome=(assigned_tome).order_by('-created')[:5]
+        assigned_to_me=len(assigned_tome)
+
+
+        # Tickets created by current user
+        created_byme = Ticket.objects.select_related('queue').filter(
+               submitter_email=request.user.email,
+            ).exclude(
+               status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+           )
+        byme=(created_byme).order_by('-created')[:5]
+
+        created_by_me = len(created_byme)
+
+        #Tasks
+        tasks = Task.objects.filter(submitter_email=request.user.email)
+        all_tasks = (tasks).values('status').annotate(total=Count('status')).order_by('total')
+
+        #tasks created by user
+        tasks_created = (tasks).exclude(status__in=([3,4])).order_by('created_date')[:5]
+        total_tasks_created = len(tasks_created)
+
+        #tasks assigned to the user
+        tasks_assigned = Task.objects.filter(assigned_to_id=request.user).exclude(status__in=([3,4])).order_by('created_date')[:5]
+        total_tasks_assigned = len(tasks_assigned)
+
+        #tasks completed by the user
+        tasks_completed = (tasks).filter(status__in='3').order_by('created_date')[:5]
+        total_tasks_completed = len (tasks_completed)
+
+#----Data From Tola Tools APIs----####
+    tolaActivityData = get_TolaActivity_data()
+
+    tolaTablesData = {}
+    if request.user.is_authenticated():
+
+        tolaTablesData = get_TolaTables_data(request)
+
+    logged_users = logged_in_users(request)
+
+    #create ticket modal
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+
+    form = PublicTicketForm(initial={})
+    form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
+    if request.method == 'POST':
+        if request.user.is_staff:
+
+            form = TicketForm(request.POST, request.FILES)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+        else:
+            form = PublicTicketForm(request.POST, request.FILES)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
+        if form.is_valid():
+
+            ticket = form.save(user=request.POST.get('assigned_to'))
+
+            #save tickettags
+            tags = request.POST.getlist('tags')
+            for tag in tags:
+                ticket.tags.add(tag)
+
+            #ticket.comment = ''
+            comment = ""
+            f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+            f.save()
+
+            #Attch a File
+            file_attachment(request, f)
+                   
+            #autopost new ticket to #tola-work slack channel in Tola
+            post_tola_slack(ticket.id)
+
+            messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
+
+            return HttpResponseRedirect('/')
+    else:
+        initial_data = {}
+        try:
+            if request.user.email:
+                initial_data['submitter_email'] = request.user.email
+            if 'queue' in request.GET:
+                initial_data['queue'] = request.GET['queue']
+
+            if request.user.is_staff:
+                form = TicketForm(initial=initial_data)
+                form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+                form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+            
+        except Exception, e:
+            form = PublicTicketForm(initial=initial_data)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
 
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
                                          'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
-                                         'recent_tickets': recent_tickets,'votes_tickets': votes_tickets})
+                                         'recent_tickets': recent_tickets,'votes_tickets': votes_tickets, 'num_tickets': num_tickets, 'recent_tasks': recent_tasks, \
+                                         'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'created_by_me':created_by_me,\
+                                         'closed':closed,'tome':tome,'byme':byme, 'tasks_created': tasks_created, 'tasks_assigned': tasks_assigned, \
+                                          'num_tasks': num_tasks, 'total_tasks_created': total_tasks_created, \
+                                        'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed, 'total_tasks_completed': total_tasks_completed, 
+                                        'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData, \
+                                         'logged_users':logged_users, 'form':form, 'helper':form.helper})
 
 
 def contact(request):
@@ -146,3 +376,118 @@ def permission_denied(request):
     Something unauthorized happened
     """
     return render(request, '401.html')
+
+###Tola Tools API Views
+import requests
+
+def get_TolaActivity_data():
+
+    url = 'http://127.0.0.1:8100/tolaactivitydata' #TolaActivity Url
+
+    try:
+        response = requests.get(url)
+
+        # Consider any status other than 2xx an error
+        if not response.status_code // 100 == 2:
+            return {}
+
+        json_obj = response.json()
+
+        return json_obj
+
+    except requests.exceptions.RequestException as e:
+        # A serious problem happened, like an SSLError or InvalidURL
+        return {}
+
+    except ValueError:
+
+        return {}
+
+def get_TolaTables_data(request):
+    import json
+
+    url = 'http://127.0.0.1:8200/api/tolatablesdata' #TolaActivity Url
+    email = request.user.email
+
+    payload = {'email': email}
+
+    #print email
+    try:
+        response = requests.get(url, params = payload)
+
+        # Consider any status other than 2xx an error
+        if not response.status_code // 100 == 2:
+            return {}
+
+        json_obj = response.json()
+
+        return json_obj
+
+    except requests.exceptions.RequestException as e:
+        # A serious problem happened, like an SSLError or InvalidURL
+        return {}
+
+    except ValueError:
+
+        return {}
+#return users logged into TolaWork 
+def logged_in_users(request):
+
+    logged_users = {}
+    username = request.user.username
+
+    logged_users = LoggedUser.objects.all().exclude(username=username).order_by('username')
+
+    return logged_users
+
+#get tickets of a logged in user
+def  get_tickets_by_user(email):
+
+    tickets = Ticket.objects.filter(submitter_email= email)
+    
+    return tickets
+
+#get tasks of a logged_in user
+def  get_tasks_by_user(email):
+    tasks = Task.objects.filter(submitter_email= email)
+
+    return tasks
+
+#Update tickets on github
+from django.conf import settings
+from helpdesk.github import  update_issue,get_issue
+
+@login_required
+def update_issue_on_github(request):
+
+    #Update tickets Status in Github
+    tickets = Ticket.objects.select_related('queue').exclude(
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        )
+
+    # check status in github
+    for ticket in tickets:
+
+        #if there is a github issue check it's status in github
+        if ticket.github_issue_number:
+            if str(ticket.queue) == "Tola Tables":
+                repo = settings.GITHUB_REPO_1
+            else:
+                repo = settings.GITHUB_REPO_2
+
+            # getstatus from github
+            github_status = get_issue(repo,ticket.github_issue_number)
+
+            #if status has been updated in github update here
+            if github_status:
+                if github_status['state'] == "open" and ticket.status != 1:
+                    Ticket.objects.filter(id=ticket.id).update(status=1)
+                elif github_status['state'] == "closed" and ticket.status != 3:
+                    Ticket.objects.filter(id=ticket.id).update(status=3)
+
+            #update issue in github with local changes and comments
+            update_issue(repo,ticket)
+    return HttpResponseRedirect('/home')
+
+
+

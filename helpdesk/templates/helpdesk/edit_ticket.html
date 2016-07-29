@@ -35,5 +35,13 @@
 
 {% csrf_token %}</form>
 </div>
+<script>
+    $(document).ready(function(){
+        $("#id_tags").select2({
+            tags: true,
+            allowClear: true,
+        });
+    });
+</script>
 
 {% endblock %}

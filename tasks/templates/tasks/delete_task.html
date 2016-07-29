@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% load i18n %}
+{% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
+{% block helpdesk_head %}
+<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css' xmlns="http://www.w3.org/1999/html"></style>
+{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css">
+
+{% block helpdesk_body %}
+<h2>{% trans "Delete Task" %}</h2>
+
+<p>{% blocktrans with task.task as task_task %}Are you sure you want to delete the task <strong>{{ task_task }}</strong>? All traces of the task, including task_followups, attachments, and updates will be irreversibly removed.{% endblocktrans %}</p>
+
+<p><a href='{% url 'view_task' task.id %}'>{% trans "No, Don't Delete It" %}</a></p>
+
+<form method='post' action='./'><input class="btn btn-primary" type='submit' value='{% trans "Yes - Delete It" %}' />{% csrf_token %}</form>
+{% endblock %}
+{% endblock %}
+
