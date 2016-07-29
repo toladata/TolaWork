@@ -544,23 +544,23 @@
           
             <div id="active_users">
               {% if user.is_authenticated %}
-                <p><span class="glyphicon glyphicon-user"></span>  {{ request.user.username }} (You) - [TW] <a href="{% url 'user' %}?email={{request.user.email}}&username={{request.user.username}}">&nbsp;<span class="glyphicon glyphicon-tasks"></span>&nbsp; View Tasks</a></p>
+                <p><span class="glyphicon glyphicon-user"></span>  {{ request.user.username }} (You) [TW]<a href="{% url 'user' %}?email={{request.user.email}}&username={{request.user.username}}">&nbsp;</span>&nbsp; View Tasks</a></p>
               {% endif %}
 
               {% if logged_users%}
                 {% for logged_user in logged_users%}
-                  <p><span class="glyphicon glyphicon-user"></span> {{logged_user.username}} - [TW] <a href="{% url 'user' %}?email={{logged_user.email}}&username={{logged_user.username}}">&nbsp;<span class="glyphicon glyphicon-tasks"></span>&nbsp; View Tasks</a> </p>
+                  <p><span class="glyphicon glyphicon-user"></span> {{logged_user.username}} TW] <a href="{% url 'user' %}?email={{logged_user.email}}&username={{logged_user.username}}">&nbsp;</span>&nbsp; View Tasks</a> </p>
                 {% endfor %}
               {% endif %}
               {%if tolaActivityData.activity_logged_users %}
                   {% for logged_user in tolaActivityData.activity_logged_users %}
-                     <p><span class="glyphicon glyphicon-user"></span> {{logged_user.username}} - [TA] &nbsp;<a href="{% url 'user' %}?email={{logged_user.email}}&username={{logged_user.username}}"><span class="glyphicon glyphicon-tasks"></span>&nbsp; View Tasks</a></p>
+                     <p><span class="glyphicon glyphicon-user"></span> {{logged_user.username}} [TA] &nbsp;<a href="{% url 'user' %}?email={{logged_user.email}}&username={{logged_user.username}}">&nbsp; View Tasks</a></p>
                   {% endfor %}
               {% endif %}
 
               {%if tolaTablesData.table_logged_users %}
                   {% for logged_user in tolaTablesData.table_logged_users %}
-                     <p><span class="glyphicon glyphicon-user"></span> {{logged_user.username}} - [TT] <a href="{% url 'user' %}?email={{logged_user.email}}&username={{logged_user.username}}">&nbsp;<span class="glyphicon glyphicon-tasks"></span>&nbsp; View Tasks</a></p>
+                     <p><span class="glyphicon glyphicon-user"></span> {{logged_user.username}} [TT] <a href="{% url 'user' %}?email={{logged_user.email}}&username={{logged_user.username}}">&nbsp;View Tasks</a></p>
                   {% endfor %}
               {% endif %}
             </div>

@@ -38,48 +38,70 @@ def user (request):
     user_id = User.objects.get(username=user).id
 
     #tickets
-    tickets = get_tickets_by_user(email)
-    all_tickets = (tickets).values('status').annotate(total=Count('status')).order_by('total')
-    total_tickets = len(tickets)
+    if user_id:
+        try:
+            tickets = get_tickets_by_user(email)
+            all_tickets = (tickets).values('status').annotate(total=Count('status')).order_by('total')
+            total_tickets = len(tickets)
 
-    #created by logged_in user
-    tickets_created = (tickets).select_related('queue').exclude(status__in=([3,4,5])).order_by('-created')[:5]
-    total_tickets_created = len(tickets_created)
+            #created by logged_in user
+            tickets_created = (tickets).select_related('queue').exclude(status__in=([3,4,5])).order_by('-created')[:5]
+            total_tickets_created = len(tickets_created)
 
-    #assigned to the user
-    tickets_assigned = Ticket.objects.select_related('queue').filter(
-            assigned_to=user_id,
-         ).exclude(
-            status__in=([3,4,5]),
-        ).order_by('-created')[:5]
+            #assigned to the user
+            tickets_assigned = Ticket.objects.select_related('queue').filter(
+                    assigned_to=user_id,
+                 ).exclude(
+                    status__in=([3,4,5]),
+                ).order_by('-created')[:5]
 
-    total_tickets_assigned=len(tickets_assigned)
+            total_tickets_assigned=len(tickets_assigned)
 
-    #closed and resolved by user
-    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
-        assigned_to=user_id,
-            status__in=[3,4],
-        ).order_by('-created')[:5]
+            #closed and resolved by user
+            tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
+                assigned_to=user_id,
+                    status__in=[3,4],
+                ).order_by('-created')[:5]
 
-    total_tickets_closed_resolved = len(tickets_closed_resolved)
+            total_tickets_closed_resolved = len(tickets_closed_resolved)
 
-    #tasks
-    tasks = get_tasks_by_user(email)
-    all_tasks = (tasks).values('status').annotate(total=Count('status')).order_by('total')
-    total_tasks= len(tasks)
+            #tasks
+            tasks = get_tasks_by_user(email)
+            all_tasks = (tasks).values('status').annotate(total=Count('status')).order_by('total')
+            total_tasks= len(tasks)
 
-    #tasks created by user
-    tasks_created = (tasks).exclude(status__in=([3,4])).order_by('created_date')[:5]
-    total_tasks_created = len(tasks_created)
+            #tasks created by user
+            tasks_created = (tasks).exclude(status__in=([3,4])).order_by('created_date')[:5]
+            total_tasks_created = len(tasks_created)
 
-    #tasks assigned to the user
-    tasks_assigned = Task.objects.filter(assigned_to_id=user_id).exclude(status__in=([3,4])).order_by('created_date')[:5]
-    total_tasks_assigned = len(tasks_assigned)
+            #tasks assigned to the user
+            tasks_assigned = Task.objects.filter(assigned_to_id=user_id).exclude(status__in=([3,4])).order_by('created_date')[:5]
+            total_tasks_assigned = len(tasks_assigned)
 
-    #tasks completed by the user
-    tasks_completed = (tasks).filter(status__in='3').order_by('created_date')[:5]
-    total_tasks_completed = len (tasks_completed)
+            #tasks completed by the user
+            tasks_completed = (tasks).filter(status__in='3').order_by('created_date')[:5]
+            total_tasks_completed = len (tasks_completed)
 
+        except Exception, e:
+            all_tickets = []
+            total_tickets = 0
+            all_tasks = []
+            tickets_created = []
+            total_tickets_created = 0
+            tickets_assigned = []
+            total_tickets_assigned = 0
+            tickets_closed_resolved = []
+            total_tickets_closed_resolved = 0
+            tasks_created = []
+            tasks_assigned = []
+            total_tasks = []
+            total_tasks_created = 0
+            total_tasks_assigned = 0
+            tasks_completed = []
+            total_tasks_completed = 0
+            
+            
+    
     #logged_users
     logged_users = logged_in_users(request)
 
