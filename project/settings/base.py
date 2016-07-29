@@ -221,6 +221,8 @@ THIRD_PARTY_APPS = (
     'requests_oauthlib',
     #'fluent_dashboard',
     'tinymce',
+    'easy_select2',
+
 
 )
 
@@ -228,6 +230,7 @@ THIRD_PARTY_APPS = (
 LOCAL_APPS = (
     'project',
     'helpdesk',
+    'tasks',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

@@ -4,7 +4,10 @@ except ImportError:
     from io import StringIO
 
 from crispy_forms.helper import FormHelper
+from django.utils.datastructures import MultiValueDict, MergeDict
 from django import forms
+from easy_select2 import Select2Multiple
+from easy_select2 import select2_modelform
 from crispy_forms.layout import *
 from crispy_forms.bootstrap import *
 from crispy_forms.layout import Layout, Submit, Reset
@@ -24,18 +27,26 @@ except ImportError:
     from datetime import datetime as timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context
-from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency
+from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency,Tag
+from helpdesk.email import email
+
+class M2MSelect(forms.SelectMultiple):
+    def value_from_datadict(self, data, files, name):
+        if isinstance(data, (MultiValueDict, MergeDict)):
+            return data.getlist(name)
+        return data.get(name, None)
 
 class CommentTicketForm(forms.ModelForm):
     class Meta:
-        #associate model to ModelForm
         model = Ticket
+
         #which fields do we need? not all fields in the model
-        fields = ['title','description']
+        fields = ['title','description', 'tags']
+
 class CommentFollowUpForm(forms.ModelForm):
     class Meta:
         model = FollowUp
-        fields = ['title','comment', 'new_status']
+        fields = ['title','comment','new_status']
 
 class EditTicketForm(forms.ModelForm):
     class Meta:
@@ -99,7 +110,6 @@ class EditFollowUpForm(forms.ModelForm):
         model = FollowUp
         exclude = ('date', 'user',)
 
-
 class TicketForm(forms.Form):
 
     queue = forms.ChoiceField(
@@ -130,7 +140,7 @@ class TicketForm(forms.Form):
         help_text=_('Was an error message displaced? Please copy and paste this error message here. '),
         )
     body = forms.CharField(
-        widget=forms.Textarea(attrs={'cols': 47, 'rows': 15}),
+        widget=forms.Textarea(attrs={'cols': 47, 'rows': 7}),
         label=_('Description of Issue'),
         required=True,
         )
@@ -165,6 +175,7 @@ class TicketForm(forms.Form):
         required=False,
         label=_('Due on'),
         )
+    tags = forms.ModelMultipleChoiceField(queryset=Tag.objects.all(),widget=M2MSelect, required=False,)
 
     def clean_due_date(self):
         data = self.cleaned_data['due_date']
@@ -173,11 +184,6 @@ class TicketForm(forms.Form):
         #    print "you changed!"
         return data
 
-    # attachment = forms.FileField(
-    #     required=False,
-    #     label=_('Attach File'),
-    #     help_text=_('You can attach a file such as a document or screenshot to this ticket.'),
-    #     )
 
     def __init__(self, *args, **kwargs):
         """
@@ -197,8 +203,8 @@ class TicketForm(forms.Form):
     helper = FormHelper()
     helper.form_method = 'post'
     helper.form_class = 'form-horizontal'
-    helper.label_class = 'col-sm-2'
-    helper.field_class = 'col-sm-6'
+    helper.label_class = 'col-sm-3'
+    helper.field_class = 'col-sm-8'
     helper.form_error_title = 'Form Errors'
     helper.error_text_inline = True
     helper.help_text_inline = True
@@ -254,6 +260,7 @@ class TicketForm(forms.Form):
 
         f.save()
 
+
         #files = []
         # if self.cleaned_data['attachment']:
         #     import mimetypes
@@ -276,53 +283,28 @@ class TicketForm(forms.Form):
             #     except NotImplementedError:
             #         pass
 
+
+
         context = safe_template_context(t)
         context['comment'] = f.comment
 
+        #send email notifications for new ticket
         messages_sent_to = []
 
         if t.submitter_email:
-            send_templated_mail(
-                'newticket_submitter',
-                context,
-                recipients=t.submitter_email,
-                sender=q.from_address,
-                fail_silently=True,
-
-                )
+            email(t,t.description,"NEW",t.submitter_email)
             messages_sent_to.append(t.submitter_email)
 
-        if t.assigned_to and t.assigned_to != user and t.assigned_to.usersettings.settings.get('email_on_ticket_assign', False) and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
-            send_templated_mail(
-                'assigned_owner',
-                context,
-                recipients=t.assigned_to.email,
-                sender=q.from_address,
-                fail_silently=True,
-
-                )
+        if t.assigned_to and t.assigned_to != user and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
+            email(t,t.description,"NEW",t.assigned_to.email)
             messages_sent_to.append(t.assigned_to.email)
 
         if q.new_ticket_cc and q.new_ticket_cc not in messages_sent_to:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=q.new_ticket_cc,
-                sender=q.from_address,
-                fail_silently=True,
-
-                )
+            email(t,t.description,"NEW",q.new_ticket_cc)
             messages_sent_to.append(q.new_ticket_cc)
 
         if q.updated_ticket_cc and q.updated_ticket_cc != q.new_ticket_cc and q.updated_ticket_cc not in messages_sent_to:
-            send_templated_mail(
-                'newticket_cc',
-                context,
-                recipients=q.updated_ticket_cc,
-                sender=q.from_address,
-                fail_silently=True,
-
-                )
+            email(t,t.description,"NEW",q.updated_ticket_cc)
 
         return t
 

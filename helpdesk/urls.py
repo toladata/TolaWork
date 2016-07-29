@@ -2,27 +2,27 @@
 from django.conf.urls import *
 from django.contrib.auth.decorators import login_required
 
-
 urlpatterns = patterns('helpdesk.views.staff',
-    url(r'^dashboard/$',
-        'dashboard',
-        name='helpdesk_dashboard'),
 
     url(r'^tickets/$',
         'ticket_list',
         name='helpdesk_list'),
 
-    url(r'^tickets/(?P<ticket_id>[0-9]+)/update/$',
-        'mass_update',
-        name='helpdesk_mass_update'),
-
-    url(r'^tickets/submit/$',
+       url(r'^tickets/submit/$',
         'create_ticket',
         name='helpdesk_submit'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/$',
         'view_ticket',
         name='helpdesk_view'),
+
+    url(r'^tickets/(?P<page>[0-9]+)/$',
+        'ticket_list',
+        name='helpdesk_list'),
+
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/update/$',
+        'mass_update',
+        name='helpdesk_mass_update'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/followup_edit/(?P<followup_id>[0-9]+)/$',
         'followup_edit',
@@ -35,9 +35,13 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^tickets/(?P<ticket_id>[0-9]+)/ticket_edit/$',
         'ticket_edit',
         name='ticket_edit'),
+    url(r'^tickets/ticket_edit/$',
+        'ticket_edit',
+        name='ticket_edit'),
 
     #url(r'^tickets/(?P<ticket_id>[0-9]+)/update/$', 'update_ticket', name='helpdesk_update'),
     url(r'^tickets/(?P<ticket_id>[0-9]+)/post_comment/$', 'post_comment', name='post_comment'), # post comments
+
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/delete/$',
         'delete_ticket',
@@ -63,9 +67,8 @@ urlpatterns = patterns('helpdesk.views.staff',
         'ticket_cc_del',
         name='helpdesk_ticket_cc_del'),
 
-    url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/add/$',
-        'tickets_dependency',
-        name='helpdesk_ticket_dependency_add'),
+    #url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/add/$','ticket_dependency_add',name='helpdesk_ticket_dependency_add'),
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/add/$','tickets_dependency',name='helpdesk_ticket_dependency_add'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/dependency/delete/(?P<dependency_id>[0-9]+)/$',
         'ticket_dependency_del',
@@ -122,9 +125,25 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^ignore/delete/(?P<id>[0-9]+)/$',
         'email_ignore_del',
         name='helpdesk_email_ignore_del'),
-)
 
-urlpatterns += patterns('helpdesk.views.public',
+    #KB urls
+    url(r'^kb/$',
+        'index', name='helpdesk_kb_index'),
+
+    url(r'^kb/$',
+        'kb_list',
+        name = 'helpdesk_kb_list'),
+
+    url(r'^kb/(?P<item>[0-9]+)/$',
+        'item', name='helpdesk_kb_item'),
+
+    url(r'^kb/(?P<item>[0-9]+)/vote/$',
+        'vote', name='helpdesk_kb_vote'),
+
+    url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/$',
+        'category', name='helpdesk_kb_category'),
+
+    #Public urls
     url(r'^$',
         'homepage',
         name='helpdesk_home'),
@@ -149,25 +168,7 @@ urlpatterns += patterns('helpdesk.views.public',
         'vote_down',
         name='vote_down'),
 )
-
-urlpatterns += patterns('helpdesk.views.kb',
-    url(r'^kb/$',
-        'index', name='helpdesk_kb_index'),
-
-    url(r'^kb/$',
-        'kb_list',
-        name = 'helpdesk_kb_list'),
-
-    url(r'^kb/(?P<item>[0-9]+)/$',
-        'item', name='helpdesk_kb_item'),
-
-    url(r'^kb/(?P<item>[0-9]+)/vote/$',
-        'vote', name='helpdesk_kb_vote'),
-
-    url(r'^kb/(?P<slug>[A-Za-z0-9_-]+)/$',
-        'category', name='helpdesk_kb_category'),
-)
-
+#blog urls
 urlpatterns += patterns('helpdesk.views.blog',
     url(r'^blog/$',
         'index', name='blog'),

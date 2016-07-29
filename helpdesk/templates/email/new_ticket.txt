@@ -1,0 +1,17 @@
+Dear {{ ticket.submitter_email }},
+
+You have successfully submitted a new ticket into TolaWork.
+    -------------------
+    Ticket #:{{ ticket.id }}
+    {{ ticket.title|escape }}
+
+    Ticket Description: {{ ticket.description|escape }}
+
+    Comments: {{ comment|escape }}
+
+    -------------------
+
+To view this ticket in Tola.Work, click on the link below:
+http://tola.work/helpdesk/tickets/{{ ticket.id }}/
+
+Best regards from the Tola.Work Support team.

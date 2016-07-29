@@ -1,0 +1,94 @@
+{% extends "base.html" %}{% load i18n %}
+{% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
+{% block helpdesk_head %}
+<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css' xmlns="http://www.w3.org/1999/html"></style>
+{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css">
+<p class="container">
+<h3>My Tasks</h3>
+
+    <div class="col-md-12 row">
+           <div class="search col-md-4" >
+              <form class="input-group" id='searchform' method='get' action="">
+                  <input type="text" name='q' class="form-control" placeholder="Search Tasks" id='search_query'>
+                  <span class="input-group-btn">
+                    <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                  </span>
+                </form>
+            </div>
+         </div>
+{% if tasks %}
+<strong> <span class="badge"{{tasks}} ></span></strong>
+
+            {% endif %}
+            <p><h3>{{ task.id }}. {{ task.task }} [{% if task.status == 1 %} Open {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}]</h3></p>
+            <span class='ticket_toolbar'>
+                {% if request.user.is_staff %}
+                <div class="panel-heading home-paneltitle">
+                    <h4 class="panel-title">
+                      <a href='{% url 'view_task' task.id %}'>
+                      <font class="font5"><b><span ></span></b>  [Edit Task] </font></a>
+                    |
+                      <a href='task_delete'>
+                      <font class="font5"><b><span></span></b> [Delete Task] </font></a>
+                    </h4>
+                  </div>
+
+
+
+
+
+                        <!-- TW#90 - add a dynamic edit form -->
+
+                            <div class="ticket_form info">
+
+                                    <div class="col-md-12 row ticket_padding">
+                                        <div class= "col-md-6 row ticket_edit" >
+                                            <label class="col-md-8"><p><strong>{% trans "Task Title:" %}</strong>  {{task.task}} </p></label>
+
+
+                                        </div>
+                                     <div class="col-md-12 row ticket_padding">
+                                        <div class= "col-md-6 row ticket_edit" >
+                                            <label class="col-md-4"><p><strong>{% trans "Task Priority:" %}</strong>{% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %} </p></label>
+
+
+                                        </div>
+                                    <div class="col-md-6 row ticket_edit">
+                                            <label class="col-md-4"><p><strong>{% trans "Created By:" %}</strong> {{created_by}}</p></label>
+
+                                        </div>
+
+                                        <div class="col-md-6 row ticket_edit">
+                                            <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong> {{assigned_to}}</p></label>
+
+                                        </div>
+
+                                    <div class="col-md-12 row ticket_padding">
+
+                                         <div class= "col-md-6 row ticket_edit" >
+                                            <label class="col-md-4"><p><strong>{% trans "Note:" %}</strong></p></label>
+                                            <textarea  class="col-md-8" name="description" rows="4" > {{ task.note}} </textarea>
+                                        </div>
+                                    </div>
+
+
+                                    </div>
+                                    <div class="col-md-12 row">
+                                        <div class= "col-md-6 row ticket_edit" >
+                         <label class="col-md-4"><p>{% trans "Submitter Email:" %} {{task.submitter_email}} </p></label>
+
+                                        </div>
+                                        <div class= "col-md-6 row ticket_edit" >
+                                            <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong> {{ due_date }}</p></label>
+
+                                        </div>
+                                    </div>
+
+                                     {% csrf_token %}
+
+</span>
+    {% endif %}
+{% endblock %}

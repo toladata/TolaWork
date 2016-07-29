@@ -1,7 +1,8 @@
 from django.contrib import admin
+from easy_select2 import select2_modelform
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
-from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory
+from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory, Tag
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
 from helpdesk.models import TicketChange, Attachment, IgnoreEmail
 from helpdesk.models import CustomField
@@ -15,6 +16,7 @@ class TicketAdmin(admin.ModelAdmin):
     list_display = ('title', 'status', 'assigned_to', 'submitter_email',)
     date_hierarchy = 'created'
     list_filter = ('assigned_to', 'status', )
+    form = select2_modelform(Ticket)
 
 class TicketChangeInline(admin.StackedInline):
     model = TicketChange
@@ -49,7 +51,7 @@ class UserAdminWithQueueMemberships(UserAdmin):
         return super(UserAdminWithQueueMemberships, self).change_view(
             request, object_id, form_url=form_url, extra_context=extra_context)
 
-
+admin.site.register(Tag)
 admin.site.register(Ticket, TicketAdmin)
 admin.site.register(Queue, QueueAdmin)
 admin.site.register(FollowUp, FollowUpAdmin)
