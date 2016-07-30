@@ -290,7 +290,7 @@ def public_ticket_list(request):
 
         ### SORTING
         data_sorting(request,query_params)
-        
+
 
     tickets = Ticket.objects.select_related()
     queue_choices = Queue.objects.all()
