@@ -502,77 +502,19 @@
           <!-- start filters -->
           <div class="panel panel-info ">
               <div class="panel-heading">
-                <strong>Issues <span class="badge">{{ num_tickets }}</span></strong>
-                <button class="btn btn-sm btn-warning read_more" id="add_ticket" type="submit" data-toggle="modal" data-target="#ticketModal" ><b><span class="glyphicon glyphicon-plus"></span></b><strong></strong> New Issue</strong>  </button>
+                <span class="glyphicon glyphicon-user"></span>&nbsp;<strong>My Tasks and Tickets </strong>
+
               </div>
-              <!-- Create ticket modal -->
-              <div class="modal fade " id="ticketModal" role="dialog">
-                <div class="modal-dialog task_form modal-lg">
-                  <!-- Modal content-->
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      <h3 class="modal-title font9">Submit a Ticket</h3>
-                      <p class="font9">Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
-                    </div>
-                    <div class="modal-body">
-                      <div class="alert alert-success" role="alert">
-                        <p>'We recommend that you search for your issue or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!'</p>
-                      </div>
-                      <form class="form-horizontal" method='post' action='./' enctype='multipart/form-data'  name="most">
 
-                            {% load crispy_forms_tags %}
-                            {% crispy form form.helper %}
-                            {% comment %}{% for field in form %}
-                                {% if field.is_hidden %}
-                                    {{ field }}
-                                {% else %}
-                                    <dt><label for='id_{{ field.name }}'>{% trans field.label %}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
-                                    <dd>{{ field }}</dd>
-                                    {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
-                                    {% if field.help_text %}<dd class='form_help_text'>{% trans field.help_text %}</dd>{% endif %}
-
-                                {% endif %}
-                            {% endfor %}
-                            {% endcomment %}
-
-                    <div class = "col-md-offset-2 col-md-10">
-
-                        <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'><b>{% trans "Attach More File(s) &raquo;" %}</b></a></p>
-
-                        <div id='FileUpload' style='display: none;'>
-
-                            <dl>
-
-                                <dt><label for='id_file'> <b>{% trans "Attach a File" %}</b></label></dt>
-                                <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'><b>{% trans "Add Another File" %}</b></a>)</span></dd>
-                            </dl>
-
-                        </div>
-                            <div class='buttons form-group'>
-                                <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
-                        </div>
-                    </div> 
-                    {{ form.media }}
-
-                    {% csrf_token %}</form>
-
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                  </div> 
-                </div>
-              </div>
               <div class="panel-body">
                 <div class="sort_panels">
-                  Created By Me <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong>
+                  <span class="glyphicon glyphicon-th-list"></span>&nbsp;Created By Me <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong>
                 </div> 
                 <div class="sort_panels">
-                   Assigned to Me <strong> <span class="badge read_more"> {{ assigned_to_me }} </span></strong>
+                   <span class="glyphicon glyphicon-list-alt"></span>&nbsp;Assigned to Me <strong> <span class="badge read_more"> {{ assigned_to_me }} </span></strong>
                 </div>
                  <div class="sort_panels">  
-                  Resolved & Closed by Me <strong> <span class="badge read_more"> {{ tickets_closed_resolved }} </span></strong>
+                  <span class="glyphicon glyphicon-th"></span>&nbsp;Closed by Me <strong> <span class="badge read_more"> {{ tickets_closed_resolved }} </span></strong>
                  </div>
               </div>
           </div>
