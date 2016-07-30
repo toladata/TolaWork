@@ -290,7 +290,7 @@ def public_ticket_list(request):
 
         ### SORTING
         data_sorting(request,query_params)
-        
+
 
     tickets = Ticket.objects.select_related()
     queue_choices = Queue.objects.all()
@@ -720,6 +720,28 @@ def view_ticket(request, ticket_id):
     """
     #ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
 
+    #tickets, reported by current user
+
+    tickets_reported =''
+
+    if request.user.email:
+        tickets_reported = Ticket.objects.select_related('queue').filter(
+                submitter_email=request.user.email,
+            ).order_by('status')
+
+    #tickets, resolved by current user
+    tickets_closed = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user,
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+
+    #display tickets assigned to current user
+    tickets_assigned = Ticket.objects.select_related('queue')\
+                    .filter(assigned_to=request.user,)\
+                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+    #display tickets created by current user
+    tickets_created = Ticket.objects.select_related('queue')\
+                    .filter(submitter_email=request.user.email,)\
+                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
@@ -727,6 +749,10 @@ def view_ticket(request, ticket_id):
             'form': form,
             #'progress': progress,
             'tags': tags,
+            'tickets_assigned': len(tickets_assigned),
+            'tickets_created':len(tickets_created),
+            'tickets_reported':len(tickets_reported),
+            'tickets_closed':len(tickets_closed),
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
             'ticket_type': Ticket.TICKET_TYPE,
@@ -1183,7 +1209,6 @@ def ticket_list(request):
      ).exclude(
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
     )
-    assigned=len(assigned_to_me)
 
 
     # Tickets created by current user
