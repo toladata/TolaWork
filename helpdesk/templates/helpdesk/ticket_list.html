@@ -341,8 +341,11 @@
                             </div>
                 </div>
                 <div class="panel-footer">
-                   <div class="panel-heading"><a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
-                    <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
+                   <div class="panel-heading">
+                     {% if user.is_staff %}
+                        <a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
+                        <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
+                      {% endif %}
 
                     {% blocktrans with ticket.queue as queue %}&nbsp;[{{ queue }}] {% endblocktrans %}
                     &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
@@ -723,8 +726,7 @@
               var c = content.substr(0, showChar);
               var h = content.substr(showChar, content.length - showChar);
 
-              var html = c  + ellipsestext+ '<span class="morecontent"><span>' + h + '</span><a href="" class="morelink">' + moretext + '</a></span>';
-             /* var html = c + '<span class="moreellipses">' + ellipsestext+ '&nbsp;</span><span class="morecontent"><span>' + h + '</span>&nbsp;&nbsp;<a href="" class=" morelink">' + moretext + '</a></span>';*/
+              var html = c + '<span class="moreellipses">' + ellipsestext+ '&nbsp;</span><span class="morecontent"><span>' + h + '</span>&nbsp;&nbsp;<a href="" class=" morelink">' + moretext + '</a></span>';
 
               $(this).html(html);
           }
