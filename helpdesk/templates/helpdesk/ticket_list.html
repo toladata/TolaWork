@@ -19,8 +19,8 @@
     <div class="col-md-9 col-sm-9 ticket_right">
               {% for ticket in tickets.object_list %}
               <div class="panel panel-info">
-                <div class="panel-heading"> <a href='{{ ticket.get_absolute_url }}'>
-                      {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong></a>
+                <div class="panel-heading">
+                      {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong>
                       {% if ticket.progress %}
                       <div class="read_more">
                         <strong> <span class="badge">{{ticket.progress}} </span></strong>
