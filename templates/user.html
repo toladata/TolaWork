@@ -7,6 +7,7 @@
 <script src="https://code.highcharts.com/highcharts-3d.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 
+
 <script>
 
 $(function () {
@@ -130,15 +131,39 @@ $(function () {
                               <th>Title</th>
                               <th>Date Created</th>
                           </tr>
-                          {% for item in tickets_created %}
-                          <tr>
-                              <td>{% if item.status == 1 %} Open {%elif item.status == 2%}Re-Opened{% elif item.status == 3%}Resolved{% elif item.status == 4%}Closed{% elif item.status == 5%}Duplicate{% endif %}</td>
-                              <td>{{ item.queue }}</td>
-                              <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
-                              <td>{{ item.created }}</td>
-                          </tr>
-                          {% endfor %}
+                          {% load endless %}
+                          {% paginate tickets_created %}
+                            {% for item in tickets_created %}
+                              <tr>
+                                  <td>{% if item.status == 1 %} Open {%elif item.status == 2%}Re-Opened{% elif item.status == 3%}Resolved{% elif item.status == 4%}Closed{% elif item.status == 5%}Duplicate{% endif %}</td>
+                                  <td>{{ item.queue }}</td>
+                                  <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
+                                  <td>{{ item.created }}</td>
+                              </tr>
+                              {% endfor %}
                         </table>
+                      </div>
+                      <div>
+                        {% get_pages %}
+                        <ul class="pagination">
+                        {% for page in pages %}
+                        {% if page == None %}
+                          <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="...">
+                              <span aria-hidden="true">...</span>
+                              <span class="sr-only">...</span>
+                            </a>
+                          </li>
+                        {% else %}
+                          <li class="page-item {% if page.is_current %} active {% endif %}">
+                            <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                              <span aria-hidden="true">{{ page.label|safe }}</span>
+                              <span class="sr-only">Page {{page.number}}</span>
+                            </a>
+                          </li>
+                        {% endif %}
+                        {% endfor %}
+                        </ul>
                       </div>
                       {% else %}
                       <div class="alert alert-info" role="alert">
@@ -161,7 +186,8 @@ $(function () {
                               <th>Title</th>
                               <th>Date Created</th>
                           </tr>
-                          {% for ticket in tickets_assigned %}
+                          {% paginate tickets_assigned using "tickets_assigned_page" %}
+                          {% for ticket in tickets_assigned  %}
                           <tr>
                               <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
                               <td>{{ticket.queue}}</td>
@@ -171,6 +197,28 @@ $(function () {
                           {%endfor%}
                       </table>
                     </div>
+                    <div>
+                        {% get_pages %}
+                        <ul class="pagination">
+                        {% for page in pages %}
+                        {% if page == None %}
+                          <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="...">
+                              <span aria-hidden="true">...</span>
+                              <span class="sr-only">...</span>
+                            </a>
+                          </li>
+                        {% else %}
+                          <li class="page-item {% if page.is_current %} active {% endif %}">
+                            <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                              <span aria-hidden="true">{{ page.label|safe }}</span>
+                              <span class="sr-only">Page {{page.number}}</span>
+                            </a>
+                          </li>
+                        {% endif %}
+                        {% endfor %}
+                        </ul>
+                      </div>
                     {% else %}
                       <div class="alert alert-info" role="alert">
                         <h5>There are no tickets currently assigned to {{username}}</h5>
@@ -192,6 +240,7 @@ $(function () {
                       <th>Title</th>
                       <th>Date Created</th>
                     </tr>
+                    {% paginate tickets_closed_resolved using "tickets_closed_resolved_page" %}
                     {% for ticket in tickets_closed_resolved %}
                     <tr>
                       <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
@@ -202,6 +251,28 @@ $(function () {
                     {%endfor%}
                   </table>
                 </div>
+                 <div>
+                    {% get_pages %}
+                    <ul class="pagination">
+                    {% for page in pages %}
+                    {% if page == None %}
+                      <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="...">
+                          <span aria-hidden="true">...</span>
+                          <span class="sr-only">...</span>
+                        </a>
+                      </li>
+                    {% else %}
+                      <li class="page-item {% if page.is_current %} active {% endif %}">
+                        <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                          <span aria-hidden="true">{{ page.label|safe }}</span>
+                          <span class="sr-only">Page {{page.number}}</span>
+                        </a>
+                      </li>
+                    {% endif %}
+                    {% endfor %}
+                    </ul>
+                  </div>
                 {% else %}
                   <div class="alert alert-info" role="alert">
                     <h5>There are no tickets currently closed and resolved by {{username}}</h5>
@@ -242,6 +313,7 @@ $(function () {
                               <td><strong>Priority</strong></td>
                               <td><strong>Assigned To</strong></td>
                             </tr>
+                            {% paginate tasks_created using "tasks_created_page" %}
                             {% for task in tasks_created %}
                             <tr>
                               <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
@@ -254,6 +326,28 @@ $(function () {
                             </tr>
                             </table>
                         </div>
+                        <div>
+                        {% get_pages %}
+                        <ul class="pagination">
+                        {% for page in pages %}
+                        {% if page == None %}
+                          <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="...">
+                              <span aria-hidden="true">...</span>
+                              <span class="sr-only">...</span>
+                            </a>
+                          </li>
+                        {% else %}
+                          <li class="page-item {% if page.is_current %} active {% endif %}">
+                            <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                              <span aria-hidden="true">{{ page.label|safe }}</span>
+                              <span class="sr-only">Page {{page.number}}</span>
+                            </a>
+                          </li>
+                        {% endif %}
+                        {% endfor %}
+                        </ul>
+                      </div>
                       {% else %}
                         <div class="alert alert-info" role="alert">
                           <h5>There are no tasks currently created by {{username}}</h5>
@@ -277,6 +371,7 @@ $(function () {
                                 <td><strong>Priority</strong></td>
                                 <td><strong>Assigned To</strong></td>
                               </tr>
+                            {% paginate tasks_assigned using "tasks_assigned_page" %}
                               {% for task in tasks_assigned %}
                               <tr>
                                 <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
@@ -288,6 +383,28 @@ $(function () {
                                 {% endfor %}
                               </tr>
                               </table>
+                          </div>
+                          <div>
+                            {% get_pages %}
+                            <ul class="pagination">
+                            {% for page in pages %}
+                            {% if page == None %}
+                              <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="...">
+                                  <span aria-hidden="true">...</span>
+                                  <span class="sr-only">...</span>
+                                </a>
+                              </li>
+                            {% else %}
+                              <li class="page-item {% if page.is_current %} active {% endif %}">
+                                <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                                  <span aria-hidden="true">{{ page.label|safe }}</span>
+                                  <span class="sr-only">Page {{page.number}}</span>
+                                </a>
+                              </li>
+                            {% endif %}
+                            {% endfor %}
+                            </ul>
                           </div>
                         {% else %}
                           <div class="alert alert-info" role="alert">
@@ -312,6 +429,7 @@ $(function () {
                                 <td><strong>Priority</strong></td>
                                 <td><strong>Assigned To</strong></td>
                               </tr>
+                              {% paginate tasks_completed using "tasks_completed" %}
                               {% for task in tasks_completed %}
                               <tr>
                                 <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
@@ -323,6 +441,28 @@ $(function () {
                                 {% endfor %}
                               </tr>
                               </table>
+                          </div>
+                          <div>
+                            {% get_pages %}
+                            <ul class="pagination">
+                            {% for page in pages %}
+                            {% if page == None %}
+                              <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="...">
+                                  <span aria-hidden="true">...</span>
+                                  <span class="sr-only">...</span>
+                                </a>
+                              </li>
+                            {% else %}
+                              <li class="page-item {% if page.is_current %} active {% endif %}">
+                                <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                                  <span aria-hidden="true">{{ page.label|safe }}</span>
+                                  <span class="sr-only">Page {{page.number}}</span>
+                                </a>
+                              </li>
+                            {% endif %}
+                            {% endfor %}
+                            </ul>
                           </div>
                         {% else %}
                           <div class="alert alert-info" role="alert">
@@ -342,6 +482,17 @@ $(function () {
     </div>
   </div>
 </div>
-
+<script type="text/javascript">
+   $('#paginator').twbsPagination({
+  totalPages: 3,
+  visiblePages: 7,
+   hrefVariable: '{{tickets_created}}',
+    items: 3,
+    itemsOnPage: 1,
+  onPageClick: function (event, page) {
+    $('#page-content').text('Page ' + page);
+  }
+});
+</script>
 
 {% endblock content %}
