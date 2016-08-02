@@ -158,7 +158,10 @@ margin-right: 0px
 {
     text-align: center;
 }
-
+.font10
+{
+    margin-top: 5px;
+}
 /*//end of fonts*/
 .collapselist
 {
@@ -554,6 +557,12 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 .multi_select
 {
     width:352px;
+}
+.add_ticket
+{
+    padding-bottom: 5px;
+    position: relative;
+    overflow: hidden;
 }
 .ticket_form
 {
