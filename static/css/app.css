@@ -567,7 +567,12 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 {
     margin-left: 15px;
 }
-
+.ticket_view
+{
+    background-color: #eee;
+    margin-bottom: 15px;
+    margin-top: 8px;
+}
 .ticket_padding
 {
     margin-left: 10px;
