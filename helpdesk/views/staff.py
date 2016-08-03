@@ -1035,7 +1035,12 @@ def ticket_list(request):
 
         if form.is_valid():
 
-            ticket = form.save(user=request.POST.get('assigned_to'))
+            try:
+                ticket = form.save(user=request.POST.get('assigned_to'))
+
+            except Exception, e:
+                ticket = form.save(user = None)
+
 
             #save tickettags
             tags = request.POST.getlist('tags')

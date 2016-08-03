@@ -247,12 +247,19 @@ class TicketForm(forms.Form):
                             value=value)
                 cfv.save()
 
-        f = FollowUp(   ticket = t,
+        ticket = t
+        user = None
+        try:
+            user = t.assigned_to  
+        except Exception, e:
+            pass
+
+        f = FollowUp(   ticket = ticket,
                         title = _('Ticket Opened'),
                         date = timezone.now(),
                         public = True,
                         comment = self.cleaned_data['body'],
-                        user = t.assigned_to,)
+                        user = user,)
         if self.cleaned_data['assigned_to']:
             f.title = _('Ticket Opened & Assigned to %(name)s') % {
                 'name': t.get_assigned_to
@@ -295,9 +302,14 @@ class TicketForm(forms.Form):
             email(t,t.description,"NEW",t.submitter_email)
             messages_sent_to.append(t.submitter_email)
 
-        if t.assigned_to and t.assigned_to != user and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
-            email(t,t.description,"NEW",t.assigned_to.email)
-            messages_sent_to.append(t.assigned_to.email)
+        try:
+            if t.assigned_to and t.assigned_to != user and t.assigned_to.email and t.assigned_to.email not in messages_sent_to:
+                email(t,t.description,"NEW",t.assigned_to.email)
+                messages_sent_to.append(t.assigned_to.email)
+            
+        except Exception, e:
+            pass
+
 
         if q.new_ticket_cc and q.new_ticket_cc not in messages_sent_to:
             email(t,t.description,"NEW",q.new_ticket_cc)
