@@ -1203,7 +1203,7 @@ def ticket_list(request):
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
 
-    tickets = Ticket.objects.select_related()
+    tickets = Ticket.objects.all()
     num_tickets = tickets.count()
 
     queue_choices = Queue.objects.all()
@@ -1236,7 +1236,7 @@ def ticket_list(request):
         ticket_qs = apply_query(tickets, query_params)
 
     #Change items per_page by a user
-    items_per_page = 2
+    items_per_page = 10
     user_choice_pageItems = request.GET.get('items_per_page')
 
     if user_choice_pageItems:
