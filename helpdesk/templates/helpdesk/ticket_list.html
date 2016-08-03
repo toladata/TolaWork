@@ -17,7 +17,7 @@
 <!-- main div -->
   <div class="ticket_cover">
     <div class="col-md-9 col-sm-9 ticket_right">
-              {% for ticket in tickets.object_list %}
+              {% for ticket in tickets.object_list.reverse %}
               <div class="panel panel-info">
                 <div class="panel-heading">
                       {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong>
@@ -474,10 +474,10 @@
                  {% if tickets.has_next %}
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}"> {{ tickets.next_page_number }}</a></li>
                       {% ifnotequal tickets.next_page_number tickets.paginator.num_pages %}
-                       {% blocktrans with tickets.paginator.num_pages as num_pages %}
+                       {% with tickets.paginator.num_pages as num_pages %}
                         <li><a href="">...</a></li>
-                        <li><a href="?page={{ num_pages }}"> {{ num_pages }}  </a></li>
-                      {% endblocktrans %}
+                        <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ num_pages }}"> {{ num_pages }}  </a></li>
+                      {% endwith %}
                     {% endifnotequal %}
                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a></li>
                
@@ -489,15 +489,15 @@
                <ul class="pagination">
                  <li>
                     <a class = "{% if items_per_page == 5 %} active {% endif %}"
-                      href="{% url 'helpdesk_list' %}?items_per_page=5">5</a>
+                      href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=5">5</a>
                   </li>
                  <li>
                     <a class = "{% if items_per_page == 10 %} active {% endif %}"
-                      href="{% url 'helpdesk_list' %}?items_per_page=10">10 </a>
+                      href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=10">10 </a>
                   </li>
                  <li>
                     <a class = "{% if items_per_page == 20 %} active {% endif %}"
-                      href="{% url 'helpdesk_list' %}?items_per_page=20" >20</a>
+                      href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=20" >20</a>
                   </li>
                  <li><a href="#">per page</a></li>
                </ul>
