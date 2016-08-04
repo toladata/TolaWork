@@ -506,6 +506,13 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
     padding: 5px;
     border-radius: 5px;
 }
+.task_minor
+{
+    border-left: 1px solid#eee;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
 .task_title
 {
     margin-left: 40px;
