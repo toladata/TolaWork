@@ -48,3 +48,4 @@ wheel==0.29.0
 django-tinymce
 django-admin-tools==0.7.2
 django_easy_select2
+django-endless-pagination

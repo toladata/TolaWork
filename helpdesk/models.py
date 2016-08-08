@@ -360,7 +360,7 @@ class Ticket(models.Model):
     created = models.DateTimeField(_('Created'), blank=True, help_text=_('Date this ticket was first created'),)
     modified = models.DateTimeField(_('Modified'),blank=True,help_text=_('Date this ticket was most recently changed.'),)
     submitter_email = models.EmailField(_('Submitter E-Mail'),blank=True,null=True,help_text=_('The submitter will receive an email for all public follow-ups left for this task.'),)
-    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL,related_name='assigned_to',blank=True,verbose_name=_('Assigned to'),)
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL,related_name='assigned_to',blank=True, null=True, verbose_name=_('Assigned to'),)
     status = models.IntegerField(_('Status'),choices=STATUS_CHOICES,default=OPEN_STATUS,)
     on_hold = models.BooleanField(_('On Hold'),blank=True,default=False,help_text=_('If a ticket is on hold, it will not automatically be escalated.'),)
     error_msg = models.TextField(_('Error Message'),blank=True,help_text=_('Error message as it appears'),)
@@ -382,7 +382,12 @@ class Ticket(models.Model):
         """ Custom property to allow us to easily print 'Unassigned' if a
         ticket has no owner, or the users name if it's assigned. If the user
         has a full name configured, we use that, otherwise their username. """
-        if not self.assigned_to:
+        try:
+            assigned = self.assigned_to
+        except Exception, e:
+            assigned = None
+
+        if not assigned:
             return _('Unassigned')
         else:
             if self.assigned_to.get_full_name():

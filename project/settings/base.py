@@ -222,6 +222,7 @@ THIRD_PARTY_APPS = (
     #'fluent_dashboard',
     'tinymce',
     'easy_select2',
+    'endless_pagination',
 
 
 )
@@ -349,3 +350,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 #ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
 #ADMIN_TOOLS_APP_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentAppIndexDashboard'
 #ADMIN_TOOLS_MENU = 'fluent_dashboard.menu.FluentMenu'
+
+#paginator
+ENDLESS_PAGINATION_PER_PAGE = 8
+ENDLESS_PAGINATION_TEMPLATE_VARNAME = 'template'

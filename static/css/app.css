@@ -158,7 +158,10 @@ margin-right: 0px
 {
     text-align: center;
 }
-
+.font10
+{
+    margin-top: 5px;
+}
 /*//end of fonts*/
 .collapselist
 {
@@ -503,6 +506,13 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
     padding: 5px;
     border-radius: 5px;
 }
+.task_minor
+{
+    border-left: 1px solid#eee;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
 .task_title
 {
     margin-left: 40px;
@@ -555,6 +565,12 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 {
     width:352px;
 }
+.add_ticket
+{
+    padding-bottom: 5px;
+    position: relative;
+    overflow: hidden;
+}
 .ticket_form
 {
     background-color: #d6f5f5;
@@ -567,7 +583,12 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 {
     margin-left: 15px;
 }
-
+.ticket_view
+{
+    background-color: #eee;
+    margin-bottom: 15px;
+    margin-top: 8px;
+}
 .ticket_padding
 {
     margin-left: 10px;
