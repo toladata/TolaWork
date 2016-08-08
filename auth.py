@@ -4,7 +4,7 @@ PASS = re.compile(r'sshd.*Failed\spassword\sfor\sinvalid\suser')
 CONNECT = re.compile(r'sshd.*Did\snot')
 
 
-def password_failure(line):
+def pass_fail(line):
     user_name = None
     ip_addr = None
     
@@ -13,7 +13,7 @@ def password_failure(line):
 
     return user_name, ip_addr
 
-def failed_connection(line):
+def fail_connect(line):
 
     if CONNECT.search(line):
 
@@ -26,7 +26,7 @@ failed_conns = {}
 with open('/var/log/auth.log') as log:
     for line in log:
 
-        user_name, ip_addr = password_failure(line[:-1])
+        user_name, ip_addr = pass_fail(line[:-1])
 
         if user_name:
             #print str(user_name) + " - " + str(ip_addr)
@@ -36,7 +36,7 @@ with open('/var/log/auth.log') as log:
                 fail_pass[user_name] = 1
 
 
-        ip_add = failed_connection(line[:-1])
+        ip_add = fail_connect(line[:-1])
 
         if ip_add:
             if failed_conns.get(ip_add):
