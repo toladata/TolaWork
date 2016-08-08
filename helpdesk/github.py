@@ -9,20 +9,15 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
-
 def get_issue_status(repo,ticket):
-    #get github issue status and update ticket
 
     repo = repo + "/issues/" + ticket.github_issue_number
     r = requests.get(repo)
-    status = None	
-    
+
     if int(r.status_code) == 200:
         data = json.loads(r.content)
-        title = data['title']
-        #closed_by = data['closed_by']
-        #person = closed_by['login']
 
+        title = data['title']
         updated_date = data['updated_at']
 
         state = data['state']
@@ -30,10 +25,10 @@ def get_issue_status(repo,ticket):
             status = 4
             state_txt = 'Closed'
         else:
-            status = 2 #re-opened
-            state_txt = 'Re-opened'
+            status = 1 #open
+            state_txt = 'Open'
 
-        comments = '[GitHub Sync] Ticket has been ' + str(state_txt) + ' in GitHub'
+        comments = '[GitHub Sync] Ticket is ' + str(state_txt) + ' in GitHub'
 
         update_ticket = Ticket.objects.get(id=ticket.id)
         current_status = update_ticket.status
@@ -45,8 +40,7 @@ def get_issue_status(repo,ticket):
         update_ticket.status = status
         update_ticket.save()
 
-    return status
-
+    return r.status_code
 
 def new_issue(repo,ticket):
 
@@ -90,7 +84,6 @@ def new_issue(repo,ticket):
 
 
 def add_comments(comment,repo,ticket):
-    #repo = queue_repo(ticket)
     payload = {}
     payload['title'] = ticket.title
     payload['state'] = "open"
@@ -106,8 +99,50 @@ def queue_repo(ticket):
         repo = settings.GITHUB_REPO_1
     else:
         repo = settings.GITHUB_REPO_2
-    print "Queue Repo: " + repo
+
     return repo
+
+def get_label(repo,ticket):
+
+    repo = repo + "/issues/" + ticket.github_issue_number + "/labels"
+    r = requests.get(repo)
+
+    if int(r.status_code) == 200:
+        data = json.loads(r.content)
+        label_txt2 = ""
+        label_int = '0'
+
+        for item in range(len(data)):
+            label = data[item]['name']
+
+            if label == "Tola-Work Ticket":
+                label_txt = 'Submitted from TolaWork '
+
+            elif label == "1 - Ready":
+                label_txt2 = ', accepted by Developers and moved into the Ready Queue'
+                label_int = '1'
+
+            elif label == "2 - Working":
+                label_txt2 = ' and Developers have started working on the Ticket'
+                label_int = '2'
+
+            elif label == "4 - Done":
+                label_txt2 = ' and its Done'
+                label_int = '4'
+
+        comments = '[Progress Update] Ticket ' + str(label_txt) + str(label_txt2)
+
+        update_ticket = Ticket.objects.get(id=ticket.id)
+        db_label = update_ticket.git_label
+
+        if not int(db_label) == int(label_int):
+            new_followup = FollowUp(title=ticket.title, ticket_id=ticket.id, comment=comments, public=1, )
+            new_followup.save()
+
+            update_ticket.git_label = label_int
+            update_ticket.save()
+
+    return r.status_code
 
 def close_issue(repo,ticket):
     payload = {}
@@ -126,12 +161,12 @@ def open_issue(repo,ticket):
     payload = {}
     payload['title'] = ticket.title
     payload['state'] = "open"
-    payload['body'] =  "Re-Opened"
+    payload['body'] = "Opened"
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues/" + ticket.github_issue_number
     header = {'Authorization': 'token %s' % token}
     r = requests.patch(repo,data=json.dumps(payload),headers=header)
-    print 'Re-open: ' + repo
+    print 'open: ' + repo
     return r.status_code
 
 def latest_release(repo):
@@ -149,3 +184,39 @@ def latest_release(repo):
         print r.status_code
         content = None
     return content
+
+#Update issues on github
+def update_issue(repo,ticket):
+
+    payload = {}
+    payload['title'] = ticket.title
+    payload['body'] = ticket.description
+
+    token = settings.GITHUB_AUTH_TOKEN
+    repo = repo + "/issues/" + ticket.github_issue_number
+
+    header = {'Authorization': 'token %s' % token}
+
+    r = requests.post(repo,json.dumps(payload),headers=header)
+    #Update ticket with new github info if created successfully "201" response
+    if int(r.status_code) == 201:
+        print "201"
+
+        getComments = FollowUp.objects.all().filter(ticket=ticket)
+        for comment in getComments:
+            comment_status = add_comments(comment, repo, ticket)
+
+    print r.status_code
+
+    return r.status_code
+
+def get_issue(repo,id):
+    repo = repo + "/issues/" + id
+    r = requests.get(repo)
+    if(r.ok):
+        issue = json.loads(r.text or r.content)
+    else:
+        issue = None
+
+    return issue
+

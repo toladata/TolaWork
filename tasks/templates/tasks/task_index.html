@@ -1,0 +1,624 @@
+{% extends "base.html" %}{% load i18n %}
+{% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
+{% block helpdesk_head %}
+<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css' xmlns="http://www.w3.org/1999/html"></style>
+
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+{% endblock %}
+
+
+{% block content %}
+{% load in_list %}
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css">
+<div class="container">
+<h3>My Tasks</h3>
+  <div class="ticket_cover">
+        <div class="col-md-9 col-sm-9">
+         <!-- start search -->
+         <div class="row">
+           <div class="search col-md-8" >
+              <form class="input-group" id='searchform' method='get' action="">
+                  <input type="text" name='q' class="form-control" placeholder="Search Tasks" id='search_query'>
+                  <span class="input-group-btn">
+                    <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                  </span>
+                </form>
+            </div>
+         </div>
+          <!-- end search -->
+          <!-- start table -->
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered" style="border-collapse:collapse;">
+                <tr class="info">
+                  <td><strong>Task Title</strong></td>
+                  <td><strong>Start Date</strong></td>
+                  <td><strong>Due Date</strong></td>
+                  <td><strong>Status</strong></td>
+                  <td><strong>Priority</strong></td>
+                  <td><strong>Assigned To</strong></td>
+                </tr>
+                {% load endless %}
+                {% paginate tasks %}
+                {% for task in tasks %}
+                <tr data-toggle="collapse" data-target="#{{ task.id }}" class="accordion-toggle">
+
+                <td><strong><a href= "#">{{ task.task }}</a></strong></td>
+                <td>{{ task.created_date | date}}</td>
+                <td>{{ task.due_date | date}}</td>
+                 <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</td>
+                  <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
+
+                <td>{{task.assigned_to}}</td>
+                </tr>
+                <tr>
+                  <td colspan="12" class="hiddenRow">
+                  
+                  <div class="accordian-body collapse" id="{{ task.id }}"> 
+                  
+                    <ul class="nav nav-tabs">
+                      <li class="active"><a data-toggle="tab" href="#task{{ task.id }}">View Task</a></li>
+                      <li><a data-toggle="tab" href="#" data-target="#tasktab{{ task.id }}">Edit Task</a></li>
+                        <li><a href="#" data-toggle="tab" data-target="#deletetask{{ task.id }}">Delete Task</a></li>
+
+                      </ul>
+
+                    <div class="tab-content">
+                      <div id="task{{ task.id }}" class="tab-pane task_view fade in active">
+                        <h4 class="view_table"><strong>Task Details</strong></h4>
+                        <div class="col-md-12 row table-responsive">
+                        <table class="table table-striped table-condensed view_table">
+                          <tr>
+                            <td><p><strong> {% trans "Title:" %}</strong></p></td>
+                            <td><p>[{{task.id}}] {{task.task}}</p></td>
+                            <td><p><strong>{% trans "Submitter Email:" %}</strong></p></td>
+                            <td><p>{{task.submitter_email}}</p></td>
+                          </tr>
+                          <tr><td><p><strong>{% trans "Status:" %} </strong></p></td>
+                            <td><p>{% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</p></td>
+                            <td><p><strong>{% trans "Priority:" %}</strong></p></td>
+                            <td><p>{% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</p></td>
+                          </tr>
+
+                          <tr>
+                            <td><p><strong>{% trans "Created Date:" %}</strong></p></td>
+                            <td><p>{{ task.created_date | date}}</p></td>
+                            <td><p><strong>{% trans "Due Date:" %}</strong></p></td>
+                            <td> <p>{{ task.due_date | date}}</p></td>
+                          </tr>
+                          <tr>
+                            <td><strong>{% trans "Created by:" %}</strong></td>
+                            <td>{{created_by}}</td>
+                            <td><strong>{% trans "Assigned to:" %}</strong></td>
+                            <td>{{task.assigned_to}}</td>
+                          </tr>
+                          <tr>
+                            <td><strong>{% trans "Note:" %}</strong></td>
+                            <td colspan="8">{{ task.note}}</td>
+                          </tr>
+                        </table>
+                        
+                        </div>
+                        
+                      </div>
+                     <!--  Edit Task  -->
+                      <div id="tasktab{{ task.id }}" class="tab-pane task_edit fade">
+                      <p class="font9"> <strong>Use this form to make any changes to the task</strong></p>
+                        <div class="ticket_form">
+                          <form method= "POST" action='{% url 'task_edit' task.id  %}'>
+                            <div class="col-md-12 row">
+                              <div class="col-md-6 row ticket_edit">
+
+                                 <label class="col-md-4"><p><strong> {% trans "Title:" %}</strong></p></label>
+
+                                 <div class="col-md-8">
+
+
+                                    <input class="form-control" type="text" id='id_title' name='task' required value="{{task.task}}" />
+                                 </div>
+                              </div>
+                              <div class="col-md-6 row ticket_edit">
+                                    <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
+                                    <div class="col-md-8" >
+                                      <input class="form-control" type="text" name='submitter_mail' id='id_submitter_mail' value="{{task.submitter_email}}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 row task_spacing">
+                             <div class="col-md-6 row ticket_edit">
+                                    <label class="col-md-4"><p><strong>{% trans "Status:" %}</strong></p></label>
+                              <div class="col-md-8">
+                                  <select class="form-control" id='id_status' name='status'>
+                                  <option value='1'>Active</option>
+                                  <option value='2'>Reopened</option>
+                                  <option value='3'>Completed</option>
+                                  <option value='4'>Cancelled</option>
+                                  <option>
+                                      {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</option>
+                                </select >
+                               </div>
+                              </div>
+                                <div class="col-md-6 row ticket_edit">
+                                   <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
+                                   <div class="col-md-8">
+                                     <select class="form-control" id='id_priority' name='priority'>
+                                     <option value='1'>High</option>
+                                  <option value='2'>Normal</option>
+                                  <option value='3'>Low</option>
+                              <option >{% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</option>
+                                      </select>
+                                   </div>
+                                </div>
+                              </div>
+                              <div class="col-md-12 row">
+
+                                <div class="col-md-6 row ticket_edit">
+                                  <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
+                                  <div class="col-md-8">
+                                     <input class="form-control" type="Date" name='created_date' id='id_edit_created_date' value="{{ task.created_date | date}}">
+                                  </div>
+                                </div>
+                                  <div class="col-md-6 row ticket_edit">
+                                  <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
+                                  <div class="col-md-8">
+                                  <input class="form-control" type="date" name='due_date' id='id_edit_due_date' Value="{{ task.due_date | date}}">
+
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="col-md-12 row">
+                                <div class="col-md-6 row ticket_edit">
+                                  <label class="col-md-4"><p><strong>{% trans "Created by:" %}</strong></p></label>
+                                  <div class="col-md-8">
+                                    <select class=" form-control" name='created_by' id='id_created_by'>
+                                      <option value="{{created_by.id}}">{{user.username}}</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div class="col-md-6 row ticket_edit">
+                                  <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong></p></label>
+                                  <div class="col-md-8">
+                                    <select class="form-control" name='assigned_to' id='id_assigned_to'>
+
+                                      {% for user in assignable_users %}<option value='{{ user.id }}' {% ifequal user.id task.assigned_to_id %} selected {% endifequal %}>{{ user.username }}</option>{% endfor %}
+
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="col-md-12 row">
+                                <div class="col-md-11 row ticket_edit">
+                                  <label class="col-md-2"><p><strong>{% trans "Note:" %}</strong></p></label>
+                                  <div class="col-md-9 edit_note">
+                                      <textarea class="form-control" rows="4" name='note' id='id_note' required>{{ task.note}}</textarea>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="col-md-12 row modal_button">
+                                <label class= "col-md-6 row ticket_edit">
+                                    <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />
+                                    {% csrf_token %}
+
+                                </label>
+                            </div>
+                            </form>
+
+                        </div>
+                      </div>
+
+                        <div id="deletetask{{ task.id }}" class="tab-pane task_edit fade">
+                          <div class="ticket_form">
+                            <h2>{% trans "Delete Task" %}</h2>
+                            <p>Are you sure you want to delete the task <strong>{{ task_task }}</strong>? All traces of the task, including task_followups, attachments, and updates will be irreversibly removed.</p>
+                            <p><a href='./'>{% trans "No, Don't Delete It" %}</a></p>
+                            <form method= "POST" action='{% url 'delete_task' task.id  %}'>
+                              <input type="submit" value="Confirm Delete" />{% csrf_token %}
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </td>
+                </tr>
+
+                {% endfor %}
+                <tr>
+                  <td colspan="6">
+                    {% get_pages %}
+                    <ul class="pagination">
+                    {% if pages.paginated %}
+                      <li class="page-item">
+                        <a class="page-link" href="{{ pages.first.path }}" aria-label="First">
+                          <span aria-hidden="true">&lt;&lt;</span>
+                          <span class="sr-only">First</span>
+                        </a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="{{ pages.previous.path }}" aria-label="Previous">
+                          <span aria-hidden="true">&lt;</span>
+                          <span class="sr-only">Previous</span>
+                        </a>
+                      </li>
+                      {% for page in pages %}
+                        {% if page == None %}
+                          <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="...">
+                              <span aria-hidden="true">...</span>
+                              <span class="sr-only">...</span>
+                            </a>
+                          </li>
+                        {% else %}
+                          <li class="page-item {% if page.is_current %} active {% endif %}">
+                            <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                              <span aria-hidden="true">{{ page.label|safe }}</span>
+                              <span class="sr-only">Page {{page.number}}</span>
+                            </a>
+                          </li>
+                        {% endif %}
+                      {% endfor %}
+                      <li class="page-item">
+                        <a class="page-link" href="{{ pages.next.path }}" aria-label="Next">
+                          <span aria-hidden="true">&gt;</span>
+                          <span class="sr-only">Next</span>
+                        </a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="{{ pages.last.path }}" aria-label="Last">
+                          <span aria-hidden="true">&gt;&gt;</span>
+                          <span class="sr-only">Last</span>
+                        </a>
+                      </li>
+                    {% endif %}
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="6">
+                    <button class="btn btn-success" type="submit" data-toggle="modal" data-target="#myModal" ><b><span class="glyphicon glyphicon-plus"></span></b><strong></strong> Create a Task</strong>  </button>
+                  </td>
+                </tr>
+              </table>
+
+            </div>
+            <!-- end table -->
+            <!-- Modal -->
+
+            <div class="modal fade " id="myModal" role="dialog">
+              <div class="modal-dialog task_form modal-lg">
+              
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 class="modal-title font9">Add Task</h3>
+                  </div>
+                  <div class="modal-body">
+                    <form method= "POST" action='{% url 'task_submit'%}'>
+                    <div class="col-md-12 row">
+                    <div class="col-md-6 row ticket_edit">
+                       <label class="col-md-4"><p><strong> {% trans "Title:" %}</strong></p></label>
+                       <div class="col-md-8">
+                          <input class="form-control" type="text" id='id_task' name='task' required>
+                       </div>
+                    </div>
+                    <div class="col-md-6 row ticket_edit">
+                          <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
+                          <div class="col-md-8" >
+                            <input class="form-control" type="text" name='submitter_mail' id='id_submitter_mail' value="{{created_by.email}}">
+                          </div>
+                      </div>
+                    </div>
+                      <div class="col-md-12 row task_spacing">
+                       <div class="col-md-6 row ticket_edit">
+                              <label class="col-md-4"><p><strong>{% trans "Status:" %}</strong></p></label>
+                              <div class="col-md-8">
+                                <select class="form-control" id='id_status' name='status'>
+                                  <option value='1'>Active</option>
+                                  <option value='2'>Reopened</option>
+                                  <option value='3'>Completed</option>
+                                  <option value='4'>Cancelled</option>
+                                </select >
+                              </div>
+                          </div>
+                          <div class="col-md-6 row ticket_edit">
+                             <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
+                             <div class="col-md-8">
+                               <select class="form-control" id='id_priority' name='priority'>
+
+                                  <option value='1'>Normal</option>
+                                  <option alue='2'>High</option>
+                                  <option alue='3'>Low</option>
+                                </select>
+                             </div>
+                          </div>
+                        </div>
+                        <div class="col-md-12 row task_spacing">
+
+                          <div class="col-md-6 row ticket_edit">
+                            <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
+                            <div class="col-md-8">
+                               <input class="form-control" type="Date" name='created_date' id='id_created_date' >
+                            </div>
+                          </div>
+                            <div class="col-md-6 row ticket_edit">
+                            <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
+                            <div class="col-md-8">
+                            <input class="form-control" type="date" name='due_date' id='id_due_date' required>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-12 row task_spacing">
+                          <div class="col-md-6 row ticket_edit">
+                            <label class="col-md-4"><p><strong>{% trans "Created by:" %}</strong></p></label>
+                            <div class="col-md-8">
+                              <select class=" form-control" name='created_by' id='id_created_by'>
+                                <option value="{{created_by.id}}">{{created_by}}</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-md-6 row ticket_edit">
+                            <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong></p></label>
+                            <div class="col-md-8">
+                              <select class="form-control" name='assigned_to' id='id_assigned_to'>
+                                {% for user in assignable_users%}
+                                  <option value='{{user.id}}'>{{user.username}}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-12 row">
+                          <div class="col-md-11 row ticket_edit">
+                            <label class="col-md-2"><p><strong>{% trans "Note:" %}</strong></p></label>
+                            <div class="col-md-9 edit_note">
+                                <textarea class="form-control" rows="4" name='note' id='id_note' required></textarea>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-12 row modal_button">
+                          <label class= "col-md-6 row ticket_edit">
+                              <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Submit" %}' />
+                          </label>
+                      </div>
+                      {% csrf_token %}
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+            <!-- start gaming -->
+           <!-- <div class="col-md-12 row">
+            <h3 class="font9">Task Solving Game</h3>
+              <div class="col-md-6">
+                <div class="panel panel-primary">
+                  <div class="panel-heading"><strong>Leaders Draw Board</strong></div>
+                  <div class="panel-body">
+                  <ol>
+                    <li >Participant 1</li>
+                    <li >Participant 2</li>
+                    <li >Participant 3</li>
+                    <li >Participant 4</li>
+                    <li >Participant 5</li>
+                  </ol>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="panel panel-primary scores">
+                  <div class="panel-heading"><strong>My performance</strong></div>
+                  <div class="panel-body">
+                  <ul>
+                    <li >My Points</li>
+                    <li >My Tasks</li>
+                    <li >My Assigned Tasks</li>
+                  </ul>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <!-- end gaming -->
+        </div>
+
+        <div class="col-md-3 col-sm-3 task_minor ">
+          <div>
+            <div class="panel panel-info ">
+              <div class="panel-heading">
+                <strong>Tasks <span class="badge"></span></strong>
+              </div>
+              <div class="panel-body sort_panels">
+              My Tasks
+              </div>
+              <div class="panel-body">
+              Due Tasks <span class="badge"></span>
+              </div>
+            </div>
+            <div class="panel panel-info">
+                <div class="panel-heading"> <strong>Sort Tasks</strong></div>
+                     <form method='get' action='./'>
+                    <div class="panel-body ">
+                    <select   class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
+                        <option value='task'>
+                            {% trans "Title" %}
+                        </option>
+                        <option value='created_date'>
+                            {% trans "Start" %}
+                        </option>
+                        <option value='due_date'>
+                            {% trans "Due" %}
+                        </option>
+                        <option value='status'>
+                            {% trans "Status" %}
+                        </option>
+                        <option value='priority'>
+                            {% trans "Priority" %}
+                        </option>
+                        <option value='assigned_to_id'>
+                            {% trans "Assigned to" %}
+                        </option>
+                      </select>
+                       
+                         <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' />
+                    </div>
+                </form>
+                </div>
+             </div>
+            <div class="panel panel-info">
+              <div class="panel-heading"> <strong>Issues By Year/Month</strong></div>
+              <div class="panel-body sort_panels">
+              <b><span class="glyphicon glyphicon-plus"></span></b>2016
+              </div>
+            </div>
+
+              <div class="panel panel-info">
+                <div class="panel-heading"> <strong>Filter tasks By:</strong></div>
+                <div class="panel-body ">
+                    <div class=" col-md-12">
+                    <strong>Click</strong> on <strong>"+"</strong> to add filters  and  <strong>"-"</strong>  to remove a filter.
+                </div>
+
+                <form class="filter_form" method='get' action='./'>
+                    <select name='select' id='filterBuilderSelect' class="btn btn-default col-md-8 dropdown-toggle">
+                        <option value='Status'>{% trans "Status" %}</option>
+                        <option value='Priority'>{% trans "Priority" %}</option>
+                        <option value='Assigned to'>{% trans "Assigned to" %}</option>
+                        <option value='Start'>{% trans "Start Date" %}</option>
+                        <option value='Due'>{% trans "Due Date" %}</option>
+
+                    </select>
+                    <input class="btn sort_add" type='button' id='filterBuilderButton' value='+' />
+                  {% csrf_token %}
+                </form>
+                  <div>
+                      <div class='thumbnail sorting_form filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
+                  <div class="keywords">
+                <form>
+                  <select id='id_statuses' name='status'class="status_select" multiple='selected' rows="4">
+                    {% for s in status_choices %}
+                          <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}
+                  </select>
+                    <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                    <input type='button' class='filterBuilderRemove' value='-' />
+                  <input class="btn btn-primary read_more " type='submit' value='{% trans "Apply " %}' />
+                </form>
+                      </div>
+                </div>
+              </div>
+          </div>
+
+        </div>
+        </div>
+  </div>
+</div>
+  <script>
+  $(function() {
+    $( "#id_due_date" ).datepicker({
+      dateFormat: "yy-mm-dd",
+    });
+    /*document.getElementById("id_due_date").setAttribute('value', new Date());*/
+
+    $( "#id_created_date" ).datepicker({
+      dateFormat: "yy-mm-dd"
+    });
+    var date = new Date();
+   var datestring = ('0000' + date.getFullYear()).slice(-4) + '-' + ('00' + (date.getMonth() + 1)).slice(-2) + '-' + ('00' + date.getDate()).slice(-2);
+   document.getElementById('id_created_date').value = datestring;
+
+    $( "#id_edit_due_date" ).datepicker({
+      dateFormat: "yy-mm-dd"
+    });
+
+    $( "#id_edit_created_date" ).datepicker({
+      dateFormat: "yy-mm-dd"
+    });
+  });
+  </script>
+<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+    // Enable Tabs
+    $("#searchtabs").tabs({
+        collapsible:true
+    });
+    // Hide all tabs by default
+    $("#searchtabs > ul > li").removeClass().addClass("ui-corner-top ui-state-default");
+    $("#searchtabs > div").addClass("ui-tabs-hide");
+    $("#select_all").click(function() {
+        $(".ticket_multi_select").attr('checked', true);
+        return false;
+    });
+    $("#select_none").click(function() {
+        $(".ticket_multi_select").attr('checked', false);
+        return false;
+    });
+    $("#select_inverse").click(function() {
+        $(".ticket_multi_select").each(function() {
+            $(this).attr('checked', !$(this).attr('checked'));
+        });
+        return false;
+    });
+
+//show selected query box when '+' button is clicked
+    $("#filterBuilderButton").click(function() {
+        var boxName = "#filterBox" + $("#filterBuilderSelect").val();
+        $(boxName).slideDown();
+        return false;
+    });
+    $(".filterBuilderRemove").click(function() {
+        var boxName = "#" + $(this).parents(".filterBox").attr('id');
+        $(boxName).slideUp();
+        $(boxName).children("input:text").each(function() {
+            $(this).val("");
+        });
+        $(boxName).children("input:checkbox").each(function() {
+            this.checked = false;
+        });
+        $(boxName).children("select").each(function() {
+            this.selectedIndex = -1;
+        });
+        return false;
+    });
+});
+
+</script>
+
+<script type='text/javascript' language='javascript'>
+    $(function(){
+    $("#filterBoxOwner").hide();
+    $("#filterBoxOwner").hover(function() {
+        $("filterBoxOwner").slideToggle("fast");
+    });
+    $("#filterBoxQueue").hide();
+    $("#filterBoxQueue").hover(function() {
+        $("filterBoxQueue").slideToggle("fast");
+    });
+    $("#filterBoxStatus").hide();
+    $("#filterBoxStatus").hover(function() {
+        $("filterBoxStatus").slideToggle("fast");
+    });
+    $("#filterBoxDates").hide();
+    $("#filterBoxDates").hover(function() {
+        $("filterBoxDates").slideToggle("fast");
+    });
+    $("#filterBoxType").hide();
+    $("#filterBoxType").hover(function() {
+        $("filterBoxType").slideToggle("fast");
+    });
+    $("#filterBoxKeywords").hide();
+    $("#filterBoxKeywords").hover(function() {
+    $("filterBoxKeywords").slideToggle("fast");
+    });
+    $("#filterBoxCreated").hide();
+    $("#filterBoxCreated").hover(function() {
+    $("filterBoxCreated").slideToggle("fast");
+    });
+
+});
+</script>
+{% endblock content %}

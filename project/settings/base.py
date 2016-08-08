@@ -221,6 +221,9 @@ THIRD_PARTY_APPS = (
     'requests_oauthlib',
     #'fluent_dashboard',
     'tinymce',
+    'easy_select2',
+    'endless_pagination',
+
 
 )
 
@@ -228,6 +231,7 @@ THIRD_PARTY_APPS = (
 LOCAL_APPS = (
     'project',
     'helpdesk',
+    'tasks',
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -346,3 +350,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 #ADMIN_TOOLS_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentIndexDashboard'
 #ADMIN_TOOLS_APP_INDEX_DASHBOARD = 'fluent_dashboard.dashboard.FluentAppIndexDashboard'
 #ADMIN_TOOLS_MENU = 'fluent_dashboard.menu.FluentMenu'
+
+#paginator
+ENDLESS_PAGINATION_PER_PAGE = 8
+ENDLESS_PAGINATION_TEMPLATE_VARNAME = 'template'

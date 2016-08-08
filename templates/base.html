@@ -10,15 +10,11 @@
 
         <title>{% block title %} Tola Work {% endblock %}</title>
 
-        <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.png" type="image/png">
+        <link rel="shortcut icon" href="{{ STATIC_URL }}img/tola-data-icon-red.png" type="image/png">
         
-        <!-- fonts -->
-        <script src="https://use.typekit.net/shi4wqr.js"></script>
-        <script>try{Typekit.load({ async: true });}catch(e){}</script>
 
         <!-- Bootstrap -->
         <link href="{{ STATIC_URL}}css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-        <link href="{{ STATIC_URL}}css/chosen.css" rel="stylesheet" type="text/css" />
 
         <!-- JQuery UI CSS -->
         <link href="{{ STATIC_URL }}css/ui-lightness/jquery-ui-1.10.4.min.css" rel="stylesheet" type="text/css" />
@@ -26,6 +22,11 @@
         <!-- Custom Footer CSS -->
         <link href="{{ STATIC_URL }}css/app.css" rel="stylesheet" type="text/css">
         <link href="{{ STATIC_URL }}css/test.css" rel="stylesheet" type="text/css">
+
+        <!-- Tagging -->
+        <link href="{{ STATIC_URL }}easy_select2/vendor/select2/css/select2.min.css" rel="stylesheet" type="text/css">
+
+        <!-- lookup_override.1.8 -->
 
         <!-- Data tables CSS -->
         <link href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
@@ -40,6 +41,7 @@
         <script type="text/javascript" src="//code.jquery.com/jquery-1.12.0.min.js"></script>
         <!-- App specific Javascript -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/app.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}easy_select2/vendor/select2/js/select2.min.js"></script>
 
         {% endblock %}
 
@@ -63,15 +65,15 @@
                 <ul class="nav navbar-nav row">
                     <li><a href="{% url 'home' %}"><span class="glyphicon glyphicon-home"></span> <font class="font6">Home</font></a></li>
                     {% if user.is_staff %}
-                        <li><a href='{% url 'helpdesk_dashboard' %}'><span class="glyphicon glyphicon-dashboard"></span> <span class="nav-text"><font class="font6">Dashboard</font></span></a></li>
-                    {% endif %}
-                    {% if user.is_staff %}
                         <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text"><font class="font6">Tickets</font></span></a></li>
                     {% else %}
                         <li><a href='{% url 'public_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text"><font class="font6">Tickets</font></span></a></li>
                     {% endif %}
                     <li><a href='{% url 'helpdesk_submit' %}'><span class="glyphicon glyphicon-plus"></span> <span class="nav-text"><font class="font6">New Ticket</font></span></a></li>
                     {% if user.is_staff %}
+                    {% if user.is_staff %}
+                        <li><a href='{% url 'task_list' %}'><span class="glyphicon glyphicon-tasks"></span> <span class="nav-text"><font class="font6">Tasks</font></span></a></li>
+                    {% endif %}
                         <li><a href='{% url 'helpdesk_report_index' %}'><span class="glyphicon glyphicon-stats"></span> <span class="nav-text"><font class="font6">Stats</font></span></a></li>
                     {% endif %}
                     <li class="font8"><a href="#" class="dropdown-toggle " data-toggle="dropdown"><font class="font8">Knowledgebase</font><b class="caret"></b></a>
@@ -103,7 +105,7 @@
             </div><!-- .container collapse -->
         </div><!-- .navbar collapse -->
         <div class="container">
-            <br/>
+
             <div>{% block bread_crumb %}{% endblock %}</div>
             <div id = "alerts">
                 <!-- Any messages for users -->
@@ -129,21 +131,23 @@
             <p>{% block helpdesk %}{% endblock %}</p>
 
         </div><!-- .container collapse -->
-        <div id="footer" class="col-md-12 col-sm-12">
+
+        <div id="footer"  class="col-md-12 col-sm-12">
             <!-- Sticky Footer -->
             <div class="container">
-                <div class="col-md-4 text-left">
-                    <a href="https://github.com/toladata/tola-work/blob/master/LICENSE" class="text-muted">GNU GENERAL PUBLIC LICENSE Version 2</a>
+                <div class="col-md-6 col-sm-6 text-left">
+                    <a href="http://www.toladata.com" class="text-muted"><b>Tola</b>Data: Built by</a> <a href="http://www.mercycorps.org" class="text-muted">MercyCorps</a>
                 </div>
-                <div class="col-md-6 text-center">
-                    <a href="http://www.toladata.com" class="text-muted">Inspired in Kabul. Built in Portland. Supported from Nairobi</a>
-                </div>
-                <div class="col-md-2 text-right">
-                    <a href="{% url 'documentation' %}" class="text-muted">Documentation</a> | <a href="{% url 'faq' %}" class="text-muted">FAQ</a>
+
+                <div class="col-md-6 col-sm-6 text-right"> <a href="http://tola.work/documentation" class="text-muted">Documentation</a> | <a href="http://tola.work/faq" class="text-muted">FAQ</a> | <a href="http://tola.work/helpdesk/tickets/submit/" class="text-muted">Feedback</a> | <a href="https://github.com/toladata/TolaActivity/blob/master/LICENSE" class="text-muted">License</a>
                 </div>
             </div>
-        </div><!-- .footer collapse -->
-        <!-- jQuery UI (necessary for datepicker as well as dataTables library -->
+        </div>
+
+        <!-- Typekit (Fonts) -->
+        <script src="https://use.typekit.net/shi4wqr.js"></script>
+        <script>try{Typekit.load({ async: true });}catch(e){}</script>
+        
         <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.10.4.min.js"></script>
         <!-- data tables jquery javascript library -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
@@ -153,7 +157,6 @@
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
         <script type="text/javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
-        <script type="text/javascript" src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
         <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
         <script type="text/javascript" src="{{ STATIC_URL }}js/naturalSort.js"></script>
 
@@ -174,9 +177,6 @@
         </script>
 
         {% endblock %}
-        <!-- Typekit (Fonts) -->
-        <script src="https://use.typekit.net/shi4wqr.js"></script>
-        <script>try{Typekit.load({ async: true });}catch(e){}</script>
     </body>
 </html>
 

@@ -5,7 +5,8 @@
 {% block helpdesk_body %}{% blocktrans with ticket.title as ticket_title and ticket.id as ticket_id %}
 <h2>Ticket CC Settings</h2>
 
-<p>The following people will receive an e-mail whenever <em><a href='../'>{{ ticket_title }}</a></em> is updated. Some people can also view or edit the ticket via the public ticket views.</p>
+<p>The following people will receive an e-mail whenever the Ticket below is updated
+    <br/><br/><span class="glyphicon glyphicon-edit"></span>&nbsp;<strong>{{ ticket_title }}</strong>. <br/><br/>Some people can also view or edit the ticket via the public ticket views.</p>
 
 <p>You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>{% endblocktrans %}
 
@@ -26,6 +27,6 @@
 </tbody>
 </table>
 
-<p><a href='{% url 'helpdesk_view' ticket.id %}'>{% blocktrans with ticket.title as ticket_title %}Return to <em>{{ ticket_title }}</em>{% endblocktrans %}</a></p>
+
 
 {% endblock %}

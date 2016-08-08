@@ -6,11 +6,6 @@
 
 {% block helpdesk_body %}
 <h2>{% trans "Knowledgebase" %}</h2>
-<div class="col-md-12 row">
-    <div class="col-md-8">
-    <p>{% trans "We have listed a number of knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
-    </div>
-</div>
 
 <div class="col-md-12 row"> 
     <div class="collapselist knowledge_panel">
@@ -29,7 +24,6 @@
             <table class="table table-striped"> 
                 <tr> 
                     <th>{% trans "Title" %}</th>
-                    <th>{% trans "Question" %}</th>
                     <th>{% trans "Answer" %}</th>
                     <th>{% trans "Last Updated" %}</th>
                 </tr>
@@ -38,8 +32,7 @@
                     {% if item.category_id == category.id %}
                         <tr>
                             <td><a href='{{ item.get_absolute_url }}'>{{ item.title }}</a></td>
-                            <td>{{ item.question | safe | urlize}}</td>
-                            <td>{{ item.answer | safe| urlize}}</a></td>
+                            <td>{{ item.answer | safe }}</a></td>
                             <td><span title='{{ ticket.created|date:"r" }}'>{{ item.last_updated }}</span></td>
 
                         </tr>

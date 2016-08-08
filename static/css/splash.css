@@ -45,27 +45,13 @@ html {
     }
 }
 .item:nth-child(1) {
-    background: url(../img/img4.jpg) no-repeat center center fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
+    background: url(../img/img5.jpg)  no-repeat;
+    background-size: 100% 100%;
 }
 .item:nth-child(2) {
-    background: url(../img/img2.jpg) no-repeat center center fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
+    background: url(../img/img6.jpg) no-repeat;
+    background-size: 100% 100%;
 }
-.item:nth-child(3) {
-    background: url(../img/img3.png) no-repeat center center fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-}
-
 .carousel {
     z-index: -99;
 }
@@ -202,7 +188,7 @@ body {
 .dropdown-menu
 {
     background-color: #fff;
-    width: 250px;
+    width: 300px;
     border-bottom: 0px;
 }
 /*end of fonts*/
@@ -231,9 +217,13 @@ body {
     margin-left: 20px;
     margin-top: 10px;
 }
+.login
+{
+    float: right;
+}
 nav ul
 {
-    background-color: rgba(179, 8, 56, 0.5);
+    background-color: rgba(0,0,0, 1);
     
 }
 
@@ -243,7 +233,9 @@ nav ul li a:active
 }
 .logo
 {
-    margin-left: 100px;
+    margin-left: 40px;
+    margin-bottom: 20px;
+    margin-top: 20px;
 }
 .splash
 {

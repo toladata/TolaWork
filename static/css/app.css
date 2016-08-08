@@ -35,7 +35,10 @@ body {
 
 body > .container {
     height: 100%;
-    margin-top: 40px;
+    width: 90%;
+    margin-left: 5%;
+    margin-top: 50px;
+
 }
 
 .row {
@@ -145,11 +148,20 @@ margin-right: 0px
 }
 .font7
 {
-    font-size: 23px;
+    font-size: 21px;
 }
-
-
-
+.font8
+{
+    margin-bottom: 10px;
+}
+.font9
+{
+    text-align: center;
+}
+.font10
+{
+    margin-top: 5px;
+}
 /*//end of fonts*/
 .collapselist
 {
@@ -175,42 +187,63 @@ margin-right: 0px
 {
     background-color: #ff9933;
 }
-.panel-footer
-{
-    background-color: #ff9933;
-}
 
 /*//home page*/
-.main_home
-{
-    background-color: #FAFAFA;
-    border-radius: 5px;
-    /*padding-bottom:10px;*/
 
-}
 .main_home table a 
 {
     color:#4db3d0;
 }
 .main_home
 {
+    background-color: #FAFAFA;
+    position: relative;
+    overflow: hidden;
+    border-radius: 5px;
     margin-bottom: 0px;
     padding-bottom: 0px;
 }
 .minor_home
 {
-    background-color: #FAFAFA;
+    background-color: #Fff;
     border-radius: 5px;
+    position: relative;
+    margin-right: 5px;
+    overflow: hidden;
     padding: 0px;
     
 }
 .home_cover
 {
     position: relative;
+    margin-top: 30px;
     border:1px solid#eee;
     overflow: hidden;
     padding: 5px;
     border-radius: 5px;
+
+}
+.logged_in_users
+{
+    margin-left: 15px;
+    position: relative;
+    overflow: hidden;
+    margin-right: 3px;
+    margin-top: 20px;
+}
+
+#active_users {
+    position: relative;
+    overflow-y: scroll;
+    border: 1px solid#ccc;
+    border-radius: 5px;
+    padding-top: 5px;
+    width: 100%;
+    max-height: 250px;
+  }
+#active_users p
+{
+    margin-left: 8px;
 
 }
 .home_button
@@ -218,13 +251,27 @@ margin-right: 0px
     background-color: #b20838;
     color:#fff;
 }
+
+/*//pie chart*/
+#pie_container
+{
+    min-width: 300px;
+    height: 300px; 
+    max-width: 600px; 
+   margin: 0 auto;
+    
+}
 .pie 
 {
-    background-color: #FAFAFA;
+    background-color: #FFF;
 }
 .panel_top
 {
     background-color: #ff8000;
+}
+.preview_links
+{
+    margin-bottom: 10px;
 }
 .homenav
 {
@@ -267,40 +314,21 @@ margin-right: 0px
 {
     background-color: #800000;
 }
-.container
-{
-    width:95.5%;
-    margin-left: 2%;
-}
 
-/*//pie chart*/
-.pie_container
-{
-    min-width: 310px; 
-    height: 300px; 
-    max-width: 600px; 
-    margin: 0 auto;
-}
 .tolatables
 {
-    background-color: #4db3d0;
-    color:#fff;
-    padding:10px;
-    padding-left: 15px;
+    color: #4db3d0;
+    
 }
+ 
 .tolaactivity
 {
-    background-color: #e89424;
-    color:#fff;
-    padding:10px;
-    padding-left: 15px;
+    color: #e89424;
+    
 }
 .ona
 {
-    background-color: #d06a4d;
-    color:#fff;
-    padding:10px;
-    padding-left: 15px;
+    color: #d06a4d;  
 }
 .home-paneltitle
 {
@@ -310,6 +338,30 @@ margin-right: 0px
 {
     border: 1px solid#4db3d0;
 }
+.panel_bottom
+{
+    background-color: #FAFAFA;
+    padding-bottom: 0px;
+    position: relative;
+    overflow: hidden;
+}
+.home-bottom
+{
+    position: relative;
+    margin-top: 10px;
+    border:1px solid#eee;
+    overflow: hidden;
+    padding: 5px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+
+}
+
+.activity_details
+{
+    margin-top: 10px;
+}
+
 .form_register_btn
 {
     margin-left: 16px;
@@ -328,4 +380,314 @@ margin-right: 0px
 {
     padding: 3px;
     padding-left: 10px;
+}
+/*//new blog for tickets*/
+.ticket_cover
+{
+    position: relative;
+    border:1px solid#eee;
+    overflow: hidden;
+    border-radius: 5px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 40px;
+}
+.ticket_right
+{
+    border-right: 1px solid#eee;
+    margin-bottom: 5px;
+}
+.ticket_issues
+{
+    background-color: #e89424;
+    float: right;
+    padding: 3px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #fff;
+}
+.attach_files
+{
+    margin-left: 50px;
+}
+
+.issues_badge
+{
+    float: right;
+}
+.sorting_header
+{
+    border: 1px solid #eee;
+}
+.sort_panels
+{
+    border-bottom: 1px solid#eee;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 3px;
+}
+
+/*//search box*/
+.search
+{
+    margin-bottom: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+/*//paginator for the tickets page*/
+.ticket_paginator
+{
+    margin-right: 15px;
+}
+ul.pagination {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+
+ul.pagination li {display: inline;}
+
+ul.pagination li a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: background-color .3s;
+    border: 1px solid #ddd;
+}
+
+ul.pagination li a.active {
+    background-color: #4CAF50;
+    color: white;
+    border: 1px solid #4CAF50;
+}
+
+ul.pagination li a:hover:not(.active) {background-color: #ddd;}
+
+/*// limiting numebr of words displayed in ticket description*/
+.morecontent span {
+    display: none;
+}
+.read_more
+{
+    float: right;
+}
+.morelink {
+    display: block;
+}
+
+/*//tasks page*/
+.center
+{
+    text-align: right;
+}
+.scores ul li
+{
+    margin: 0px;
+    padding: 0px;
+    list-style: none;
+}
+.modal-body
+{
+    position: absolute;
+    overflow: hidden;
+}
+.modal_button
+{
+    margin-top: 10px;
+}
+.task_form
+{
+    background-color: #d6f5f5;
+    position: relative;
+    overflow: hidden;
+    padding: 5px;
+    border-radius: 5px;
+}
+.task_minor
+{
+    border-left: 1px solid#eee;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+.task_title
+{
+    margin-left: 40px;
+}
+.tab-pane 
+{
+    margin-top: 10px;
+    position: relative;
+    overflow: hidden;
+    padding: 5px;
+}
+.view_table
+{
+    margin-left: 15px;
+}
+.task_view
+{
+    background-color: #eee;
+}
+.task_edit
+{
+    position: relative;
+    background-color: #fff;
+    border:1px solid#eee;
+    overflow: hidden;
+    padding: 5px;
+    padding-top: 10px;
+    border-radius: 5px;
+
+}
+.edit_note
+{
+    margin-left: 5px;
+}
+/*ticket edit form*/
+.task_spacing
+{
+    margin-bottom: 20px;
+}
+
+.ticket_edit label {
+    float: left;
+    text-align: left;
+}
+.ticket_padding
+{
+    margin-bottom: 8px;
+}
+.multi_select
+{
+    width:352px;
+}
+.add_ticket
+{
+    padding-bottom: 5px;
+    position: relative;
+    overflow: hidden;
+}
+.ticket_form
+{
+    background-color: #d6f5f5;
+    position: relative;
+    overflow: hidden;
+    padding: 15px;
+    border-radius: 5px;
+}
+.ticket_title
+{
+    margin-left: 15px;
+}
+.ticket_view
+{
+    background-color: #eee;
+    margin-bottom: 15px;
+    margin-top: 8px;
+}
+.ticket_padding
+{
+    margin-left: 10px;
+}
+.ticket_form_cover
+{
+    position: relative;
+    border:2px solid#fff;
+    overflow: hidden;
+    padding: 5px;
+    border-radius: 5px;
+
+}
+.task_border
+{ 
+    position: relative;
+    border:2px solid#fff;
+    overflow: hidden;
+    padding: 5px;
+    border-radius: 5px;
+}
+.addTask
+{
+    background-color: #e6e6ff;
+    padding: 5PX;
+}
+.ticket_task
+{
+    background-color: #fff;
+}
+/*tickets filter section*/
+.filter_form
+{
+    margin-top: 10px;
+}
+form .thumbnail
+{
+    margin-top: 8px;
+    padding-top: 5px;
+
+}
+.thumbnail label
+{
+    float: left;
+    margin-right: 7px;
+}
+.sorting_form
+{
+    position: relative;
+    overflow: hidden;
+}
+.reverse_sort
+{
+    margin-top: 5px;
+}
+.sort_add
+{
+    margin-left:9px;
+}
+.sort_select
+{
+    margin-left:9px;
+    width: 135px;
+}
+.owners_select
+{
+    width: 130px;
+}
+.status_select
+{
+    width: 125px;
+}
+.date_input
+{
+    width: 115px;
+}
+.date_to input
+{
+    margin-left: 19px;
+}
+.date_to 
+{
+    margin-top: 7px;
+    margin-bottom: 7px;
+}
+.keywords
+{
+    margin-bottom: 5px;
+}
+.keywords input
+{
+    width: 128px;
+}
+.types_select
+{
+    width: 155px;
+}
+.githubsync
+{
+    margin-bottom: 10px;
+    margin-top: 10px;
 }
