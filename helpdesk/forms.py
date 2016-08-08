@@ -250,7 +250,7 @@ class TicketForm(forms.Form):
         ticket = t
         user = None
         try:
-            user = t.assigned_to  
+            user = t.assigned_to
         except Exception, e:
             pass
 
