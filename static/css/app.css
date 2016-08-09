@@ -200,7 +200,6 @@ margin-right: 0px
     position: relative;
     overflow: hidden;
     border-radius: 5px;
-    margin-bottom: 0px;
     padding-bottom: 0px;
 }
 .minor_home
@@ -216,12 +215,12 @@ margin-right: 0px
 .home_cover
 {
     position: relative;
-    margin-top: 30px;
+    margin-top: 20px;
+    margin-bottom: 50px;
     border:1px solid#eee;
     overflow: hidden;
     padding: 5px;
     border-radius: 5px;
-
 }
 .logged_in_users
 {
