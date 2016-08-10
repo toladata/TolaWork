@@ -1015,17 +1015,7 @@ def ticket_dependency_add(request, ticket_id):
 ticket_dependency_add = staff_member_required(ticket_dependency_add)
 
 def ticket_list(request):
-    context = {}
-    # Query_params will hold a dictionary of parameters relating to
-    # a query, to be saved if needed:
-    query_params = data_query_params()
-
-    from_saved_query = False
-
-    # If the user is coming from the header/navigation search box, lets' first
-    # look at their query to see if they have entered a valid ticket number. If
-    # they have, just redirect to that ticket number. Otherwise, we treat it as
-    # a keyword search.
+    #create ticket
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     if request.method == 'POST':
@@ -1080,6 +1070,19 @@ def ticket_list(request):
         except Exception, e:
             form = PublicTicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
+   #ticket_list 
+    context = {}
+    # Query_params will hold a dictionary of parameters relating to
+    # a query, to be saved if needed:
+    query_params = data_query_params()
+
+    from_saved_query = False
+
+    # If the user is coming from the header/navigation search box, lets' first
+    # look at their query to see if they have entered a valid ticket number. If
+    # they have, just redirect to that ticket number. Otherwise, we treat it as
+    # a keyword search.
 
     if request.GET.get('search_type', None) == 'header':
         query = request.GET.get('q')
@@ -1195,31 +1198,32 @@ def ticket_list(request):
 
         ### SORTING
         data_sorting(request,query_params)
-        # all tickets, reported by current user
-    all_tickets_reported_by_current_user=''
-    email_current_user = request.user.email
-    if email_current_user:
-        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
-                submitter_email=email_current_user,
-            ).order_by('status')
-        # open & reopened tickets, assigned to current user
-    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
 
-    tickets = Ticket.objects.all()
+    tickets = Ticket.objects.select_related()
     num_tickets = tickets.count()
 
     queue_choices = Queue.objects.all()
 
-# Tickets assigned to current user
+    # Tickets assigned to current user
     assigned_to_me = Ticket.objects.select_related('queue').filter(
         assigned_to=request.user,
      ).exclude(
         status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
     )
 
+    # all tickets, reported by current user
+    all_tickets_reported_by_current_user = {}
+    email_current_user = request.user.email
+    if email_current_user:
+        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
+                submitter_email=email_current_user,
+            ).order_by('status')
+
+    # open & reopened tickets, assigned to current user
+    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user,
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
     # Tickets created by current user
     created_by_me = Ticket.objects.select_related('queue').filter(
@@ -1239,6 +1243,7 @@ def ticket_list(request):
             'sorting': 'created',
         }
         ticket_qs = apply_query(tickets, query_params)
+
 
     #Change items per_page by a user
     items_per_page = 10

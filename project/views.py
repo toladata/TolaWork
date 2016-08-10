@@ -148,7 +148,7 @@ def home(request):
     recent_tickets = Ticket.objects.all().exclude(status__in='4').order_by('-created')[:5]
     votes_tickets = Ticket.objects.all().exclude(status__in='4').filter(type=2).order_by('-votes')[:5]
     recent_tasks = Task.objects.all().order_by('-created_date')[:5]
-    num_tickets = len(Ticket.objects.all())
+    num_tickets = len(Ticket.objects.filter(status__in=[1,2,3]))
     num_tasks = len(Task.objects.all())
 
     closed_resolved = 0
