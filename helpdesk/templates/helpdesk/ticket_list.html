@@ -293,7 +293,7 @@
                             <input name="github" type='button ' class="btn btn-info" value='{% trans "Send to Github" %}' onClick="location.href='send_to_github/'"/>
                           {% endif %}
                         {% else %}
-                          <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Issue in Github" %}' onClick="location.href='{{ ticket.github_issue_url }}'"/>
+                          <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Ticket in Github" %}' onClick="location.href='{{ ticket.github_issue_url }}'"/>
                         {% endif %}
 
                         {% if ticket.slack_status == 0 %}
@@ -542,7 +542,7 @@
                   </div>
                   <div class="modal-body">
                     <div class="alert alert-success" role="alert">
-                      <p>'We recommend that you search for your issue or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!'</p>
+                      <p>'We recommend that you search for your ticket or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!'</p>
                     </div>
                     <form class="form-horizontal" method='post' action='./' enctype='multipart/form-data'  name="most">
                       {% load crispy_forms_tags %}

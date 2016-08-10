@@ -545,7 +545,7 @@ def send_to_github(request, ticket_id):
         response = new_issue(repo,ticket)
 
     if int(response) == 201:
-        messages.success(request, 'Success, issue sent to Github')
+        messages.success(request, 'Success, ticket sent to Github')
 
     else:
         messages.success(request, 'There was a problem sending the ticket to GitHub')
@@ -1361,7 +1361,7 @@ def ticket_edit(request):
 @login_required
 def create_ticket(request):
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-    messages.add_message(request, messages.SUCCESS, 'We recommend that you search for your issue or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!')
+    messages.add_message(request, messages.SUCCESS, 'We recommend that you search for your ticket or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!')
 
     if request.method == 'POST':
         if request.user.is_staff:

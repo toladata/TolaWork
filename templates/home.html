@@ -11,7 +11,7 @@
       <div class="col-md-12 col-sm-12">
         <!-- Introductory message -->
         <h2><strong>Tola</strong>Work</h2>
-        <p class="font7">Get help setting up, using and configuring Tola Activity, Tola Tables and Mobile Data collection platforms and M&E in general.  Report any issues with tools and request  and vote on new features.</p>
+        <p class="font7">Get help setting up, using and configuring Tola Activity, Tola Tables, Mobile Data collection platforms and M&E in general. Use tickets to report any issues with <strong>Tola</strong>Data tools, request and vote on new features.</p>
         <br/>
         <!--  add ticket button -->
         <button class="btn btn-lg btn-success" type="submit" data-toggle="modal" data-target="#ticketModal"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</button>
@@ -27,7 +27,7 @@
               </div>
               <div class="modal-body">
                 <div class="alert alert-success" role="alert">
-                  <p>'We recommend that you search for your issue or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!'</p>
+                  <p>'We recommend that you search if such ticket or request already exists before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!'</p>
                 </div>
                 <form class="form-horizontal" method='post' action='./' enctype='multipart/form-data'  name="most">
                   {% load crispy_forms_tags %}
@@ -590,7 +590,7 @@
       <div class="col-md-3 col-sm-3 minor_home">
         {%if user.is_staff%}
           <div class="col-md-10 col-md-offset-2 githubsync">
-            <a href="{% url 'gitissueupdate' %}" class="btn btn-info"><b><span class="glyphicon glyphicon-refresh"></span></b> Sync Issues with Github</a>
+            <a href="{% url 'gitissueupdate' %}" class="btn btn-info"><b><span class="glyphicon glyphicon-refresh"></span></b> Sync Tickets with Github</a>
           </div>
         {% endif %}
         <br>
