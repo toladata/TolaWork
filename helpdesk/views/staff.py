@@ -383,7 +383,7 @@ def vote_down(request, id):
 
 def email(ticket,comment, status_text):
 
-    if ticket.assigned_to == "0":
+    if ticket.get_assigned_to == "Unassigned":
         assignee = ticket.submitter_email
     else:
         assignee = ticket.assigned_to.email
@@ -475,8 +475,13 @@ def post_comment(request, ticket_id):
                 status_text = 'Not a status'
 
             created = ticket.created
+
             #check the person whom the ticket is assigned to
-            assigned_to_username = str(ticket.assigned_to).upper()
+            if not ticket.get_assigned_to == 'Unassigned':
+                assigned = str(ticket.assigned_to).upper()
+            else:
+                assigned = None
+
             on_hold = ticket.on_hold
             description = ticket.description
             resolution = ticket.resolution
@@ -489,7 +494,6 @@ def post_comment(request, ticket_id):
                 tags = ""
 
             last_escalation = ticket.last_escalation
-            assigned = ticket.assigned_to
             github_id = ticket.github_issue_id
             github_no = ticket.github_issue_number
             github_url = ticket.github_issue_url
@@ -505,6 +509,7 @@ def post_comment(request, ticket_id):
             else:
                 f_comments = str(request.user.email.upper())  + ' changed ticket status from ['  + str(ticket.get_status) + '] to [ ' + str(status_text) + ']'
 
+
             update_comments = Ticket(id=ticket_id, title=title, created=created,
                                      modified=timezone.now(), description=description,
                                      submitter_email=request.POST.get('submitter_email',request.user.email.upper()), status=status,
@@ -514,7 +519,7 @@ def post_comment(request, ticket_id):
                                      queue=queue, github_issue_id=github_id, github_issue_number=github_no,
                                      github_issue_url=github_url, type=type, votes=votes,
                                      error_msg=error, slack_status=slack_status)
-            update_comments.save(update_fields=['status'])
+            update_comments.save(update_fields=['status','assigned_to'])
 
             new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status)
             new_followup.save()
