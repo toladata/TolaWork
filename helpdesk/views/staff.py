@@ -109,7 +109,7 @@ def homepage(request):
         }))
 
 @login_required
-def view_ticket(request):
+def public_view_ticket(request):
     ticket_req = request.GET.get('ticket', '')
     ticket = False
     email = request.GET.get('email', '')
