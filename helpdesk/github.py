@@ -60,7 +60,7 @@ def new_issue(repo,ticket):
     payload = {}
     labels = ['Tola-Work Ticket']
     payload['title'] = ticket.title
-    payload['body'] = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment)
+    payload['body'] = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment) + " Link to Ticket - " + str(ticket.t_url)
     payload['labels'] = labels
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues"
