@@ -541,6 +541,7 @@ taskview = staff_member_required(taskview)
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     repo = queue_repo(ticket)
+
     if not ticket.github_issue_id:
         response = new_issue(repo,ticket)
 
@@ -642,6 +643,11 @@ def view_ticket(request, ticket_id):
     if not (request.user.is_active):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
     ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if not ticket.t_url:
+        ticket.t_url = request.build_absolute_uri()
+        ticket.save(update_fields=['t_url'])
+
     progress=''
     if ticket.github_issue_id:
         repo = queue_repo(ticket)
@@ -649,6 +655,7 @@ def view_ticket(request, ticket_id):
         response = get_issue_status(repo,ticket)
 
         if response == 200:
+
             #synced status wth github
             ticket_state = get_object_or_404(Ticket, id=ticket_id)
             status = ticket_state.status
@@ -747,6 +754,9 @@ def view_ticket(request, ticket_id):
     tickets_created = Ticket.objects.select_related('queue')\
                     .filter(submitter_email=request.user.email,)\
                     .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+
+    print "URL - " + str(request.build_absolute_uri())
+
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
