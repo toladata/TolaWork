@@ -78,7 +78,7 @@ def new_issue(repo,ticket):
         update_ticket.github_issue_url = github_issue_url
         update_ticket.github_issue_number = github_issue_number
         update_ticket.github_issue_id = github_issue_id
-        update_ticket.save()
+        update_ticket.save(update_fields=['github_issue_url','github_issue_number','github_issue_id'])
 
     return r.status_code
 

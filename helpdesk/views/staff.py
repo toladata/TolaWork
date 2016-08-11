@@ -755,8 +755,6 @@ def view_ticket(request, ticket_id):
                     .filter(submitter_email=request.user.email,)\
                     .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
 
-    print "URL - " + str(request.build_absolute_uri())
-
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
