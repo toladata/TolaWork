@@ -644,7 +644,9 @@ def view_ticket(request, ticket_id):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-
+    if not ticket.t_url:
+        ticket.t_url = request.build_absolute_uri()
+        ticket.save(update_fields=['t_url'])
 
     progress=''
     if ticket.github_issue_id:
