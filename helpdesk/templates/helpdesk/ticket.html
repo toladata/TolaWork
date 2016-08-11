@@ -254,7 +254,7 @@
 
                                       {% if not ticket.github_issue_url %}
                                        {% if request.user.is_staff %}
-                                        <input name="github" type='button ' class="btn btn-info" value='{% trans "Send to Github" %}' onClick="location.href='send_to_github/'"/>
+                                        <input name="github" type='button ' class="btn btn-info" value='{% trans "Send to Github" %}' onClick="location.href='/helpdesk/tickets/{{ticket.id}}/send_to_github/'"/>
                                       {% endif %}
                                       {% else %}
 

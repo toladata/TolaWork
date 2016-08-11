@@ -118,6 +118,10 @@ def get_label(repo,ticket):
             if label == "Tola-Work Ticket":
                 label_txt = 'Submitted from TolaWork '
 
+            elif label == "accepted":
+                label_txt2 = ', accepted by QA Lead and moved into the Ready Queue'
+                label_int = '5'
+
             elif label == "1 - Ready":
                 label_txt2 = ', accepted by Developers and moved into the Ready Queue'
                 label_int = '1'

@@ -544,12 +544,12 @@ def send_to_github(request, ticket_id):
     if not ticket.github_issue_id:
         response = new_issue(repo,ticket)
 
-    if int(response) == 201:
-        messages.success(request, 'Success, ticket sent to Github')
+        if int(response) == 201:
+            messages.success(request, 'Success, ticket sent to Github')
 
-    else:
-        messages.success(request, 'There was a problem sending the ticket to GitHub')
-        print response
+        else:
+            messages.success(request, 'There was a problem sending the ticket to GitHub')
+            print response
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
