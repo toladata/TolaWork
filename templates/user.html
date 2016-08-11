@@ -99,6 +99,7 @@ $(function () {
 {% load in_list %}
 <div class="container">
   <div class="panel-body">
+    <!-- display of the labels -->
     <ul class="nav nav-tabs">
       <li class="active ">
         <a data-toggle="tab" href="#tickets">Tickets </a>
@@ -107,392 +108,435 @@ $(function () {
         <a data-toggle="tab" href="#tasks">Tasks</a>
       </li>
     </ul>
+    <!-- content display -->
     <div class="tab-content">
-        <div id="tickets" class="tab-pane fade in active">
-          <div class="col-md-12 row">
-            <div class="col-md-8">
-              <h4>Tickets for {{username}}</h4>
-              <div class="panel panel-info ">
-                <div class="panel-heading">
+      <!-- start of the tickets section -->
+      <div id="tickets" class="tab-pane fade in active">
+        <div class="col-md-12 row">
+          <div class="col-md-8">
+            <h4>Tickets for {{username}}</h4>
+            <div class="panel panel-info ">
+              <div class="panel-heading">
                 <strong>Total Tickets <span class="badge read_more">{{ total_tickets }}</span></strong>
-                </div>
-                <div class="panel-body">
-                  <div class="sort_panels" >
-                    <div class= "preview_links">
-                       <a href="#Created_by_user" data-toggle="collapse">Tickets Created </a> <strong> <span class="badge read_more"> {{ total_tickets_created }} </span></strong>
-                    </div>
-                    <div id="Created_by_user" class="collapse in">
-                    {% if tickets_created %}
-                      <div class="table-responsive">
-                        <table class="table table-striped">
+              </div>
+              <!-- tickets display section -->
+              <div class="panel-body">
+                <!-- tickets created -->
+                <div class="sort_panels" >
+                  <div class= "preview_links">
+                    <a href="#Created_by_user" data-toggle="collapse">Tickets Created </a> <strong> <span class="badge read_more"> {{ total_tickets_created }} </span></strong>
+                  </div>
+                  <!-- collapse section for tickets created -->
+                  <div id="Created_by_user" class="collapse in">
+                  {% if tickets_created %}
+                    <!-- table to display tickets created -->
+                    <div class="table-responsive">
+                      <table class="table table-striped">
+                        <tr>
+                          <th>Status</th>
+                          <th>Queue</th>
+                          <th>Title</th>
+                          <th>Date Created</th>
+                        </tr>
+                        {% load endless %}
+                        {% paginate tickets_created %}
+                        {% for item in tickets_created %}
                           <tr>
-                              <th>Status</th>
-                              <th>Queue</th>
-                              <th>Title</th>
-                              <th>Date Created</th>
+                            <td>{% if item.status == 1 %} Open {%elif item.status == 2%}Re-Opened{% elif item.status == 3%}Resolved{% elif item.status == 4%}Closed{% elif item.status == 5%}Duplicate{% endif %}</td>
+                            <td>{{ item.queue }}</td>
+                            <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
+                            <td>{{ item.created }}</td>
                           </tr>
-                          {% load endless %}
-                          {% paginate tickets_created %}
-                            {% for item in tickets_created %}
-                              <tr>
-                                  <td>{% if item.status == 1 %} Open {%elif item.status == 2%}Re-Opened{% elif item.status == 3%}Resolved{% elif item.status == 4%}Closed{% elif item.status == 5%}Duplicate{% endif %}</td>
-                                  <td>{{ item.queue }}</td>
-                                  <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
-                                  <td>{{ item.created }}</td>
-                              </tr>
-                              {% endfor %}
+                          {% endfor %}
+                      </table>
+                    </div>
+                    <!-- end of tickets created table -->
+                    <!-- tickets created paginator -->
+                    <div>
+                      {% get_pages %}
+                      <ul class="pagination">
+                      {% for page in pages %}
+                        {% if page == None %}
+                          <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="...">
+                              <span aria-hidden="true">...</span>
+                              <span class="sr-only">...</span>
+                            </a>
+                          </li>
+                        {% else %}
+                          <li class="page-item {% if page.is_current %} active {% endif %}">
+                            <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                              <span aria-hidden="true">{{ page.label|safe }}</span>
+                              <span class="sr-only">Page {{page.number}}</span>
+                            </a>
+                          </li>
+                        {% endif %}
+                      {% endfor %}
+                      </ul>
+                    </div>
+                    <!-- end of tickets create paginator -->
+                    {% else %}
+                    <div class="alert alert-info" role="alert">
+                      <h5>There are no tickets currently created by {{username}}</h5>
+                    </div>
+                    {% endif %}
+                  </div> <!-- end of the collapse section for tickets created -->
+              </div>
+              <!-- end of tickets created -->
+
+              <!-- start of tickets assigned -->
+              <div class="sort_panels">
+                <div class= "preview_links">
+                  <a href="#assigned_to_me" data-toggle="collapse">Tickets Assigned </a> <strong><span class="badge read_more"> {{ total_tickets_assigned }} </span></strong>
+                </div>
+                <!-- the collapse section of tickets assigned -->
+                <div id="assigned_to_me" class="collapse">
+                 {% if tickets_assigned %}
+                  <!-- the tickets assigned table -->
+                  <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tr>
+                          <th>Status</th>
+                          <th>Queue</th>
+                          <th>Title</th>
+                          <th>Date Created</th>
+                        </tr>
+                        {% paginate tickets_assigned using "tickets_assigned_page" %}
+                        {% for ticket in tickets_assigned  %}
+                        <tr>
+                          <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
+                          <td>{{ticket.queue}}</td>
+                          <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
+                          <td> {{ticket.created}}</td>
+                        </tr>
+                        {%endfor%}
+                    </table>
+                  </div>
+                  <!-- end of the tickets assigned table -->
+                  <!-- tickets assigned paginator -->
+                  <div>
+                    {% get_pages %}
+                    <ul class="pagination">
+                    {% for page in pages %}
+                      {% if page == None %}
+                        <li class="page-item disabled">
+                          <a class="page-link" href="#" aria-label="...">
+                            <span aria-hidden="true">...</span>
+                            <span class="sr-only">...</span>
+                          </a>
+                        </li>
+                      {% else %}
+                        <li class="page-item {% if page.is_current %} active {% endif %}">
+                          <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                            <span aria-hidden="true">{{ page.label|safe }}</span>
+                            <span class="sr-only">Page {{page.number}}</span>
+                          </a>
+                        </li>
+                      {% endif %}
+                    {% endfor %}
+                    </ul>
+                  </div> <!-- end of the tickets assigned paginator -->
+                  {% else %}
+                    <div class="alert alert-info" role="alert">
+                      <h5>There are no tickets currently assigned to {{username}}</h5>
+                    </div>
+                  {% endif %}
+                </div> <!-- end of the collpase section for tickets assigned -->
+              </div>
+              <!-- end of tickets assigned -->
+
+              <!-- tickets closed -->
+              <div class="sort_panels">
+                <div class= "preview_links">
+                  <a href="#closed_resolved" data-toggle="collapse">Tickets Closed and Resolved </a> <strong> <span class="badge read_more"> {{ total_tickets_closed_resolved }} </span></strong>
+                </div>
+                <!-- the collapse section for tickets closed  --> 
+                <div id="closed_resolved" class="collapse">
+                  {% if tickets_closed_resolved %}
+                    <!-- tickets closed table -->
+                    <div class="table-responsive">
+                      <table class="table table-striped">
+                        <tr>
+                          <th>Status</th>
+                          <th>Queue</th>
+                          <th>Title</th>
+                          <th>Date Created</th>
+                        </tr>
+                        {% paginate tickets_closed_resolved using "tickets_closed_resolved_page" %}
+                        {% for ticket in tickets_closed_resolved %}
+                        <tr>
+                          <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
+                          <td>{{ticket.queue}}</td>
+                          <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
+                          <td> {{ticket.created}}</td>
+                        </tr>
+                        {%endfor%}
+                      </table>
+                    </div>
+                    <!-- end of the tickets closed table -->
+                    <!-- tickets closed paginator -->
+                    <div>
+                      {% get_pages %}
+                      <ul class="pagination">
+                      {% for page in pages %}
+                        {% if page == None %}
+                          <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="...">
+                              <span aria-hidden="true">...</span>
+                              <span class="sr-only">...</span>
+                            </a>
+                          </li>
+                        {% else %}
+                          <li class="page-item {% if page.is_current %} active {% endif %}">
+                            <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                              <span aria-hidden="true">{{ page.label|safe }}</span>
+                              <span class="sr-only">Page {{page.number}}</span>
+                            </a>
+                          </li>
+                        {% endif %}
+                      {% endfor %}
+                      </ul>
+                    </div>
+                    <!-- end of the tickets closed paginator -->
+                  {% else %}
+                    <div class="alert alert-info" role="alert">
+                      <h5>There are no tickets currently closed and resolved by {{username}}</h5>
+                    </div>
+                  {% endif %}
+                </div> <!-- end of the collapse section for the tickets closed -->
+              </div> <!-- end of the tickets closed section -->
+            </div> <!-- end of the tickets display section -->
+          </div>
+        </div>
+        <!-- tickets chart -->
+        <div class="col-md-4">
+          <div id="container"></div>
+        </div>
+      </div>
+    </div>
+    <!-- end of the tickets section -->
+
+
+    <!-- the start of the tasks section -->
+    <div id="tasks" class="tab-pane fade active">
+      <div class="col-md-12 row">
+        <div class="col-md-8">
+          <h4>Tasks for {{username}}</h4>
+          <div class="panel panel-info ">
+            <div class="panel-heading">
+              <strong>Total Tasks <span class="badge read_more">{{ total_tasks }}</span></strong>
+            </div>
+            <!-- tasks display section -->
+            <div class="panel-body">
+              <!-- tasks created -->
+              <div class="sort_panels" >
+                <div class= "preview_links">
+                  <a href="#tasks_created" data-toggle="collapse">Tasks Created </a> <strong> <span class="badge read_more"> {{ total_tasks_created }} </span></strong>
+                </div>
+                <!-- collapse section of tasks created -->
+                <div id="tasks_created" class="collapse in">
+                  {% if tasks_created %}
+                    <!-- tasks created table -->
+                    <div class="table-responsive">
+                      <table class="table table-striped table-bordered">
+                        <tr class="info">
+                          <td><strong>Task Title</strong></td>
+                          <td><strong>Start Date</strong></td>
+                          <td><strong>Due Date</strong></td>
+                          <td><strong>Status</strong></td>
+                          <td><strong>Priority</strong></td>
+                          <td><strong>Assigned To</strong></td>
+                        </tr>
+                        {% paginate tasks_created using "tasks_created_page" %}
+                        {% for task in tasks_created %}
+                        <tr>
+                          <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
+                          <td>{{ task.created_date | date}}</td>
+                          <td>{{ task.due_date | date}}</td>
+                          <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</td>
+                          <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
+                          <td>{{task.assigned_to}}</td>
+                        </tr>
+                        {% endfor %}
+                        </table>
+                    </div>
+                    <!-- end of tasks created table -->
+                    <!-- tasks created paginator -->
+                    <div>
+                      {% get_pages %}
+                      <ul class="pagination">
+                      {% for page in pages %}
+                        {% if page == None %}
+                          <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="...">
+                              <span aria-hidden="true">...</span>
+                              <span class="sr-only">...</span>
+                            </a>
+                          </li>
+                        {% else %}
+                          <li class="page-item {% if page.is_current %} active {% endif %}">
+                            <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                              <span aria-hidden="true">{{ page.label|safe }}</span>
+                              <span class="sr-only">Page {{page.number}}</span>
+                            </a>
+                          </li>
+                        {% endif %}
+                      {% endfor %}
+                      </ul>
+                    </div>
+                    <!-- end of tasks created paginator -->
+                    {% else %}
+                      <div class="alert alert-info" role="alert">
+                        <h5>There are no tasks currently created by {{username}}</h5>
+                      </div>
+                    {% endif %}
+                  </div> <!-- end of the collapse section of tasks created -->
+                </div> 
+                <!-- end of tasks created --> 
+
+                <!-- tasks assigned -->
+                <div class="sort_panels" >
+                  <div class= "preview_links">
+                    <a href="#tasks_assigned" data-toggle="collapse">Tasks Assigned </a> <strong> <span class="badge read_more"> {{ total_tasks_assigned }} </span></strong>
+                  </div>
+                  <!-- the collapse section of tasks assigned -->
+                  <div id="tasks_assigned" class="collapse">
+                    {% if tasks_assigned %}
+                      <!-- tasks assigned table -->
+                      <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                          <tr class="info">
+                            <td><strong>Task Title</strong></td>
+                            <td><strong>Start Date</strong></td>
+                            <td><strong>Due Date</strong></td>
+                            <td><strong>Status</strong></td>
+                            <td><strong>Priority</strong></td>
+                            <td><strong>Assigned To</strong></td>
+                          </tr>
+                          {% paginate tasks_assigned using "tasks_assigned_page" %}
+                          {% for task in tasks_assigned %}
+                          <tr>
+                            <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
+                            <td>{{ task.created_date | date}}</td>
+                            <td>{{ task.due_date | date}}</td>
+                            <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</td>
+                            <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
+                            <td>{{task.assigned_to}}</td>
+                          </tr>
+                          {% endfor %}
                         </table>
                       </div>
+                      <!-- end of tasks assigned table -->
+                      <!-- tasks assigned paginator -->
                       <div>
                         {% get_pages %}
                         <ul class="pagination">
                         {% for page in pages %}
-                        {% if page == None %}
-                          <li class="page-item disabled">
-                            <a class="page-link" href="#" aria-label="...">
-                              <span aria-hidden="true">...</span>
-                              <span class="sr-only">...</span>
-                            </a>
-                          </li>
-                        {% else %}
-                          <li class="page-item {% if page.is_current %} active {% endif %}">
-                            <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
-                              <span aria-hidden="true">{{ page.label|safe }}</span>
-                              <span class="sr-only">Page {{page.number}}</span>
-                            </a>
-                          </li>
-                        {% endif %}
+                          {% if page == None %}
+                            <li class="page-item disabled">
+                              <a class="page-link" href="#" aria-label="...">
+                                <span aria-hidden="true">...</span>
+                                <span class="sr-only">...</span>
+                              </a>
+                            </li>
+                          {% else %}
+                            <li class="page-item {% if page.is_current %} active {% endif %}">
+                              <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                                <span aria-hidden="true">{{ page.label|safe }}</span>
+                                <span class="sr-only">Page {{page.number}}</span>
+                              </a>
+                            </li>
+                          {% endif %}
                         {% endfor %}
                         </ul>
                       </div>
-                      {% else %}
+                      <!-- end of tasks assigned paginator -->
+                    {% else %}
                       <div class="alert alert-info" role="alert">
-                        <h5>There are no tickets currently created by {{username}}</h5>
+                        <h5>There are no tasks currently assigned to {{username}}</h5>
                       </div>
-                      {% endif %}
-                    </div> 
+                    {% endif %}
+                  </div> <!-- end of the collapse section of tasks assigned -->
                 </div>
-                <div class="sort_panels">
+                <!-- end of tasks assigned -->
+
+                <!-- tasks completed -->
+                <div class="sort_panels" >
                   <div class= "preview_links">
-                    <a href="#assigned_to_me" data-toggle="collapse">Tickets Assigned </a> <strong><span class="badge read_more"> {{ total_tickets_assigned }} </span></strong>
+                    <a href="#tasks_completed" data-toggle="collapse">Tasks Completed </a> <strong> <span class="badge read_more"> {{ total_tasks_completed }} </span></strong>
                   </div>
-                   <div id="assigned_to_me" class="collapse">
-                   {% if tickets_assigned %}
-                    <div class="table-responsive">
-                      <table class="table table-striped">
-                          <tr>
-                              <th>Status</th>
-                              <th>Queue</th>
-                              <th>Title</th>
-                              <th>Date Created</th>
+                  <!-- the collapse section of tasks completed -->
+                  <div id="tasks_completed" class="collapse">
+                    {% if tasks_completed %}
+                      <!-- tasks completed table -->
+                      <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                          <tr class="info">
+                            <td><strong>Task Title</strong></td>
+                            <td><strong>Start Date</strong></td>
+                            <td><strong>Due Date</strong></td>
+                            <td><strong>Status</strong></td>
+                            <td><strong>Priority</strong></td>
+                            <td><strong>Assigned To</strong></td>
                           </tr>
-                          {% paginate tickets_assigned using "tickets_assigned_page" %}
-                          {% for ticket in tickets_assigned  %}
+                          {% paginate tasks_completed using "tasks_completed" %}
+                          {% for task in tasks_completed %}
                           <tr>
-                              <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
-                              <td>{{ticket.queue}}</td>
-                              <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
-                              <td> {{ticket.created}}</td>
+                            <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
+                            <td>{{ task.created_date | date}}</td>
+                            <td>{{ task.due_date | date}}</td>
+                            <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</td>
+                            <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
+                            <td>{{task.assigned_to}}</td>
                           </tr>
-                          {%endfor%}
-                      </table>
-                    </div>
-                    <div>
+                          {% endfor %}
+                        </table>
+                      </div>
+                      <!-- end of tasks completed table -->
+                      <!-- tasks completed paginator -->
+                      <div>
                         {% get_pages %}
                         <ul class="pagination">
                         {% for page in pages %}
-                        {% if page == None %}
-                          <li class="page-item disabled">
-                            <a class="page-link" href="#" aria-label="...">
-                              <span aria-hidden="true">...</span>
-                              <span class="sr-only">...</span>
-                            </a>
-                          </li>
-                        {% else %}
-                          <li class="page-item {% if page.is_current %} active {% endif %}">
-                            <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
-                              <span aria-hidden="true">{{ page.label|safe }}</span>
-                              <span class="sr-only">Page {{page.number}}</span>
-                            </a>
-                          </li>
-                        {% endif %}
+                          {% if page == None %}
+                            <li class="page-item disabled">
+                              <a class="page-link" href="#" aria-label="...">
+                                <span aria-hidden="true">...</span>
+                                <span class="sr-only">...</span>
+                              </a>
+                            </li>
+                          {% else %}
+                            <li class="page-item {% if page.is_current %} active {% endif %}">
+                              <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
+                                <span aria-hidden="true">{{ page.label|safe }}</span>
+                                <span class="sr-only">Page {{page.number}}</span>
+                              </a>
+                            </li>
+                          {% endif %}
                         {% endfor %}
                         </ul>
                       </div>
+                      <!-- end of tasks completed paginator -->
                     {% else %}
                       <div class="alert alert-info" role="alert">
-                        <h5>There are no tickets currently assigned to {{username}}</h5>
+                        <h5>There are no tasks currently completed by {{username}}</h5>
                       </div>
                     {% endif %}
-                  </div> 
+                  </div> <!-- end the collapse section of tasks completed -->
                 </div>
-                <div class="sort_panels">
-               <div class= "preview_links">
-                 <a href="#closed_resolved" data-toggle="collapse">Tickets Closed and Resolved </a> <strong> <span class="badge read_more"> {{ total_tickets_closed_resolved }} </span></strong>
-               </div>  
-               <div id="closed_resolved" class="collapse">
-               {% if tickets_closed_resolved %}
-                <div class="table-responsive">
-                  <table class="table table-striped">
-                    <tr>
-                      <th>Status</th>
-                      <th>Queue</th>
-                      <th>Title</th>
-                      <th>Date Created</th>
-                    </tr>
-                    {% paginate tickets_closed_resolved using "tickets_closed_resolved_page" %}
-                    {% for ticket in tickets_closed_resolved %}
-                    <tr>
-                      <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
-                      <td>{{ticket.queue}}</td>
-                      <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
-                      <td> {{ticket.created}}</td>
-                    </tr>
-                    {%endfor%}
-                  </table>
-                </div>
-                 <div>
-                    {% get_pages %}
-                    <ul class="pagination">
-                    {% for page in pages %}
-                    {% if page == None %}
-                      <li class="page-item disabled">
-                        <a class="page-link" href="#" aria-label="...">
-                          <span aria-hidden="true">...</span>
-                          <span class="sr-only">...</span>
-                        </a>
-                      </li>
-                    {% else %}
-                      <li class="page-item {% if page.is_current %} active {% endif %}">
-                        <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
-                          <span aria-hidden="true">{{ page.label|safe }}</span>
-                          <span class="sr-only">Page {{page.number}}</span>
-                        </a>
-                      </li>
-                    {% endif %}
-                    {% endfor %}
-                    </ul>
-                  </div>
-                {% else %}
-                  <div class="alert alert-info" role="alert">
-                    <h5>There are no tickets currently closed and resolved by {{username}}</h5>
-                  </div>
-                {% endif %}
-               </div>
-             </div> 
-            </div>
+                <!-- end tasks completed -->
+              </div><!-- end tasks display section -->
+            </div>  
+          </div>
+          <!-- tasks chart -->
+          <div class="col-md-4">
+            <div id="taskcontainer"></div>
           </div>
         </div>
-        <div class="col-md-4">
-            <div id="container"></div>
-        </div>
       </div>
-      </div>
-        <div id="tasks" class="tab-pane fade active">
-          <div class="col-md-12 row">
-            <div class="col-md-8">
-              <h4>Tasks for {{username}}</h4>
-              <div class="panel panel-info ">
-                <div class="panel-heading">
-                <strong>Total Tasks <span class="badge read_more">{{ total_tasks }}</span></strong>
-                </div>
-                <div class="panel-body">
-                  <div class="sort_panels" >
-                    <div class= "preview_links">
-                       <a href="#tasks_created" data-toggle="collapse">Tasks Created </a> <strong> <span class="badge read_more"> {{ total_tasks_created }} </span></strong>
-                    </div>
-                    <div id="tasks_created" class="collapse in">
-                      {% if tasks_created %}
-                        <div class="table-responsive">
-                          <table class="table table-striped table-bordered">
-                            <tr class="info">
-                              <td><strong>Task Title</strong></td>
-                              <td><strong>Start Date</strong></td>
-                              <td><strong>Due Date</strong></td>
-                              <td><strong>Status</strong></td>
-                              <td><strong>Priority</strong></td>
-                              <td><strong>Assigned To</strong></td>
-                            </tr>
-                            {% paginate tasks_created using "tasks_created_page" %}
-                            {% for task in tasks_created %}
-                            <tr>
-                              <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
-                              <td>{{ task.created_date | date}}</td>
-                              <td>{{ task.due_date | date}}</td>
-                              <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</td>
-                              <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
-                              <td>{{task.assigned_to}}</td>
-                              {% endfor %}
-                            </tr>
-                            </table>
-                        </div>
-                        <div>
-                        {% get_pages %}
-                        <ul class="pagination">
-                        {% for page in pages %}
-                        {% if page == None %}
-                          <li class="page-item disabled">
-                            <a class="page-link" href="#" aria-label="...">
-                              <span aria-hidden="true">...</span>
-                              <span class="sr-only">...</span>
-                            </a>
-                          </li>
-                        {% else %}
-                          <li class="page-item {% if page.is_current %} active {% endif %}">
-                            <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
-                              <span aria-hidden="true">{{ page.label|safe }}</span>
-                              <span class="sr-only">Page {{page.number}}</span>
-                            </a>
-                          </li>
-                        {% endif %}
-                        {% endfor %}
-                        </ul>
-                      </div>
-                      {% else %}
-                        <div class="alert alert-info" role="alert">
-                          <h5>There are no tasks currently created by {{username}}</h5>
-                        </div>
-                      {% endif %}
-                      </div>
-                    </div>
-                    <div class="sort_panels" >
-                      <div class= "preview_links">
-                         <a href="#tasks_assigned" data-toggle="collapse">Tasks Assigned </a> <strong> <span class="badge read_more"> {{ total_tasks_assigned }} </span></strong>
-                      </div>
-                      <div id="tasks_assigned" class="collapse">
-                        {% if tasks_assigned %}
-                          <div class="table-responsive">
-                            <table class="table table-striped table-bordered">
-                              <tr class="info">
-                                <td><strong>Task Title</strong></td>
-                                <td><strong>Start Date</strong></td>
-                                <td><strong>Due Date</strong></td>
-                                <td><strong>Status</strong></td>
-                                <td><strong>Priority</strong></td>
-                                <td><strong>Assigned To</strong></td>
-                              </tr>
-                            {% paginate tasks_assigned using "tasks_assigned_page" %}
-                              {% for task in tasks_assigned %}
-                              <tr>
-                                <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
-                                <td>{{ task.created_date | date}}</td>
-                                <td>{{ task.due_date | date}}</td>
-                                <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</td>
-                                <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
-                                <td>{{task.assigned_to}}</td>
-                                {% endfor %}
-                              </tr>
-                              </table>
-                          </div>
-                          <div>
-                            {% get_pages %}
-                            <ul class="pagination">
-                            {% for page in pages %}
-                            {% if page == None %}
-                              <li class="page-item disabled">
-                                <a class="page-link" href="#" aria-label="...">
-                                  <span aria-hidden="true">...</span>
-                                  <span class="sr-only">...</span>
-                                </a>
-                              </li>
-                            {% else %}
-                              <li class="page-item {% if page.is_current %} active {% endif %}">
-                                <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
-                                  <span aria-hidden="true">{{ page.label|safe }}</span>
-                                  <span class="sr-only">Page {{page.number}}</span>
-                                </a>
-                              </li>
-                            {% endif %}
-                            {% endfor %}
-                            </ul>
-                          </div>
-                        {% else %}
-                          <div class="alert alert-info" role="alert">
-                            <h5>There are no tasks currently assigned to {{username}}</h5>
-                          </div>
-                        {% endif %}
-                      </div>
-                    </div>
-                    <div class="sort_panels" >
-                      <div class= "preview_links">
-                         <a href="#tasks_completed" data-toggle="collapse">Tasks Completed </a> <strong> <span class="badge read_more"> {{ total_tasks_completed }} </span></strong>
-                      </div>
-                      <div id="tasks_completed" class="collapse">
-                        {% if tasks_completed %}
-                          <div class="table-responsive">
-                            <table class="table table-striped table-bordered">
-                              <tr class="info">
-                                <td><strong>Task Title</strong></td>
-                                <td><strong>Start Date</strong></td>
-                                <td><strong>Due Date</strong></td>
-                                <td><strong>Status</strong></td>
-                                <td><strong>Priority</strong></td>
-                                <td><strong>Assigned To</strong></td>
-                              </tr>
-                              {% paginate tasks_completed using "tasks_completed" %}
-                              {% for task in tasks_completed %}
-                              <tr>
-                                <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
-                                <td>{{ task.created_date | date}}</td>
-                                <td>{{ task.due_date | date}}</td>
-                                <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</td>
-                                <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
-                                <td>{{task.assigned_to}}</td>
-                                {% endfor %}
-                              </tr>
-                              </table>
-                          </div>
-                          <div>
-                            {% get_pages %}
-                            <ul class="pagination">
-                            {% for page in pages %}
-                            {% if page == None %}
-                              <li class="page-item disabled">
-                                <a class="page-link" href="#" aria-label="...">
-                                  <span aria-hidden="true">...</span>
-                                  <span class="sr-only">...</span>
-                                </a>
-                              </li>
-                            {% else %}
-                              <li class="page-item {% if page.is_current %} active {% endif %}">
-                                <a class="page-link" href="{{ page.path }}" aria-label="Page {{page.number}}">
-                                  <span aria-hidden="true">{{ page.label|safe }}</span>
-                                  <span class="sr-only">Page {{page.number}}</span>
-                                </a>
-                              </li>
-                            {% endif %}
-                            {% endfor %}
-                            </ul>
-                          </div>
-                        {% else %}
-                          <div class="alert alert-info" role="alert">
-                            <h5>There are no tasks currently completed by {{username}}</h5>
-                          </div>
-                        {% endif %}
-                      </div>
-                    </div>
-                  </div>
-              </div>  
-            </div>
-            <div class="col-md-4">
-                <div id="taskcontainer"></div>
-            </div>
-          </div>
-        </div>
-    </div>
+      <!-- end of the tasks section -->
+    </div> <!-- end content display -->
   </div>
-</div>
-<script type="text/javascript">
-   $('#paginator').twbsPagination({
-  totalPages: 3,
-  visiblePages: 7,
-   hrefVariable: '{{tickets_created}}',
-    items: 3,
-    itemsOnPage: 1,
-  onPageClick: function (event, page) {
-    $('#page-content').text('Page ' + page);
-  }
-});
-</script>
+</div> <!-- end container -->
 
 {% endblock content %}
