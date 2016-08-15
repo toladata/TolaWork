@@ -378,6 +378,8 @@ class Ticket(models.Model):
     votes = models.IntegerField(default=0)
     tags = models.ManyToManyField(Tag, related_name='ticket_tags', blank=True)
     slack_status = models.IntegerField(_('Slack Status'),default=0)
+    remind = models.IntegerField(default=0)
+    remind_date = models.DateTimeField(_('Reminder'), blank=True, help_text=_('Date the last reminder was sent'),)
 
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
