@@ -60,7 +60,7 @@ def new_issue(repo,ticket):
     payload = {}
     labels = ['Tola-Work Ticket']
     payload['title'] = ticket.title
-    payload['body'] = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment)
+    payload['body'] = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment) + " Link to Ticket - " + str(ticket.t_url)
     payload['labels'] = labels
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues"
@@ -78,7 +78,7 @@ def new_issue(repo,ticket):
         update_ticket.github_issue_url = github_issue_url
         update_ticket.github_issue_number = github_issue_number
         update_ticket.github_issue_id = github_issue_id
-        update_ticket.save()
+        update_ticket.save(update_fields=['github_issue_url','github_issue_number','github_issue_id'])
 
     return r.status_code
 
@@ -117,6 +117,10 @@ def get_label(repo,ticket):
 
             if label == "Tola-Work Ticket":
                 label_txt = 'Submitted from TolaWork '
+
+            elif label == "accepted":
+                label_txt2 = ', accepted by QA Lead and moved into the Ready Queue'
+                label_int = '5'
 
             elif label == "1 - Ready":
                 label_txt2 = ', accepted by Developers and moved into the Ready Queue'

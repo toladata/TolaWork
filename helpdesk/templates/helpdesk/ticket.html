@@ -1,14 +1,10 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "View Ticket Details" %}{% endblock %}
-{% block helpdesk_head %}
-
-{% endblock %}
+{% block helpdesk_head %}{% endblock %}
 
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <div class="container">
-
 {% block h1_title %}{{ ticket.ticket_for_url|upper }}{% endblock %}
-
 {% block helpdesk_body %}
 {% load in_list %}
 
@@ -258,11 +254,11 @@
 
                                       {% if not ticket.github_issue_url %}
                                        {% if request.user.is_staff %}
-                                        <input name="github" type='button ' class="btn btn-info" value='{% trans "Send to Github" %}' onClick="location.href='send_to_github/'"/>
+                                        <input name="github" type='button ' class="btn btn-info" value='{% trans "Send to Github" %}' onClick="location.href='/helpdesk/tickets/{{ticket.id}}/send_to_github/'"/>
                                       {% endif %}
                                       {% else %}
 
-                                      <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Issue in Github" %}' onClick="location.href='{{ ticket.github_issue_url }}'"/>
+                                      <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Ticket in Github" %}' onClick="location.href='{{ ticket.github_issue_url }}'"/>
                                       {% endif %}
 
                                       {% if ticket.slack_status == 0 %}
@@ -345,7 +341,7 @@
                       </div>
                       <div class="ticket_form_cover">
                         <div class="ticket_form info">
-                          <form  method='post' action='ticket_edit/?ticket_id={{ticket.id}}' enctype='multipart/form-data' >
+                          <form  method='post' action='/helpdesk/tickets/ticket_edit/?ticket_id={{ticket.id}}' enctype='multipart/form-data' >
                           <div class=" row task_spacing">
                             <div class="col-md-12 ticket_padding row ticket_edit">
                                <label class="col-md-2"><p><strong>{% trans "Title:" %}</strong></p></Label>

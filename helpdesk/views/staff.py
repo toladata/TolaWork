@@ -109,7 +109,7 @@ def homepage(request):
         }))
 
 @login_required
-def view_ticket(request):
+def public_view_ticket(request):
     ticket_req = request.GET.get('ticket', '')
     ticket = False
     email = request.GET.get('email', '')
@@ -383,7 +383,7 @@ def vote_down(request, id):
 
 def email(ticket,comment, status_text):
 
-    if ticket.assigned_to == "0":
+    if ticket.get_assigned_to == "Unassigned":
         assignee = ticket.submitter_email
     else:
         assignee = ticket.assigned_to.email
@@ -475,8 +475,13 @@ def post_comment(request, ticket_id):
                 status_text = 'Not a status'
 
             created = ticket.created
+
             #check the person whom the ticket is assigned to
-            assigned_to_username = str(ticket.assigned_to).upper()
+            if not ticket.get_assigned_to == 'Unassigned':
+                assigned = str(ticket.assigned_to).upper()
+            else:
+                assigned = None
+
             on_hold = ticket.on_hold
             description = ticket.description
             resolution = ticket.resolution
@@ -489,7 +494,6 @@ def post_comment(request, ticket_id):
                 tags = ""
 
             last_escalation = ticket.last_escalation
-            assigned = ticket.assigned_to
             github_id = ticket.github_issue_id
             github_no = ticket.github_issue_number
             github_url = ticket.github_issue_url
@@ -505,6 +509,7 @@ def post_comment(request, ticket_id):
             else:
                 f_comments = str(request.user.email.upper())  + ' changed ticket status from ['  + str(ticket.get_status) + '] to [ ' + str(status_text) + ']'
 
+
             update_comments = Ticket(id=ticket_id, title=title, created=created,
                                      modified=timezone.now(), description=description,
                                      submitter_email=request.POST.get('submitter_email',request.user.email.upper()), status=status,
@@ -514,7 +519,7 @@ def post_comment(request, ticket_id):
                                      queue=queue, github_issue_id=github_id, github_issue_number=github_no,
                                      github_issue_url=github_url, type=type, votes=votes,
                                      error_msg=error, slack_status=slack_status)
-            update_comments.save(update_fields=['status'])
+            update_comments.save(update_fields=['status','assigned_to'])
 
             new_followup = FollowUp(title=title, date=timezone.now(), ticket_id=ticket_id, comment=f_comments, public=f_public, new_status=status)
             new_followup.save()
@@ -536,15 +541,16 @@ taskview = staff_member_required(taskview)
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     repo = queue_repo(ticket)
+
     if not ticket.github_issue_id:
         response = new_issue(repo,ticket)
 
-    if int(response) == 201:
-        messages.success(request, 'Success, issue sent to Github')
+        if int(response) == 201:
+            messages.success(request, 'Success, ticket sent to Github')
 
-    else:
-        messages.success(request, 'There was a problem sending the ticket to GitHub')
-        print response
+        else:
+            messages.success(request, 'There was a problem sending the ticket to GitHub')
+            print response
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
@@ -637,6 +643,11 @@ def view_ticket(request, ticket_id):
     if not (request.user.is_active):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
     ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if not ticket.t_url:
+        ticket.t_url = request.build_absolute_uri()
+        ticket.save(update_fields=['t_url'])
+
     progress=''
     if ticket.github_issue_id:
         repo = queue_repo(ticket)
@@ -644,6 +655,7 @@ def view_ticket(request, ticket_id):
         response = get_issue_status(repo,ticket)
 
         if response == 200:
+
             #synced status wth github
             ticket_state = get_object_or_404(Ticket, id=ticket_id)
             status = ticket_state.status
@@ -742,6 +754,7 @@ def view_ticket(request, ticket_id):
     tickets_created = Ticket.objects.select_related('queue')\
                     .filter(submitter_email=request.user.email,)\
                     .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
@@ -1365,7 +1378,7 @@ def ticket_edit(request):
 @login_required
 def create_ticket(request):
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-    messages.add_message(request, messages.SUCCESS, 'We recommend that you search for your issue or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!')
+    #messages.add_message(request, messages.SUCCESS, 'We recommend that you search for your ticket or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!')
 
     if request.method == 'POST':
         if request.user.is_staff:
@@ -1414,11 +1427,37 @@ def create_ticket(request):
         else:
             form = PublicTicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+    #tickets, reported by current user
+
+    tickets_reported =''
+
+    if request.user.email:
+        tickets_reported = Ticket.objects.select_related('queue').filter(
+                submitter_email=request.user.email,
+            ).order_by('status')
+
+    #tickets, resolved by current user
+    tickets_closed = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user,
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+
+    #display tickets assigned to current user
+    tickets_assigned = Ticket.objects.select_related('queue')\
+                    .filter(assigned_to=request.user,)\
+                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+    #display tickets created by current user
+    tickets_created = Ticket.objects.select_related('queue')\
+                    .filter(submitter_email=request.user.email,)\
+                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
 
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
             'form': form,
             'helper': form.helper,
+            'tickets_assigned': len(tickets_assigned),
+            'tickets_created':len(tickets_created),
+            'tickets_reported':len(tickets_reported),
+            'tickets_closed':len(tickets_closed),
         }))
 
 def raw_details(request, type):

@@ -150,7 +150,7 @@ urlpatterns = patterns('helpdesk.views.staff',
         name='helpdesk_home'),
 
     url(r'^view/$',
-        'view_ticket',
+        'public_view_ticket',
         name='helpdesk_public_view'),
 
     url(r'^change_language/$',
@@ -172,8 +172,10 @@ urlpatterns = patterns('helpdesk.views.staff',
 #blog urls
 urlpatterns += patterns('helpdesk.views.blog',
     url(r'^blog/$',
-        'index', name='blog'),
+        'index',
+        name='blog'),
 
     url(r'^blog/(?P<entry>\w+)/$',
-        'index', name='blog'),
+        'index',
+        name='blog'),
 )
