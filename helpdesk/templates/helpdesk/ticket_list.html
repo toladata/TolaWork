@@ -436,15 +436,26 @@
                           <p class="col-md-9">{{ form.due_date }}</p>
                         </div>
                       </div>
-                      <!-- <div class="row">
+                      <div class="row">
                         <div class= "col-md-6 row ticket_edit task_spacing" >
                           <label class="col-md-4"><p><strong>{% trans "Tags:" %}</strong></p></label>
                           <div class="col-md-8">
-                            <select class = " form-control multi_select" style="width:200px" multiple = "multiple" id='id_edit_tags' name='edit_tags'> {% for q in edit_tags %} <option value='{{ q.id }}'{% endfor %} {{form.edit_tags }} </option>
-                          </select>
+                            <select class = " form-control multi_select {{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags' name='edit_tags'> 
+                                {% for q in tags %} 
+
+                                  <option value='{{ q.id }}' {% for tag in ticket.tags.all %} {% ifequal q.id tag.id %} selected='selected'{% endifequal %}{% endfor %}>{{q.name}}</option>
+
+                                {% endfor %}
+                            </select>
+                            <script type="text/javascript">
+                                  $(".{{ticket.id}}").select2({
+                                          tags: true,
+                                          allowClear: true,
+                                  });
+                            </script>
                           </div>
                         </div>  
-                      </div> -->
+                      </div>
                       <div class=" row">
                         <label class= "col-md-6 row ticket_edit">
                           <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />

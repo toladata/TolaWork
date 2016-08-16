@@ -1211,6 +1211,12 @@ def ticket_list(request):
     tickets = Ticket.objects.select_related()
     num_tickets = tickets.count()
 
+    for ticket in tickets:
+        if ticket.tags.all():
+            ticket.tags = [t.pk for t in ticket.tags.all()]
+        else:
+            ticket.tags = ""
+
     queue_choices = Queue.objects.all()
 
     # Tickets assigned to current user
@@ -1300,12 +1306,15 @@ def ticket_list(request):
                    ticket.progress = " "
     """
     q = Queue.objects.all()
+    tags = Tag.objects.all()
+
 
     return render_to_response('helpdesk/ticket_list.html',
         RequestContext(request, dict(
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
+            tags=tags,
             priorities = Ticket.PRIORITY_CHOICES,
             ticket_queue=q,
             ticket_type=Ticket.TICKET_TYPE,
@@ -1353,7 +1362,7 @@ def ticket_edit(request):
             description = request.POST.get('description')
             email = request.POST.get('email')
             due_date = ticket.due_date
-            tags = request.POST.getlist('tags')
+            tags = request.POST.getlist('edit_tags')
             update_comments = Ticket(id=ticket_id, title=title, description=description, assigned_to_id=owner,
                                      submitter_email=email, priority=priority, due_date=due_date,
                                      queue_id=queue, type=type, error_msg=error_msg)
