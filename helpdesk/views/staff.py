@@ -1316,6 +1316,7 @@ def ticket_list(request):
         RequestContext(request, dict(
             context,
             query_string=querydict.urlencode(),
+            query = request.GET.get('q'),
             tickets=tickets,
             tags=tags,
             priorities = Ticket.PRIORITY_CHOICES,
