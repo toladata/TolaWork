@@ -267,31 +267,6 @@ class TicketForm(forms.Form):
 
         f.save()
 
-
-        #files = []
-        # if self.cleaned_data['attachment']:
-        #     import mimetypes
-        #     file = self.cleaned_data['attachment']
-        #     filename = file.name.replace(' ', '_')
-        #     a = Attachment(
-        #         followup=f,
-        #         filename=filename,
-        #         mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
-        #         size=file.size,
-        #         )
-        #     a.file.save(file.name, file, save=False)
-            #a.save()
-
-            # if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-            #     # Only files smaller than 512kb (or as defined in
-            #     # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-            #     try:
-            #         files.append([a.filename, a.file])
-            #     except NotImplementedError:
-            #         pass
-
-
-
         context = safe_template_context(t)
         context['comment'] = f.comment
 

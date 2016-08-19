@@ -1051,11 +1051,19 @@ def reminder(ticket_id):
     print "Date Created :" + str(create_date)
     print "Reminder Months : " + str(r.months) + " Months"
     return r.months
-
+    
+@login_required
 def ticket_list(request):
     #create ticket
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     initial_data = {}
+    try:
+        if request.user.is_authenticated and request.user.email:
+            initial_data['submitter_email'] = request.user.email
+
+    except Exception, e:
+        pass
+    
     form = PublicTicketForm(initial=initial_data)
     form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
     if request.method == 'POST':
