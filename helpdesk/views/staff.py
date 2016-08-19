@@ -648,8 +648,22 @@ def view_ticket(request, ticket_id):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    #print reminder duration
-    reminder(ticket.id)
+    #check Ticket status (open or re-opened) and TO DO - send email reminders
+    months = reminder(ticket.id)
+    ticket_status = ticket.status
+    print "Ticket Status :" + str(ticket_status)
+
+    if ticket_status == 1 or ticket_status == 2:
+        if months == 0:
+            print "Reminder Email : No reminder"
+        elif months == 1:
+            print "Send 1st Reminder Email after 1 Month, Update ticket.remind == 1 and ticket.remind_date"
+        elif months == 2:
+            print "Send 2nd Reminder Email after 2 Months, Update ticket.remind == 2 and ticket.remind_date"
+        elif months == 3:
+            print "Send 3rd Reminder Email after 3 Months, Update ticket.remind == 3 and ticket.remind_date"
+        else:
+            print "Ticket is " + str(months) + " Months old. Move this into a dashboard"
 
     if not ticket.t_url:
         ticket.t_url = request.build_absolute_uri()
@@ -1033,11 +1047,12 @@ def reminder(ticket_id):
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    create_date = datetime.strptime(str(ticket.created),'%Y-%m-%d %H:%M:%S')
-    today_date = datetime.strptime(str(datetime.now(), '%Y-%m-%d %H:%M:%S')
+    create_date = datetime.strptime(str(ticket.created)[:19],'%Y-%m-%d %H:%M:%S')
+    today_date = datetime.strptime(str(datetime.now())[:19],'%Y-%m-%d %H:%M:%S')
 
     r = relativedelta.relativedelta(today_date, create_date)
-    print "Reminder Duration : " + str(r.days) + " Days"
+    print "Date Created :" + str(create_date)
+    print "Reminder Months : " + str(r.months) + " Months"
     return r.months
 
 def ticket_list(request):
