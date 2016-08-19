@@ -5,7 +5,10 @@ views/staff.py - The bulk of the application - provides most business logic and
 """
 
 from __future__ import unicode_literals
+
 from datetime import datetime, timedelta
+from dateutil import relativedelta
+
 from django.contrib.auth.decorators import login_required
 try:
     from django.contrib.auth import get_user_model
@@ -645,6 +648,23 @@ def view_ticket(request, ticket_id):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
+    #check Ticket status (open or re-opened) and TO DO - send email reminders
+    months = reminder(ticket.id)
+    ticket_status = ticket.status
+    print "Ticket Status :" + str(ticket_status)
+
+    if ticket_status == 1 or ticket_status == 2:
+        if months == 0:
+            print "Reminder Email : No reminder"
+        elif months == 1:
+            print "Send 1st Reminder Email after 1 Month, Update ticket.remind == 1 and ticket.remind_date"
+        elif months == 2:
+            print "Send 2nd Reminder Email after 2 Months, Update ticket.remind == 2 and ticket.remind_date"
+        elif months == 3:
+            print "Send 3rd Reminder Email after 3 Months, Update ticket.remind == 3 and ticket.remind_date"
+        else:
+            print "Ticket is " + str(months) + " Months old. Move this into a dashboard"
+
     if not ticket.t_url:
         ticket.t_url = request.build_absolute_uri()
         ticket.save(update_fields=['t_url'])
@@ -1023,6 +1043,18 @@ def ticket_dependency_add(request, ticket_id):
         }))
 ticket_dependency_add = staff_member_required(ticket_dependency_add)
 
+def reminder(ticket_id):
+
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    create_date = datetime.strptime(str(ticket.created)[:19],'%Y-%m-%d %H:%M:%S')
+    today_date = datetime.strptime(str(datetime.now())[:19],'%Y-%m-%d %H:%M:%S')
+
+    r = relativedelta.relativedelta(today_date, create_date)
+    print "Date Created :" + str(create_date)
+    print "Reminder Months : " + str(r.months) + " Months"
+    return r.months
+
 def ticket_list(request):
     #create ticket
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
@@ -1062,7 +1094,7 @@ def ticket_list(request):
             file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            #post_tola_slack(ticket.id)
+            post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
     else:
