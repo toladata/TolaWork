@@ -69,11 +69,7 @@
             <div class="navbar-collapse collapse " role="navigation">
                 <ul class="nav navbar-nav row">
                     <li><a href="{% url 'home' %}"><span class="glyphicon glyphicon-home"></span> <font class="font6">Home</font></a></li>
-                    {% if user.is_staff %}
-                        <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text"><font class="font6">Tickets</font></span></a></li>
-                    {% else %}
-                        <li><a href='{% url 'public_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text"><font class="font6">Tickets</font></span></a></li>
-                    {% endif %}
+                    <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text"><font class="font6">Tickets</font></span></a></li>
                     <li><a href='{% url 'helpdesk_submit' %}'><span class="glyphicon glyphicon-plus"></span> <span class="nav-text"><font class="font6">New Ticket</font></span></a></li>
                     {% if user.is_staff %}
                     {% if user.is_staff %}

@@ -22,7 +22,6 @@
     <h3>Submitted Tickets</h3>
   {% endif %}
   <div class="ticket_cover">
-
     <!-- main ticket section -->
     <div class="col-md-9 col-sm-9 ticket_right">
       {%if number_of_tickets == 0 %} 
@@ -315,13 +314,15 @@
 
                   <!-- ticket on-hold and delete section -->
                   <div class="col-md-2 col-md-offset-1">
-                    <a href='#' data-toggle="modal" data-target="#deleteModal{{ticket.id}}"class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
-                    <span>
-                    {% if ticket.on_hold %}
-                      | <a href='{% url "helpdesk_unhold" ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>
-                    {% else %}
-                      |<a href='{% url "helpdesk_hold" ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>
-                    {% endif %}</span>
+                    {% if user.is_staff %}
+                      <a href='#' data-toggle="modal" data-target="#deleteModal{{ticket.id}}"class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+                      <span>
+                      {% if ticket.on_hold %}
+                        | <a href='{% url "helpdesk_unhold" ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>
+                      {% else %}
+                        |<a href='{% url "helpdesk_hold" ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>
+                      {% endif %}</span>
+                    {% endif %}
                     <!-- delete ticket modal -->
                     <div id="deleteModal{{ticket.id}}" class="modal fade" role="dialog">
                       <div class="modal-dialog">
