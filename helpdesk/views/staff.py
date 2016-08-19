@@ -29,12 +29,9 @@ from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-
 from django.core import paginator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
 from django.utils.safestring import mark_safe
-
 
 try:
     from django.utils import timezone
@@ -1170,6 +1167,7 @@ def ticket_list(request):
                 query_params['filtering']['assigned_to__id__in'] = owners
             except ValueError:
                 pass
+
         submitter_email = request.GET.getlist('submitter_email')
         if submitter_email:
             try:
@@ -1202,6 +1200,41 @@ def ticket_list(request):
         if date_to:
             query_params['filtering']['created__lte'] = date_to
 
+        #additional filters for my tickets section
+        created_by_me = []
+        my_email = request.GET.get('created')
+        created_by_me.append(my_email)
+        if my_email:
+            try:
+                query_params['filtering']['submitter_email__in'] = created_by_me
+            except Exception, e:
+                pass
+
+        assigned_to_me = []
+        my_email = request.GET.get('assigned')
+        if my_email:
+            try:
+                assigned_id = request.user.id
+                assigned_to_me.append(assigned_id)
+                query_params['filtering']['assigned_to__id__in'] = assigned_to_me
+            except Exception, e:
+                pass
+
+        clossed_by_me = []
+        my_statuses =  [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS]
+        print my_statuses
+        my_email = request.GET.get('clossed')
+        if my_email:
+            try:
+                assigned_id = request.user.id
+                clossed_by_me.append(assigned_id)
+                query_params['filtering']['assigned_to__id__in'] = clossed_by_me
+                query_params['filtering']['status__in'] = my_statuses
+            except Exception, e:
+                pass
+            
+        print query_params
+
         ### KEYWORD SEARCHING
         key_word_searching(request, context, query_params)
 
@@ -1209,6 +1242,7 @@ def ticket_list(request):
         data_sorting(request,query_params)
 
         print query_params
+        print("this is awesome")
 
 
     tickets = Ticket.objects.select_related()
@@ -1310,7 +1344,6 @@ def ticket_list(request):
     """
     q = Queue.objects.all()
     tags = Tag.objects.all()
-
 
     return render_to_response('helpdesk/ticket_list.html',
         RequestContext(request, dict(
