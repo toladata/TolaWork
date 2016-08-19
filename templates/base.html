@@ -69,11 +69,7 @@
             <div class="navbar-collapse collapse " role="navigation">
                 <ul class="nav navbar-nav row">
                     <li><a href="{% url 'home' %}"><span class="glyphicon glyphicon-home"></span> <font class="font6">Home</font></a></li>
-                    {% if user.is_staff %}
-                        <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text"><font class="font6">Tickets</font></span></a></li>
-                    {% else %}
-                        <li><a href='{% url 'public_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text"><font class="font6">Tickets</font></span></a></li>
-                    {% endif %}
+                    <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text"><font class="font6">Tickets</font></span></a></li>
                     <li><a href='{% url 'helpdesk_submit' %}'><span class="glyphicon glyphicon-plus"></span> <span class="nav-text"><font class="font6">New Ticket</font></span></a></li>
                     {% if user.is_staff %}
                     {% if user.is_staff %}
@@ -144,7 +140,7 @@
                     <a href="http://www.toladata.com" class="text-muted"><b>Tola</b>Data: Built by</a> <a href="http://www.mercycorps.org" class="text-muted">MercyCorps</a>
                 </div>
 
-                <div class="col-md-6 col-sm-6 text-right"> <a href="http://tola.work/documentation" class="text-muted">Documentation</a> | <a href="http://tola.work/faq" class="text-muted">FAQ</a> | <a href="http://tola.work/helpdesk/tickets/submit/" class="text-muted">Feedback</a> | <a href="https://github.com/toladata/TolaActivity/blob/master/LICENSE" class="text-muted">License</a>
+                <div class="col-md-6 col-sm-6 text-right"> <a href="http://tola.work/documentation" class="text-muted">Documentation</a> | <a href="http://tola.work/helpdesk/tickets/submit/" class="text-muted">Feedback</a> | <a href="https://github.com/toladata/TolaActivity/blob/master/LICENSE" class="text-muted">License</a>
                 </div>
             </div>
         </div>
