@@ -162,6 +162,10 @@ margin-right: 0px
 {
     margin-top: 5px;
 }
+.date_to p
+{
+    text-align: right;
+}
 /*//end of fonts*/
 .collapselist
 {
@@ -670,8 +674,9 @@ form .thumbnail
 }
 .date_to 
 {
-    margin-top: 7px;
-    margin-bottom: 7px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
 }
 .keywords
 {
