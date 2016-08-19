@@ -1026,7 +1026,9 @@ ticket_dependency_add = staff_member_required(ticket_dependency_add)
 def ticket_list(request):
     #create ticket
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-
+    initial_data = {}
+    form = PublicTicketForm(initial=initial_data)
+    form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
     if request.method == 'POST':
         if request.user.is_staff:
 
@@ -1222,34 +1224,41 @@ def ticket_list(request):
 
     queue_choices = Queue.objects.all()
 
-    # Tickets assigned to current user
-    assigned_to_me = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-     ).exclude(
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-    )
+    all_tickets_reported_by_current_user = []
+    assigned_to_me = []
+    tickets_closed_resolved = []
+    created_by_me = []
+    user_saved_queries = []
+    if (request.user.is_authenticated()):
+        # all tickets, reported by current user
+        email_current_user = request.user.email
+        if email_current_user:
+            all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
+                    submitter_email=email_current_user,
+                ).order_by('status')
 
-    # all tickets, reported by current user
-    all_tickets_reported_by_current_user = {}
-    email_current_user = request.user.email
-    if email_current_user:
-        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
-                submitter_email=email_current_user,
-            ).order_by('status')
+        #tickets for the user
+        # Tickets assigned to current user
+        assigned_to_me = Ticket.objects.select_related('queue').filter(
+            assigned_to=request.user,
+         ).exclude(
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+        )
 
-    # open & reopened tickets, assigned to current user
-    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+        # open & reopened tickets, assigned to current user
+        tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
+            assigned_to=request.user,
+            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
-    # Tickets created by current user
-    created_by_me = Ticket.objects.select_related('queue').filter(
-           submitter_email=request.user.email,
-        ).exclude(
-           status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-       )
+        # Tickets created by current user
+        created_by_me = Ticket.objects.select_related('queue').filter(
+               submitter_email=request.user.email,
+            ).exclude(
+               status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+           )
+        #saved Queries
+        user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
-    my_tickets = len(created_by_me)
 
     try:
         ticket_qs = apply_query(tickets, query_params)
@@ -1292,7 +1301,6 @@ def ticket_list(request):
     from helpdesk.lib import b64encode
     urlsafe_query = b64encode(pickle.dumps(query_params))
 
-    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
     querydict = request.GET.copy()
     querydict.pop('page', 1)
@@ -1322,7 +1330,7 @@ def ticket_list(request):
             priorities = Ticket.PRIORITY_CHOICES,
             ticket_queue=q,
             ticket_type=Ticket.TICKET_TYPE,
-            my_tickets=my_tickets,
+            my_tickets = len(created_by_me),
             items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
             assigned_to_me=len(assigned_to_me),
