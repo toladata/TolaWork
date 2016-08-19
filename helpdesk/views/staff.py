@@ -48,6 +48,7 @@ except ImportError:
 import requests
 import json
 
+from helpdesk.serializer import UserSerializer, TicketSerializer, QueueSerializer, FollowUpSerializer, TicketDependencySerializer, AttachmentSerializer, TicketChangeSerializer
 from helpdesk.forms import TicketForm, UserSettingsForm, CommentTicketForm, CommentFollowUpForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, UserVotes, Queue, UserSettings, KBCategory, Tag, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
@@ -1224,6 +1225,8 @@ def ticket_list(request):
         ### SORTING
         data_sorting(request,query_params)
 
+        print query_params
+
 
     tickets = Ticket.objects.select_related()
     num_tickets = tickets.count()
@@ -1345,7 +1348,6 @@ def ticket_list(request):
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
             status_choices=Ticket.STATUS_CHOICES,
-            type_choices=Ticket.TICKET_TYPE,
             urlsafe_query=urlsafe_query,
             user_saved_queries=user_saved_queries,
             query_params=query_params,
@@ -2388,3 +2390,152 @@ def filter_tickets_by_tags(taglist):
         tickets = tickets.filter(taglist=tag)
     tickets = tickets.filter(count=len(taglist))
     return tickets
+
+#FILTER TICKETS
+
+from django.core import serializers
+from rest_framework.response import Response
+def filter_tickets(request):
+
+    query_params = {
+            'filtering': {'status__in': [1, 2, 3]},
+            'sorting': 'created',
+        }
+
+    query_data = json.loads(request.body)
+
+    queues = query_data['filtering']['queue__id__in']
+
+    if queues:
+        try:
+            queues = [int(q) for q in queues]
+            query_params['filtering']['queue__id__in'] = queues
+        except ValueError:
+            pass
+
+    # # owners = query_data['filtering']['assigned_to__id__in']
+    # # if owners:
+    # #     try:
+    # #         owners = [int(u) for u in owners]
+    # #         query_params['filtering']['assigned_to__id__in'] = owners
+    # #     except ValueError:
+    # #         pass
+
+    statuses = query_data['filtering']['status__in']
+    if statuses:
+        try:
+            statuses = [int(s) for s in statuses]
+            query_params['filtering']['status__in'] = statuses
+        except ValueError:
+            pass
+
+    types = query_data['filtering']['type__in']
+    if types:
+        try:
+            types = [int(s) for s in types]
+            query_params['filtering']['type__in'] = types
+        except ValueError:
+            pass
+
+    # # date_from = query_data['filtering']['created__gte']
+    # # if date_from:
+    # #     query_params['filtering']['created__gte'] = date_from
+
+    # # date_to = query_data['filtering']['created__lte']
+    # # if date_to:
+    # #     query_params['filtering']['created__lte'] = date_to
+
+    # keyword = query_data['keyword']
+    # if keyword:
+    #     try:
+    #         query_params['keyword'] = keyword
+    #     except ValueError:
+    #         pass
+    sort = query_data ['sorting']
+    if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'type'):
+       sort = 'created'
+    query_params['sorting'] = sort    
+
+    sortreverse = query_data['sortreverse']
+    query_params['sortreverse'] = sortreverse
+    print query_params
+
+    follow_ups = []
+    raw_tickets = Ticket.objects.prefetch_related()
+    raw_tickets = apply_query(raw_tickets, query_params) 
+
+    tickets = TicketSerializer(raw_tickets, many=True)
+
+    tickets = tickets.data
+
+    #tickets = serializers.serialize("json", raw_tickets)
+    
+    return HttpResponse(json.dumps(tickets))
+
+#Get filter variables and send to Angular controller
+def get_queues(request):
+    queues = Queue.objects.all()
+    queues = serializers.serialize("json", queues)
+
+    return HttpResponse(queues, content_type="application/json")
+
+def get_follow_ups(request):
+    follow_ups = FollowUp.objects.all()
+    follow_ups = FollowUpSerializer(follow_ups, many=True)
+    follow_ups = follow_ups.data
+
+    return HttpResponse(json.dumps(follow_ups))
+
+
+def get_ticket_change(request):
+    ticket_changes = TicketChange.objects.all()
+    ticket_changes = TicketChangeSerializer(ticket_changes, many=True)
+    ticket_changes = ticket_changes.data
+
+    return HttpResponse(json.dumps(ticket_changes))
+
+def get_attachments(request):
+    attachments = Attachment.objects.all()
+    attachments = AttachmentSerializer(attachments, many=True)
+    attachments = attachments.data
+
+    return HttpResponse(json.dumps(attachments))
+
+def get_dependencies(request):
+    dependencies = TicketDependency.objects.all()
+    dependencies = TicketDependencySerializer(dependencies, many=True)
+    dependencies = dependencies.data
+
+    return HttpResponse(json.dumps(dependencies))
+
+def get_tags(request):
+    t_tags = Tag.objects.all()
+    t_tags = serializers.serialize("json", t_tags)
+
+    return HttpResponse(t_tags, content_type="application/json")
+
+def get_my_tickets(request):
+  my_tickets =  Ticket.objects.select_related('queue').filter(
+          submitter_email=request.user.email,
+       ).exclude(
+          status__in=[4,5],
+      )
+  my_tickets = serializers.serialize("json", my_tickets)    
+  return HttpResponse(my_tickets, content_type="application/json")
+
+def get_tickets_assigned_to_me(request):
+   tickets_assigned = Ticket.objects.select_related('queue').filter(
+       assigned_to=request.user,
+       ).exclude(
+       status__in=[4,5],
+       )
+
+   tickets_assigned = serializers.serialize("json", tickets_assigned)    
+   return HttpResponse(tickets_assigned, content_type="application/json")
+
+def get_tickets_closed_by_me(request):
+  tickets_closed = Ticket.objects.select_related('queue').filter(
+       assigned_to=request.user,
+       status__in=[4,5])
+  tickets_closed = serializers.serialize("json", tickets_closed)    
+  return HttpResponse(tickets_closed, content_type="application/json")
