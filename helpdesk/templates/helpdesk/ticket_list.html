@@ -626,7 +626,7 @@
         <!-- sort tickets panel -->
         <div class="panel panel-info">
           <div class="panel-heading"> <strong>Sort Tickets</strong></div>
-          <form method='get' action='./'>
+          <form method='GET' action='./'>
             <div class="panel-body ">
               <select   class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
                 <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
@@ -690,7 +690,7 @@
               <input class="btn sort_add" type='button' id='filterBuilderButton' value='+' />
               {% csrf_token %}
             </form>
-            <form method='get' action='./'>
+            <form method='get'>
               <div class='thumbnail sorting_form filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %}' id='filterBoxOwner'>
                 <div class="keywords">
                   <label  for='id_owners'>{% trans "Owner(s): " %}</label>

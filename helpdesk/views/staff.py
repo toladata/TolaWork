@@ -1051,7 +1051,7 @@ def reminder(ticket_id):
     print "Date Created :" + str(create_date)
     print "Reminder Months : " + str(r.months) + " Months"
     return r.months
-    
+
 @login_required
 def ticket_list(request):
     #create ticket
@@ -1274,17 +1274,12 @@ def ticket_list(request):
                 query_params['filtering']['status__in'] = my_statuses
             except Exception, e:
                 pass
-            
-        print query_params
 
         ### KEYWORD SEARCHING
         key_word_searching(request, context, query_params)
 
         ### SORTING
         data_sorting(request,query_params)
-
-        print query_params
-        print("this is awesome")
 
 
     tickets = Ticket.objects.select_related()
@@ -1412,6 +1407,7 @@ def ticket_list(request):
             all_tickets_reported_by_current_user=len(all_tickets_reported_by_current_user),
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
+            type_choices=Ticket.TICKET_TYPE,
             status_choices=Ticket.STATUS_CHOICES,
             urlsafe_query=urlsafe_query,
             user_saved_queries=user_saved_queries,
