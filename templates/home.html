@@ -600,13 +600,12 @@
         <div class= "logged_in_users">
           <h4>Users Online:</h4>
           <div id="active_users">
-            {% if user.is_authenticated %}
-              <p><span class="glyphicon glyphicon-user"> </span> {{ request.user.username }} (You) [TW]<a href="{% url 'user' %}?email={{request.user.email}}&username={{request.user.username}}">&nbsp;View Tasks</a></p>
-            {% endif %}
 
             {% if logged_users%}
               {% for logged_user in logged_users%}
-                <p><span class="glyphicon glyphicon-user"></span> {{logged_user.username}} [TW] <a href="{% url 'user' %}?email={{logged_user.email}}&username={{logged_user.username}}">&nbsp;View Tasks</a></p>
+                <p><span class="glyphicon glyphicon-user"></span> {{logged_user.username}}
+                  {% if user.is_authenticated and request.user.username == "peter" %} (You){% endif %}
+                 [TW] <a href="{% url 'user' %}?email={{logged_user.email}}&username={{logged_user.username}}">&nbsp;View Tasks</a></p>
               {% endfor %}
             {% endif %}
 

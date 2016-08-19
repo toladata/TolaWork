@@ -21,6 +21,12 @@ from helpdesk.views.staff import file_attachment
 from helpdesk.views.staff import data_query_pagination
 from helpdesk.slack import post_slack,post_tola_slack
 
+from django.contrib.sessions.models import Session
+try:
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
+
 
 
 def splash(request):
@@ -217,8 +223,6 @@ def home(request):
 
         tolaTablesData = get_TolaTables_data(request)
 
-    logged_users = logged_in_users(request)
-
     #create ticket modal
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
@@ -275,6 +279,8 @@ def home(request):
             form = PublicTicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
 
+    users = get_current_users()
+
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
                                          'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
@@ -284,7 +290,7 @@ def home(request):
                                           'num_tasks': num_tasks, 'total_tasks_created': total_tasks_created, \
                                         'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed, 'total_tasks_completed': total_tasks_completed, 
                                         'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData, \
-                                         'logged_users':logged_users, 'form':form, 'helper':form.helper})
+                                         'logged_users':users, 'form':form, 'helper':form.helper})
 
 
 def contact(request):
@@ -488,6 +494,19 @@ def update_issue_on_github(request):
             #update issue in github with local changes and comments
             update_issue(repo,ticket)
     return HttpResponseRedirect('/home')
+
+#Get users with active sessions
+def get_current_users():
+    active_sessions = Session.objects.filter(expire_date__gte=timezone.now())
+    user_id_list = []
+    for session in active_sessions:
+        data = session.get_decoded()
+        user_id_list.append(data.get('_auth_user_id', None))
+    # Query all logged in users based on id list
+    logged_users = User.objects.filter(id__in=user_id_list)
+    for user in logged_users:
+        user.email = User.objects.get(username=user).email
+    return logged_users
 
 
 
