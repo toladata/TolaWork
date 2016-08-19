@@ -14,7 +14,12 @@
         <p class="font7">Get help setting up, using and configuring Tola Activity, Tola Tables, Mobile Data collection platforms and M&E in general. Use tickets to report any issues with <strong>Tola</strong>Data tools, request and vote on new features.</p>
         <br/>
         <!--  add ticket button -->
+        {% if user.is_authenticated %}
         <button class="btn btn-lg btn-success" type="submit" data-toggle="modal" data-target="#ticketModal"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</button>
+        {% endif %}
+        {% if not user.is_authenticated %}
+          <a href="{% url 'login' %}" role="button"  class="btn btn-lg btn-success"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
+        {% endif %}
         <!-- add ticket modal -->
         <div class="modal fade " id="ticketModal" role="dialog">
           <div class="modal-dialog task_form modal-lg">
