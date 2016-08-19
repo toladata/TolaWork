@@ -620,8 +620,70 @@
                </div>
             </div>
             <!-- end user ticket summary -->
-        </div><!-- 
-        end my tickets panel -->
+        </div><!-- end my tickets panel -->
+
+        <!-- my filters -->
+        <div class="panel panel-info">
+          <div class="panel-heading"> <strong>My Filters</strong></div>
+          <div class="panel-body">
+              <!-- save query -->
+              {% if not from_saved_query %}
+              <div class="sort_panels">
+                  <div class= "preview_links">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#save_query">
+                        {% trans "Save Query" %}</a>
+                  </div>
+                  <div id="save_query" class="panel-collapse collapse">
+                    <div class="panel-body">
+                      <form method='post' action='{% url 'helpdesk_savequery' %}'>
+                        <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}' />
+                        <dl>
+                        <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
+                        <dd><input type='text' name='title' id='id_title' /></dd>
+                        <dd class='form_help_text'>{% trans "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</dd>
+
+                        <dt><label for='id_shared'>{% trans "Shared?" %}</label></dt>
+                        <dd><input type='checkbox' name='shared' id='id_shared' /> {% trans "Yes, share this query with other users." %}</dd>
+                        <dd class='form_help_text'>{% trans "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</dd>
+
+                        </dl>
+
+                        <div class='buttons'>
+                        <input class="btn btn-primary" type='submit' value='{% trans "Save Query" %}'>
+                        </div>
+
+                        {% csrf_token %}
+                      </form>
+                    </div>
+                  </div>
+              </div>
+              {% endif %}
+              <!-- end save query -->
+
+              <!-- use saved query -->
+              <div class="sort_panels">
+                <div class= "preview_links">
+                  <a data-toggle="collapse" data-parent="#accordion" href="#use_query">
+                  {% trans "Use Saved Query" %} </a>
+                </div>
+                <div id="use_query" class="panel-collapse collapse">
+                  <div class="panel-body">
+                    <form method='get' action='{% url 'helpdesk_list' %}'>
+                      <p><label for='id_query_selector'>{% trans "Query" %}</label> <select name='saved_query' id='id_query_selector'>
+                      {% for q in user_saved_queries %}
+                      <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %}){% endif %}</option>
+                      {% endfor %}
+                      </select></p>
+                      <input class="btn btn-primary" type='submit' value='{% trans "Run Query" %}'>
+                      {% csrf_token %}
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <!-- end use saved query -->
+          </div>
+        </div>
+        <!-- end my filters -->
 
         <!-- sort tickets panel -->
         <div class="panel panel-info">
