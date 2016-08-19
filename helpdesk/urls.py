@@ -8,9 +8,27 @@ urlpatterns = patterns('helpdesk.views.staff',
         'ticket_list',
         name='helpdesk_list'),
 
-       url(r'^tickets/submit/$',
-        'create_ticket',
-        name='helpdesk_submit'),
+    url(r'^tickets/filter_tickets/$',
+       'filter_tickets',
+       name='filter_tickets'),
+
+    #get urls for angularJs
+    url(r'^tickets/get_queues/$','get_queues', name='get_queues'),
+    url(r'^tickets/get_tags/$','get_tags', name='get_tags'),
+    #end of get urls
+
+    #My Tickets urls
+    url(r'^tickets/get_my_tickets/$','get_my_tickets', name='get_my_tickets'),
+    url(r'^tickets/get_follow_ups/$','get_follow_ups', name='get_follow_ups'),
+    url(r'^tickets/get_dependencies/$','get_dependencies', name='get_dependencies'),
+    url(r'^tickets/get_ticket_change/$','get_ticket_change', name='get_ticket_change'),
+    url(r'^tickets/get_attachments/$','get_attachments', name='get_attachments'),
+   url(r'^tickets/get_tickets_closed_by_me/$','get_tickets_closed_by_me', name='get_tickets_closed_by_me'),
+   url(r'^tickets/get_tickets_assigned_to_me/$','get_tickets_assigned_to_me', name='get_tickets_assigned_to_me'),
+
+   url(r'^tickets/submit/$',
+    'create_ticket',
+    name='helpdesk_submit'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/$',
         'view_ticket',
