@@ -1337,6 +1337,7 @@ def ticket_list(request):
             from_saved_query=from_saved_query,
             saved_query=saved_query,
             search_message=search_message,
+            active_users=assignable_users,
             form=form,
             helper=form.helper
 
