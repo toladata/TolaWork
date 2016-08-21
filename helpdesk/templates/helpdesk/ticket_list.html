@@ -423,12 +423,15 @@
                         </div>
                       </div>
                       <div class=" row">
-                        <div class="col-md-6 row ticket_edit">
-                          <label class="col-md-4"><p><strong>{% trans "Case Owner:" %}</strong></p></label>
-                          <div class="col-md-8">
-                            <select class="form-control" id='id_owner' name='owner'><option value=''>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
+                        {% if user.is_superuser %}
+                          <div class="col-md-6 row ticket_edit">
+                            <label class="col-md-4"><p><strong>{% trans "Case Owner:" %}</strong></p></label>
+                            
+                            <div class="col-md-8">
+                              <select class="form-control" id='id_owner' name='owner'><option value=''>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
+                            </div>
                           </div>
-                        </div>
+                          {% endif %}
                         <div class="col-md-6 row ticket_edit">
                           <label class="col-md-4"><p><strong> {% trans "Type of Ticket:" %}</strong></p></label>
                           <div class="col-md-8 ">

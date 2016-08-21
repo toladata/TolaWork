@@ -190,6 +190,10 @@ class TicketForm(forms.Form):
         Add any custom fields that are defined to the form
         """
         super(TicketForm, self).__init__(*args, **kwargs)
+
+        if not user.is_superuser:
+           del self.fields['assigned_to']
+
         for field in CustomField.objects.all():
             instanceargs = {
                     'label': field.label,
