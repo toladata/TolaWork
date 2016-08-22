@@ -32,8 +32,8 @@
       {% endif %}
       {% for ticket in tickets.object_list.reverse %}
       <div class="panel panel-info">
-        <div class="panel-heading"><a href='{{ ticket.get_absolute_url }}'>
-          {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong></a>
+        <div class="panel-heading">
+          {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong>
           {% if ticket.progress %}
           <div class="read_more">
             <strong><span class="badge">{{ticket.progress}} </span></strong>
@@ -358,7 +358,7 @@
           <!-- the panel footer -->
           <div class="panel-footer">
             <div class="panel-heading">
-              {% if user.is_staff %}
+              {% if user.is_superuser %}
                 <a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
                 <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
               {% endif %}
