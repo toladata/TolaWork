@@ -1,0 +1,18 @@
+{% block content %}
+
+Dear {{ ticket.submitter_email }},
+
+<p>The status of your ticket #:{{ ticket.id }}<br/>{{ ticket.title|escape }}, <br/><br/>Submitted to Tola.Work on {{ ticket.created }} is still Open.<br/>
+    -------------------<br/>
+    Ticket Description: {{ ticket.description|escape }}<br/>
+
+    Number of Votes: {{ ticket.votes}}<br/>
+    -------------------<br/>
+</p>
+<p>Would you kindly provide an update on this ticket and if this ticket is still relevant, do you have any new information about the ticket or would you asks others to vote?
+</p>
+<p>To view this ticket in Tola.Work, click on the link below:<br/>
+http://tola.work/helpdesk/tickets/{{ ticket.id }}/
+
+<br/>Best regards from the Tola.Work Support team.</p>
+{% endblock content %}

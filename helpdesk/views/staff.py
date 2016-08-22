@@ -51,7 +51,7 @@ from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_t
 from helpdesk.models import Ticket, UserVotes, Queue, UserSettings, KBCategory, Tag, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo, get_label
 from helpdesk.slack import post_slack,post_tola_slack
-from helpdesk.email import email
+from helpdesk.email import email, reminders
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -645,23 +645,6 @@ def view_ticket(request, ticket_id):
         return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
     ticket = get_object_or_404(Ticket, id=ticket_id)
 
-    #check Ticket status (open or re-opened) and TO DO - send email reminders
-    months = reminder(ticket.id)
-    ticket_status = ticket.status
-    print "Ticket Status :" + str(ticket_status)
-
-    if ticket_status == 1 or ticket_status == 2:
-        if months == 0:
-            print "Reminder Email : No reminder"
-        elif months == 1:
-            print "Send 1st Reminder Email after 1 Month, Update ticket.remind == 1 and ticket.remind_date"
-        elif months == 2:
-            print "Send 2nd Reminder Email after 2 Months, Update ticket.remind == 2 and ticket.remind_date"
-        elif months == 3:
-            print "Send 3rd Reminder Email after 3 Months, Update ticket.remind == 3 and ticket.remind_date"
-        else:
-            print "Ticket is " + str(months) + " Months old. Move this into a dashboard"
-
     if not ticket.t_url:
         ticket.t_url = request.build_absolute_uri()
         ticket.save(update_fields=['t_url'])
@@ -1046,10 +1029,8 @@ def reminder(ticket_id):
 
     create_date = datetime.strptime(str(ticket.created)[:19],'%Y-%m-%d %H:%M:%S')
     today_date = datetime.strptime(str(datetime.now())[:19],'%Y-%m-%d %H:%M:%S')
-
     r = relativedelta.relativedelta(today_date, create_date)
-    print "Date Created :" + str(create_date)
-    print "Reminder Months : " + str(r.months) + " Months"
+
     return r.months
 
 @login_required
@@ -1287,10 +1268,48 @@ def ticket_list(request):
     num_tickets = tickets.count()
 
     for ticket in tickets:
+
         if ticket.tags.all():
             ticket.tags = [t.pk for t in ticket.tags.all()]
         else:
             ticket.tags = ""
+
+        #check Ticket (open or re-opened) and send email reminders
+        months = reminder(ticket.id)
+
+        print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
+        print "Since created (in Months) : " + str(months) + " Months"
+
+        if ticket.status == 1 or ticket.status == 2:
+
+            if months == 0:
+                print "Reminder Email : No reminder"
+
+            elif months == 1 and ticket.remind == 0:
+                #1st email reminders for 'Open' ticket - after 1 month
+                reminders(ticket,ticket.submitter_email)
+                first_remind = Ticket(id=ticket.id,remind=1,remind_date=datetime.now())
+                first_remind.save(update_fields=['remind','remind_date'])
+
+            elif months == 2 and ticket.remind == 1:
+                #2nd email reminders for 'Open' ticket - after 2 months
+                reminders(ticket,ticket.submitter_email)
+                second_remind = Ticket(id=ticket.id,remind=2,remind_date=datetime.now())
+                second_remind.save(update_fields=['remind','remind_date'])
+
+            elif months == 3 and ticket.remind == 2:
+                #3rd email reminders for 'Open' ticket - after 3 months
+                reminders(ticket,ticket.submitter_email)
+                third_remind = Ticket(id=ticket.id,remind=3,remind_date=datetime.now())
+                third_remind.save(update_fields=['remind','remind_date'])
+
+            elif months > 3:
+                print "Ticket is " + str(months) + " Months old and still open. Move this into a dashboard"
+                dashboard_remind = Ticket(id=ticket.id,remind=4,remind_date=datetime.now())
+                dashboard_remind.save(update_fields=['remind','remind_date'])
+
+            else:
+                print "Ticket is " + str(months) + " Months old"
 
     queue_choices = Queue.objects.all()
 

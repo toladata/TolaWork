@@ -12,3 +12,9 @@ def email(t,comment, status_text, send_to):
 
     send_mail('[TolaWork] ' + t.title, txt_message,'TolaData <toladatawork@gmail.com>',[send_to],fail_silently=False, html_message=html_message)
 
+def reminders(ticket,send_to):
+
+    txt_message = render_to_string('email/reminders.txt', {'ticket': ticket})
+    html_message = render_to_string('email/reminders.html', {'ticket': ticket})
+
+    send_mail('[TolaWork Reminders] ' + ticket.title, txt_message,'TolaData <toladatawork@gmail.com>',[send_to],fail_silently=False, html_message=html_message)

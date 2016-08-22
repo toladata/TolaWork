@@ -358,7 +358,7 @@
           <!-- the panel footer -->
           <div class="panel-footer">
             <div class="panel-heading">
-              {% if user.is_staff %}
+              {% if user.is_superuser %}
                 <a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
                 <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
               {% endif %}
