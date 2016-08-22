@@ -191,8 +191,6 @@ class TicketForm(forms.Form):
         """
         super(TicketForm, self).__init__(*args, **kwargs)
 
-        if not user.is_superuser:
-           del self.fields['assigned_to']
 
         for field in CustomField.objects.all():
             instanceargs = {
@@ -202,6 +200,7 @@ class TicketForm(forms.Form):
                     }
 
             self.customfield_to_field(field, instanceargs)
+
 
     #Crispy Form Helper to add Bootstrap and layout
     helper = FormHelper()
