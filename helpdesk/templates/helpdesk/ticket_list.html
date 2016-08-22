@@ -694,39 +694,53 @@
           <form method='GET' action='./'>
             <div class="panel-body ">
               <select   class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
-                <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
+                <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=created">
                     {% trans "Created" %}
                 </option>
-                <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %}>
+                <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=title">
                     {% trans "Title" %}
                 </option>
-                <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %}>
+                <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=queue">
                     {% trans "Queue" %}
                 </option>
-                <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
+                <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=status">
                     {% trans "Status" %}
                 </option>
-                <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>
+                <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=priority">
                     {% trans "Priority" %}
                 </option>
-                <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %}>
+                <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=assigned_to" >
                     {% trans "Owner" %}
                 </option>
-                <option value='assigned_to'{% ifequal query_params.sorting "type"%} selected='selected'{% endifequal %}>
+                <option value='type'{% ifequal query_params.sorting "type"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=type">
                     {% trans "Type" %}
                 </option>
-                <option value='votes'{% ifequal query_params.sorting "votes"%} selected='selected'{% endifequal %}>
+                <option value='votes'{% ifequal query_params.sorting "votes"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=votes">
                     {% trans "Most Vote Up" %}
                 </option>
               </select>
               <div class="col-md-12 row reverse_sort">
                 <label for='id_sortreverse'>{% trans "Reverse: " %}</label>
-                <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
+                <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sortreverse=on"/>
                 <p class='filterHelp'>{% trans "Ordering applied to tickets" %}</p>
               </div>
-              <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' />
+              <!-- <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' /> -->
             </div>
         </form>
+        <script>
+          document.getElementById('id_sort').onchange = function() {
+              window.location.href = this.children[this.selectedIndex].getAttribute('href');
+          }
+          document.getElementById('id_sortreverse').onclick = function() {
+             if($(this).is(":checked")){         
+                  window.location.href = this.getAttribute('href');
+                }else {
+                   // Code in the case checkbox is NOT checked.
+               window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sortreverse=off';
+              }
+
+          }
+        </script>
       </div>
       <!-- end sort tickets -->
 
