@@ -231,14 +231,16 @@ class TicketForm(forms.Form):
                     priority = self.cleaned_data['priority'],
                     type = self.cleaned_data['type'],
                     due_date = self.cleaned_data['due_date'],
-                  )
+                )
+
+        t.assigned_to = None
 
         if self.cleaned_data['assigned_to']:
             try:
                 u = User.objects.get(id=self.cleaned_data['assigned_to'])
                 t.assigned_to = u
             except User.DoesNotExist:
-                t.assigned_to = None
+                pass
         t.save()
 
         for field, value in self.cleaned_data.items():
