@@ -609,7 +609,7 @@
             {% if logged_users%}
               {% for logged_user in logged_users%}
                 <p><span class="glyphicon glyphicon-user"></span> {{logged_user.username}}
-                  {% if user.is_authenticated and request.user.username == "peter" %} (You){% endif %}
+                  {% if user.is_authenticated and request.user.username == logged_user.username %} (You){% endif %}
                  [TW] <a href="{% url 'user' %}?email={{logged_user.email}}&username={{logged_user.username}}">&nbsp;View Tasks</a></p>
               {% endfor %}
             {% endif %}
