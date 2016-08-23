@@ -247,8 +247,11 @@ def home(request):
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
 
         if form.is_valid():
+            try:
+                ticket = form.save(user=request.POST.get('assigned_to'))
+            except Exception, e:
+                ticket = form.save(user=None)
 
-            ticket = form.save(user=request.POST.get('assigned_to'))
 
             #save tickettags
             tags = request.POST.getlist('tags')
@@ -264,7 +267,7 @@ def home(request):
             file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
+            #post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
