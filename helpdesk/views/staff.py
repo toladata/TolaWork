@@ -48,7 +48,7 @@ import json
 from helpdesk.serializer import UserSerializer, TicketSerializer, QueueSerializer, FollowUpSerializer, TicketDependencySerializer, AttachmentSerializer, TicketChangeSerializer
 from helpdesk.forms import TicketForm, UserSettingsForm, CommentTicketForm, CommentFollowUpForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, UserVotes, Queue, UserSettings, KBCategory, Tag, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
+from helpdesk.models import Ticket, UserVotes, Queue, UserSettings, KBCategory, Tag, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate, UserDefaultSort
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo, get_label
 from helpdesk.slack import post_slack,post_tola_slack
 from helpdesk.email import email, reminders
@@ -1174,6 +1174,23 @@ def ticket_list(request):
             'filtering': {'status__in': [1, 2, 3]},
             'sorting': 'created',
         }
+
+        my_sort = None
+        user_id = User.objects.get(username=request.user).id
+        user = User.objects.get(id=user_id)
+        try:
+            my_sort = get_object_or_404(UserDefaultSort, user_id=user)
+        except Exception, e:
+            pass
+
+        # print my_sort
+
+        if my_sort:
+            query_params = {
+                'filtering': {'status__in': [1, 2, 3]},
+                'sorting': my_sort.sort,
+            }
+
     else:
         queues = request.GET.getlist('queue')
         if queues:
@@ -1277,13 +1294,14 @@ def ticket_list(request):
         #check Ticket (open or re-opened) and send email reminders
         months = reminder(ticket.id)
 
-        print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
-        print "Since created (in Months) : " + str(months) + " Months"
+        # print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
+        # print "Since created (in Months) : " + str(months) + " Months"
 
         if ticket.status == 1 or ticket.status == 2:
 
             if months == 0:
-                print "Reminder Email : No reminder"
+                # print "Reminder Email : No reminder"
+                pass
 
             elif months == 1 and ticket.remind == 0:
                 #1st email reminders for 'Open' ticket - after 1 month
@@ -1304,12 +1322,24 @@ def ticket_list(request):
                 third_remind.save(update_fields=['remind','remind_date'])
 
             elif months > 3:
-                print "Ticket is " + str(months) + " Months old and still open. Move this into a dashboard"
-                dashboard_remind = Ticket(id=ticket.id,remind=4,remind_date=datetime.now())
-                dashboard_remind.save(update_fields=['remind','remind_date'])
+                # print "Ticket is " + str(months) + " Months old and still open. Move this into a dashboard"
+                # dashboard_remind = Ticket(id=ticket.id,remind=4,remind_date=datetime.now())
+                # dashboard_remind.save(update_fields=['remind','remind_date'])
+                pass
 
             else:
-                print "Ticket is " + str(months) + " Months old"
+                # print "Ticket is " + str(months) + " Months old"
+                pass
+    #save mysort
+    my_sort = None
+    my_default_sort(request)
+    try:
+        user_id = User.objects.get(username=request.user).id
+        user = User.objects.get(id=user_id)
+        my_sort = get_object_or_404(UserDefaultSort, user_id=user)
+
+    except Exception, e:
+        pass
 
     queue_choices = Queue.objects.all()
 
@@ -1435,6 +1465,7 @@ def ticket_list(request):
             from_saved_query=from_saved_query,
             saved_query=saved_query,
             search_message=search_message,
+            my_sort=my_sort,
             active_users=assignable_users,
             form=form,
             helper=form.helper
@@ -1443,6 +1474,7 @@ def ticket_list(request):
     ticket_list = staff_member_required(ticket_list)
 
 def ticket_edit(request):
+    from django.shortcuts import redirect
     ticket_id = request.GET.get('ticket_id')
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -1474,7 +1506,7 @@ def ticket_edit(request):
             for tag in tags:
                 ticket.tags.add(tag)
 
-    return ticket_list(request)
+    return redirect('helpdesk_list')
 
 @login_required
 def create_ticket(request):
@@ -2307,9 +2339,26 @@ def key_word_searching(request, context, query_params):
 
 #Sorting
 def data_sorting(request,query_params):
+
     sort = request.GET.get('sort', None)
+
+    user_id = User.objects.get(username=request.user).id
+    user = User.objects.get(id=user_id)
+    my_sort=None
+
+    try:
+        my_sort = get_object_or_404(UserDefaultSort, user_id=user)
+    except Exception, e:
+        pass
+
     if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'type'):
         sort = 'created'
+    if my_sort:
+        sort = my_sort.sort
+
+    # if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'type') and my_sort:
+    #     sort = my_sort.sort
+
     query_params['sorting'] = sort
 
     sortreverse = request.GET.get('sortreverse', None)
@@ -2475,4 +2524,22 @@ def filter_tickets_by_tags(taglist):
         tickets = tickets.filter(taglist=tag)
     tickets = tickets.filter(count=len(taglist))
     return tickets
+
+#save mysort
+def my_default_sort(request):
+    sort = request.GET.get('mysort')
+    if sort:
+        user_id = User.objects.get(username=request.user).id
+        user = User.objects.get(id=user_id)
+        my_sort = UserDefaultSort(user_id=user, sort=sort)
+
+        try:
+            UserDefaultSort.objects.filter(user_id=user).delete()#delete the old sort
+
+        except Exception, e:
+            pass
+            
+        my_sort.save()
+
+    return 
 
