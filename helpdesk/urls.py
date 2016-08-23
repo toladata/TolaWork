@@ -156,11 +156,7 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^change_language/$',
         'change_language',
         name='helpdesk_public_change_language'),
-
-    url(r'^all_tickets/$',
-        'public_ticket_list',
-        name='public_list'),
-
+    
     url(r'^vote_up/(?P<id>[0-9]+)/$',
         'vote_up',
         name='vote_up'),
