@@ -7,6 +7,8 @@ from django.conf import settings
 from datetime import datetime
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django import VERSION
+from django.contrib.auth.models import User
+
 
 try:
     from django.utils import timezone
@@ -1237,3 +1239,15 @@ class TicketDependency(models.Model):
         unique_together = ('ticket', 'depends_on')
         verbose_name = _('Ticket dependency')
         verbose_name_plural = _('Ticket dependencies')
+
+class UserDefaultSort(models.Model):
+
+    user_id = models.ForeignKey(User, verbose_name=_('User'),related_name='userdefaultsort')
+    sort = models.CharField(max_length=50, blank=False)
+
+    class Meta:
+        verbose_name_plural = 'userdefaultsorts'
+
+    def __unicode__(self):
+        return u'%s %s' % (self.user_id, self.sort)
+        

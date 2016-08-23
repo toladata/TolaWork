@@ -593,7 +593,7 @@
     <!-- home right side section (minor_home) -->
     <div class="row">
       <div class="col-md-3 col-sm-3 minor_home">
-        {%if user.is_staff%}
+        {% if user.is_superuser %}
           <div class="col-md-10 col-md-offset-2 githubsync">
             <a href="{% url 'gitissueupdate' %}" class="btn btn-info"><b><span class="glyphicon glyphicon-refresh"></span></b> Sync Tickets with Github</a>
           </div>
