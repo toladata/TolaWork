@@ -1488,10 +1488,12 @@ rss_list = staff_member_required(rss_list)
 def report_index(request):
     number_tickets = Ticket.objects.all().count()
     saved_query = request.GET.get('saved_query', None)
+    tickets_3_months = Ticket.objects.filter(remind=4)
     return render_to_response('helpdesk/report_index.html',
         RequestContext(request, {
             'number_tickets': number_tickets,
             'saved_query': saved_query,
+            'tickets_3_months': tickets_3_months,
         }))
 report_index = staff_member_required(report_index)
 
