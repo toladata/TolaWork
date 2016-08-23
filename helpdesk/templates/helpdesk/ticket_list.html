@@ -622,13 +622,15 @@
             <div class="panel-body">
               <div class="sort_panels">
                 <span class="glyphicon glyphicon-th-list"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&created={{request.user.email}}">&nbsp;Created By Me </a> <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong>
-              </div>
+              </div> 
+              {% if user.is_staff %}
               <div class="sort_panels">
                  <span class="glyphicon glyphicon-list-alt"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&assigned={{request.user.email}}">&nbsp;Assigned to Me </a><strong> <span class="badge read_more"> {{ assigned_to_me }} </span></strong>
               </div>
                <div class="sort_panels">  
                 <span class="glyphicon glyphicon-th"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&clossed={{request.user.email}}">&nbsp;Closed by Me </a><strong> <span class="badge read_more"> {{ tickets_closed_resolved }} </span></strong>
                </div>
+              {% endif %}
             </div>
             <!-- end user ticket summary -->
         </div><!-- end my tickets panel -->
