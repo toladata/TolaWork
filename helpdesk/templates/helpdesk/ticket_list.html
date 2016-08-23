@@ -1,4 +1,5 @@
 {% extends "base.html" %}{% load i18n %}
+{% load highlight %}
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 
 {% block helpdesk_head %}
@@ -31,9 +32,11 @@
        </div>
       {% endif %}
       {% for ticket in tickets.object_list.reverse %}
+      
       <div class="panel panel-info">
         <div class="panel-heading"><a href='{{ ticket.get_absolute_url }}'>
-          {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong></a>
+          {{ ticket.ticket | upper}} <strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}</p>
+          {% endif %}</strong></a>
           {% if ticket.progress %}
           <div class="read_more">
             <strong><span class="badge">{{ticket.progress}} </span></strong>
@@ -41,7 +44,12 @@
           {% endif %}
         </div>
         <div class="panel-body">
+          {% if query%}
+            <p class="description">{%  highlight ticket.description with query css_class "highlight" html_tag "span" %}</p>
+          {% else %}
+
           <p class="description">{{ ticket.description }}</p>
+          {% endif %}
           <div>
             <div class= "preview_links">
                 <a href="#moredetails{{ticket.id}}" class="btn btn-info" data-toggle="collapse">&nbsp;View More Details</a>
@@ -439,8 +447,8 @@
                           </div>
                         </div>
                       </div>
-                      <div class="row ticket_padding">
-                        <div class= "col-md-6 row ticket_edit" >
+                      <div class="row task_spacing">
+                        <div class= "col-md-6 row" >
                           <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
                           <div class="col-md-8">
                             <select class="form-control" id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select>
@@ -448,13 +456,13 @@
                         </div>                            
                       </div>
                       <div class="row task_spacing">
-                        <div class= "col-md-8 row ticket_edit">
+                        <div class= "col-md-8 row">
                           <label class="col-md-3"><p><strong>{% trans "Due Date:" %}</strong></p></label>
                           <p class="col-md-9">{{ form.due_date }}</p>
                         </div>
                       </div>
                       <div class="row">
-                        <div class= "col-md-6 row ticket_edit task_spacing" >
+                        <div class= "col-md-6 row  task_spacing" >
                           <label class="col-md-4"><p><strong>{% trans "Tags:" %}</strong></p></label>
                           <div class="col-md-8">
                             <select class = " form-control multi_select {{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags' name='edit_tags'> 
@@ -614,7 +622,7 @@
             <div class="panel-body">
               <div class="sort_panels">
                 <span class="glyphicon glyphicon-th-list"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&created={{request.user.email}}">&nbsp;Created By Me </a> <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong>
-              </div> 
+              </div>
               <div class="sort_panels">
                  <span class="glyphicon glyphicon-list-alt"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&assigned={{request.user.email}}">&nbsp;Assigned to Me </a><strong> <span class="badge read_more"> {{ assigned_to_me }} </span></strong>
               </div>

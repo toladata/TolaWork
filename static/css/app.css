@@ -430,6 +430,9 @@ margin-right: 0px
     padding-bottom: 5px;
     margin-bottom: 3px;
 }
+.highlight{
+  background: #f1c40f;
+}
 
 /*//search box*/
 .search
