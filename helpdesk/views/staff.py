@@ -1129,13 +1129,13 @@ def ticket_list(request):
         #check Ticket (open or re-opened) and send email reminders
         months = reminder(ticket.id)
 
-        # print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
-        # print "Since created (in Months) : " + str(months) + " Months"
+        print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
+        print "Since created (in Months) : " + str(months) + " Months"
 
         if ticket.status == 1 or ticket.status == 2:
 
             if months == 0:
-                # print "Reminder Email : No reminder"
+                print "Reminder Email : No reminder"
                 pass
 
             elif months == 1 and ticket.remind == 0:
@@ -1157,13 +1157,12 @@ def ticket_list(request):
                 third_remind.save(update_fields=['remind','remind_date'])
 
             elif months > 3:
-                # print "Ticket is " + str(months) + " Months old and still open. Move this into a dashboard"
-                # dashboard_remind = Ticket(id=ticket.id,remind=4,remind_date=datetime.now())
-                # dashboard_remind.save(update_fields=['remind','remind_date'])
-                pass
+                print "Ticket is " + str(months) + " Months old and still open. Move this into a dashboard"
+                dashboard_remind = Ticket(id=ticket.id,remind=4,remind_date=datetime.now())
+                dashboard_remind.save(update_fields=['remind','remind_date'])
 
             else:
-                # print "Ticket is " + str(months) + " Months old"
+                print "Ticket is " + str(months) + " Months old"
                 pass
     #save mysort
     my_sort = None
