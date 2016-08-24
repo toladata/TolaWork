@@ -370,8 +370,7 @@
                 <a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
                 <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
               {% endif %}
-
-              {% blocktrans with ticket.queue as queue %}&nbsp;[{{ queue }}] {% endblocktrans %}
+              
               &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
 
               <strong>&nbsp;&nbsp;Tags:</strong>
