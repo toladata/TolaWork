@@ -1991,8 +1991,8 @@ def data_sorting(request,query_params):
 
     if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'type'):
         sort = 'created'
-    if my_sort:
-        sort = my_sort.sort
+        if my_sort:
+            sort = my_sort.sort
 
     # if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'type') and my_sort:
     #     sort = my_sort.sort
