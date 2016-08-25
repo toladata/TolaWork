@@ -837,71 +837,27 @@ def reminder(ticket_id):
 
 @login_required
 def ticket_list(request):
-    #create ticket
+    # #Form data
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-    initial_data = {}
-    try:
-        if request.user.is_authenticated and request.user.email:
-            initial_data['submitter_email'] = request.user.email
+    form = form_data(request)
+    #initial_data = {}
 
-    except Exception, e:
-        pass
-    
-    form = PublicTicketForm(initial=initial_data)
-    form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-    if request.method == 'POST':
-        if request.user.is_staff:
+    # form = PublicTicketForm(initial=initial_data)
+    # form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
 
-            form = TicketForm(request.POST, request.FILES)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        else:
-            form = PublicTicketForm(request.POST, request.FILES)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+    # try:
+    #     if request.user.email:
+    #         initial_data['submitter_email'] = request.user.email
+    #     if 'queue' in request.GET:
+    #         initial_data['queue'] = request.GET['queue']
 
-        if form.is_valid():
-
-            try:
-                ticket = form.save(user=request.POST.get('assigned_to'))
-
-            except Exception, e:
-                ticket = form.save(user = None)
-
-
-            #save tickettags
-            tags = request.POST.getlist('tags')
-            for tag in tags:
-                ticket.tags.add(tag)
-
-            #ticket.comment = ''
-            comment = ""
-            f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
-            f.save()
-
-            #Attch a File
-            file_attachment(request, f)
-                   
-            #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
-
-            messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
-    else:
-        initial_data = {}
-        try:
-            if request.user.email:
-                initial_data['submitter_email'] = request.user.email
-            if 'queue' in request.GET:
-                initial_data['queue'] = request.GET['queue']
-
-            if request.user.is_staff:
-                form = TicketForm(initial=initial_data)
-                form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-                form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-            
-        except Exception, e:
-            form = PublicTicketForm(initial=initial_data)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-
+    #     if request.user.is_staff:
+    #         form = TicketForm(initial=initial_data)
+    #         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+    #         form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+        
+    # except Exception, e:
+    #     pass
    #ticket_list 
     context = {}
     # Query_params will hold a dictionary of parameters relating to
@@ -1252,25 +1208,14 @@ def create_ticket(request):
             file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
+            #post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
             return HttpResponseRedirect(ticket.get_absolute_url())
     else:
-        initial_data = {}
-        if request.user.email:
-            initial_data['submitter_email'] = request.user.email
-        if 'queue' in request.GET:
-            initial_data['queue'] = request.GET['queue']
-
-        if request.user.is_staff:
-            form = TicketForm(initial=initial_data)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        else:
-            form = PublicTicketForm(initial=initial_data)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+        form = form_data(request)
+        
     #tickets, reported by current user
 
     tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
@@ -2306,3 +2251,28 @@ def user_tickets(request):
     user_tickets = [tickets_reported, tickets_closed, tickets_assigned, tickets_created]
 
     return tickets_reported, tickets_closed, tickets_assigned, tickets_created
+
+#Form data
+def form_data(request):
+    #Form data
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    initial_data = {}
+
+    form = PublicTicketForm(initial=initial_data)
+    form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
+    try:
+        if request.user.email:
+            initial_data['submitter_email'] = request.user.email
+        if 'queue' in request.GET:
+            initial_data['queue'] = request.GET['queue']
+
+        if request.user.is_staff:
+            form = TicketForm(initial=initial_data)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+        
+    except Exception, e:
+        pass
+
+    return form
