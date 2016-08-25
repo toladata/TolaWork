@@ -34,7 +34,7 @@
                 <div class="alert alert-success" role="alert">
                   <p>'We recommend that you search if such ticket or request already exists before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!'</p>
                 </div>
-                <form class="form-horizontal" method='post' action='./' enctype='multipart/form-data'  name="most">
+                <form class="form-horizontal" method='post' action='/helpdesk/tickets/submit/' enctype='multipart/form-data'  name="most">
                   {% load crispy_forms_tags %}
                   {% crispy form form.helper %}
                   {% comment %}{% for field in form %}
