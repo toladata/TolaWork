@@ -28,7 +28,7 @@
       {%if number_of_tickets == 0 %} 
        <div class="alert alert-info">
          
-        <h4>No results were found for "{{query}}"</h4>
+        <h4>No results were found</h4>
        </div>
       {% endif %}
       {% if query_params and number_of_tickets %}
@@ -965,7 +965,7 @@
               <div class='thumbnail  sorting_form filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
                 <div class="keywords">
                   <label for='id_query'>{% trans "Keywords: " %}</label>
-                  <input class="status_select" type='text' name='q' value='{{ query }}' id='id_query' />
+                  <input class="status_select" type='text' name='q' value='{{query_params.keyword}}' id='id_query' />
                 </div>
                 <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
                 <input type='button' class='filterBuilderRemove' value='-' />
