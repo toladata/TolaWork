@@ -553,44 +553,11 @@ def view_ticket(request, ticket_id):
     form = TicketForm(initial={'due_date':ticket_state.due_date, 'tags':tags})
     tags = Tag.objects.all()
 
-    """
-    progress = ''
-    if ticket:
-       if request.user.is_active:
-           if ticket.assigned_to:
-               if ticket.status ==1:
-                   progress= "Ticket In Progress"
-               elif ticket.status == 2:
-                   progress = "Ticket reopened and is in progress"
-               else:
-                   progress = " "
-
-    """
     #ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
 
     #tickets, reported by current user
 
-    tickets_reported =''
-
-    if request.user.email:
-        tickets_reported = Ticket.objects.select_related('queue').filter(
-                submitter_email=request.user.email,
-            ).order_by('status')
-
-    #tickets, resolved by current user
-    tickets_closed = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
-
-    #display tickets assigned to current user
-    tickets_assigned = Ticket.objects.select_related('queue')\
-                    .filter(assigned_to=request.user,)\
-                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
-    #display tickets created by current user
-    tickets_created = Ticket.objects.select_related('queue')\
-                    .filter(submitter_email=request.user.email,)\
-                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
-
+    tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
@@ -978,9 +945,6 @@ def ticket_list(request):
                 pass
 
     saved_query = None
-    my_email1 = None
-    my_email2 = None
-    my_email3 = None
     if request.GET.get('saved_query', None):
         from_saved_query = True
         try:
@@ -1082,38 +1046,6 @@ def ticket_list(request):
         if date_to:
             query_params['filtering']['created__lte'] = date_to
 
-        #additional filters for my tickets section
-        created_by_me = []
-        my_email1 = request.GET.get('created')
-        created_by_me.append(my_email1)
-        if my_email1:
-            try:
-                query_params['filtering']['submitter_email__in'] = created_by_me
-            except Exception, e:
-                pass
-
-        assigned_to_me = []
-        my_email2 = request.GET.get('assigned')
-        if my_email2:
-            try:
-                assigned_id = request.user.id
-                assigned_to_me.append(assigned_id)
-                query_params['filtering']['assigned_to__id__in'] = assigned_to_me
-            except Exception, e:
-                pass
-
-        clossed_by_me = []
-        my_statuses =  [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS]
-        my_email3 = request.GET.get('clossed')
-        if my_email3:
-            try:
-                assigned_id = request.user.id
-                clossed_by_me.append(assigned_id)
-                query_params['filtering']['assigned_to__id__in'] = clossed_by_me
-                query_params['filtering']['status__in'] = my_statuses
-            except Exception, e:
-                pass
-
 
         ### KEYWORD SEARCHING
         key_word_searching(request, context, query_params)
@@ -1122,51 +1054,37 @@ def ticket_list(request):
         data_sorting(request,query_params)
 
     tickets = Ticket.objects.select_related()
+    tickets_filtered = tickets
+
+    tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
+
+    #other filters
+    my_email1 = request.GET.get('created')
+    if my_email1:
+        try:  
+            tickets = tickets_filtered.filter(submitter_email=my_email1)
+        except Exception, e:
+            pass
+
+    my_email2 = request.GET.get('assigned')
+    if my_email2:
+        try:
+            assigned_id = request.user.id
+            tickets = tickets_filtered.filter(assigned_to__id=assigned_id)
+        except Exception, e:
+                pass
+    my_email3 = request.GET.get('clossed')
+    if my_email3:
+        try:
+            assigned_id = request.user.id
+            tickets = tickets_filtered.filter(assigned_to__id=assigned_id, status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+        except Exception, e:
+                pass
+
     num_tickets = tickets.count()
 
-    for ticket in tickets:
-
-        if ticket.tags.all():
-            ticket.tags = [t.pk for t in ticket.tags.all()]
-        else:
-            ticket.tags = ""
-
-        #check Ticket (open or re-opened) and send email reminders
-        months = reminder(ticket.id)
-
-        print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
-        print "Since created (in Months) : " + str(months) + " Months"
-
-        if ticket.status == 1 or ticket.status == 2:
-
-            if months == 0:
-                print "Reminder Email : No reminder"
-
-            elif months == 1 and ticket.remind == 0:
-                #1st email reminders for 'Open' ticket - after 1 month
-                reminders(ticket,ticket.submitter_email)
-                first_remind = Ticket(id=ticket.id,remind=1,remind_date=datetime.now())
-                first_remind.save(update_fields=['remind','remind_date'])
-
-            elif months == 2 and ticket.remind == 1:
-                #2nd email reminders for 'Open' ticket - after 2 months
-                reminders(ticket,ticket.submitter_email)
-                second_remind = Ticket(id=ticket.id,remind=2,remind_date=datetime.now())
-                second_remind.save(update_fields=['remind','remind_date'])
-
-            elif months == 3 and ticket.remind == 2:
-                #3rd email reminders for 'Open' ticket - after 3 months
-                reminders(ticket,ticket.submitter_email)
-                third_remind = Ticket(id=ticket.id,remind=3,remind_date=datetime.now())
-                third_remind.save(update_fields=['remind','remind_date'])
-
-            elif months > 3:
-                print "Ticket is " + str(months) + " Months old and still open. Move this into a dashboard"
-                dashboard_remind = Ticket(id=ticket.id,remind=4,remind_date=datetime.now())
-                dashboard_remind.save(update_fields=['remind','remind_date'])
-
-            else:
-                print "Ticket is " + str(months) + " Months old"
+    #reminders
+    remind_messages(tickets)
         
     #save mysort
     my_sort = None
@@ -1180,41 +1098,9 @@ def ticket_list(request):
         pass
 
     queue_choices = Queue.objects.all()
-
-    all_tickets_reported_by_current_user = []
-    assigned_to_me = []
-    tickets_closed_resolved = []
-    created_by_me = []
-    user_saved_queries = []
-    if (request.user.is_authenticated()):
-        # all tickets, reported by current user
-        email_current_user = request.user.email
-        if email_current_user:
-            all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
-                    submitter_email=email_current_user,
-                ).order_by('status')
-
-        #tickets for the user
-        # Tickets assigned to current user
-        assigned_to_me = Ticket.objects.select_related('queue').filter(
-            assigned_to=request.user,
-         ).exclude(
-            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-        )
-
-        # open & reopened tickets, assigned to current user
-        tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
-            assigned_to=request.user,
-            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
-
-        # Tickets created by current user
-        created_by_me = Ticket.objects.select_related('queue').filter(
-               submitter_email=request.user.email,
-            ).exclude(
-               status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-           )
-        #saved Queries
-        user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
+    
+    #saved Queries
+    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
 
     try:
@@ -1261,17 +1147,6 @@ def ticket_list(request):
     querydict = request.GET.copy()
     querydict.pop('page', 1)
 
-    """
-    progress = ''
-    for ticket in tickets:
-       if request.user.is_active and ticket.assigned_to :
-               if ticket.status ==1:
-                   ticket.progress= "Ticket In Progress"
-               elif ticket.status == 2:
-                   ticket.progress = "Ticket reopened and is in progress"
-               else:
-                   ticket.progress = " "
-    """
     q = Queue.objects.all()
     tags = Tag.objects.all()
 
@@ -1285,13 +1160,13 @@ def ticket_list(request):
             priorities = Ticket.PRIORITY_CHOICES,
             ticket_queue=q,
             ticket_type=Ticket.TICKET_TYPE,
-            my_tickets = len(created_by_me),
+            my_tickets = len(tickets_created),
             items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
-            assigned_to_me=len(assigned_to_me),
+            assigned_to_me=len(tickets_assigned),
             num_tickets=num_tickets,
-            tickets_closed_resolved=len(tickets_closed_resolved),
-            all_tickets_reported_by_current_user=len(all_tickets_reported_by_current_user),
+            tickets_closed_resolved=len(tickets_closed),
+            all_tickets_reported_by_current_user=len(tickets_reported),
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
             type_choices=Ticket.TICKET_TYPE,
@@ -1349,7 +1224,6 @@ def ticket_edit(request):
 def create_ticket(request):
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     #messages.add_message(request, messages.SUCCESS, 'We recommend that you search for your ticket or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!')
-
     if request.method == 'POST':
         if request.user.is_staff:
 
@@ -1399,26 +1273,7 @@ def create_ticket(request):
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
     #tickets, reported by current user
 
-    tickets_reported =''
-
-    if request.user.email:
-        tickets_reported = Ticket.objects.select_related('queue').filter(
-                submitter_email=request.user.email,
-            ).order_by('status')
-
-    #tickets, resolved by current user
-    tickets_closed = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
-
-    #display tickets assigned to current user
-    tickets_assigned = Ticket.objects.select_related('queue')\
-                    .filter(assigned_to=request.user,)\
-                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
-    #display tickets created by current user
-    tickets_created = Ticket.objects.select_related('queue')\
-                    .filter(submitter_email=request.user.email,)\
-                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+    tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
 
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
@@ -2381,3 +2236,73 @@ def my_default_sort(request):
 
     return 
 
+def remind_messages(tickets):
+    for ticket in tickets:
+
+        if ticket.tags.all():
+            ticket.tags = [t.pk for t in ticket.tags.all()]
+        else:
+            ticket.tags = ""
+
+        #check Ticket (open or re-opened) and send email reminders
+        months = reminder(ticket.id)
+
+        print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
+        print "Since created (in Months) : " + str(months) + " Months"
+
+        if ticket.status == 1 or ticket.status == 2:
+
+            if months == 0:
+                print "Reminder Email : No reminder"
+
+            elif months == 1 and ticket.remind == 0:
+                #1st email reminders for 'Open' ticket - after 1 month
+                reminders(ticket,ticket.submitter_email)
+                first_remind = Ticket(id=ticket.id,remind=1,remind_date=datetime.now())
+                first_remind.save(update_fields=['remind','remind_date'])
+
+            elif months == 2 and ticket.remind == 1:
+                #2nd email reminders for 'Open' ticket - after 2 months
+                reminders(ticket,ticket.submitter_email)
+                second_remind = Ticket(id=ticket.id,remind=2,remind_date=datetime.now())
+                second_remind.save(update_fields=['remind','remind_date'])
+
+            elif months == 3 and ticket.remind == 2:
+                #3rd email reminders for 'Open' ticket - after 3 months
+                reminders(ticket,ticket.submitter_email)
+                third_remind = Ticket(id=ticket.id,remind=3,remind_date=datetime.now())
+                third_remind.save(update_fields=['remind','remind_date'])
+
+            elif months > 3:
+                print "Ticket is " + str(months) + " Months old and still open. Move this into a dashboard"
+                dashboard_remind = Ticket(id=ticket.id,remind=4,remind_date=datetime.now())
+                dashboard_remind.save(update_fields=['remind','remind_date'])
+
+            else:
+                print "Ticket is " + str(months) + " Months old"
+
+#get user specific tickets
+def user_tickets(request):
+
+    if request.user.email:
+        tickets_reported = Ticket.objects.select_related('queue').filter(
+                submitter_email=request.user.email,
+            ).order_by('status')
+
+    #tickets, resolved by current user
+    tickets_closed = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user,
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+
+    #display tickets assigned to current user
+    tickets_assigned = Ticket.objects.select_related('queue')\
+                    .filter(assigned_to=request.user,)\
+                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+    #display tickets created by current user
+    tickets_created = Ticket.objects.select_related('queue')\
+                    .filter(submitter_email=request.user.email,)\
+                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+
+    user_tickets = [tickets_reported, tickets_closed, tickets_assigned, tickets_created]
+
+    return tickets_reported, tickets_closed, tickets_assigned, tickets_created
