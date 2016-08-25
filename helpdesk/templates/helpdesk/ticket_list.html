@@ -14,7 +14,7 @@
 
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <div class="container" ng-controller="TicketController">
-  {% if tickets %}
+  {% if tickets and not query  %}
    <h3>Submitted Tickets</h3>
   {% elif tickets and query %}
    <h3>{{number_of_tickets}} tickets found for {{query}}</h3>
@@ -676,14 +676,14 @@
             <!-- user ticket summary -->
             <div class="panel-body">
               <div class="sort_panels">
-                <span class="glyphicon glyphicon-th-list"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&created={{request.user.email}}">&nbsp;Created By Me </a> <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong>
+                <span class="glyphicon glyphicon-th-list"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&{% endif %}created={{request.user.email}}">&nbsp;Created By Me </a> <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong>
               </div> 
               {% if user.is_staff %}
               <div class="sort_panels">
-                 <span class="glyphicon glyphicon-list-alt"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&assigned={{request.user.email}}">&nbsp;Assigned to Me </a><strong> <span class="badge read_more"> {{ assigned_to_me }} </span></strong>
+                 <span class="glyphicon glyphicon-list-alt"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&{% endif %}assigned={{request.user.email}}">&nbsp;Assigned to Me </a><strong> <span class="badge read_more"> {{ assigned_to_me }} </span></strong>
               </div>
                <div class="sort_panels">  
-                <span class="glyphicon glyphicon-th"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&clossed={{request.user.email}}">&nbsp;Closed by Me </a><strong> <span class="badge read_more"> {{ tickets_closed_resolved }} </span></strong>
+                <span class="glyphicon glyphicon-th"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&{% endif %}clossed={{request.user.email}}">&nbsp;Closed by Me </a><strong> <span class="badge read_more"> {{ tickets_closed_resolved }} </span></strong>
                </div>
               {% endif %}
             </div>

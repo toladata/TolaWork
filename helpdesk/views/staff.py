@@ -978,6 +978,9 @@ def ticket_list(request):
                 pass
 
     saved_query = None
+    my_email1 = None
+    my_email2 = None
+    my_email3 = None
     if request.GET.get('saved_query', None):
         from_saved_query = True
         try:
@@ -993,12 +996,16 @@ def ticket_list(request):
             import cPickle as pickle
         from helpdesk.lib import b64decode
         query_params = pickle.loads(b64decode(str(saved_query.query)))
+
     elif not (  'queue' in request.GET
             or  'assigned_to' in request.GET
             or  'status' in request.GET
             or  'q' in request.GET
             or  'sort' in request.GET
             or  'sortreverse' in request.GET
+            or  'clossed' in request.GET
+            or  'assigned' in request.GET
+            or  'created' in request.GET
                 ):
 
         # Fall-back if no querying is being done, force the list to only
@@ -1048,7 +1055,7 @@ def ticket_list(request):
             try:
 
                 query_params['filtering']['submitter_email__in'] = submitter_email
-                print query_params
+                
             except ValueError:
                 pass
         statuses = request.GET.getlist('status')
@@ -1077,17 +1084,17 @@ def ticket_list(request):
 
         #additional filters for my tickets section
         created_by_me = []
-        my_email = request.GET.get('created')
-        created_by_me.append(my_email)
-        if my_email:
+        my_email1 = request.GET.get('created')
+        created_by_me.append(my_email1)
+        if my_email1:
             try:
                 query_params['filtering']['submitter_email__in'] = created_by_me
             except Exception, e:
                 pass
 
         assigned_to_me = []
-        my_email = request.GET.get('assigned')
-        if my_email:
+        my_email2 = request.GET.get('assigned')
+        if my_email2:
             try:
                 assigned_id = request.user.id
                 assigned_to_me.append(assigned_id)
@@ -1097,8 +1104,8 @@ def ticket_list(request):
 
         clossed_by_me = []
         my_statuses =  [Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS]
-        my_email = request.GET.get('clossed')
-        if my_email:
+        my_email3 = request.GET.get('clossed')
+        if my_email3:
             try:
                 assigned_id = request.user.id
                 clossed_by_me.append(assigned_id)
@@ -1107,14 +1114,12 @@ def ticket_list(request):
             except Exception, e:
                 pass
 
+
         ### KEYWORD SEARCHING
         key_word_searching(request, context, query_params)
 
         ### SORTING
         data_sorting(request,query_params)
-
-
-    print query_params
 
     tickets = Ticket.objects.select_related()
     num_tickets = tickets.count()
@@ -1136,7 +1141,6 @@ def ticket_list(request):
 
             if months == 0:
                 print "Reminder Email : No reminder"
-                pass
 
             elif months == 1 and ticket.remind == 0:
                 #1st email reminders for 'Open' ticket - after 1 month
@@ -1163,7 +1167,7 @@ def ticket_list(request):
 
             else:
                 print "Ticket is " + str(months) + " Months old"
-                pass
+        
     #save mysort
     my_sort = None
     my_default_sort(request)
@@ -1253,7 +1257,6 @@ def ticket_list(request):
         import cPickle as pickle
     from helpdesk.lib import b64encode
     urlsafe_query = b64encode(pickle.dumps(query_params))
-
 
     querydict = request.GET.copy()
     querydict.pop('page', 1)
@@ -2167,8 +2170,7 @@ def key_word_searching(request, context, query_params):
             Q(submitter_email__icontains=q)
         )
 
-        context = dict(context, query=q,
-                       )
+        context = dict(context, query=q)
 
         query_params['other_filter'] = qset
     return
@@ -2180,7 +2182,7 @@ def data_sorting(request,query_params):
 
     user_id = User.objects.get(username=request.user).id
     user = User.objects.get(id=user_id)
-    my_sort=None
+    my_sort = None
 
     try:
         my_sort = get_object_or_404(UserDefaultSort, user_id=user)
