@@ -21,7 +21,13 @@ from helpdesk.views.staff import file_attachment
 from helpdesk.views.staff import data_query_pagination
 from helpdesk.slack import post_slack,post_tola_slack
 
+from django.contrib.sessions.models import Session
+try:
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 
+from helpdesk.views.staff import form_data, user_tickets
 
 def splash(request):
     if request.user.is_authenticated():
@@ -217,63 +223,18 @@ def home(request):
 
         tolaTablesData = get_TolaTables_data(request)
 
-    logged_users = logged_in_users(request)
-
     #create ticket modal
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    initial_data = {}
+    try:
+        if request.user.is_authenticated and request.user.email:
+            initial_data['submitter_email'] = request.user.email
 
-    form = PublicTicketForm(initial={})
-    form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+    except Exception, e:
+        pass
+    form = form_data(request)
 
-    if request.method == 'POST':
-        if request.user.is_staff:
-
-            form = TicketForm(request.POST, request.FILES)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        else:
-            form = PublicTicketForm(request.POST, request.FILES)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-
-        if form.is_valid():
-
-            ticket = form.save(user=request.POST.get('assigned_to'))
-
-            #save tickettags
-            tags = request.POST.getlist('tags')
-            for tag in tags:
-                ticket.tags.add(tag)
-
-            #ticket.comment = ''
-            comment = ""
-            f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
-            f.save()
-
-            #Attch a File
-            file_attachment(request, f)
-                   
-            #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
-
-            messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
-
-            return HttpResponseRedirect('/')
-    else:
-        initial_data = {}
-        try:
-            if request.user.email:
-                initial_data['submitter_email'] = request.user.email
-            if 'queue' in request.GET:
-                initial_data['queue'] = request.GET['queue']
-
-            if request.user.is_staff:
-                form = TicketForm(initial=initial_data)
-                form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-                form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-            
-        except Exception, e:
-            form = PublicTicketForm(initial=initial_data)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+    users = get_current_users()
 
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
@@ -284,7 +245,7 @@ def home(request):
                                           'num_tasks': num_tasks, 'total_tasks_created': total_tasks_created, \
                                         'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed, 'total_tasks_completed': total_tasks_completed, 
                                         'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData, \
-                                         'logged_users':logged_users, 'form':form, 'helper':form.helper})
+                                         'logged_users':users, 'form':form, 'helper':form.helper})
 
 
 def contact(request):
@@ -488,6 +449,19 @@ def update_issue_on_github(request):
             #update issue in github with local changes and comments
             update_issue(repo,ticket)
     return HttpResponseRedirect('/home')
+
+#Get users with active sessions
+def get_current_users():
+    active_sessions = Session.objects.filter(expire_date__gte=timezone.now())
+    user_id_list = []
+    for session in active_sessions:
+        data = session.get_decoded()
+        user_id_list.append(data.get('_auth_user_id', None))
+    # Query all logged in users based on id list
+    logged_users = User.objects.filter(id__in=user_id_list)
+    for user in logged_users:
+        user.email = User.objects.get(username=user).email
+    return logged_users
 
 
 

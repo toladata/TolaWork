@@ -162,6 +162,10 @@ margin-right: 0px
 {
     margin-top: 5px;
 }
+.date_to p
+{
+    text-align: right;
+}
 /*//end of fonts*/
 .collapselist
 {
@@ -426,6 +430,9 @@ margin-right: 0px
     padding-bottom: 5px;
     margin-bottom: 3px;
 }
+.highlight{
+  background: #f1c40f;
+}
 
 /*//search box*/
 .search
@@ -670,8 +677,9 @@ form .thumbnail
 }
 .date_to 
 {
-    margin-top: 7px;
-    margin-bottom: 7px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
 }
 .keywords
 {

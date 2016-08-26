@@ -223,6 +223,7 @@ THIRD_PARTY_APPS = (
     'tinymce',
     'easy_select2',
     'endless_pagination',
+    'haystack',
 
 
 )
@@ -354,3 +355,14 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 #paginator
 ENDLESS_PAGINATION_PER_PAGE = 8
 ENDLESS_PAGINATION_TEMPLATE_VARNAME = 'template'
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://127.0.0.1:9200/',
+        'INDEX_NAME': 'haystack',
+    },
+}
+HAYSTACK_CUSTOM_HIGHLIGHTER = 'helpdesk.lib.MyHighlighter'
