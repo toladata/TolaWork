@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('helpdesk', '0004_auto_20160822_0548'),
+        ('helpdesk', '0009_merge'),
     ]
 
     operations = [
@@ -28,6 +28,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='ticket',
             name='remind_date',
-            field=models.DateTimeField(default=datetime.datetime(2016, 8, 22, 5, 52, 9, 183385), help_text='Date the last reminder was sent', verbose_name='Reminder', blank=True),
+            field=models.DateTimeField(default=datetime.datetime(2016, 8, 26, 10, 31, 18, 139769), help_text='Date the last reminder was sent', verbose_name='Reminder', blank=True),
         ),
     ]
