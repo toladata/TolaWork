@@ -1293,7 +1293,7 @@ def report_index(request):
     saved_query = request.GET.get('saved_query', None)
 
     tickets_3_months = Ticket.objects.filter(remind=4)
-    paginator = Paginator(tickets_3_months, 15) # show 15 tickets per page
+    paginator = Paginator(tickets_3_months, 10) # show 10 tickets per page
 
     page = request.GET.get('page')
     try:

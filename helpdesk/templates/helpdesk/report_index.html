@@ -3,9 +3,16 @@
 {% block helpdesk_title %}{% trans "Report Dashboard" %}{% endblock %}
 
 {% block helpdesk_body %}
-<h2>{% trans "Report Dashboard" %}</h2>
+{% load in_list %}
 
-{% ifequal number_tickets 0 %}
+<div class="ticket_cover">
+    <div class="col-md-9 col-sm-9 ticket_right">
+        <div class="panel panel-info">
+                <div class="panel-heading">
+                    <strong>{% trans "Reports & Stats Dashboard" %}</strong>
+                </div>
+        </div>
+    {% ifequal number_tickets 0 %}
 <p>{% trans "You haven't created any tickets yet, so you cannot run any reports." %}</p>
 {% else %}
 <table class="table table-hover table-bordered table-striped">
@@ -27,7 +34,7 @@
             <th>{{ ticket.ticket|upper }}</th>
             <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
             <td>{{ ticket.get_status }}</td>
-            <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created }}</span></td>
+            <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|date:"M d, Y" }}</span></td>
             <td>{{ ticket.get_assigned_to }}</td>
         </tr>
         {% empty %}
@@ -53,8 +60,20 @@
         {% endif %}
     </span>
 </div>
+    </div>
+    <div class="col-md-3 col-sm-3 ">
 
-<ul>
+       <!-- start search -->
+          <div class="search" >
+            <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
+                <input type="text" name='q' class="form-control" placeholder="Search" id='search_query'>
+                <span class="input-group-btn">
+                  <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                </span>
+              </form>
+          </div>
+          <!-- end search -->
+            <ul>
     <li>{% trans "Reports By User" %}
         <ul>
             <li><a href='userpriority/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Priority" %}</a></li>
@@ -65,7 +84,7 @@
     </li>
     <li>{% trans "Reports By Queue" %}
         <ul>
-    
+
             <li><a href='queuepriority/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Priority" %}</a></li>
             <li><a href='queuestatus/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Status" %}</a></li>
             <li><a href='queuemonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Month" %}</a></li>
@@ -74,5 +93,12 @@
     </li>
 
 </ul>
+
+
+    </div>
+</div>
+
+
+
 
 {% endifequal %}{% endblock %}
