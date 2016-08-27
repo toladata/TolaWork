@@ -27,7 +27,7 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
-
+from helpdesk.views.staff import form_data, user_tickets
 
 def splash(request):
     if request.user.is_authenticated():
@@ -232,62 +232,7 @@ def home(request):
 
     except Exception, e:
         pass
-
-    form = PublicTicketForm(initial=initial_data)
-    form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-
-    if request.method == 'POST':
-        if request.user.is_staff:
-
-            form = TicketForm(request.POST, request.FILES)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        else:
-            form = PublicTicketForm(request.POST, request.FILES)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-
-        if form.is_valid():
-            try:
-                ticket = form.save(user=request.POST.get('assigned_to'))
-            except Exception, e:
-                ticket = form.save(user=None)
-
-
-            #save tickettags
-            tags = request.POST.getlist('tags')
-            for tag in tags:
-                ticket.tags.add(tag)
-
-            #ticket.comment = ''
-            comment = ""
-            f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
-            f.save()
-
-            #Attch a File
-            file_attachment(request, f)
-                   
-            #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
-
-            messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
-
-            return HttpResponseRedirect('/')
-    else:
-        initial_data = {}
-        try:
-            if request.user.email:
-                initial_data['submitter_email'] = request.user.email
-            if 'queue' in request.GET:
-                initial_data['queue'] = request.GET['queue']
-
-            if request.user.is_staff:
-                form = TicketForm(initial=initial_data)
-                form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-                form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-            
-        except Exception, e:
-            form = PublicTicketForm(initial=initial_data)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+    form = form_data(request)
 
     users = get_current_users()
 
