@@ -22,7 +22,7 @@
     </thead>
 
     <tbody>
-        {% for ticket in tickets_3_months.reverse %}
+        {% for ticket in more_3_months %}
         <tr class="{{ ticket.get_priority_css_class }}">
             <th>{{ ticket.ticket|upper }}</th>
             <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
@@ -37,6 +37,22 @@
         {% endfor %}
     </tbody>
 </table>
+
+<div class="pagination">
+    <span class="step-links">
+        {% if more_3_months.has_previous %}
+            <a href="?page={{ more_3_months.previous_page_number }}">{% trans "Previous" %}</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ more_3_months.number }} of {{ more_3_months.paginator.num_pages }}.
+        </span>
+
+        {% if more_3_months.has_next %}
+            <a href="?page={{ more_3_months.next_page_number }}">{% trans "Next" %}</a>
+        {% endif %}
+    </span>
+</div>
 
 <ul>
     <li>{% trans "Reports By User" %}
