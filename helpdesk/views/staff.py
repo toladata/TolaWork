@@ -1163,16 +1163,37 @@ def ticket_edit(request):
             description = request.POST.get('description')
             email = request.POST.get('email')
             due_date = ticket.due_date
-            tags = request.POST.getlist('edit_tags')
             update_comments = Ticket(id=ticket_id, title=title, description=description, assigned_to_id=owner,
                                      submitter_email=email, priority=priority, due_date=due_date,
                                      queue_id=queue, type=type, error_msg=error_msg)
             update_comments.save(update_fields=['title','queue_id','type','assigned_to_id','error_msg','priority','description','submitter_email', 'due_date'])
 
             #updating tags
+            #
+            #Find tags
+
+            #empty the list but do not remove the dictionary element
+            tags = request.POST.getlist('edit_tags')
+
+            new_tags = request.POST.copy()
+
+            if tags: del new_tags.getlist('edit_tags')[:]
+  
+            for i, t in enumerate(tags):
+                if t.isdigit():
+                    new_tags.getlist('edit_tags').append(t)
+                else:
+                    tag, created = Tag.objects.get_or_create(name=t)
+                    if created:
+                        #print("creating tag: %s " % tag)
+                        tags[i] = tag.id
+                    #post_data is a QueryDict in which each element is a list
+                    new_tags.getlist('edit_tags').append(tag.id)
+                    
             Ticket.tags.through.objects.filter(ticket_id = ticket_id).delete()
-            for tag in tags:
-                ticket.tags.add(tag)
+            for tag in new_tags.getlist('edit_tags'):
+                ticket.tags.add(tag)   
+
 
     return redirect('helpdesk_list')
 
@@ -1198,6 +1219,7 @@ def create_ticket(request):
             tags = request.POST.getlist('tags')
             for tag in tags:
                 ticket.tags.add(tag)
+
 
             #ticket.comment = ''
             comment = ""
