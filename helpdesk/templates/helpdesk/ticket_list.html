@@ -4,14 +4,10 @@
 
 {% block helpdesk_head %}
 <style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>
-
-
 {% endblock %}
 
 {% block content %}
 {% load in_list %}
-
-
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <div class="container" ng-controller="TicketController">
   {% if tickets and not query  %}
@@ -88,9 +84,9 @@
       {% for ticket in tickets.object_list.reverse %}
       
       <div class="panel panel-info">
-        <div class="panel-heading"><a href='{{ ticket.get_absolute_url }}'>
+        <div class="panel-heading">
           {{ ticket.ticket | upper}} <strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}</p>
-          {% endif %}</strong></a>
+          {% endif %}</strong>
           {% if ticket.progress %}
           <div class="read_more">
             <strong><span class="badge">{{ticket.progress}} </span></strong>
@@ -105,8 +101,25 @@
           <p class="description">{{ ticket.description }}</p>
           {% endif %}
           <div class="col-md-12 ">
-            
-          <a href="#moredetails{{ticket.id}}" class= "read_more" data-toggle="collapse">&nbsp;View More Details</a>
+            <div class="col-md-7"></div>
+
+            <div class="col-md-3 read_more">
+              <a href="#moredetails{{ticket.id}}" class= "" data-toggle="collapse"><span class="glyphicon glyphicon-th"></span> View More Details</a>
+            </div>
+            <input hidden id="ticket-link" value="{{ ticket.get_absolute_url }}">
+            <div class="col-md-2 read_more">
+              <a id="example" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-content=" Copied to Clipboard" data-placement="top" onclick="copyToClipboard('#p1{{ticket.id}}')"><span class="g glyphicon glyphicon-paste"></span> Copy Link</a> 
+              <p id="p1{{ticket.id}}" hidden>{{request.get_host}}{{ ticket.get_absolute_url }}</p>
+              <script type="text/javascript">
+                function copyToClipboard(element) {
+                    var $temp = $("<input>");
+                    $("body").append($temp);
+                    $temp.val($(element).text()).select();
+                    document.execCommand("copy"); 
+                    $temp.remove();
+                  }
+              </script>
+            </div>
           </div>
           <div>
             <!-- the collapse section for view more details -->
@@ -1170,5 +1183,9 @@ $(document).ready(function() {
         });
 
     }
+
+    $(function () {
+        $('[data-toggle="popover"]').popover()
+      });
 </script>
 {% endblock content %}
