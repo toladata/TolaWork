@@ -3,43 +3,78 @@
 {% block helpdesk_title %}{% trans "Report Dashboard" %}{% endblock %}
 
 {% block helpdesk_body %}
-<h2>{% trans "Report Dashboard" %}</h2>
+{% load in_list %}
 
-{% ifequal number_tickets 0 %}
-<p>{% trans "You haven't created any tickets yet, so you cannot run any reports." %}</p>
-{% else %}
-<table class="table table-hover table-bordered table-striped">
-    <caption>{% trans "&nbsp;Open Tickets beyond 3 Months" %}</caption>
+<div class="ticket_cover">
+    <div class="col-md-9 col-sm-9 ticket_right">
 
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>{% trans "Title" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Created" %}</th>
-            <th>{% trans "Owner" %}</th>
-        </tr>
-    </thead>
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <strong>{% trans "Reports &amp; Stats Dashboard" %}</strong>
+                </div>
+            </div>
+            {% ifequal number_tickets 0 %}
+                <p>{% trans "You haven't created any tickets yet, so you cannot run any reports." %}</p>
+            {% else %}
+                <table class="table table-hover table-bordered table-striped">
+                 <caption>{% trans "&nbsp;Open Tickets beyond 3 Months" %}</caption>
 
-    <tbody>
-        {% for ticket in tickets_3_months.reverse %}
-        <tr class="{{ ticket.get_priority_css_class }}">
-            <th>{{ ticket.ticket|upper }}</th>
-            <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
-            <td>{{ ticket.get_status }}</td>
-            <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created }}</span></td>
-            <td>{{ ticket.get_assigned_to }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan='8'>{% trans "No Tickets Match Your Selection" %}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{% trans "Title" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Created" %}</th>
+                        <th>{% trans "Owner" %}</th>
+                    </tr>
+                </thead>
 
-<ul>
-    <li>{% trans "Reports By User" %}
+                <tbody>
+                    {% for ticket in more_3_months %}
+                    <tr class="{{ ticket.get_priority_css_class }}">
+                        <th>{{ ticket.ticket|upper }}</th>
+                        <th><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></th>
+                        <td>{{ ticket.get_status }}</td>
+                        <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|date:"M d, Y" }}</span></td>
+                        <td>{{ ticket.get_assigned_to }}</td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+<div class="pagination">
+    <span class="step-links">
+        {% if more_3_months.has_previous %}
+            <a href="?page={{ more_3_months.previous_page_number }}">{% trans "Previous" %}</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ more_3_months.number }} of {{ more_3_months.paginator.num_pages }}.
+        </span>
+
+        {% if more_3_months.has_next %}
+            <a href="?page={{ more_3_months.next_page_number }}">{% trans "Next" %}</a>
+        {% endif %}
+    </span>
+</div>
+    </div>
+    <div class="col-md-3 col-sm-3 ">
+
+       <!-- start search -->
+          <div class="search" >
+            <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
+                <input type="text" name='q' class="form-control" placeholder="Search" id='search_query'>
+                <span class="input-group-btn">
+                  <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                </span>
+              </form>
+          </div>
+          <!-- end search -->
+
+            <ul>
+    <li><strong>{% trans "Reports By User" %}</strong>
         <ul>
             <li><a href='userpriority/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Priority" %}</a></li>
             <li><a href='userqueue/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Queue" %}</a></li>
@@ -47,16 +82,22 @@
             <li><a href='usermonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Month" %}</a></li>
         </ul>
     </li>
-    <li>{% trans "Reports By Queue" %}
+    <li><strong>{% trans "Reports By Queue" %}</strong>
         <ul>
-    
             <li><a href='queuepriority/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Priority" %}</a></li>
             <li><a href='queuestatus/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Status" %}</a></li>
             <li><a href='queuemonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Month" %}</a></li>
-            <li><a href='daysuntilticketclosedbymonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "Days until ticket closed by Month" %}</a></li>
+            <li><a href='daysuntilticketclosedbymonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "Days until ticket closed" %}</a></li>
         </ul>
     </li>
 
 </ul>
+
+
+    </div>
+</div>
+
+
+
 
 {% endifequal %}{% endblock %}

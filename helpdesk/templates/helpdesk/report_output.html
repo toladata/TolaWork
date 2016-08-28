@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/dashboard.html" %}{% load i18n %}
 
 {% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
 
@@ -13,7 +13,15 @@
 {% endblock %}
 
 {% block helpdesk_body %}
-<h2>{% trans "Reports &amp; Statistics" %}</h2>
+{% load in_list %}
+
+<div class="ticket_cover">
+    <div class="col-md-9 col-sm-9 ticket_right">
+        <div class="panel panel-info">
+                <div class="panel-heading">
+                {% trans "Reports &amp; Statistics" %}
+                </div>
+        </div>
 
 {% if user_saved_queries_ %}
     <p>{% trans "You can run this query on filtered data by using one of your saved queries." %}</p>
@@ -39,9 +47,31 @@
 <tr class='row_{% cycle odd,even %}'>{% for f in d %}<td class='report'>{{ f }}</td>{% endfor %}</tr>{% endfor %}
 </tbody>
 </table>
+</div>
+<div class="col-md-3 col-sm-3 ">
 
+       <!-- start search -->
+          <div class="search" >
+            <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
+                <input type="text" name='q' class="form-control" placeholder="Search" id='search_query'>
+                <span class="input-group-btn">
+                  <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                </span>
+              </form>
+          </div>
+          <!-- end search -->
+
+
+
+
+</div>
+</div>
 <div class='jqPlot' id='placeholder' style='width: 600px; height: 400px;'></div>
 {% ifequal charttype "date" %}
+    </div>
+
+
+
 <script type='text/javascript'>
     $.jqplot.config.enablePlugins = true;
     var dataset = [];

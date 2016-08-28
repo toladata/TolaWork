@@ -23,7 +23,7 @@ from django.core.exceptions import ValidationError
 from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render,render_to_response, get_object_or_404
 from django.template import RequestContext, loader, Context
 from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
@@ -1289,13 +1289,26 @@ rss_list = staff_member_required(rss_list)
 
 def report_index(request):
     number_tickets = Ticket.objects.all().count()
+
     saved_query = request.GET.get('saved_query', None)
+
     tickets_3_months = Ticket.objects.filter(remind=4)
+    paginator = Paginator(tickets_3_months, 10) # show 10 tickets per page
+
+    page = request.GET.get('page')
+    try:
+        more_3_months = paginator.page(page)
+    except PageNotAnInteger:
+        more_3_months = paginator.page(1)
+    except EmptyPage:
+        more_3_months = paginator.page(paginator.num_pages)
+
+    print "Number of Older Tickets : " + str(tickets_3_months.count())
     return render_to_response('helpdesk/report_index.html',
         RequestContext(request, {
             'number_tickets': number_tickets,
             'saved_query': saved_query,
-            'tickets_3_months': tickets_3_months,
+            'more_3_months': more_3_months,
         }))
 report_index = staff_member_required(report_index)
 
