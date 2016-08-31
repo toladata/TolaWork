@@ -384,10 +384,25 @@
                     <div class="row">
                       <div class="col-md-9">
                         <input class="btn btn-primary" type='submit' value='{% trans "Update This Ticket" %}' />
-                        
+                        {% if not ticket.github_issue_url %}
+                        {% if request.user.is_staff %}
+                        <input name="github" type='button ' class="btn btn-info" value='{% trans "Send to Github" %}' onClick="location.href='/helpdesk/tickets/{{ticket.id}}/send_to_github/'"/>
+                        {% endif %}
+                        {% else %}
+
+                        <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Ticket in Github" %}' onClick="location.href='{{ ticket.github_issue_url }}'"/>
+                        {% endif %}
+
+                        {% if ticket.slack_status == 0 %}
+                        <a href='{% url "post_to_slack" ticket.id %}'><img alt="Add to Slack" height="40" width="139" src="{{ STATIC_URL }}/img/add_to_slack.png"></a>
+                        {% else %}
+                        <a href="https://tola-users.slack.com/archives/tola-work"><img alt="Posted to Slack" height="60" width="140" src="{{ STATIC_URL }}/img/slack.png" /></a>
+                        {% endif %}
                       </div>
                         {% csrf_token %}
+                    
                   </form>
+
 
                   <!-- ticket on-hold and delete section -->
                   <div class="col-md-2 col-md-offset-1">
