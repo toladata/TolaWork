@@ -314,7 +314,10 @@ def post_comment(request, ticket_id):
 
             #check the person whom the ticket is assigned to
             if not ticket.get_assigned_to == 'Unassigned':
-                assigned = str(ticket.assigned_to).upper()
+                try:
+                    assigned = User.objects.get(id=ticket.assigned_to.id)
+                except User.DoesNotExist:
+                    pass
             else:
                 assigned = None
 
