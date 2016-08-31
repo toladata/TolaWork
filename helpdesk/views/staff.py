@@ -23,7 +23,7 @@ from django.core.exceptions import ValidationError
 from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render,render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, loader, Context
 from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
@@ -488,10 +488,13 @@ def view_ticket(request, ticket_id):
         ticket.save(update_fields=['t_url'])
 
     progress=''
+
+    # check status of ticket in github
     if ticket.github_issue_id:
-        repo = queue_repo(ticket)
+        queue = queue_repo(ticket)
+
         #check status of ticket in GitHub
-        response = get_issue_status(repo,ticket)
+        response = get_issue_status(queue,ticket)
 
         if response == 200:
 
@@ -505,8 +508,9 @@ def view_ticket(request, ticket_id):
             print 'Ticket status in Github is: [' + str(state) + ']'
         else:
             print 'Check ticket status in GitHub'
+
         #check github label
-        label_response = get_label(repo,ticket)
+        label_response = get_label(queue,ticket)
         print label_response
 
     ticket_state = get_object_or_404(Ticket, id=ticket_id)
@@ -1145,7 +1149,7 @@ def ticket_list(request):
     ticket_list = staff_member_required(ticket_list)
 
 def ticket_edit(request):
-    from django.shortcuts import redirect
+
     ticket_id = request.GET.get('ticket_id')
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -1171,7 +1175,7 @@ def ticket_edit(request):
                                      submitter_email=email, priority=priority, due_date=due_date,
                                      queue_id=queue, type=type, error_msg=error_msg)
             update_comments.save(update_fields=['title','queue_id','type','assigned_to_id','error_msg','priority','description','submitter_email', 'due_date'])
-
+            messages.success(request, 'Success, Ticket # ' + str(ticket_id) + ' updated.')
             #updating tags
             Ticket.tags.through.objects.filter(ticket_id = ticket_id).delete()
             for tag in tags:
@@ -1292,13 +1296,26 @@ rss_list = staff_member_required(rss_list)
 
 def report_index(request):
     number_tickets = Ticket.objects.all().count()
+
     saved_query = request.GET.get('saved_query', None)
+
     tickets_3_months = Ticket.objects.filter(remind=4)
+    paginator = Paginator(tickets_3_months, 10) # show 10 tickets per page
+
+    page = request.GET.get('page')
+    try:
+        more_3_months = paginator.page(page)
+    except PageNotAnInteger:
+        more_3_months = paginator.page(1)
+    except EmptyPage:
+        more_3_months = paginator.page(paginator.num_pages)
+
+    print "Number of Older Tickets : " + str(tickets_3_months.count())
     return render_to_response('helpdesk/report_index.html',
         RequestContext(request, {
             'number_tickets': number_tickets,
             'saved_query': saved_query,
-            'tickets_3_months': tickets_3_months,
+            'more_3_months': more_3_months,
         }))
 report_index = staff_member_required(report_index)
 

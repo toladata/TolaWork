@@ -698,3 +698,10 @@ form .thumbnail
     margin-bottom: 10px;
     margin-top: 10px;
 }
+
+/* Popover Body */
+.popover-content {
+    background-color: #000;
+    color: #FFFFFF;
+    padding: 5px;
+}

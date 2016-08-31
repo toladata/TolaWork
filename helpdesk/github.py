@@ -19,20 +19,21 @@ def get_issue_status(repo,ticket):
 
         title = data['title']
         updated_date = data['updated_at']
-
         state = data['state']
+
         if state == 'closed':
-            status = 4
+            status = 3 # If 'Closed' in github, save as 'Resolved' in TW
             state_txt = 'Closed'
         else:
             status = 1 #open
             state_txt = 'Open'
 
+        # add a comment/explanation for the change of state in TW
         comments = '[GitHub Sync] Ticket is ' + str(state_txt) + ' in GitHub'
 
         update_ticket = Ticket.objects.get(id=ticket.id)
         current_status = update_ticket.status
-
+        print 'Ticket#' + str(ticket.id) + str(comments)
         if not int(current_status) == int(status):
             new_followup = FollowUp(title=title, date=updated_date, ticket_id=ticket.id, comment=comments, public=1, new_status=status, )
             new_followup.save()

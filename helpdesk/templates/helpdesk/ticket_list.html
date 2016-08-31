@@ -4,14 +4,10 @@
 
 {% block helpdesk_head %}
 <style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>
-
-
 {% endblock %}
 
 {% block content %}
 {% load in_list %}
-
-
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <div class="container" ng-controller="TicketController">
   {% if tickets and not query  %}
@@ -105,8 +101,25 @@
           <p class="description">{{ ticket.description }}</p>
           {% endif %}
           <div class="col-md-12 ">
-            
-          <a href="#moredetails{{ticket.id}}" class= "read_more" data-toggle="collapse">&nbsp;View More Details</a>
+            <div class="col-md-7"></div>
+
+            <div class="col-md-3 read_more">
+              <a href="#moredetails{{ticket.id}}" class= "" data-toggle="collapse"><span class="glyphicon glyphicon-th"></span> View More Details</a>
+            </div>
+            <input hidden id="ticket-link" value="{{ ticket.get_absolute_url }}">
+            <div class="col-md-2 read_more">
+              <a id="example" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-content=" Copied to Clipboard" data-placement="top" onclick="copyToClipboard('#p1{{ticket.id}}')"><span class="g glyphicon glyphicon-paste"></span> Copy Link</a> 
+              <p id="p1{{ticket.id}}" hidden>{{request.get_host}}{{ ticket.get_absolute_url }}</p>
+              <script type="text/javascript">
+                function copyToClipboard(element) {
+                    var $temp = $("<input>");
+                    $("body").append($temp);
+                    $temp.val($(element).text()).select();
+                    document.execCommand("copy"); 
+                    $temp.remove();
+                  }
+              </script>
+            </div>
           </div>
           <div>
             <!-- the collapse section for view more details -->
@@ -371,14 +384,29 @@
                     <div class="row">
                       <div class="col-md-9">
                         <input class="btn btn-primary" type='submit' value='{% trans "Update This Ticket" %}' />
-                        
+                        {% if not ticket.github_issue_url %}
+                        {% if request.user.is_staff %}
+                        <input name="github" type='button ' class="btn btn-info" value='{% trans "Send to Github" %}' onClick="location.href='/helpdesk/tickets/{{ticket.id}}/send_to_github/'"/>
+                        {% endif %}
+                        {% else %}
+
+                        <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Ticket in Github" %}' onClick="location.href='{{ ticket.github_issue_url }}'"/>
+                        {% endif %}
+
+                        {% if ticket.slack_status == 0 %}
+                        <a href='{% url "post_to_slack" ticket.id %}'><img alt="Add to Slack" height="40" width="139" src="{{ STATIC_URL }}/img/add_to_slack.png"></a>
+                        {% else %}
+                        <a href="https://tola-users.slack.com/archives/tola-work"><img alt="Posted to Slack" height="60" width="140" src="{{ STATIC_URL }}/img/slack.png" /></a>
+                        {% endif %}
                       </div>
                         {% csrf_token %}
+
                   </form>
+
 
                   <!-- ticket on-hold and delete section -->
                   <div class="col-md-2 col-md-offset-1">
-                    {% if user.is_staff %}
+                    {% if user.is_superuser %}
                       <a href='#' data-toggle="modal" data-target="#deleteModal{{ticket.id}}"class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
                       <span>
                       {% if ticket.on_hold %}
@@ -519,8 +547,10 @@
                       <div class="row">
                         <div class= "col-md-6 row  task_spacing" >
                           <label class="col-md-4"><p><strong>{% trans "Tags:" %}</strong></p></label>
+
                           <div class="col-md-8">
-                            <select class = " form-control multi_select {{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags' name='edit_tags'> 
+                            <span id="helpBlock" class="help-block">To add <strong>NEW</strong> tag(s), type in then press <strong>'ENTER'</strong></span>
+                            <select class = " form-control multi_select {{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
                                 {% for q in tags %} 
 
                                   <option value='{{ q.id }}' {% for tag in ticket.tags.all %} {% ifequal q.id tag.id %} selected='selected'{% endifequal %}{% endfor %}>{{q.name}}</option>
@@ -531,8 +561,23 @@
                                   $(".{{ticket.id}}").select2({
                                           tags: true,
                                           allowClear: true,
-                                  });
+                                          placeholder: "Add tags",
+
+                                          createTag: function(tag) {
+                                              return {
+                                                  id: tag.term,
+                                                  text: tag.term,
+                                                  isNew: true
+                                              };
+                                          },
+                                      }).on("change", function(e) {
+                                          var isNew = $(this).find('[data-select2-tag="true"]');
+                                          if(isNew.length){
+                                              isNew.replaceWith('<option selected="selected" value="'+isNew.val()+'">'+isNew.text()+'</option>');
+                                          }
+                                      });
                             </script>
+                            
                           </div>
                         </div>  
                       </div>
@@ -1170,5 +1215,9 @@ $(document).ready(function() {
         });
 
     }
+
+    $(function () {
+        $('[data-toggle="popover"]').popover()
+      });
 </script>
 {% endblock content %}
