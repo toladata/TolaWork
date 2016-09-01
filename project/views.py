@@ -216,6 +216,7 @@ def home(request):
         total_tasks_completed = len (tasks_completed)
 
 #----Data From Tola Tools APIs----####
+    #get_TolaActivity_data() 
     tolaActivityData = get_TolaActivity_data()
 
     tolaTablesData = {}
@@ -343,21 +344,27 @@ import requests
 
 def get_TolaActivity_data():
 
-    url = 'http://127.0.0.1:8100/tolaactivitydata' #TolaActivity Url
+    #TolaActivity Url
+    url = 'http://activity.toladata.io/api/initiations/' 
+
+    token = settings.TOLA_ACTIVITY_TOKEN
+
+    header = {'Authorization': 'token %s' % token}
 
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=header)
 
         # Consider any status other than 2xx an error
         if not response.status_code // 100 == 2:
             return {}
 
         json_obj = response.json()
-
+        print json_obj
         return json_obj
 
     except requests.exceptions.RequestException as e:
         # A serious problem happened, like an SSLError or InvalidURL
+        print e
         return {}
 
     except ValueError:
@@ -368,13 +375,18 @@ def get_TolaTables_data(request):
     import json
 
     url = 'http://127.0.0.1:8200/api/tolatablesdata' #TolaActivity Url
+
+    token = settings.TOLA_TABLES_TOKEN
+
+    header = {'Authorization': 'token %s' % token}
+
     email = request.user.email
 
     payload = {'email': email}
 
     #print email
     try:
-        response = requests.get(url, params = payload)
+        response = requests.get(url, params = payload, headers=header)
 
         # Consider any status other than 2xx an error
         if not response.status_code // 100 == 2:
@@ -457,6 +469,7 @@ def get_current_users():
     for session in active_sessions:
         data = session.get_decoded()
         user_id_list.append(data.get('_auth_user_id', None))
+
     # Query all logged in users based on id list
     logged_users = User.objects.filter(id__in=user_id_list)
     for user in logged_users:
