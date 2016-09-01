@@ -8,7 +8,7 @@ from helpdesk.models import DocumentationApp, FAQ
 from django.contrib.auth.views import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from helpdesk.github import latest_release
+from helpdesk.github import latest_release, update_issue, get_issue, queue_repo, get_issue_status
 from helpdesk.models import Ticket, Queue, FollowUp
 from tasks.models import Task
 from django.conf import settings
@@ -426,40 +426,22 @@ def  get_tasks_by_user(email):
 
     return tasks
 
-#Update tickets on github
-from django.conf import settings
-from helpdesk.github import  update_issue,get_issue
-
+#GitHub Sync
 @login_required
-def update_issue_on_github(request):
+def githubSync(request):
 
-    #Update tickets Status in Github
     tickets = Ticket.objects.select_related('queue').exclude(
-            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+            status__in=[Ticket.RESOLVED_STATUS],
         )
-
-    # check status in github
     for ticket in tickets:
-
-        #if there is a github issue check it's status in github
+        # Sync 'Closed' status in github to 'Resolved' status in TW
         if ticket.github_issue_number:
-            if str(ticket.queue) == "Tola Tables":
-                repo = settings.GITHUB_REPO_1
-            else:
-                repo = settings.GITHUB_REPO_2
+            queue = queue_repo(ticket)
+            response = get_issue_status(queue,ticket)
 
-            # getstatus from github
-            github_status = get_issue(repo,ticket.github_issue_number)
+            if response == 200:
+                print 'GitHubSync Success - #' + str(ticket.github_issue_number)
 
-            #if status has been updated in github update here
-            if github_status:
-                if github_status['state'] == "open" and ticket.status != 1:
-                    Ticket.objects.filter(id=ticket.id).update(status=1)
-                elif github_status['state'] == "closed" and ticket.status != 3:
-                    Ticket.objects.filter(id=ticket.id).update(status=3)
-
-            #update issue in github with local changes and comments
-            update_issue(repo,ticket)
     return HttpResponseRedirect('/home')
 
 #Get users with active sessions

@@ -23,7 +23,7 @@ from django.core.exceptions import ValidationError
 from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render,render_to_response, get_object_or_404
+from django.shortcuts import render,render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, loader, Context
 from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
@@ -485,10 +485,13 @@ def view_ticket(request, ticket_id):
         ticket.save(update_fields=['t_url'])
 
     progress=''
+
+    # check status of ticket in github
     if ticket.github_issue_id:
-        repo = queue_repo(ticket)
+        queue = queue_repo(ticket)
+
         #check status of ticket in GitHub
-        response = get_issue_status(repo,ticket)
+        response = get_issue_status(queue,ticket)
 
         if response == 200:
 
@@ -502,8 +505,9 @@ def view_ticket(request, ticket_id):
             print 'Ticket status in Github is: [' + str(state) + ']'
         else:
             print 'Check ticket status in GitHub'
+
         #check github label
-        label_response = get_label(repo,ticket)
+        label_response = get_label(queue,ticket)
         print label_response
 
     ticket_state = get_object_or_404(Ticket, id=ticket_id)
@@ -1142,7 +1146,7 @@ def ticket_list(request):
     ticket_list = staff_member_required(ticket_list)
 
 def ticket_edit(request):
-    from django.shortcuts import redirect
+
     ticket_id = request.GET.get('ticket_id')
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -1163,37 +1167,16 @@ def ticket_edit(request):
             description = request.POST.get('description')
             email = request.POST.get('email')
             due_date = ticket.due_date
+            tags = request.POST.getlist('edit_tags')
             update_comments = Ticket(id=ticket_id, title=title, description=description, assigned_to_id=owner,
                                      submitter_email=email, priority=priority, due_date=due_date,
                                      queue_id=queue, type=type, error_msg=error_msg)
             update_comments.save(update_fields=['title','queue_id','type','assigned_to_id','error_msg','priority','description','submitter_email', 'due_date'])
-
+            messages.success(request, 'Success, Ticket # ' + str(ticket_id) + ' updated.')
             #updating tags
-            #
-            #Find tags
-
-            #empty the list but do not remove the dictionary element
-            tags = request.POST.getlist('edit_tags')
-
-            new_tags = request.POST.copy()
-
-            if tags: del new_tags.getlist('edit_tags')[:]
-  
-            for i, t in enumerate(tags):
-                if t.isdigit():
-                    new_tags.getlist('edit_tags').append(t)
-                else:
-                    tag, created = Tag.objects.get_or_create(name=t)
-                    if created:
-                        #print("creating tag: %s " % tag)
-                        tags[i] = tag.id
-                    #post_data is a QueryDict in which each element is a list
-                    new_tags.getlist('edit_tags').append(tag.id)
-                    
             Ticket.tags.through.objects.filter(ticket_id = ticket_id).delete()
-            for tag in new_tags.getlist('edit_tags'):
-                ticket.tags.add(tag)   
-
+            for tag in tags:
+                ticket.tags.add(tag)
 
     return redirect('helpdesk_list')
 
@@ -1219,7 +1202,6 @@ def create_ticket(request):
             tags = request.POST.getlist('tags')
             for tag in tags:
                 ticket.tags.add(tag)
-
 
             #ticket.comment = ''
             comment = ""
