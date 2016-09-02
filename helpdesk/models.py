@@ -410,7 +410,7 @@ class Ticket(models.Model):
 
     def _get_ticket_for_url(self):
         """ A URL-friendly ticket ID, used in links. """
-        return u"%s-%s" % (self.queue.slug, self.id)
+        return u"%s-%s" % (self.queue.slug.upper(), self.id)
     ticket_for_url = property(_get_ticket_for_url)
 
     def _get_priority_img(self):

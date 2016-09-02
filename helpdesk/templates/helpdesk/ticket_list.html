@@ -85,7 +85,7 @@
       
       <div class="panel panel-info">
         <div class="panel-heading"><a href='{{ ticket.get_absolute_url }}'>
-          {{ ticket.ticket | upper}} <strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}</p>
+          {% highlight ticket.ticket with query css_class "highlight" html_tag "span" %} <strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}</p>
           {% endif %}</strong></a>
           {% if ticket.progress %}
           <div class="read_more">
@@ -646,15 +646,17 @@
 
       <!-- the right side of the tickets page -->
       <div class="col-md-3 col-sm-3 ">
-        <!-- start search -->
+
+        <!-- string search -->
         <div class="search" >
-          <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
-            <input type="text" name='q' class="form-control" placeholder="Search" id='search_query'>
-            <span class="input-group-btn">
-              <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
-            </span>
+          <form class="navbar-form navbar-left input-group" id='ticketsearch' method='get' action="{% url 'helpdesk_list' %}">
+
+              <input type='text' name='q' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' />
+                <span class="input-group-btn">
+                  <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span> Go</button>
+                </span>
           </form>
-        </div>
+        </div >
         <!-- end search -->
 
         <!-- start my tickets summary -->

@@ -866,10 +866,18 @@ def ticket_list(request):
     # except Exception, e:
     #     pass
    #ticket_list 
+
     context = {}
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
-    query_params = data_query_params()
+
+    query_params = {
+        'filtering': {},
+        'sorting': None,
+        'sortreverse': True,
+        'keyword': None,
+        'other_filter': None,
+        }
 
     from_saved_query = False
 
@@ -1011,7 +1019,19 @@ def ticket_list(request):
 
 
         ### KEYWORD SEARCHING
-        key_word_searching(request, context, query_params)
+        #key_word_searching(request, context, query_params)
+        q = request.GET.get('q', None)
+
+        if q:
+            qset = (
+                Q(id__icontains=q) |
+                Q(title__icontains=q) |
+                Q(description__icontains=q) |
+                Q(resolution__icontains=q) |
+                Q(submitter_email__icontains=q)
+            )
+            context = dict(context, query=q)
+            query_params['other_filter'] = qset
 
         ### SORTING
         data_sorting(request,query_params)
@@ -1984,6 +2004,7 @@ def key_word_searching(request, context, query_params):
 
     if q:
         qset = (
+            Q(id__icontains=q) |
             Q(title__icontains=q) |
             Q(description__icontains=q) |
             Q(resolution__icontains=q) |
@@ -1993,7 +2014,7 @@ def key_word_searching(request, context, query_params):
         context = dict(context, query=q)
 
         query_params['other_filter'] = qset
-    return
+    return context
 
 #Sorting
 def data_sorting(request,query_params):
