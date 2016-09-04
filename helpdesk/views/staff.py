@@ -1196,10 +1196,32 @@ def ticket_edit(request):
                                      queue_id=queue, type=type, error_msg=error_msg)
             update_comments.save(update_fields=['title','queue_id','type','assigned_to_id','error_msg','priority','description','submitter_email', 'due_date'])
             messages.success(request, 'Success, Ticket # ' + str(ticket_id) + ' updated.')
+
+            
             #updating tags
+
+            tags = request.POST.getlist('edit_tags')
+
+            new_tags = request.POST.copy()
+
+            if tags: del new_tags.getlist('edit_tags')[:]
+  
+            for i, t in enumerate(tags):
+                if t.isdigit():
+                    new_tags.getlist('edit_tags').append(t)
+                else:
+                    tag, created = Tag.objects.get_or_create(name=t)
+                    if created:
+
+                        tags[i] = tag.id
+
+                    new_tags.getlist('edit_tags').append(tag.id)
+                    
             Ticket.tags.through.objects.filter(ticket_id = ticket_id).delete()
-            for tag in tags:
-                ticket.tags.add(tag)
+
+            for tag in new_tags.getlist('edit_tags'):
+
+                ticket.tags.add(tag) 
 
     return redirect('helpdesk_list')
 

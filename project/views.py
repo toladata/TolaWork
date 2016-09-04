@@ -345,7 +345,7 @@ import requests
 def get_TolaActivity_data():
 
     #TolaActivity Url
-    url = 'http://activity.toladata.io/api/initiations/' 
+    url = 'http://activity.toladata.io/api/projectagreements/' 
 
     token = settings.TOLA_ACTIVITY_TOKEN
 
