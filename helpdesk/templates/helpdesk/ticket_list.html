@@ -1,27 +1,92 @@
 {% extends "base.html" %}{% load i18n %}
+{% load highlight %}
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 
 {% block helpdesk_head %}
 <style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>
-
-
 {% endblock %}
 
 {% block content %}
 {% load in_list %}
-
-
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-<div class="container">
-  <h3>Submitted Tickets</h3>
+<div class="container" ng-controller="TicketController">
+  {% if tickets and not query  %}
+   <h3>Submitted Tickets</h3>
+  {% elif tickets and query %}
+   <h3>{{number_of_tickets}} tickets found for {{query}}</h3>
+ {% endif %}
+ {% if number_of_tickets == 0 %}
+   <h3>Submitted Tickets</h3>
+ {% endif %}
   <div class="ticket_cover">
     <!-- main ticket section -->
     <div class="col-md-9 col-sm-9 ticket_right">
-
+      {%if number_of_tickets == 0 %} 
+       <div class="alert alert-info">
+         
+        <h4>No results were found</h4>
+       </div>
+      {% endif %}
+      {% if query_params and number_of_tickets %}
+        {% if query_params.sorting %}
+        <p><b>Sorted by:</b> {{query_params.sorting}}</p>
+        {% endif %}
+        {% if query_params.filtering %}
+          <p>
+            <b>Filtered by:</b> 
+            {% if query_params.filtering %} 
+              <!-- queue -->
+              {% if query_params.filtering.queue__id__in %}
+                <b>Queue(s):-</b>
+                {% for q in ticket_queue %}
+                  {% if q.id|in_list:query_params.filtering.queue__id__in %}
+                  {{q.title}},
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+              <!-- status -->
+              {% if query_params.filtering.status__in %}
+                <b>Status(es):-</b>
+                 {% for status in status_choices %}
+                  {% if status.0|in_list:query_params.filtering.status__in %}
+                    {{status.1}}, 
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+              <!-- type -->
+              {% if query_params.filtering.type__in %}
+                <b>Type(s):-</b>
+                {% for type in type_choices %}
+                  {% if type.0|in_list:query_params.filtering.type__in %}
+                    {{type.1}},
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+              <!-- Date -->
+              {% if query_params.filtering.created__gte %}
+                Date From-{{query_params.filtering.created__gte}} |
+              {% endif %}
+              {% if query_params.filtering.created__lte %}
+                Date To-{{query_params.filtering.created__lte}} |
+              {% endif %}
+              <!-- assigned_to_me -->
+              {% if query_params.filtering.assigned_to__id__in %}
+                <b>Tickets Assigned:-</b> to me
+              {% endif %}
+              <!-- Created by me -->
+               {% if query_params.filtering.submitter_email__in %}
+                <b>Tickets Created:-</b> by me
+              {% endif %}
+            {% endif %}
+          </p>
+        {% endif %}
+      {% endif %}
       {% for ticket in tickets.object_list.reverse %}
+      
       <div class="panel panel-info">
         <div class="panel-heading"><a href='{{ ticket.get_absolute_url }}'>
-          {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong></a>
+          {% if query%}{% highlight ticket.ticket with query css_class "highlight" html_tag "span" %}{% else %}{{ticket.ticket}}{% endif %}<strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}</p>
+          {% endif %}</strong></a>
           {% if ticket.progress %}
           <div class="read_more">
             <strong><span class="badge">{{ticket.progress}} </span></strong>
@@ -29,13 +94,37 @@
           {% endif %}
         </div>
         <div class="panel-body">
+          {% if query%}
+            <p class="description">{%  highlight ticket.description with query css_class "highlight" html_tag "span" %}</p>
+          {% else %}
+
           <p class="description">{{ ticket.description }}</p>
-          <div>
-            <div class= "preview_links">
-                <a href="#moredetails{{ticket.id}}" class="btn btn-info" data-toggle="collapse">&nbsp;View More Details</a>
+          {% endif %}
+          <div class="col-md-12 ">
+            <div class="col-md-7"></div>
+
+            <div class="col-md-3 read_more">
+              <a href="#moredetails{{ticket.id}}" class= "" data-toggle="collapse"><span class="glyphicon glyphicon-th"></span> View More Details</a>
             </div>
+            <input hidden id="ticket-link" value="{{ ticket.get_absolute_url }}">
+            <div class="col-md-2 read_more">
+              <a id="example" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" data-content=" Copied to Clipboard" data-placement="top" onclick="copyToClipboard('#p1{{ticket.id}}')"><span class="g glyphicon glyphicon-paste"></span> Copy Link</a> 
+              <p id="p1{{ticket.id}}" hidden>{{request.get_host}}{{ ticket.get_absolute_url }}</p>
+              <script type="text/javascript">
+                function copyToClipboard(element) {
+                    var $temp = $("<input>");
+                    $("body").append($temp);
+                    $temp.val($(element).text()).select();
+                    document.execCommand("copy"); 
+                    $temp.remove();
+                  }
+              </script>
+            </div>
+          </div>
+          <div>
             <!-- the collapse section for view more details -->
             <div id="moredetails{{ticket.id}}" class="collapse">
+            <br>
               <div class="ticket_view tab-pane">
                 <h5 class="view_table"><strong>Other Details</strong></h5>
                 <!-- the table with the ticket details -->
@@ -77,8 +166,8 @@
                         </td>
                       </tr>
                     </table>
-                  </div>
-                </div> <!-- end the ticket details table -->
+                  </div><!-- end the ticket details table -->
+                </div> 
 
                 <!-- the dependencies section -->
                 <div>
@@ -295,20 +384,37 @@
                     <div class="row">
                       <div class="col-md-9">
                         <input class="btn btn-primary" type='submit' value='{% trans "Update This Ticket" %}' />
-                        
+                        {% if not ticket.github_issue_url %}
+                        {% if request.user.is_staff %}
+                        <input name="github" type='button ' class="btn btn-info" value='{% trans "Send to Github" %}' onClick="location.href='/helpdesk/tickets/{{ticket.id}}/send_to_github/'"/>
+                        {% endif %}
+                        {% else %}
+
+                        <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Ticket in Github" %}' onClick="location.href='{{ ticket.github_issue_url }}'"/>
+                        {% endif %}
+
+                        {% if ticket.slack_status == 0 %}
+                        <a href='{% url "post_to_slack" ticket.id %}'><img alt="Add to Slack" height="40" width="139" src="{{ STATIC_URL }}/img/add_to_slack.png"></a>
+                        {% else %}
+                        <a href="https://tola-users.slack.com/archives/tola-work"><img alt="Posted to Slack" height="60" width="140" src="{{ STATIC_URL }}/img/slack.png" /></a>
+                        {% endif %}
                       </div>
                         {% csrf_token %}
+
                   </form>
+
 
                   <!-- ticket on-hold and delete section -->
                   <div class="col-md-2 col-md-offset-1">
-                    <a href='#' data-toggle="modal" data-target="#deleteModal{{ticket.id}}"class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
-                    <span>
-                    {% if ticket.on_hold %}
-                      | <a href='{% url "helpdesk_unhold" ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>
-                    {% else %}
-                      |<a href='{% url "helpdesk_hold" ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>
-                    {% endif %}</span>
+                    {% if user.is_superuser %}
+                      <a href='#' data-toggle="modal" data-target="#deleteModal{{ticket.id}}"class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+                      <span>
+                      {% if ticket.on_hold %}
+                        | <a href='{% url "helpdesk_unhold" ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>
+                      {% else %}
+                        |<a href='{% url "helpdesk_hold" ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>
+                      {% endif %}</span>
+                    {% endif %}
                     <!-- delete ticket modal -->
                     <div id="deleteModal{{ticket.id}}" class="modal fade" role="dialog">
                       <div class="modal-dialog">
@@ -344,12 +450,11 @@
           <!-- the panel footer -->
           <div class="panel-footer">
             <div class="panel-heading">
-              {% if user.is_staff %}
+              {% if user.is_superuser %}
                 <a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
                 <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
               {% endif %}
 
-              {% blocktrans with ticket.queue as queue %}&nbsp;[{{ queue }}] {% endblocktrans %}
               &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
 
               <strong>&nbsp;&nbsp;Tags:</strong>
@@ -409,12 +514,15 @@
                         </div>
                       </div>
                       <div class=" row">
-                        <div class="col-md-6 row ticket_edit">
-                          <label class="col-md-4"><p><strong>{% trans "Case Owner:" %}</strong></p></label>
-                          <div class="col-md-8">
-                            <select class="form-control" id='id_owner' name='owner'><option value=''>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
+                        {% if user.is_superuser %}
+                          <div class="col-md-6 row ticket_edit">
+                            <label class="col-md-4"><p><strong>{% trans "Case Owner:" %}</strong></p></label>
+                            
+                            <div class="col-md-8">
+                              <select class="form-control" id='id_owner' name='owner'><option value=''>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
+                            </div>
                           </div>
-                        </div>
+                          {% endif %}
                         <div class="col-md-6 row ticket_edit">
                           <label class="col-md-4"><p><strong> {% trans "Type of Ticket:" %}</strong></p></label>
                           <div class="col-md-8 ">
@@ -422,8 +530,8 @@
                           </div>
                         </div>
                       </div>
-                      <div class="row ticket_padding">
-                        <div class= "col-md-6 row ticket_edit" >
+                      <div class="row task_spacing">
+                        <div class= "col-md-6 row" >
                           <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
                           <div class="col-md-8">
                             <select class="form-control" id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select>
@@ -431,20 +539,48 @@
                         </div>                            
                       </div>
                       <div class="row task_spacing">
-                        <div class= "col-md-8 row ticket_edit">
+                        <div class= "col-md-8 row">
                           <label class="col-md-3"><p><strong>{% trans "Due Date:" %}</strong></p></label>
                           <p class="col-md-9">{{ form.due_date }}</p>
                         </div>
                       </div>
-                      <!-- <div class="row">
-                        <div class= "col-md-6 row ticket_edit task_spacing" >
+                      <div class="row">
+                        <div class= "col-md-6 row  task_spacing" >
                           <label class="col-md-4"><p><strong>{% trans "Tags:" %}</strong></p></label>
+
                           <div class="col-md-8">
-                            <select class = " form-control multi_select" style="width:200px" multiple = "multiple" id='id_edit_tags' name='edit_tags'> {% for q in edit_tags %} <option value='{{ q.id }}'{% endfor %} {{form.edit_tags }} </option>
-                          </select>
+                            <span id="helpBlock" class="help-block">To add <strong>NEW</strong> tag(s), type in then press <strong>'ENTER'</strong></span>
+                            <select class = " form-control multi_select {{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
+                                {% for q in tags %} 
+
+                                  <option value='{{ q.id }}' {% for tag in ticket.tags.all %} {% ifequal q.id tag.id %} selected='selected'{% endifequal %}{% endfor %}>{{q.name}}</option>
+
+                                {% endfor %}
+                            </select>
+                            <script type="text/javascript">
+                                  $(".{{ticket.id}}").select2({
+                                          tags: true,
+                                          allowClear: true,
+                                          placeholder: "Add tags",
+
+                                          createTag: function(tag) {
+                                              return {
+                                                  id: tag.term,
+                                                  text: tag.term,
+                                                  isNew: true
+                                              };
+                                          },
+                                      }).on("change", function(e) {
+                                          var isNew = $(this).find('[data-select2-tag="true"]');
+                                          if(isNew.length){
+                                              isNew.replaceWith('<option selected="selected" value="'+isNew.val()+'">'+isNew.text()+'</option>');
+                                          }
+                                      });
+                            </script>
+                            
                           </div>
                         </div>  
-                      </div> -->
+                      </div>
                       <div class=" row">
                         <label class= "col-md-6 row ticket_edit">
                           <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />
@@ -462,61 +598,65 @@
         {% endfor %}
 
         <!-- start paginator -->
-        <div class="row">
-          <div class="col-md-8">
-           <ul class="pagination">
-              {% if tickets.has_previous %}
-                <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "Previous" %} </a></li>
-                <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {{tickets.previous_page_number}} </a></li>
-              {% endif %}
-              {% blocktrans with tickets.number as ticket_num and tickets.paginator.num_pages as num_pages %}
-                <li><a class="active" href=""> {{ ticket_num }}</a></li>
-              {% endblocktrans %}
+        {% if number_of_tickets %}
+          <div class="row">
+            <div class="col-md-8">
+             <ul class="pagination">
+                {% if tickets.has_previous %}
+                  <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "Previous" %} </a></li>
+                  <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {{tickets.previous_page_number}} </a></li>
+                {% endif %}
+                {% blocktrans with tickets.number as ticket_num and tickets.paginator.num_pages as num_pages %}
+                  <li><a class="active" href=""> {{ ticket_num }}</a></li>
+                {% endblocktrans %}
 
-              {% if tickets.has_next %}
-               <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}"> {{ tickets.next_page_number }}</a></li>
-                {% ifnotequal tickets.next_page_number tickets.paginator.num_pages %}
-                   {% with tickets.paginator.num_pages as num_pages %}
-                    <li><a href="">...</a></li>
-                    <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ num_pages }}"> {{ num_pages }}  </a></li>
-                  {% endwith %}
-                {% endifnotequal %}
-                <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a></li>
-              {% endif %}
-            </ul>
+                {% if tickets.has_next %}
+                 <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}"> {{ tickets.next_page_number }}</a></li>
+                  {% ifnotequal tickets.next_page_number tickets.paginator.num_pages %}
+                     {% with tickets.paginator.num_pages as num_pages %}
+                      <li><a href="">...</a></li>
+                      <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ num_pages }}"> {{ num_pages }}  </a></li>
+                    {% endwith %}
+                  {% endifnotequal %}
+                  <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a></li>
+                {% endif %}
+              </ul>
+            </div>
+            <div class="read_more ticket_paginator">
+              <ul class="pagination">
+               <li>
+                  <a class = "{% if items_per_page == 5 %} active {% endif %}"
+                    href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=5">5</a>
+                </li>
+               <li>
+                  <a class = "{% if items_per_page == 10 %} active {% endif %}"
+                    href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=10">10 </a>
+                </li>
+               <li>
+                  <a class = "{% if items_per_page == 20 %} active {% endif %}"
+                    href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=20" >20</a>
+                </li>
+               <li><a href="#">per page</a></li>
+              </ul>
+            </div> 
           </div>
-          <div class="read_more ticket_paginator">
-            <ul class="pagination">
-             <li>
-                <a class = "{% if items_per_page == 5 %} active {% endif %}"
-                  href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=5">5</a>
-              </li>
-             <li>
-                <a class = "{% if items_per_page == 10 %} active {% endif %}"
-                  href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=10">10 </a>
-              </li>
-             <li>
-                <a class = "{% if items_per_page == 20 %} active {% endif %}"
-                  href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=20" >20</a>
-              </li>
-             <li><a href="#">per page</a></li>
-            </ul>
-          </div> 
-        </div>
+        {% endif %}
         <!-- end paginator -->
       </div>
 
       <!-- the right side of the tickets page -->
       <div class="col-md-3 col-sm-3 ">
-        <!-- start search -->
+
+        <!-- string search -->
         <div class="search" >
-          <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
-            <input type="text" name='q' class="form-control" placeholder="Search" id='search_query'>
-            <span class="input-group-btn">
-              <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
-            </span>
+          <form class="navbar-form navbar-left input-group" id='ticketsearch' method='get' action="{% url 'helpdesk_list' %}">
+
+              <input type='text' name='q' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' />
+                <span class="input-group-btn">
+                  <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span> Go</button>
+                </span>
           </form>
-        </div>
+        </div >
         <!-- end search -->
 
         <!-- start my tickets summary -->
@@ -539,7 +679,7 @@
                     <div class="alert alert-success" role="alert">
                       <p>'We recommend that you search for your ticket or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!'</p>
                     </div>
-                    <form class="form-horizontal" method='post' action='./' enctype='multipart/form-data'  name="most">
+                    <form class="form-horizontal" method='post' action='/helpdesk/tickets/submit/' enctype='multipart/form-data'  name="most">
                       {% load crispy_forms_tags %}
                       {% crispy form form.helper %}
                       {% comment %}
@@ -583,58 +723,197 @@
             <!-- user ticket summary -->
             <div class="panel-body">
               <div class="sort_panels">
-                <span class="glyphicon glyphicon-th-list"></span>&nbsp;Created By Me <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong>
+                <span class="glyphicon glyphicon-th-list"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&{% endif %}created={{request.user.email}}">&nbsp;Created By Me </a> <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong>
               </div> 
+              {% if user.is_staff %}
               <div class="sort_panels">
-                 <span class="glyphicon glyphicon-list-alt"></span>&nbsp;Assigned to Me <strong> <span class="badge read_more"> {{ assigned_to_me }} </span></strong>
+                 <span class="glyphicon glyphicon-list-alt"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&{% endif %}assigned={{request.user.email}}">&nbsp;Assigned to Me </a><strong> <span class="badge read_more"> {{ assigned_to_me }} </span></strong>
               </div>
                <div class="sort_panels">  
-                <span class="glyphicon glyphicon-th"></span>&nbsp;Closed by Me <strong> <span class="badge read_more"> {{ tickets_closed_resolved }} </span></strong>
+                <span class="glyphicon glyphicon-th"></span><a href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&{% endif %}clossed={{request.user.email}}">&nbsp;Closed by Me </a><strong> <span class="badge read_more"> {{ tickets_closed_resolved }} </span></strong>
                </div>
+              {% endif %}
             </div>
             <!-- end user ticket summary -->
-        </div><!-- 
-        end my tickets panel -->
+        </div><!-- end my tickets panel -->
+
+        <!-- my filters -->
+        <div class="panel panel-info">
+          <div class="panel-heading"> <strong>My Filters</strong></div>
+          <div class="panel-body">
+              <!-- save query -->
+              {% if not from_saved_query %}
+              <div class="sort_panels">
+                  <div class= "preview_links">
+                      <a data-toggle="collapse" data-parent="#accordion" href="#save_query">
+                        {% trans "Save Query" %}</a>
+                  </div>
+                  <div id="save_query" class="panel-collapse collapse">
+                    <div class="panel-body">
+                      <form method='post' action='{% url 'helpdesk_savequery' %}'>
+                        <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}' />
+                        <dl>
+                        <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
+                        <dd><input type='text' name='title' id='id_title' /></dd>
+                        <dd class='form_help_text'>{% trans "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</dd>
+
+                        <dt><label for='id_shared'>{% trans "Shared?" %}</label></dt>
+                        <dd><input type='checkbox' name='shared' id='id_shared' /> {% trans "Yes, share this query with other users." %}</dd>
+                        <dd class='form_help_text'>{% trans "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</dd>
+
+                        </dl>
+
+                        <div class='buttons'>
+                        <input class="btn btn-primary" type='submit' value='{% trans "Save Query" %}'>
+                        </div>
+
+                        {% csrf_token %}
+                      </form>
+                    </div>
+                  </div>
+              </div>
+              {% endif %}
+              <!-- end save query -->
+
+              <!-- use saved query -->
+              <div class="sort_panels">
+                <div class= "preview_links">
+                  <a data-toggle="collapse" data-parent="#accordion" href="#use_query">
+                  {% trans "Use Saved Query" %} </a>
+                </div>
+                <div id="use_query" class="panel-collapse collapse">
+                  <div class="panel-body">
+                    <form method='get' action='{% url 'helpdesk_list' %}'>
+                      <p><label for='id_query_selector'>{% trans "Query" %}</label> <select name='saved_query' id='id_query_selector'>
+                      {% for q in user_saved_queries %}
+                      <option value='{{ q.id }}'>{{ q.title }}{% if q.shared %} (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %}){% endif %}</option>
+                      {% endfor %}
+                      </select></p>
+                      <input class="btn btn-primary" type='submit' value='{% trans "Run Query" %}'>
+                      {% csrf_token %}
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <!-- end use saved query -->
+          </div>
+        </div>
+        <!-- end my filters -->
 
         <!-- sort tickets panel -->
         <div class="panel panel-info">
           <div class="panel-heading"> <strong>Sort Tickets</strong></div>
-          <form method='get' action='./'>
+          <form method='GET' action='./'>
             <div class="panel-body ">
-              <select   class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
-                <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
-                    {% trans "Created" %}
-                </option>
-                <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %}>
-                    {% trans "Title" %}
-                </option>
-                <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %}>
-                    {% trans "Queue" %}
-                </option>
-                <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
-                    {% trans "Status" %}
-                </option>
-                <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>
-                    {% trans "Priority" %}
-                </option>
-                <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %}>
-                    {% trans "Owner" %}
-                </option>
-                <option value='assigned_to'{% ifequal query_params.sorting "type"%} selected='selected'{% endifequal %}>
-                    {% trans "Type" %}
-                </option>
-                <option value='votes'{% ifequal query_params.sorting "votes"%} selected='selected'{% endifequal %}>
-                    {% trans "Most Vote Up" %}
-                </option>
-              </select>
-              <div class="col-md-12 row reverse_sort">
+              <div class="sort_panels">
+                  <select class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
+                    <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=created">
+                        {% trans "Created" %}
+                    </option>
+                    <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=title">
+                        {% trans "Title" %}
+                    </option>
+                    <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=queue">
+                        {% trans "Queue" %}
+                    </option>
+                    <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=status">
+                        {% trans "Status" %}
+                    </option>
+                    <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=priority">
+                        {% trans "Priority" %}
+                    </option>
+                    <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=assigned_to" >
+                        {% trans "Owner" %}
+                    </option>
+                    <option value='type'{% ifequal query_params.sorting "type"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=type">
+                        {% trans "Type" %}
+                    </option>
+                    <option value='votes'{% ifequal query_params.sorting "votes"%} selected='selected'{% endifequal %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=votes">
+                        {% trans "Most Vote Up" %}
+                    </option>
+                  </select>
+                </div>
+              <div class="sort_panels">
                 <label for='id_sortreverse'>{% trans "Reverse: " %}</label>
-                <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
+                <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sortreverse=on"/>
                 <p class='filterHelp'>{% trans "Ordering applied to tickets" %}</p>
               </div>
-              <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' />
+              <!-- <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' /> -->
+              <div class="sort_panels">
+                <a href="" data-toggle="modal" data-target="#mysort"> Set Your Default Sort</a>
+              </div>
+
+              <!-- Modal -->
+              <div id="mysort" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h4 class="modal-title">Save Your Default Ticket Sort</h4>
+                    </div>
+                    <div class="modal-body">
+                      <h3>Select and Save a Sort.</h3> 
+                      <p><strong>NOTE:</strong> After Saving a sort, the ticket list will always load presorted by your saved sort.  To Change your default sort, <strong>select on a new option and save.</strong></p>
+                      {% if my_sort%}
+                        <div class="col-md-8"><p>Your Current Sort is: <b>{{my_sort.sort}}</b></p></div>
+                      {% endif %}
+                      {% if not my_sort%}
+                        <div class="col-md-8"><p><b>You Currently have no Saved Sort</b></p></div>
+                      {% endif%}
+          
+                      <div class="col-md-12 row">
+                          <div class="col-md-2"></div>
+                          <div class="col-md-8">
+                            <form class="sort-form" method="POST" action="{% url 'my_sort' %}">
+                            <select class="btn btn-default dropdown-toggle form-control" id='id_sort' name='mysort'>
+                              <option value='created'>{% trans "Created" %}</option>
+                              <option value='title'>{% trans "Title" %}</option>
+                              <option value='queue'>{% trans "Queue" %}</option>
+                              <option value='status'>{% trans "Status" %}</option>
+                              <option value='priority'>{% trans "Priority" %}</option>
+                              <option value='assigned_to'>{% trans "Owner" %}</option>
+                              <option value='type'>{% trans "Type" %}</option>
+                              <option value='votes'>{% trans "Most Vote Up" %}</option> 
+                            </select><br><br>
+                            <div class="col-md-2"></div>
+                            <div class="col-md-8">
+                              {% if my_sort %}
+                                <button class="btn btn-success form-control" type="submit">Change Sort</button>
+                              {% endif %}
+                              {% if not my_sort %}
+                                <button class="btn btn-success form-control" type="submit">Save Sort</button>
+                              {% endif %}
+                            </div>
+                            <div class="col-md-2"></div>
+                          </form>
+                          </div>
+                          <div class="col-md-2"></div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
             </div>
         </form>
+        <script>
+          document.getElementById('id_sort').onchange = function() {
+              window.location.href = this.children[this.selectedIndex].getAttribute('href');
+          }
+          document.getElementById('id_sortreverse').onclick = function() {
+             if($(this).is(":checked")){         
+                  window.location.href = this.getAttribute('href');
+                }else {
+                   // Code in the case checkbox is NOT checked.
+               window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sortreverse=off';
+              }
+
+          }
+        </script>
       </div>
       <!-- end sort tickets -->
 
@@ -663,7 +942,7 @@
               <input class="btn sort_add" type='button' id='filterBuilderButton' value='+' />
               {% csrf_token %}
             </form>
-            <form method='get' action='./'>
+            <form method='get'>
               <div class='thumbnail sorting_form filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %}' id='filterBoxOwner'>
                 <div class="keywords">
                   <label  for='id_owners'>{% trans "Owner(s): " %}</label>
@@ -733,13 +1012,13 @@
               <div class='thumbnail  sorting_form filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
                 <div class="keywords">
                   <label for='id_query'>{% trans "Keywords: " %}</label>
-                  <input class="status_select" type='text' name='q' value='{{ query }}' id='id_query' />
+                  <input class="status_select" type='text' name='q' value='{{query_params.keyword}}' id='id_query' />
                 </div>
                 <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
                 <input type='button' class='filterBuilderRemove' value='-' />
               </div>
 
-              <div class='thumbnail  sorting_form filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxType'>
+              <div class='thumbnail  sorting_form filterBox{% if query_params.filtering.type__in %} filterBoxShow{% endif %}' id='filterBoxType'>
                 <div class="keywords">
                   <label for='id_types'>{% trans "Types: " %}</label>
                   <select id='id_types' name='types' multiple='selected' rows="4" class="types_select">{% for s in type_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.type__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
@@ -938,5 +1217,9 @@ $(document).ready(function() {
         });
 
     }
+
+    $(function () {
+        $('[data-toggle="popover"]').popover()
+      });
 </script>
 {% endblock content %}

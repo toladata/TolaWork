@@ -58,7 +58,7 @@ urlpatterns += patterns('',
     url(r'^faq', 'project.views.faq', name='faq'),
     url(r'^splash', 'project.views.splash', name='splash'),
     url(r'^documentation', 'project.views.documentation', name='documentation'),
-    url(r'^update_issue_on_github', 'project.views.update_issue_on_github', name='gitissueupdate'),
+    url(r'^githubSync', 'project.views.githubSync', name='githubSync'),
 
     #local login
     url(r'^login/$', 'django.contrib.auth.views.login', name='login'),

@@ -7,10 +7,14 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^tickets/$',
         'ticket_list',
         name='helpdesk_list'),
+    
+    url(r'^tickets/$',
+        'my_default_sort',
+        name='my_sort'),
 
-       url(r'^tickets/submit/$',
-        'create_ticket',
-        name='helpdesk_submit'),
+   url(r'^tickets/submit/$',
+    'create_ticket',
+    name='helpdesk_submit'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/$',
         'view_ticket',
@@ -156,11 +160,7 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^change_language/$',
         'change_language',
         name='helpdesk_public_change_language'),
-
-    url(r'^all_tickets/$',
-        'public_ticket_list',
-        name='public_list'),
-
+    
     url(r'^vote_up/(?P<id>[0-9]+)/$',
         'vote_up',
         name='vote_up'),

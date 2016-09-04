@@ -5,7 +5,11 @@ views/staff.py - The bulk of the application - provides most business logic and
 """
 
 from __future__ import unicode_literals
+
 from datetime import datetime, timedelta
+from dateutil import relativedelta
+from haystack.utils import Highlighter
+
 from django.contrib.auth.decorators import login_required
 try:
     from django.contrib.auth import get_user_model
@@ -19,7 +23,7 @@ from django.core.exceptions import ValidationError
 from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render,render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, loader, Context
 from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
@@ -29,12 +33,9 @@ from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-
 from django.core import paginator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
 from django.utils.safestring import mark_safe
-
 
 try:
     from django.utils import timezone
@@ -45,12 +46,13 @@ except ImportError:
 import requests
 import json
 
+from helpdesk.serializer import UserSerializer, TicketSerializer, QueueSerializer, FollowUpSerializer, TicketDependencySerializer, AttachmentSerializer, TicketChangeSerializer
 from helpdesk.forms import TicketForm, UserSettingsForm, CommentTicketForm, CommentFollowUpForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
-from helpdesk.models import Ticket, UserVotes, Queue, UserSettings, KBCategory, Tag, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate
+from helpdesk.models import Ticket, UserVotes, Queue, UserSettings, KBCategory, Tag, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate, UserDefaultSort
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo, get_label
 from helpdesk.slack import post_slack,post_tola_slack
-from helpdesk.email import email
+from helpdesk.email import email, reminders
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -167,172 +169,6 @@ def public_view_ticket(request):
             'email': email,
             'error_message': error_message
         }))
-
-@login_required
-def public_ticket_list(request):
-    context = {}
-
-    # Query_params will hold a dictionary of parameters relating to
-    # a query, to be saved if needed:
-    query_params = data_query_params()
-
-    from_saved_query = False
-
-    # If the user is coming from the header/navigation search box, lets' first
-    # look at their query to see if they have entered a valid ticket number. If
-    # they have, just redirect to that ticket number. Otherwise, we treat it as
-    # a keyword search.
-
-    if request.GET.get('search_type', None) == 'header':
-        query = request.GET.get('q')
-        filter = None
-        if query.find('-') > 0:
-            try:
-                queue, id = query.split('-')
-                id = int(id)
-            except ValueError:
-                id = None
-
-            if id:
-                filter = {'queue__slug': queue, 'id': id }
-        else:
-            try:
-                query = int(query)
-            except ValueError:
-                query = None
-
-            if query:
-                filter = {'id': int(query) }
-
-        if filter:
-            try:
-                ticket = Ticket.objects.get(**filter)
-                return HttpResponseRedirect(ticket.staff_url)
-            except Ticket.DoesNotExist:
-                # Go on to standard keyword searching
-                pass
-
-    saved_query = None
-    if request.GET.get('saved_query', None):
-        from_saved_query = True
-        try:
-            saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
-        except SavedSearch.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk_list'))
-        if not (saved_query.shared or saved_query.user == request.user):
-            return HttpResponseRedirect(reverse('helpdesk_list'))
-
-        try:
-            import pickle
-        except ImportError:
-            import cPickle as pickle
-        from helpdesk.lib import b64decode
-        query_params = pickle.loads(b64decode(str(saved_query.query)))
-    elif not (  'queue' in request.GET
-            or  'assigned_to' in request.GET
-            or  'status' in request.GET
-            or  'q' in request.GET
-            or  'sort' in request.GET
-            or  'sortreverse' in request.GET
-                ):
-
-        # Fall-back if no querying is being done, force the list to only
-        # show open/reopened/resolved (not closed) cases sorted by creation
-        # date.
-
-        query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
-            'sorting': 'created',
-        }
-    else:
-        queues = request.GET.getlist('queue')
-        if queues:
-            try:
-                queues = [int(q) for q in queues]
-                query_params['filtering']['queue__id__in'] = queues
-            except ValueError:
-                pass
-
-        owners = request.GET.getlist('assigned_to')
-        if owners:
-            try:
-                owners = [int(u) for u in owners]
-                query_params['filtering']['assigned_to__id__in'] = owners
-            except ValueError:
-                pass
-
-        statuses = request.GET.getlist('status')
-        if statuses:
-            try:
-                statuses = [int(s) for s in statuses]
-                query_params['filtering']['status__in'] = statuses
-            except ValueError:
-                pass
-
-        types = request.GET.getlist('types')
-        if types:
-            try:
-                types = [int(s) for s in types]
-                query_params['filtering']['type__in'] = types
-            except ValueError:
-                pass
-
-        date_from = request.GET.get('date_from')
-        if date_from:
-            query_params['filtering']['created__gte'] = date_from
-
-        date_to = request.GET.get('date_to')
-        if date_to:
-            query_params['filtering']['created__lte'] = date_to
-
-        ### KEYWORD SEARCHING
-        key_word_searching(request, context, query_params)
-
-        ### SORTING
-        data_sorting(request,query_params)
-
-
-    tickets = Ticket.objects.select_related()
-    queue_choices = Queue.objects.all()
-
-    #query and paination
-
-    tickets = data_query_pagination(request, tickets, query_params)
-
-    search_message = ''
-
-    from helpdesk.lib import b64encode
-
-    try:
-        import pickle
-    except ImportError:
-        import cPickle as pickle
-    urlsafe_query = b64encode(pickle.dumps(query_params))
-
-    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
-
-    querydict = request.GET.copy()
-    querydict.pop('page', 1)
-
-    print "TICKET TYPES:"
-    print Ticket.TICKET_TYPE
-
-    return render_to_response('helpdesk/public_ticket_list.html',
-        RequestContext(request, dict(
-            context,
-            query_string=querydict.urlencode(),
-            tickets=tickets,
-            user_choices=User.objects.filter(is_active=True,is_staff=True),
-            queue_choices=queue_choices,
-            status_choices=Ticket.STATUS_CHOICES,
-            type_choices=Ticket.TICKET_TYPE,
-            urlsafe_query=urlsafe_query,
-            user_saved_queries=user_saved_queries,
-            query_params=query_params,
-            from_saved_query=from_saved_query,
-            saved_query=saved_query,
-            search_message=search_message,
-        )))
 
 
 def change_language(request):
@@ -652,10 +488,13 @@ def view_ticket(request, ticket_id):
         ticket.save(update_fields=['t_url'])
 
     progress=''
+
+    # check status of ticket in github
     if ticket.github_issue_id:
-        repo = queue_repo(ticket)
+        queue = queue_repo(ticket)
+
         #check status of ticket in GitHub
-        response = get_issue_status(repo,ticket)
+        response = get_issue_status(queue,ticket)
 
         if response == 200:
 
@@ -669,8 +508,9 @@ def view_ticket(request, ticket_id):
             print 'Ticket status in Github is: [' + str(state) + ']'
         else:
             print 'Check ticket status in GitHub'
+
         #check github label
-        label_response = get_label(repo,ticket)
+        label_response = get_label(queue,ticket)
         print label_response
 
     ticket_state = get_object_or_404(Ticket, id=ticket_id)
@@ -720,46 +560,11 @@ def view_ticket(request, ticket_id):
     form = TicketForm(initial={'due_date':ticket_state.due_date, 'tags':tags})
     tags = Tag.objects.all()
 
-    """
-    progress = ''
-    if ticket:
-       if request.user.is_active:
-           if ticket.assigned_to:
-               if ticket.status ==1:
-                   progress= "Ticket In Progress"
-               elif ticket.status == 2:
-                   progress = "Ticket reopened and is in progress"
-               else:
-                   progress = " "
-
-    """
     #ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
 
     #tickets, reported by current user
 
-    tickets_reported =''
-
-    if request.user.email:
-        tickets_reported = Ticket.objects.select_related('queue').filter(
-                submitter_email=request.user.email,
-            ).order_by('status')
-
-    #tickets, resolved by current user
-    tickets_closed = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
-
-    #display tickets assigned to current user
-    tickets_assigned = Ticket.objects.select_related('queue')\
-                    .filter(assigned_to=request.user,)\
-                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
-    #display tickets created by current user
-    tickets_created = Ticket.objects.select_related('queue')\
-                    .filter(submitter_email=request.user.email,)\
-                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
-
-    print "URL - " + str(request.build_absolute_uri())
-
+    tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
@@ -1027,68 +832,52 @@ def ticket_dependency_add(request, ticket_id):
         }))
 ticket_dependency_add = staff_member_required(ticket_dependency_add)
 
+def reminder(ticket_id):
+
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    create_date = datetime.strptime(str(ticket.created)[:19],'%Y-%m-%d %H:%M:%S')
+    today_date = datetime.strptime(str(datetime.now())[:19],'%Y-%m-%d %H:%M:%S')
+    r = relativedelta.relativedelta(today_date, create_date)
+
+    return r.months
+
+@login_required
 def ticket_list(request):
-    #create ticket
+    # #Form data
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    form = form_data(request)
+    #initial_data = {}
 
-    if request.method == 'POST':
-        if request.user.is_staff:
+    # form = PublicTicketForm(initial=initial_data)
+    # form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
 
-            form = TicketForm(request.POST, request.FILES)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        else:
-            form = PublicTicketForm(request.POST, request.FILES)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+    # try:
+    #     if request.user.email:
+    #         initial_data['submitter_email'] = request.user.email
+    #     if 'queue' in request.GET:
+    #         initial_data['queue'] = request.GET['queue']
 
-        if form.is_valid():
-
-            try:
-                ticket = form.save(user=request.POST.get('assigned_to'))
-
-            except Exception, e:
-                ticket = form.save(user = None)
-
-
-            #save tickettags
-            tags = request.POST.getlist('tags')
-            for tag in tags:
-                ticket.tags.add(tag)
-
-            #ticket.comment = ''
-            comment = ""
-            f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
-            f.save()
-
-            #Attch a File
-            file_attachment(request, f)
-                   
-            #autopost new ticket to #tola-work slack channel in Tola
-            #post_tola_slack(ticket.id)
-
-            messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
-    else:
-        initial_data = {}
-        try:
-            if request.user.email:
-                initial_data['submitter_email'] = request.user.email
-            if 'queue' in request.GET:
-                initial_data['queue'] = request.GET['queue']
-
-            if request.user.is_staff:
-                form = TicketForm(initial=initial_data)
-                form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-                form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-            
-        except Exception, e:
-            form = PublicTicketForm(initial=initial_data)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-
+    #     if request.user.is_staff:
+    #         form = TicketForm(initial=initial_data)
+    #         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+    #         form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+        
+    # except Exception, e:
+    #     pass
    #ticket_list 
+
     context = {}
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
-    query_params = data_query_params()
+
+    query_params = {
+        'filtering': {},
+        'sorting': None,
+        'sortreverse': True,
+        'keyword': None,
+        'other_filter': None,
+        }
 
     from_saved_query = False
 
@@ -1142,12 +931,16 @@ def ticket_list(request):
             import cPickle as pickle
         from helpdesk.lib import b64decode
         query_params = pickle.loads(b64decode(str(saved_query.query)))
+
     elif not (  'queue' in request.GET
             or  'assigned_to' in request.GET
             or  'status' in request.GET
             or  'q' in request.GET
             or  'sort' in request.GET
             or  'sortreverse' in request.GET
+            or  'clossed' in request.GET
+            or  'assigned' in request.GET
+            or  'created' in request.GET
                 ):
 
         # Fall-back if no querying is being done, force the list to only
@@ -1158,6 +951,23 @@ def ticket_list(request):
             'filtering': {'status__in': [1, 2, 3]},
             'sorting': 'created',
         }
+
+        my_sort = None
+        user_id = User.objects.get(username=request.user).id
+        user = User.objects.get(id=user_id)
+        try:
+            my_sort = get_object_or_404(UserDefaultSort, user_id=user)
+        except Exception, e:
+            pass
+
+        # print my_sort
+
+        if my_sort:
+            query_params = {
+                'filtering': {'status__in': [1, 2, 3]},
+                'sorting': my_sort.sort,
+            }
+
     else:
         queues = request.GET.getlist('queue')
         if queues:
@@ -1174,12 +984,13 @@ def ticket_list(request):
                 query_params['filtering']['assigned_to__id__in'] = owners
             except ValueError:
                 pass
+
         submitter_email = request.GET.getlist('submitter_email')
         if submitter_email:
             try:
 
                 query_params['filtering']['submitter_email__in'] = submitter_email
-                print query_params
+                
             except ValueError:
                 pass
         statuses = request.GET.getlist('status')
@@ -1206,46 +1017,74 @@ def ticket_list(request):
         if date_to:
             query_params['filtering']['created__lte'] = date_to
 
+
         ### KEYWORD SEARCHING
-        key_word_searching(request, context, query_params)
+        #key_word_searching(request, context, query_params)
+        q = request.GET.get('q', None)
+
+        if q:
+            qset = (
+                Q(id__icontains=q) |
+                Q(title__icontains=q) |
+                Q(description__icontains=q) |
+                Q(resolution__icontains=q) |
+                Q(submitter_email__icontains=q)
+            )
+            context = dict(context, query=q)
+            query_params['other_filter'] = qset
 
         ### SORTING
         data_sorting(request,query_params)
 
-
     tickets = Ticket.objects.select_related()
+    tickets_filtered = tickets
+
+    tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
+
+    #other filters
+    my_email1 = request.GET.get('created')
+    if my_email1:
+        try:  
+            tickets = tickets_filtered.filter(submitter_email=my_email1)
+        except Exception, e:
+            pass
+
+    my_email2 = request.GET.get('assigned')
+    if my_email2:
+        try:
+            assigned_id = request.user.id
+            tickets = tickets_filtered.filter(assigned_to__id=assigned_id)
+        except Exception, e:
+                pass
+    my_email3 = request.GET.get('clossed')
+    if my_email3:
+        try:
+            assigned_id = request.user.id
+            tickets = tickets_filtered.filter(assigned_to__id=assigned_id, status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+        except Exception, e:
+                pass
+
     num_tickets = tickets.count()
 
+    #reminders
+    remind_messages(tickets)
+        
+    #save mysort
+    my_sort = None
+    my_default_sort(request)
+    try:
+        user_id = User.objects.get(username=request.user).id
+        user = User.objects.get(id=user_id)
+        my_sort = get_object_or_404(UserDefaultSort, user_id=user)
+
+    except Exception, e:
+        pass
+
     queue_choices = Queue.objects.all()
+    
+    #saved Queries
+    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
-    # Tickets assigned to current user
-    assigned_to_me = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-     ).exclude(
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-    )
-
-    # all tickets, reported by current user
-    all_tickets_reported_by_current_user = {}
-    email_current_user = request.user.email
-    if email_current_user:
-        all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
-                submitter_email=email_current_user,
-            ).order_by('status')
-
-    # open & reopened tickets, assigned to current user
-    tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
-
-    # Tickets created by current user
-    created_by_me = Ticket.objects.select_related('queue').filter(
-           submitter_email=request.user.email,
-        ).exclude(
-           status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-       )
-
-    my_tickets = len(created_by_me)
 
     try:
         ticket_qs = apply_query(tickets, query_params)
@@ -1288,49 +1127,41 @@ def ticket_list(request):
     from helpdesk.lib import b64encode
     urlsafe_query = b64encode(pickle.dumps(query_params))
 
-    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
-
     querydict = request.GET.copy()
     querydict.pop('page', 1)
 
-    """
-    progress = ''
-    for ticket in tickets:
-       if request.user.is_active and ticket.assigned_to :
-               if ticket.status ==1:
-                   ticket.progress= "Ticket In Progress"
-               elif ticket.status == 2:
-                   ticket.progress = "Ticket reopened and is in progress"
-               else:
-                   ticket.progress = " "
-    """
     q = Queue.objects.all()
+    tags = Tag.objects.all()
 
     return render_to_response('helpdesk/ticket_list.html',
         RequestContext(request, dict(
             context,
             query_string=querydict.urlencode(),
+            query = request.GET.get('q'),
             tickets=tickets,
+            tags=tags,
             priorities = Ticket.PRIORITY_CHOICES,
             ticket_queue=q,
             ticket_type=Ticket.TICKET_TYPE,
-            my_tickets=my_tickets,
+            my_tickets = len(tickets_created),
             items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
-            assigned_to_me=len(assigned_to_me),
+            assigned_to_me=len(tickets_assigned),
             num_tickets=num_tickets,
-            tickets_closed_resolved=len(tickets_closed_resolved),
-            all_tickets_reported_by_current_user=len(all_tickets_reported_by_current_user),
+            tickets_closed_resolved=len(tickets_closed),
+            all_tickets_reported_by_current_user=len(tickets_reported),
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
-            status_choices=Ticket.STATUS_CHOICES,
             type_choices=Ticket.TICKET_TYPE,
+            status_choices=Ticket.STATUS_CHOICES,
             urlsafe_query=urlsafe_query,
             user_saved_queries=user_saved_queries,
             query_params=query_params,
             from_saved_query=from_saved_query,
             saved_query=saved_query,
             search_message=search_message,
+            my_sort=my_sort,
+            active_users=assignable_users,
             form=form,
             helper=form.helper
 
@@ -1338,6 +1169,7 @@ def ticket_list(request):
     ticket_list = staff_member_required(ticket_list)
 
 def ticket_edit(request):
+
     ticket_id = request.GET.get('ticket_id')
 
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -1358,24 +1190,45 @@ def ticket_edit(request):
             description = request.POST.get('description')
             email = request.POST.get('email')
             due_date = ticket.due_date
-            tags = request.POST.getlist('tags')
+            tags = request.POST.getlist('edit_tags')
             update_comments = Ticket(id=ticket_id, title=title, description=description, assigned_to_id=owner,
                                      submitter_email=email, priority=priority, due_date=due_date,
                                      queue_id=queue, type=type, error_msg=error_msg)
             update_comments.save(update_fields=['title','queue_id','type','assigned_to_id','error_msg','priority','description','submitter_email', 'due_date'])
+            messages.success(request, 'Success, Ticket # ' + str(ticket_id) + ' updated.')
 
+            
             #updating tags
-            Ticket.tags.through.objects.filter(ticket_id = ticket_id).delete()
-            for tag in tags:
-                ticket.tags.add(tag)
 
-    return ticket_list(request)
+            tags = request.POST.getlist('edit_tags')
+
+            new_tags = request.POST.copy()
+
+            if tags: del new_tags.getlist('edit_tags')[:]
+  
+            for i, t in enumerate(tags):
+                if t.isdigit():
+                    new_tags.getlist('edit_tags').append(t)
+                else:
+                    tag, created = Tag.objects.get_or_create(name=t)
+                    if created:
+
+                        tags[i] = tag.id
+
+                    new_tags.getlist('edit_tags').append(tag.id)
+                    
+            Ticket.tags.through.objects.filter(ticket_id = ticket_id).delete()
+
+            for tag in new_tags.getlist('edit_tags'):
+
+                ticket.tags.add(tag) 
+
+    return redirect('helpdesk_list')
 
 @login_required
 def create_ticket(request):
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     #messages.add_message(request, messages.SUCCESS, 'We recommend that you search for your ticket or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!')
-
     if request.method == 'POST':
         if request.user.is_staff:
 
@@ -1404,47 +1257,17 @@ def create_ticket(request):
             file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
+            #post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
             return HttpResponseRedirect(ticket.get_absolute_url())
     else:
-        initial_data = {}
-        if request.user.email:
-            initial_data['submitter_email'] = request.user.email
-        if 'queue' in request.GET:
-            initial_data['queue'] = request.GET['queue']
-
-        if request.user.is_staff:
-            form = TicketForm(initial=initial_data)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        else:
-            form = PublicTicketForm(initial=initial_data)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+        form = form_data(request)
+        
     #tickets, reported by current user
 
-    tickets_reported =''
-
-    if request.user.email:
-        tickets_reported = Ticket.objects.select_related('queue').filter(
-                submitter_email=request.user.email,
-            ).order_by('status')
-
-    #tickets, resolved by current user
-    tickets_closed = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
-
-    #display tickets assigned to current user
-    tickets_assigned = Ticket.objects.select_related('queue')\
-                    .filter(assigned_to=request.user,)\
-                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
-    #display tickets created by current user
-    tickets_created = Ticket.objects.select_related('queue')\
-                    .filter(submitter_email=request.user.email,)\
-                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+    tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
 
     return render_to_response('helpdesk/create_ticket.html',
         RequestContext(request, {
@@ -1515,11 +1338,26 @@ rss_list = staff_member_required(rss_list)
 
 def report_index(request):
     number_tickets = Ticket.objects.all().count()
+
     saved_query = request.GET.get('saved_query', None)
+
+    tickets_3_months = Ticket.objects.filter(remind=4)
+    paginator = Paginator(tickets_3_months, 10) # show 10 tickets per page
+
+    page = request.GET.get('page')
+    try:
+        more_3_months = paginator.page(page)
+    except PageNotAnInteger:
+        more_3_months = paginator.page(1)
+    except EmptyPage:
+        more_3_months = paginator.page(paginator.num_pages)
+
+    print "Number of Older Tickets : " + str(tickets_3_months.count())
     return render_to_response('helpdesk/report_index.html',
         RequestContext(request, {
             'number_tickets': number_tickets,
             'saved_query': saved_query,
+            'more_3_months': more_3_months,
         }))
 report_index = staff_member_required(report_index)
 
@@ -2188,26 +2026,46 @@ def key_word_searching(request, context, query_params):
 
     if q:
         qset = (
+            Q(id__icontains=q) |
             Q(title__icontains=q) |
             Q(description__icontains=q) |
             Q(resolution__icontains=q) |
             Q(submitter_email__icontains=q)
         )
 
-        context = dict(context, query=q,
-                       )
+        context = dict(context, query=q)
 
         query_params['other_filter'] = qset
-    return
+    return context
 
 #Sorting
 def data_sorting(request,query_params):
+
     sort = request.GET.get('sort', None)
-    if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority'):
+
+    user_id = User.objects.get(username=request.user).id
+    user = User.objects.get(id=user_id)
+    my_sort = None
+
+    try:
+        my_sort = get_object_or_404(UserDefaultSort, user_id=user)
+    except Exception, e:
+        pass
+
+    if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'type'):
         sort = 'created'
+        if my_sort:
+            sort = my_sort.sort
+
+    # if sort not in ('status', 'assigned_to', 'created', 'title', 'queue', 'priority', 'type') and my_sort:
+    #     sort = my_sort.sort
+
     query_params['sorting'] = sort
 
     sortreverse = request.GET.get('sortreverse', None)
+    if sortreverse == 'off':
+        sortreverse = None
+
     query_params['sortreverse'] = sortreverse
 
     return
@@ -2367,3 +2225,117 @@ def filter_tickets_by_tags(taglist):
         tickets = tickets.filter(taglist=tag)
     tickets = tickets.filter(count=len(taglist))
     return tickets
+
+#save mysort
+def my_default_sort(request):
+    sort = request.GET.get('mysort')
+    if sort:
+        user_id = User.objects.get(username=request.user).id
+        user = User.objects.get(id=user_id)
+        my_sort = UserDefaultSort(user_id=user, sort=sort)
+
+        try:
+            UserDefaultSort.objects.filter(user_id=user).delete()#delete the old sort
+
+        except Exception, e:
+            pass
+            
+        my_sort.save()
+
+    return 
+
+def remind_messages(tickets):
+    for ticket in tickets:
+
+        if ticket.tags.all():
+            ticket.tags = [t.pk for t in ticket.tags.all()]
+        else:
+            ticket.tags = ""
+
+        #check Ticket (open or re-opened) and send email reminders
+        months = reminder(ticket.id)
+
+        print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
+        print "Since created (in Months) : " + str(months) + " Months"
+
+        if ticket.status == 1 or ticket.status == 2:
+
+            if months == 0:
+                print "Reminder Email : No reminder"
+
+            elif months == 1 and ticket.remind == 0:
+                #1st email reminders for 'Open' ticket - after 1 month
+                reminders(ticket,ticket.submitter_email)
+                first_remind = Ticket(id=ticket.id,remind=1,remind_date=datetime.now())
+                first_remind.save(update_fields=['remind','remind_date'])
+
+            elif months == 2 and ticket.remind == 1:
+                #2nd email reminders for 'Open' ticket - after 2 months
+                reminders(ticket,ticket.submitter_email)
+                second_remind = Ticket(id=ticket.id,remind=2,remind_date=datetime.now())
+                second_remind.save(update_fields=['remind','remind_date'])
+
+            elif months == 3 and ticket.remind == 2:
+                #3rd email reminders for 'Open' ticket - after 3 months
+                reminders(ticket,ticket.submitter_email)
+                third_remind = Ticket(id=ticket.id,remind=3,remind_date=datetime.now())
+                third_remind.save(update_fields=['remind','remind_date'])
+
+            elif months > 3:
+                print "Ticket is " + str(months) + " Months old and still open. Move this into a dashboard"
+                dashboard_remind = Ticket(id=ticket.id,remind=4,remind_date=datetime.now())
+                dashboard_remind.save(update_fields=['remind','remind_date'])
+
+            else:
+                print "Ticket is " + str(months) + " Months old"
+
+#get user specific tickets
+def user_tickets(request):
+
+    if request.user.email:
+        tickets_reported = Ticket.objects.select_related('queue').filter(
+                submitter_email=request.user.email,
+            ).order_by('status')
+
+    #tickets, resolved by current user
+    tickets_closed = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user,
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+
+    #display tickets assigned to current user
+    tickets_assigned = Ticket.objects.select_related('queue')\
+                    .filter(assigned_to=request.user,)\
+                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+    #display tickets created by current user
+    tickets_created = Ticket.objects.select_related('queue')\
+                    .filter(submitter_email=request.user.email,)\
+                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+
+    user_tickets = [tickets_reported, tickets_closed, tickets_assigned, tickets_created]
+
+    return tickets_reported, tickets_closed, tickets_assigned, tickets_created
+
+#Form data
+def form_data(request):
+    #Form data
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    initial_data = {}
+
+    form = PublicTicketForm(initial=initial_data)
+    form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
+    try:
+        if request.user.email:
+            initial_data['submitter_email'] = request.user.email
+        if 'queue' in request.GET:
+            initial_data['queue'] = request.GET['queue']
+
+        if request.user.is_staff:
+            form = TicketForm(initial=initial_data)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+        
+    except Exception, e:
+        pass
+
+    return form

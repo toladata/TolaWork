@@ -8,7 +8,7 @@ from helpdesk.models import DocumentationApp, FAQ
 from django.contrib.auth.views import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from helpdesk.github import latest_release
+from helpdesk.github import latest_release, update_issue, get_issue, queue_repo, get_issue_status
 from helpdesk.models import Ticket, Queue, FollowUp
 from tasks.models import Task
 from django.conf import settings
@@ -21,7 +21,13 @@ from helpdesk.views.staff import file_attachment
 from helpdesk.views.staff import data_query_pagination
 from helpdesk.slack import post_slack,post_tola_slack
 
+from django.contrib.sessions.models import Session
+try:
+    from django.utils import timezone
+except ImportError:
+    from datetime import datetime as timezone
 
+from helpdesk.views.staff import form_data, user_tickets
 
 def splash(request):
     if request.user.is_authenticated():
@@ -210,6 +216,7 @@ def home(request):
         total_tasks_completed = len (tasks_completed)
 
 #----Data From Tola Tools APIs----####
+    #get_TolaActivity_data() 
     tolaActivityData = get_TolaActivity_data()
 
     tolaTablesData = {}
@@ -217,63 +224,18 @@ def home(request):
 
         tolaTablesData = get_TolaTables_data(request)
 
-    logged_users = logged_in_users(request)
-
     #create ticket modal
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    initial_data = {}
+    try:
+        if request.user.is_authenticated and request.user.email:
+            initial_data['submitter_email'] = request.user.email
 
-    form = PublicTicketForm(initial={})
-    form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+    except Exception, e:
+        pass
+    form = form_data(request)
 
-    if request.method == 'POST':
-        if request.user.is_staff:
-
-            form = TicketForm(request.POST, request.FILES)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        else:
-            form = PublicTicketForm(request.POST, request.FILES)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-
-        if form.is_valid():
-
-            ticket = form.save(user=request.POST.get('assigned_to'))
-
-            #save tickettags
-            tags = request.POST.getlist('tags')
-            for tag in tags:
-                ticket.tags.add(tag)
-
-            #ticket.comment = ''
-            comment = ""
-            f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
-            f.save()
-
-            #Attch a File
-            file_attachment(request, f)
-                   
-            #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
-
-            messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
-
-            return HttpResponseRedirect('/')
-    else:
-        initial_data = {}
-        try:
-            if request.user.email:
-                initial_data['submitter_email'] = request.user.email
-            if 'queue' in request.GET:
-                initial_data['queue'] = request.GET['queue']
-
-            if request.user.is_staff:
-                form = TicketForm(initial=initial_data)
-                form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-                form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-            
-        except Exception, e:
-            form = PublicTicketForm(initial=initial_data)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+    users = get_current_users()
 
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
@@ -284,7 +246,7 @@ def home(request):
                                           'num_tasks': num_tasks, 'total_tasks_created': total_tasks_created, \
                                         'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed, 'total_tasks_completed': total_tasks_completed, 
                                         'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData, \
-                                         'logged_users':logged_users, 'form':form, 'helper':form.helper})
+                                         'logged_users':users, 'form':form, 'helper':form.helper})
 
 
 def contact(request):
@@ -382,21 +344,27 @@ import requests
 
 def get_TolaActivity_data():
 
-    url = 'http://127.0.0.1:8100/tolaactivitydata' #TolaActivity Url
+    #TolaActivity Url
+    url = 'http://activity.toladata.io/api/projectagreements/' 
+
+    token = settings.TOLA_ACTIVITY_TOKEN
+
+    header = {'Authorization': 'token %s' % token}
 
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=header)
 
         # Consider any status other than 2xx an error
         if not response.status_code // 100 == 2:
             return {}
 
         json_obj = response.json()
-
+        print json_obj
         return json_obj
 
     except requests.exceptions.RequestException as e:
         # A serious problem happened, like an SSLError or InvalidURL
+        print e
         return {}
 
     except ValueError:
@@ -407,13 +375,18 @@ def get_TolaTables_data(request):
     import json
 
     url = 'http://127.0.0.1:8200/api/tolatablesdata' #TolaActivity Url
+
+    token = settings.TOLA_TABLES_TOKEN
+
+    header = {'Authorization': 'token %s' % token}
+
     email = request.user.email
 
     payload = {'email': email}
 
     #print email
     try:
-        response = requests.get(url, params = payload)
+        response = requests.get(url, params = payload, headers=header)
 
         # Consider any status other than 2xx an error
         if not response.status_code // 100 == 2:
@@ -453,41 +426,37 @@ def  get_tasks_by_user(email):
 
     return tasks
 
-#Update tickets on github
-from django.conf import settings
-from helpdesk.github import  update_issue,get_issue
-
+#GitHub Sync
 @login_required
-def update_issue_on_github(request):
+def githubSync(request):
 
-    #Update tickets Status in Github
     tickets = Ticket.objects.select_related('queue').exclude(
-            status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
+            status__in=[Ticket.RESOLVED_STATUS],
         )
-
-    # check status in github
     for ticket in tickets:
-
-        #if there is a github issue check it's status in github
+        # Sync 'Closed' status in github to 'Resolved' status in TW
         if ticket.github_issue_number:
-            if str(ticket.queue) == "Tola Tables":
-                repo = settings.GITHUB_REPO_1
-            else:
-                repo = settings.GITHUB_REPO_2
+            queue = queue_repo(ticket)
+            response = get_issue_status(queue,ticket)
 
-            # getstatus from github
-            github_status = get_issue(repo,ticket.github_issue_number)
+            if response == 200:
+                print 'GitHubSync Success - #' + str(ticket.github_issue_number)
 
-            #if status has been updated in github update here
-            if github_status:
-                if github_status['state'] == "open" and ticket.status != 1:
-                    Ticket.objects.filter(id=ticket.id).update(status=1)
-                elif github_status['state'] == "closed" and ticket.status != 3:
-                    Ticket.objects.filter(id=ticket.id).update(status=3)
-
-            #update issue in github with local changes and comments
-            update_issue(repo,ticket)
     return HttpResponseRedirect('/home')
+
+#Get users with active sessions
+def get_current_users():
+    active_sessions = Session.objects.filter(expire_date__gte=timezone.now())
+    user_id_list = []
+    for session in active_sessions:
+        data = session.get_decoded()
+        user_id_list.append(data.get('_auth_user_id', None))
+
+    # Query all logged in users based on id list
+    logged_users = User.objects.filter(id__in=user_id_list)
+    for user in logged_users:
+        user.email = User.objects.get(username=user).email
+    return logged_users
 
 
 

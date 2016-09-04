@@ -1,1 +1,1 @@
-//App specific JavaScript
+//App specific Angular JavaScript

@@ -190,6 +190,8 @@ class TicketForm(forms.Form):
         Add any custom fields that are defined to the form
         """
         super(TicketForm, self).__init__(*args, **kwargs)
+
+
         for field in CustomField.objects.all():
             instanceargs = {
                     'label': field.label,
@@ -198,6 +200,7 @@ class TicketForm(forms.Form):
                     }
 
             self.customfield_to_field(field, instanceargs)
+
 
     #Crispy Form Helper to add Bootstrap and layout
     helper = FormHelper()
@@ -228,14 +231,16 @@ class TicketForm(forms.Form):
                     priority = self.cleaned_data['priority'],
                     type = self.cleaned_data['type'],
                     due_date = self.cleaned_data['due_date'],
-                  )
+                )
+
+        t.assigned_to = None
 
         if self.cleaned_data['assigned_to']:
             try:
                 u = User.objects.get(id=self.cleaned_data['assigned_to'])
                 t.assigned_to = u
             except User.DoesNotExist:
-                t.assigned_to = None
+                pass
         t.save()
 
         for field, value in self.cleaned_data.items():
@@ -266,31 +271,6 @@ class TicketForm(forms.Form):
             }
 
         f.save()
-
-
-        #files = []
-        # if self.cleaned_data['attachment']:
-        #     import mimetypes
-        #     file = self.cleaned_data['attachment']
-        #     filename = file.name.replace(' ', '_')
-        #     a = Attachment(
-        #         followup=f,
-        #         filename=filename,
-        #         mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
-        #         size=file.size,
-        #         )
-        #     a.file.save(file.name, file, save=False)
-            #a.save()
-
-            # if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
-            #     # Only files smaller than 512kb (or as defined in
-            #     # settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
-            #     try:
-            #         files.append([a.filename, a.file])
-            #     except NotImplementedError:
-            #         pass
-
-
 
         context = safe_template_context(t)
         context['comment'] = f.comment

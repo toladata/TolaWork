@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load saved_queries %}
+{% block helpdesk %}
+{% load static from staticfiles %}
+{% with user|saved_queries as user_saved_queries_ %}
+
+<link rel='stylesheet' href='{% static "helpdesk/helpdesk-extend.css" %}' type='text/css' />
+<div id='container2'>
+
+    <div id='body' class="row">
+        {% block helpdesk_body %}{% endblock %}
+    </div>
+</div>
+{% endwith %}
+{% endblock %}

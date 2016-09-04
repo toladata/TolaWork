@@ -1,6 +1,6 @@
 {% load staticfiles %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app = "helpdesk">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -39,8 +39,13 @@
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.11.1.min.js"></script>
         <script type="text/javascript" src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+        
         <!-- App specific Javascript -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/app.js"></script>
+      <!--   <script type="text/javascript" src="{{ STATIC_URL }}js/angular.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/paginate.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/ng-text-truncate.js"></script> -->
+        
         <script type="text/javascript" src="{{ STATIC_URL }}easy_select2/vendor/select2/js/select2.min.js"></script>
 
         {% endblock %}
@@ -64,11 +69,7 @@
             <div class="navbar-collapse collapse " role="navigation">
                 <ul class="nav navbar-nav row">
                     <li><a href="{% url 'home' %}"><span class="glyphicon glyphicon-home"></span> <font class="font6">Home</font></a></li>
-                    {% if user.is_staff %}
-                        <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text"><font class="font6">Tickets</font></span></a></li>
-                    {% else %}
-                        <li><a href='{% url 'public_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text"><font class="font6">Tickets</font></span></a></li>
-                    {% endif %}
+                    <li><a href='{% url 'helpdesk_list' %}'><span class="glyphicon glyphicon-tags"></span> <span class="nav-text"><font class="font6">Tickets</font></span></a></li>
                     <li><a href='{% url 'helpdesk_submit' %}'><span class="glyphicon glyphicon-plus"></span> <span class="nav-text"><font class="font6">New Ticket</font></span></a></li>
                     {% if user.is_staff %}
                     {% if user.is_staff %}
@@ -139,7 +140,7 @@
                     <a href="http://www.toladata.com" class="text-muted"><b>Tola</b>Data: Built by</a> <a href="http://www.mercycorps.org" class="text-muted">MercyCorps</a>
                 </div>
 
-                <div class="col-md-6 col-sm-6 text-right"> <a href="http://tola.work/documentation" class="text-muted">Documentation</a> | <a href="http://tola.work/faq" class="text-muted">FAQ</a> | <a href="http://tola.work/helpdesk/tickets/submit/" class="text-muted">Feedback</a> | <a href="https://github.com/toladata/TolaActivity/blob/master/LICENSE" class="text-muted">License</a>
+                <div class="col-md-6 col-sm-6 text-right"> <a href="http://tola.work/documentation" class="text-muted">Documentation</a> | <a href="http://tola.work/helpdesk/tickets/submit/" class="text-muted">Feedback</a> | <a href="https://github.com/toladata/TolaActivity/blob/master/LICENSE" class="text-muted">License</a>
                 </div>
             </div>
         </div>
@@ -159,6 +160,7 @@
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
         <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
         <script type="text/javascript" src="{{ STATIC_URL }}js/naturalSort.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.js"></script>
 
         <!--  js file for the table export functionalities -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/buttons.html5.min.js"></script>

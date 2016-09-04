@@ -1,0 +1,378 @@
+{% extends "base.html" %}{% load i18n %}
+{% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
+
+{% block helpdesk_head %}
+<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>
+
+
+{% endblock %}
+
+{% block content %}
+{% load in_list %}
+
+
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<div class="container" ng-controller="TicketController">
+  <h3>Submitted Tickets</h3>
+  <div class="ticket_cover">
+    <!-- main ticket section -->
+    <div class="col-md-9 col-sm-9 ticket_right"> 
+      <!--  <div class="alert alert-info" ng-show="tickets == 0">
+         
+        <h4>No results were found</h4>
+       </div> -->
+      <div ng-init="pageSize = 10" dir-paginate="ticket in tickets | itemsPerPage: pageSize">
+
+        <div class="panel panel-info">
+          <div class="panel-heading"><a href=''> <span ng-bind="ticket.id"></span> - [<span ng-bind="ticket.queue.title | uppercase"></span>]
+          <strong class="font8"> <span ng-bind="ticket.title"></span></strong></a>
+
+          </div>
+          <div class="panel-body">
+            <p class="description" ng-text-truncate="ticket.description" ng-tt-words-threshold="30" ng-tt-more-label="Show More" ng-tt-less-label="Show Less"></p>
+            <div>
+              <div class= "preview_links">
+                  <a href="#moredetails[[ticket.id]]" class="btn btn-info" data-toggle="collapse">&nbsp;View More Details</a>
+              </div>
+              <div id="moredetails[[ticket.id]]" class="collapse">
+                <div class="ticket_view tab-pane">
+                  <h5 class="view_table"><strong>Other Details</strong></h5>
+                  <div class="col-md-12 row table-responsive">
+                    <table class="table table-striped table-condensed view_table">
+                      <tr>
+                        <td><p><strong>Submitter Email: </strong></p></td>
+                        <td><p> <span ng-bind="ticket.submitter_email"></span> </p></td>
+                        <td><p><strong>Submitted on: </strong></p></td>
+                        <td><p><span ng-bind="ticket.created | date"></span></p></td>
+                      </tr>
+                      <tr>
+                        <td><p><strong>Assigned to: </strong></p></td>
+                        <td><p> <span ng-bind="ticket.fields.assigned_to_id"></span></p>
+                          <strong ng-if="ticket.fields.get_assigned_to ('Unassigned')"><a href='?take'><span class='button button_take'>Take</span></a></strong>
+                        </td>
+                        <td><p><strong>Ticket CC:</strong></p></td>
+                      </tr>
+                      <tr>
+                        <td><p><strong>Priority: </strong></p></td>
+                        <td><p><span ng-bind="ticket.fields.priority"></span></p></td>
+                        <td><p><strong>Type: </strong></p></td>
+                        <td><p><span ng-bind="ticket.fields.type"></span></p></td>
+                      </tr>
+                      <tr>
+                        <td><p><strong>Developer(s) Progress:</strong></p></td>
+                        <td>
+                          <p>
+                            {% if ticket.git_label == 0 %}In {% blocktrans with ticket.queue as queue %}&nbsp;{{ queue }}{% endblocktrans %}&nbsp;Backlog
+                            {% elif ticket.git_label == 1 %}Accepted and moved into the Ready Queue
+                            {% elif ticket.git_label == 2 %}Developers have started working on the Ticket
+                            {% elif ticket.git_label == 4 %}Done
+                            {% elif ticket.git_label == 5 %}<span class="label label-info">Accepted by QA Lead </span>
+                            {% endif%}
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+                
+                <!-- the dependencies section -->
+                <div>
+                  <h5><strong>Dependencies:</strong></h5>
+                  <div class="row">
+                    <div ng-repeat="dep in dependencies">
+                    <div class="col-md-8"  ng-show = "ticket.id == dep.ticket.id">
+                      <p>
+                        [[dep.depends_on.ticket.id]]
+                        {% trans "This ticket cannot be resolved until the following ticket(s) it depends on are resolved" %}
+                      </p>
+                      <ul>
+                        <li>
+                            <a href=''><span>[</span><span ng-if="dep.depends_on.queue.id == 1">TW - </span><span ng-if="dep.depends_on.queue.id == 2">TA - </span><span ng-if="dep.depends_on.queue.id == 3">TT- </span>[[dep.depends_on.id ]]<span>]</span> [[dep.depends_on.title]]</a>
+                            <span ng-if="dep.depends_on.status == 1">(Ticket Opened)</span>
+                            <span ng-if="dep.depends_on.status == 2">(Ticket Reopened)</span>
+                            <span ng-if="dep.depends_on.status == 3">(Ticket Clossed)</span>
+                            <a href=''>{% trans "Remove Dependency" %}</a>
+                        </li>
+                      </ul>
+                    </div>
+                    <div class="col-md-8" ng-hide = "ticket.id == dep.ticket.id">
+                      <p>{% trans "This ticket has no dependencies. If you want to make this ticket dependent on another ticket, search and add a dependent ticket. " %} </p>
+                    </div>
+                    </div >
+                    <div class="col-md-4">
+                      <p>
+                        <form class="navbar-form navbar-left" id='searchform' method='get'  ticket.id %}>
+                          <div class="input-group">
+                            <input type='text' name='q' size='15' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "If you want to make this ticket dependent on another ticket, search and add a depend ticket." %}'/>
+                            <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' />
+                            <input type='hidden' name='search_type' value='header' />
+                            {% csrf_token %}
+                            <span class="input-group-btn">
+                              <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span> Go </button>
+                            </span>
+                          </div>
+                        </form>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <!-- end dependencies section -->
+
+                <!-- follow-up section -->
+                  <h3>{% trans "Follow-Ups" %}</h3>
+                <div ng-repeat="followup in follow_ups">
+                  <div ng-show="ticket.id == followup.ticket">
+                      <div class='title'>
+                        <span class='byline text-info'>
+                          [[followup.user_id]]&nbsp;&nbsp;&nbsp;&nbsp;[[followup.date | date: "fullDate"]] ({{ followup.date }})</span>
+                        <small>[[followup.title]]</small>
+                        <span class='private' ng-show="followup.public != 1">({% trans "Private" %})</span>
+                        
+                            <!-- <a href="" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
+                          
+                       
+                          <a href=" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a> -->
+                      </div>
+                    <div class='followup well'>
+                      <!-- <div class='title'>
+                        [[followup.title]]
+                        <span class='byline text-info' ng-show = "followup.user">by  [[followup.user]] <span title='[[followup.date|date:"r"]]'>[[followup.date]]</span>
+                            {<span class='private' ng-show="followup.public != 1">({% trans "Private" %})</span></span>
+                        {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
+                            {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
+                                <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
+                            {% endif %}
+                        {% endif %}
+                        {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+                            <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
+                        {% endif %}
+                      </div> -->
+
+                  <!-- display ticket comments from 'follow.comment' column -->
+                  <span class='followup-desc' ng-show="followup.comment">
+                      [[followup.comment]] 
+                  </span>
+                  <!-- Ticket change -->
+                    <div class='changes'>
+                        <ul>
+                          <li ng-repeat = "change in ticketchanges" ng-show = "followup.id == change.followup">
+                            Changed [[change.field]] from [[change.old_value ]] to [[change.new_value]].>
+                          </li>
+                      </ul>
+                    </div>
+                    
+                  <!-- Ticket attachments -->
+                      <!-- <div class='attachments'>
+                          <ul>
+                          <li ng-repeat="attachment in attachments" ng-show="followup.id == attachment.followup" >
+                            <span><a href=''>[[attachment.filename]]</a> ([[attachment.mime_type]], [[attachment.size]])
+                          
+                            <a href=''>delete</a></span> 
+                          </li>
+                        </ul>
+                      </div> -->
+                  </div>
+                </div>
+                </div>
+                <!-- end follow-up section -->
+              </div>
+
+            </div>
+          </div> <!-- end panel body -->
+            
+        </div>
+      </div>
+       <div class="row" >
+        <div class="col-md-8">
+          <dir-pagination-controls></dir-pagination-controls>
+        </div>
+        <div class="read_more col-md-4" ng-show="tickets!= 0">
+          <div class="col-md-7">
+            <p class="font10 read_more">Items Per Page</p>
+          </div>
+          <div class="col-md-5">
+            <select class="form-control" ng-model="pageSize" id="pageSize" ng-options="value as key for (key , value) in items_per_page" >
+             </select>
+          </div>
+        </div>
+      </div>
+
+
+  </div>
+
+      <!-- the right side of the tickets page -->
+      <div class="col-md-3 col-sm-3 ">
+        <!-- start search -->
+        <div class="search" >
+          <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
+            <input type="text" name='q' class="form-control" placeholder="Search" id='search_query'>
+            <span class="input-group-btn">
+              <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+            </span>
+          </form>
+        </div>
+        <!-- end search -->
+
+        <!-- start my tickets summary -->
+        <div class="panel panel-info ">
+          <div class="panel-heading add_ticket">
+            <span class="glyphicon glyphicon-user font10"></span>&nbsp;<strong class="font10">My Tickets </strong>
+            <button class="btn btn-sm btn-warning read_more" type="submit" data-toggle="modal" data-target="#ticketModal" ><b><span class="glyphicon glyphicon-plus"></span></b> New Ticket</button>
+          </div>
+          
+
+            <!-- user ticket summary -->
+            <div class="panel-body">
+              <div class="sort_panels">
+                <a href="" ng-click="getMyTickets()"><span class="glyphicon glyphicon-th-list"></span>&nbsp;Created By Me <strong> <span class="badge read_more"> {{ my_tickets }} </span></strong></a>
+              </div> 
+              <div class="sort_panels">
+                 <a href="" ng-click="getAssignedTickets()"><span class="glyphicon glyphicon-list-alt"></span>&nbsp;Assigned to Me <strong> <span class="badge read_more"> {{ assigned_to_me }} </span></strong></a>
+              </div>
+               <div class="sort_panels">  
+                <a href="" ng-click="getClosedTickets()"><span class="glyphicon glyphicon-th"></span>&nbsp;Closed by Me <strong> <span class="badge read_more"> {{ tickets_closed_resolved }} </span></strong></a>
+               </div>
+            </div>
+            <!-- end user ticket summary -->
+            
+        </div><!-- 
+        end my tickets panel -->
+
+        <!-- ticket sorting -->
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <strong class="font10">Sort tickets</strong>
+          </div>
+          <div class="panel-body">
+             <select class="form-control" ng-model="sorting" ng-options="value as key for (key , value) in sort" ng-change="filterTickets()">
+                <option value="" disabled selected>Sort</option>
+             </select>
+             <div class="col-md-12 row reverse_sort">
+                <label for='id_sortreverse'>Reverse:</label>
+                <input type='checkbox' ng-model='sortreverse' ng-checked="filterTickets()"/>
+                <p class='filterHelp'>{% trans "Ordering applied to tickets" %}</p>
+              </div>
+          </div>
+        </div>
+        <!-- end of ticket sorting -->
+        
+        <!-- ticket filters -->
+        <div class="panel panel-info">
+           <div class="panel-heading">
+            <strong class="font10">Filter tickets</strong>
+          </div>
+          <div class="panel-body">
+            <div class="preview_links">
+              <h5><strong>Queue:</strong></h5>
+              <select class="form-control queue" multiple ng-model="queue_id" ng-options="q.pk as q.fields.title for q in queues" ng-change="filterTickets()">
+                <option value="" disabled selected>Select Queue</option>
+             </select>
+             <script type="text/javascript">
+                $(".queue").select2({
+                        tags: true,
+                        allowClear: true,
+                });
+              </script>
+            </div>
+            <div class="preview_links">
+              <h5><strong>Status:</strong></h5>
+              <select class="form-control status" multiple ng-model="type_id" ng-options="value as key for (key , value) in status" ng-change="filterTickets()">
+                <option value="" selected disabled>Select status</option>
+              </select>
+              <script type="text/javascript">
+                $(".status").select2({
+                        tags: true,
+                        allowClear: true,
+                });
+              </script>
+            </div>
+            <div class="preview_links">
+              <h5><strong>Type:</strong></h5>
+              <select class="form-control type" multiple ng-model="type_id" ng-options="value as key for (key , value) in types" ng-change="filterTickets()">
+                <option value="" disabled selected>Select Type</option>
+             </select>
+             <script type="text/javascript">
+                $(".type").select2({
+                        tags: true,
+                        allowClear: true,
+                });
+              </script>
+            </div>
+            <div class="preview_links">
+              <h5><strong>Tags:</strong></h5>
+              <select class="form-control tags" multiple ng-model="tag_id" ng-options="tag.pk as tag.fields.name for tag in t_tags" ng-change="filterTickets()">
+                <option value="" selected disabled>Select tag</option>
+              </select>
+              <script type="text/javascript">
+                $(".tags").select2({
+                        tags: true,
+                        allowClear: true,
+                });
+              </script>
+            </div>
+            <div class="preview_links">
+              <h5><strong>Date:</strong></h5>
+              <div class="col-md-12 preview_links">
+                <div class="row ticket_padding">
+                  <div class="col-md-3">
+                    <p>From:</p>
+                  </div>
+                  <div class="col-md-9"> 
+                    <input class="form-control" type='date' name='date_from' id='id_date_from' />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3">
+                    <p>To:</p>
+                  </div>
+                  <div class="col-md-9"> 
+                    <input  class="form-control" type="date" name='date_to' id='id_date_to'/>
+                  </div>
+                </div>
+              </div>
+          </div>
+          <div class="preview_links">
+            <h5><strong>Keywords:</strong></h5>
+            <input type="text" name="keywords" class="form-control">
+            <span>Keywords are case-insensitive, and will be looked for in the title, body and submitter fields.</span>
+          </div>
+          <div class="preview_links">
+            <h5><strong>Other filters</strong></h5>
+            <select class="form-control others" multiple ng-model="type_id" ng-options="value as key for (key , value) in other_filters" ng-change="filterTickets()">
+              <option value="" disabled selected>Select filter</option>
+            </select>
+            <script type="text/javascript">
+                $(".others").select2({
+                        tags: true,
+                        allowClear: true,
+                });
+            </script>
+          </div>
+        </div>
+        </div>
+        <!-- end ticket filters -->
+
+    </div>
+    <!-- end the right side of the tickets page --> 
+
+      
+  </div>
+</div>
+<!-- date picker -->
+<script>
+  $(function() {
+    $( "#id_date_from" ).datepicker({
+      dateFormat: "yy-mm-dd",
+    });
+    /*document.getElementById("id_due_date").setAttribute('value', new Date());*/
+
+    $( "#id_date_to" ).datepicker({
+      dateFormat: "yy-mm-dd"
+    });
+    var date = new Date();
+   var datestring = ('0000' + date.getFullYear()).slice(-4) + '-' + ('00' + (date.getMonth() + 1)).slice(-2) + '-' + ('00' + date.getDate()).slice(-2);
+   document.getElementById('id_date_from').value = datestring;
+
+  });
+  </script>
+{% endblock content %}
