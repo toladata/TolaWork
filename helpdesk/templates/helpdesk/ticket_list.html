@@ -83,8 +83,8 @@
       {% endif %}
       {% for ticket in tickets.object_list.reverse %}
       
-      <div class="panel panel-info">
-        <div class="panel-heading"><a href='{{ ticket.get_absolute_url }}'>
+      <div class="panel sorting_header">
+        <div class="panel-heading color_{{ticket.queue_id}}"><a href='{{ ticket.get_absolute_url }}' >
           {{ ticket.ticket | upper}} <strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}</p>
           {% endif %}</strong></a>
           {% if ticket.progress %}
@@ -93,7 +93,7 @@
           </div>
           {% endif %}
         </div>
-        <div class="panel-body">
+        <div class="panel-body ticket_body">
           {% if query%}
             <p class="description">{%  highlight ticket.description with query css_class "highlight" html_tag "span" %}</p>
           {% else %}

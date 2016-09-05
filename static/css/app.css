@@ -430,6 +430,35 @@ margin-right: 0px
     padding-bottom: 5px;
     margin-bottom: 3px;
 }
+.ticket_footer
+{
+    border-bottom: 1px solid#eee;
+}
+.ticket_body
+{
+    border-left:1px solid#eee;
+    border-right:1px solid#eee;
+
+}
+.panel-body
+{
+    margin-bottom: none;
+}
+.color_1
+{
+    background-color: rgba(204, 204, 204, 0.2);
+}
+.color_2
+{
+    background-color: #4db3d0;
+    
+}
+ 
+.color_3
+{
+    background-color: #e89424;
+    
+}
 .highlight{
   background: #f1c40f;
 }
