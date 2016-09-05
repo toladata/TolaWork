@@ -982,6 +982,7 @@ def ticket_list(request):
                 
             except ValueError:
                 pass
+
         statuses = request.GET.getlist('status')
         if statuses:
             try:
@@ -1012,6 +1013,49 @@ def ticket_list(request):
 
         ### SORTING
         data_sorting(request,query_params)
+
+    removequeues = request.GET.getlist('removequeue')
+    if removequeues:
+        try:
+            query_params['filtering']['queue__id__in'] = queues
+            removequeues = [int(s) for s in removequeues]
+            for s in removequeues:
+                queues.remove(s)
+            query_params['filtering']['queue__id__in'] = queues
+        except ValueError:
+            pass
+
+    removestatuses = request.GET.getlist('removestatus')
+    if removestatuses:
+        try:
+            statuses = query_params['filtering']['status__in']
+            removestatuses = [int(s) for s in removestatuses]
+            for s in removestatuses:
+                statuses.remove(s)
+            query_params['filtering']['status__in'] = statuses
+        except ValueError:
+            pass
+
+    removetypes = request.GET.getlist('removetype')
+    if removetypes:
+        try:
+            query_params['filtering']['type__in'] = types
+            removetypes = [int(s) for s in removetypes]
+            for s in removetypes:
+                types.remove(s)
+            query_params['filtering']['type__in'] = types
+        except ValueError:
+            pass
+
+    removeemails = request.GET.getlist('submitter_email')
+    if removeemails:
+        try:
+            query_params['filtering']['submitter_email__in'] = submitter_email
+            removeemails = [int(s) for s in removeemails]
+            for s in removeemails:
+                submitter_email.remove(s)
+        except ValueError:
+            pass
 
     tickets = Ticket.objects.select_related()
     tickets_filtered = tickets
