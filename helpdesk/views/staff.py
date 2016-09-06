@@ -841,28 +841,10 @@ def reminder(ticket_id):
 
 @login_required
 def ticket_list(request):
-    # #Form data
+    #Form data
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     form = form_data(request)
-    #initial_data = {}
 
-    # form = PublicTicketForm(initial=initial_data)
-    # form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-
-    # try:
-    #     if request.user.email:
-    #         initial_data['submitter_email'] = request.user.email
-    #     if 'queue' in request.GET:
-    #         initial_data['queue'] = request.GET['queue']
-
-    #     if request.user.is_staff:
-    #         form = TicketForm(initial=initial_data)
-    #         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-    #         form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        
-    # except Exception, e:
-    #     pass
-   #ticket_list 
     context = {}
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
@@ -1374,11 +1356,13 @@ def report_index(request):
         more_3_months = paginator.page(paginator.num_pages)
 
     print "Number of Older Tickets : " + str(tickets_3_months.count())
+    form = form_data(request)
     return render_to_response('helpdesk/report_index.html',
         RequestContext(request, {
             'number_tickets': number_tickets,
             'saved_query': saved_query,
             'more_3_months': more_3_months,
+            'form': form
         }))
 report_index = staff_member_required(report_index)
 
@@ -1547,7 +1531,7 @@ def run_report(request, report):
         for hdr in possible_options:
             data.append(summarytable[item, hdr])
         table.append([item] + data)
-
+    form = form_data(request)
     return render_to_response('helpdesk/report_output.html',
         RequestContext(request, {
             'title': title,
@@ -1556,6 +1540,7 @@ def run_report(request, report):
             'headings': column_headings,
             'from_saved_query': from_saved_query,
             'saved_query': saved_query,
+            'form': form,
         }))
 run_report = staff_member_required(run_report)
 
@@ -1822,32 +1807,39 @@ def index(request):
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         item_list = paginator.page(paginator.num_pages)
-
+    form = form_data(request)
     # TODO: It'd be great to have a list of most popular items here.
     return render_to_response('helpdesk/kb_index.html',
         RequestContext(request, {
             'kb_categories': category_list,
-            'kb_items': item_list
+            'kb_items': item_list,
+            'form': form
         }))
 
 
 def category(request, slug):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
     items = category.kbitem_set.all()
+
+    form = form_data(request)
     return render_to_response('helpdesk/kb_category.html',
         RequestContext(request, {
             'category': category,
             'items': items,
+            'form': form
         }))
 
 def item(request, item):
     from django.utils.html import escape, format_html
     item = get_object_or_404(KBItem, pk=item)
-    item.answer = format_html(item.answer) 
+    item.answer = format_html(item.answer)
+
+    form = form_data(request)
 
     return render_to_response('helpdesk/kb_item.html',
         RequestContext(request, {
-            'item': item
+            'item': item,
+            'form': form
         }))
 
 
