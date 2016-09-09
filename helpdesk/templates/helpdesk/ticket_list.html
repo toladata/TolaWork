@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load i18n %}
 {% load highlight %}
+{% load url_replace %}
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 
 {% block helpdesk_head %}
@@ -48,7 +49,7 @@
                               window.location.href = this.getAttribute('href');
                             }else {
                                // Code in the case checkbox is NOT checked.
-                           window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if q.id|in_list:query_params.filtering.queue__id__in %}removequeue={{q.id}}{% endif %}';
+                           window.location.href = '{% url_replace request %};
                           }
 
                         }

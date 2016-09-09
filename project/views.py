@@ -217,7 +217,7 @@ def home(request):
         total_tasks_completed = len (tasks_completed)
 
 #----Data From Tola Tools APIs----####
-    #get_TolaActivity_data() 
+
     tolaActivityData = get_TolaActivity_data()
 
     tolaTablesData = {}
@@ -366,7 +366,6 @@ def get_TolaActivity_data():
             return {}
 
         json_obj = response.json()
-        print json_obj
         return json_obj
 
     except requests.exceptions.RequestException as e:
