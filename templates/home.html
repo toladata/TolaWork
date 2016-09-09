@@ -478,16 +478,14 @@
                           <table class="table table-striped">
                             <tr>
                               <th>Project</th>
-                              <th>Program</th>
                               <th>Status</th>
-                              <th>Date Created</th>
+                              <th>Start Date</th>
                             </tr>
-                            {% for data in tolaActivityData.projects %}
+                            {% for data in tolaActivityData|dictsort:"expected_start_date" reversed %}
                               <tr>
                                 <td>{{data.project_name}}</td>
-                                <td>{{data.program.name}}</td>
                                 <td>{{data.approval}}</td>
-                                <td>{{data.create_date}}</td>
+                                <td>{{data.expected_start_date}}</td>
                               </tr>
                             {% endfor %}
                           </table>
