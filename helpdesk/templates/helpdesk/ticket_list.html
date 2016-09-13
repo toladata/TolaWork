@@ -43,18 +43,20 @@
                   {% if q.id|in_list:query_params.filtering.queue__id__in %}
                     {% if not forloop.first %}, {% endif %}
                     <input type="checkbox" name="queue" id="id_queue{{q.id}}" {% if q.id|in_list:query_params.filtering.queue__id__in %} checked="checked" {% endif %}> {{q.title}}
+                  
                     <script type="text/javascript">
                       document.getElementById('id_queue{{q.id}}').onclick = function() {
                          if($(this).is(":checked")){         
                               window.location.href = this.getAttribute('href');
                             }else {
                                // Code in the case checkbox is NOT checked.
-                           window.location.href = '{% url_replace request %};
+                           /*window.location.href = '/helpdesk/tickets/{% query_string "queue=5" "queue=2" %}';*/
+                           window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if q.id|in_list:query_params.filtering.queue__id__in %}removequeue={{q.id}}{% endif %}';
                           }
 
                         }
                     </script>
-                  {% endif %}
+                    {% endif %}
                 {% endfor %}
               {% endif %}
               <!-- status -->

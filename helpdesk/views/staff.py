@@ -2354,9 +2354,3 @@ def form_data(request):
         pass
 
     return form
-
-def url_replace(request):
-
-    querydict = request.GET.copy()
-
-    return querydict.urlencode()
