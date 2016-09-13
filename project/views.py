@@ -115,13 +115,14 @@ def user (request):
 
 
     logged_users = logged_in_users(request)
+    form = form_data(request)
 
     return render(request, "user.html", {'all_tickets': all_tickets,'total_tickets': total_tickets, 'all_tasks': all_tasks, \
                                         'logged_users': logged_users, 'username': username,'tickets_created': tickets_created, 'total_tickets_created':total_tickets_created, \
                                         'tickets_assigned': tickets_assigned, 'total_tickets_assigned': total_tickets_assigned, 'tickets_closed_resolved': tickets_closed_resolved, \
                                         'total_tickets_closed_resolved': total_tickets_closed_resolved,'tasks_created': tasks_created, 'tasks_assigned': tasks_assigned, \
                                         'total_tasks': total_tasks, 'total_tasks_created': total_tasks_created,'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed,\
-                                         'total_tasks_completed': total_tasks_completed})
+                                         'total_tasks_completed': total_tasks_completed, 'form': form})
 
 def home(request):
 
@@ -216,7 +217,7 @@ def home(request):
         total_tasks_completed = len (tasks_completed)
 
 #----Data From Tola Tools APIs----####
-    #get_TolaActivity_data() 
+
     tolaActivityData = get_TolaActivity_data()
 
     tolaTablesData = {}
@@ -233,6 +234,7 @@ def home(request):
 
     except Exception, e:
         pass
+
     form = form_data(request)
 
     users = get_current_users()
@@ -264,7 +266,8 @@ def contact(request):
             messages.error(request, 'Invalid', fail_silently=False)
             print form.errors
 
-    return render(request, "contact.html", {'form': form, 'helper': FeedbackForm.helper})
+    form = form_data(request)
+    return render(request, "contact.html", {'form': form, 'helper': FeedbackForm.helper, 'form':form})
 
 
 def faq(request):
@@ -274,7 +277,9 @@ def faq(request):
 
     getFAQ = FAQ.objects.all()
 
-    return render(request, 'faq.html', {'getFAQ': getFAQ})
+    form = form_data(request)
+
+    return render(request, 'faq.html', {'getFAQ': getFAQ, 'form':form})
 
 
 def documentation(request):
@@ -284,7 +289,9 @@ def documentation(request):
 
     getDocumentation = DocumentationApp.objects.all()
 
-    return render(request, 'documentation.html', {'getDocumentation': getDocumentation})
+    form = form_data(request)
+
+    return render(request, 'documentation.html', {'getDocumentation': getDocumentation, 'form':form})
 
 
 def register(request):
@@ -359,6 +366,34 @@ def get_TolaActivity_data():
             return {}
 
         json_obj = response.json()
+        return json_obj
+
+    except requests.exceptions.RequestException as e:
+        # A serious problem happened, like an SSLError or InvalidURL
+        print e
+        return {}
+
+    except ValueError:
+
+        return {}
+
+def get_TolaActivity_loggedUser():
+
+    #TolaActivity Url
+    url = 'http://activity.toladata.io/api/loggedusers/' 
+
+    token = settings.TOLA_ACTIVITY_TOKEN
+
+    header = {'Authorization': 'token %s' % token}
+
+    try:
+        response = requests.get(url, headers=header)
+
+        # Consider any status other than 2xx an error
+        if not response.status_code // 100 == 2:
+            return {}
+
+        json_obj = response.json()
         print json_obj
         return json_obj
 
@@ -370,6 +405,7 @@ def get_TolaActivity_data():
     except ValueError:
 
         return {}
+
 
 def get_TolaTables_data(request):
     import json
@@ -423,7 +459,6 @@ def  get_tickets_by_user(email):
 #get tasks of a logged_in user
 def  get_tasks_by_user(email):
     tasks = Task.objects.filter(submitter_email= email)
-
     return tasks
 
 #GitHub Sync

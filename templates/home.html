@@ -20,63 +20,6 @@
         {% if not user.is_authenticated %}
           <a href="{% url 'login' %}" role="button"  class="btn btn-lg btn-success"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
         {% endif %}
-        <!-- add ticket modal -->
-        <div class="modal fade " id="ticketModal" role="dialog">
-          <div class="modal-dialog task_form modal-lg">
-            <!-- Modal content-->
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h3 class="modal-title font9">Submit a Ticket</h3>
-                <p class="font9">Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
-              </div>
-              <div class="modal-body">
-                <div class="alert alert-success" role="alert">
-                  <p>'We recommend that you search if such ticket or request already exists before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!'</p>
-                </div>
-                <form class="form-horizontal" method='post' action='/helpdesk/tickets/submit/' enctype='multipart/form-data'  name="most">
-                  {% load crispy_forms_tags %}
-                  {% crispy form form.helper %}
-                  {% comment %}{% for field in form %}
-                    {% if field.is_hidden %}
-                        {{ field }}
-                    {% else %}
-                      <dt>
-                        <label for='id_{{ field.name }}'>{% trans field.label %}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}
-                      </dt>
-                      <dd>{{ field }}</dd>
-                      {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
-                      {% if field.help_text %}<dd class='form_help_text'>{% trans field.help_text %}</dd>{% endif %}
-
-                    {% endif %}
-                  {% endfor %}
-                  {% endcomment %}
-                 <!--  attach file section -->
-                  <div class = "col-md-offset-2 col-md-10">
-                    <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'><b>Attach More File(s) &raquo;</b></a></p>
-                    <div id='FileUpload' style='display: none;'>
-                     <dl>
-                        <dt><label for='id_file'> <b>Attach a File</b></label></dt>
-                        <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'><b>Add Another File</b></a>)</span></dd>
-                      </dl>
-                    </div>
-                    <div class='buttons form-group'>
-                      <input type='submit' class="btn btn-primary" value='Submit Ticket' />
-                    </div>
-                 </div> 
-                {{ form.media }}
-
-                {% csrf_token %}
-                </form>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              </div>
-            </div> 
-          </div>
-        </div>
-        <!-- end add ticket modal -->
-
 
         <!-- the tickets, tasks and tools section -->
         <br/>
@@ -535,16 +478,14 @@
                           <table class="table table-striped">
                             <tr>
                               <th>Project</th>
-                              <th>Program</th>
                               <th>Status</th>
-                              <th>Date Created</th>
+                              <th>Start Date</th>
                             </tr>
-                            {% for data in tolaActivityData.projects %}
+                            {% for data in tolaActivityData|dictsort:"expected_start_date" reversed %}
                               <tr>
                                 <td>{{data.project_name}}</td>
-                                <td>{{data.program.name}}</td>
                                 <td>{{data.approval}}</td>
-                                <td>{{data.create_date}}</td>
+                                <td>{{data.expected_start_date}}</td>
                               </tr>
                             {% endfor %}
                           </table>
@@ -645,11 +586,6 @@
             $("#FurtherEditOptions").fadeIn();
             $("#ShowFurtherOptPara").show();
             return false;
-        });
-
-        $("#id_tags").select2({
-                tags: true,
-                allowClear: true,
         });
 
         processAddFileClick();

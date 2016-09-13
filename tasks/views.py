@@ -40,6 +40,7 @@ import re
 import json
 from tasks.forms import TaskForm
 from tasks.models import Task
+from helpdesk.views.staff import form_data, user_tickets
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -89,7 +90,7 @@ def task_list(request):
         except ValueError:
             pass
 
-
+    form = form_data(request)
 
 
 
@@ -98,7 +99,8 @@ def task_list(request):
         'tasks': tasks,
         'assignable_users': assignable_users,
         'created_by': created_by,
-            'status_choices':Task.STATUS_CHOICES
+        'status_choices':Task.STATUS_CHOICES, 
+        'form' : form
 
 
 
