@@ -146,23 +146,23 @@
               {% endif %}
               <!-- Created by me -->
               {% if query_params.filtering.submitter_email__in %}
-                <b>Tickets Created:-</b> 
-                {% for u in user_choices %}
+              {% for u in user_choices %}
                 {% if u.email|in_list:query_params.filtering.submitter_email__in %}
-                  <input type="checkbox" name="submitter_email" id="id_created" {% if u.email|in_list:query_params.filtering.submitter_email__in %} checked="checked" {% endif %} > by me
-                    <script type="text/javascript">
-                      document.getElementById('id_created').onclick = function() {
-                         if($(this).is(":checked")){         
-                              window.location.href = this.getAttribute('href');
-                            }else {
-                               // Code in the case checkbox is NOT checked.
-                           window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if u.email|in_list:query_params.filtering.submitter_email__in %}submitter_email={{u.email}}{% endif %}';
-                          }
+                  <b>Tickets Created:-</b> 
+                  <input type="checkbox" name="submitter_email" id="id_submitter_email" {% if query_params.filtering.submitter_email__in %} checked="checked"  {% endif %} > by me
+                   <script type="text/javascript">
+                      document.getElementById('id_submitter_email').onclick = function() {
+                       if($(this).is(":checked")){         
+                            window.location.href = this.getAttribute('href');
+                          }else {
+                             // Code in the case checkbox is NOT checked.
+                         window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if u.email|in_list:query_params.filtering.submitter_email__in %}removeemail={{ u.email }}{% endif %}';
+                        }
 
-                      }
+                    }
                     </script>
                   {% endif %}
-                  {% endfor %}
+                {% endfor %}
               {% endif %}
             {% endif %}
           </p>
@@ -170,9 +170,9 @@
       {% endif %}
       {% for ticket in tickets.object_list.reverse %}
       
-      <div class="panel sorting_header">
+      <div class="panel ">
         <div class="panel-heading color_{{ticket.queue_id}}"><a href='{{ ticket.get_absolute_url }}' >
-          {{ ticket.ticket | upper}} <strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}</p>
+          {{ ticket.ticket | upper}} <strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}
           {% endif %}</strong></a>
           {% if ticket.progress %}
           <div class="read_more">
@@ -741,6 +741,20 @@
               <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
             </span>
           </form>
+          {% if query%}
+            <input type="checkbox" name="removesearch" id="id_search" {% if query_params.q %} checked='checked'{% endif %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&removesearch=on">
+            <script type="text/javascript">
+              document.getElementById('id_search').onclick = function() {
+             if($(this).is(":checked")){         
+                  window.location.href = this.getAttribute('href');
+                }else {
+                   // Code in the case checkbox is NOT checked.
+               window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&removesearch=off';
+              }
+
+          }
+            </script>
+          {% endif %}
         </div>
         <!-- end search -->
 

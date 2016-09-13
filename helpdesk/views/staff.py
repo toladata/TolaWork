@@ -975,6 +975,7 @@ def ticket_list(request):
                 pass
 
         submitter_email = request.GET.getlist('submitter_email')
+        print submitter_email
         if submitter_email:
             try:
 
@@ -1047,16 +1048,7 @@ def ticket_list(request):
         except ValueError:
             pass
 
-    removeemails = request.GET.getlist('submitter_email')
-    if removeemails:
-        try:
-            query_params['filtering']['submitter_email__in'] = submitter_email
-            removeemails = [int(s) for s in removeemails]
-            for s in removeemails:
-                submitter_email.remove(s)
-        except ValueError:
-            pass
-
+    
     tickets = Ticket.objects.select_related()
     tickets_filtered = tickets
 
@@ -2275,8 +2267,8 @@ def remind_messages(tickets):
         #check Ticket (open or re-opened) and send email reminders
         months = reminder(ticket.id)
 
-        print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
-        print "Since created (in Months) : " + str(months) + " Months"
+        # print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
+        # print "Since created (in Months) : " + str(months) + " Months"
 
         if ticket.status == 1 or ticket.status == 2:
 
