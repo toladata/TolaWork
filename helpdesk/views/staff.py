@@ -2042,7 +2042,8 @@ def key_word_searching(request, context, query_params):
             Q(title__icontains=q) |
             Q(description__icontains=q) |
             Q(resolution__icontains=q) |
-            Q(submitter_email__icontains=q)
+            Q(submitter_email__icontains=q) |
+            Q(tags__name__icontains = q)
         )
 
         context = dict(context, query=q)
@@ -2267,13 +2268,14 @@ def remind_messages(tickets):
         #check Ticket (open or re-opened) and send email reminders
         months = reminder(ticket.id)
 
-        print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
-        print "Since created (in Months) : " + str(months) + " Months"
+        # print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
+        # print "Since created (in Months) : " + str(months) + " Months"
 
         if ticket.status == 1 or ticket.status == 2:
 
             if months == 0:
-                print "Reminder Email : No reminder"
+                # print "Reminder Email : No reminder"
+                pass
 
             elif months == 1 and ticket.remind == 0:
                 #1st email reminders for 'Open' ticket - after 1 month
@@ -2294,12 +2296,13 @@ def remind_messages(tickets):
                 third_remind.save(update_fields=['remind','remind_date'])
 
             elif months > 3:
-                print "Ticket is " + str(months) + " Months old and still open. Move this into a dashboard"
+                # print "Ticket is " + str(months) + " Months old and still open. Move this into a dashboard"
                 dashboard_remind = Ticket(id=ticket.id,remind=4,remind_date=datetime.now())
                 dashboard_remind.save(update_fields=['remind','remind_date'])
 
             else:
-                print "Ticket is " + str(months) + " Months old"
+                # print "Ticket is " + str(months) + " Months old"
+                pass
 
 #get user specific tickets
 def user_tickets(request):
@@ -2351,3 +2354,9 @@ def form_data(request):
         pass
 
     return form
+
+def url_replace(request):
+
+    querydict = request.GET.copy()
+
+    return querydict.urlencode()
