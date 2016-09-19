@@ -3,6 +3,8 @@
 {% block content %}
 
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 <div class="container col-md-12">
   <div class="home_cover">
@@ -591,48 +593,56 @@
         <div class=" row task_spacing">
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Name:</strong></p></label>
-              <div class=" col-md-9">
-                <input class="form-control" type='text' name='name' id='id_name'/>
+              <div class=" col-md-8">
+                <input class="form-control" type='text' name='name' id='id_name' required/>
               </div>
             </div> 
         </div>
         <div class=" row task_spacing">
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Phone:</strong></p></label>
-              <div class=" col-md-9">
-                <input class="form-control" type='text' name='phone' id='id_phone'/>
+              <div class=" col-md-8">
+                <input class="form-control" type='text' name='phone' id='id_phone' required/>
               </div>
             </div> 
         </div>
         <div class=" row task_spacing">
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Email:</strong></p></label>
-              <div class=" col-md-9">
-                <input class="form-control" type='text' name='email' id='id_email'/>
+              <div class=" col-md-8">
+                <input class="form-control" type='text' name='email' id='id_email' required/>
               </div>
             </div> 
         </div>
         <div class=" row task_spacing">
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Project Description:</strong></p></label>
-              <div class=" col-md-9">
-                <textarea class="form-control" name="project_description" id='id_project_description' rows="4" ></textarea>
+              <div class=" col-md-8">
+                <textarea class="form-control" name="project_description" id='id_project_description' rows="4" required ></textarea>
               </div>
             </div> 
         </div>
         <div class=" row task_spacing">
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Project's Start Date:</strong></p></label>
-              <div class=" col-md-9">
-                <input class="form-control" type='text' name='project_start_date' id='id_project_start_date'/>
+              <div class=" col-md-8">
+                  <script>
+                      $( function() {
+                        $( "#id_project_start_date" ).datepicker({
+                          dateFormat: "yy-mm-dd"
+                        });
+                      } );
+                    </script>
+                <input class="form-control" type='text' name='project_start_date' id='id_project_start_date' required/>
               </div>
             </div> 
         </div>
-        <div class=" row task_spacing">
+        <div class=" row task_spacing ">
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Total Estimated Amount:</strong></p></label>
-              <div class=" col-md-9">
-                <input class="form-control" type='number' name='total_estimated_amount' id='id_total_estimated_amount'/>
+              <div class=" col-md-8 input-group">
+                <span class="input-group-addon">$</span>
+                <input class="form-control" type='number' name='total_estimated_amount' id='id_total_estimated_amount' required/>
               </div>
             </div> 
         </div>
@@ -640,7 +650,7 @@
         <div class=" row task_spacing">
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Additional Comments:</strong></p></label>
-              <div class=" col-md-9">
+              <div class=" col-md-8">
                 <textarea class="form-control" name="project_description" id='id_additional_comments' rows="4" ></textarea>
               </div>
             </div> 
