@@ -15,10 +15,12 @@
         <br/>
         <!--  add ticket button -->
         {% if user.is_authenticated %}
-        <button class="btn btn-lg btn-success" type="submit" data-toggle="modal" data-target="#ticketModal"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</button>
+        <button class="btn btn-md btn-success" type="submit" data-toggle="modal" data-target="#ticketModal"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</button>
+
+        <button class="btn btn-md btn-info float_right" type="submit" data-toggle="modal" data-target="#fundingModal"><b><span class="glyphicon glyphicon-usd"></span></b> Add Funding Opportunity</button>
         {% endif %}
         {% if not user.is_authenticated %}
-          <a href="{% url 'login' %}" role="button"  class="btn btn-lg btn-success"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
+          <a href="{% url 'login' %}" role="button"  class="btn btn-lg btn-success "><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
         {% endif %}
 
         <!-- the tickets, tasks and tools section -->
@@ -573,6 +575,89 @@
     
   </div> <!-- end home_cover -->
 </div> <!-- end container -->
+
+<!-- add funding opportunity modal -->
+<div class="modal fade " id="fundingModal" role="dialog">
+  <div class="modal-dialog task_form modal-lg">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h3 class="modal-title font9">Submit a Funding Opportunity</h3>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" method='post' name="funding_form" id="f_opportunity-form">
+        {% csrf_token %}
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Name:</strong></p></label>
+              <div class=" col-md-9">
+                <input class="form-control" type='text' name='name' id='id_name'/>
+              </div>
+            </div> 
+        </div>
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Phone:</strong></p></label>
+              <div class=" col-md-9">
+                <input class="form-control" type='text' name='phone' id='id_phone'/>
+              </div>
+            </div> 
+        </div>
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Email:</strong></p></label>
+              <div class=" col-md-9">
+                <input class="form-control" type='text' name='email' id='id_email'/>
+              </div>
+            </div> 
+        </div>
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Project Description:</strong></p></label>
+              <div class=" col-md-9">
+                <textarea class="form-control" name="project_description" id='id_project_description' rows="4" ></textarea>
+              </div>
+            </div> 
+        </div>
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Project's Start Date:</strong></p></label>
+              <div class=" col-md-9">
+                <input class="form-control" type='text' name='project_start_date' id='id_project_start_date'/>
+              </div>
+            </div> 
+        </div>
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Total Estimated Amount:</strong></p></label>
+              <div class=" col-md-9">
+                <input class="form-control" type='number' name='total_estimated_amount' id='id_total_estimated_amount'/>
+              </div>
+            </div> 
+        </div>
+
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Additional Comments:</strong></p></label>
+              <div class=" col-md-9">
+                <textarea class="form-control" name="project_description" id='id_additional_comments' rows="4" ></textarea>
+              </div>
+            </div> 
+        </div>
+
+        <div class='buttons form-group '>
+          <input type='submit' class="btn btn-primary col-md-offset-3" value='Submit' />
+        </div>
+          </div> 
+        </form>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div> 
+  </div>
+</div>
+<!-- end add ticket modal -->
 <script>
   $("#id_tags").select2({
               tags: true,
@@ -618,6 +703,12 @@
         });
 
     }
+
+    $('#f_opportunity-form').on('submit', function(event){
+          event.preventDefault();
+          create_post();
+      });
+
 </script>
 
 {% endblock content %}

@@ -734,3 +734,8 @@ form .thumbnail
     color: #FFFFFF;
     padding: 5px;
 }
+
+.float_right
+{
+    margin-left:80px;
+}
