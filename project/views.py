@@ -9,7 +9,7 @@ from django.contrib.auth.views import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from helpdesk.github import latest_release, update_issue, get_issue, queue_repo, get_issue_status
-from helpdesk.models import Ticket, Queue, FollowUp
+from helpdesk.models import Ticket, Queue, FollowUp, FundingOpportunity
 from tasks.models import Task
 from django.conf import settings
 from django.db.models import Count, Sum
@@ -493,5 +493,35 @@ def get_current_users():
         user.email = User.objects.get(username=user).email
     return logged_users
 
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import HttpResponse
+import json
+
+@ensure_csrf_cookie
+def create_funding_opportunity(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+        project_description = request.POST.get('project_description')
+        project_start_date = request.POST.get('project_start_date')
+        total_estimated_amount = request.POST.get('total_estimated_amount')
+        additional_comments = request.POST.get('additional_comments')
+
+        response_data = {}
+
+        f_opportunity = FundingOpportunity(name=name, phone=phone, email=email, project_description=project_description, project_start_date=project_start_date, total_estimated_amount=total_estimated_amount, additional_comments=additional_comments)
+
+        f_opportunity.save()
+
+        return HttpResponse(
+                json.dumps(response_data),
+                content_type="application/json"
+            )
+    else:
+        return HttpResponse(
+            json.dumps({"response": "there was an error"}),
+            content_type="application/json"
+        )
 
 
