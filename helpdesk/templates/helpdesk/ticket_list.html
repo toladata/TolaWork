@@ -159,7 +159,7 @@
                               window.location.href = this.getAttribute('href');
                             }else {
                                // Code in the case checkbox is NOT checked.
-                           window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if u.email|in_list:query_params.filtering.submitter_email__in %}submitter_email={{u.email}}{% endif %}';
+                            window.location.href = '/helpdesk/tickets/{% query_string "queue=2" "submitter_email" %}';
                           }
 
                       }

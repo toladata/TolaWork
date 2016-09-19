@@ -57,10 +57,6 @@ def task_list(request):
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     context = {}
 
-    created_by = request.user
-    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-
-
     tasks = Task.objects.select_related()
     ## sorting tasks
     sort = request.GET.get('sort', None)
@@ -92,8 +88,6 @@ def task_list(request):
 
     form = form_data(request)
 
-
-
     return render_to_response('tasks/task_index.html',
         RequestContext(request, {
         'tasks': tasks,
@@ -101,8 +95,6 @@ def task_list(request):
         'created_by': created_by,
         'status_choices':Task.STATUS_CHOICES, 
         'form' : form
-
-
 
         }))
 
@@ -125,8 +117,6 @@ def create_task(request):
 
 		task = Task(task=title, submitter_email=submitter_mail, status=status, priority=priority, due_date=due_date, created_date=created_date,created_by_id=created_by, assigned_to_id=assigned_to, note=note)
 		task.save()
-
-		print (task)
 
     tasks = Task.objects.all()
     return render_to_response('tasks/task_index.html',
