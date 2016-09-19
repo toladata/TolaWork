@@ -450,13 +450,25 @@ margin-right: 0px
 }
 .color_2
 {
-    background-color: #4db3d0;
+    background-color: rgba(153,204,255, 0.8);
     
 }
  
 .color_3
 {
-    background-color: #e89424;
+    background-color: rgba(232, 148, 36, 0.8);
+   
+    
+}
+.border_3
+{
+    border: 1px solid#e89424;
+    position: relative;
+    overflow: hidden;F
+}
+.color_3 a
+{
+    color: #fff;
     
 }
 .highlight{
