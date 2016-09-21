@@ -1813,11 +1813,14 @@ def category(request, slug):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
     items = category.kbitem_set.all()
 
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+
     form = form_data(request)
     return render_to_response('helpdesk/kb_category.html',
         RequestContext(request, {
             'category': category,
             'items': items,
+            'assignable_users': assignable_users,
             'form': form
         }))
 
@@ -1827,10 +1830,12 @@ def item(request, item):
     item.answer = format_html(item.answer)
 
     form = form_data(request)
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     return render_to_response('helpdesk/kb_item.html',
         RequestContext(request, {
             'item': item,
+            'assignable_users': assignable_users,
             'form': form
         }))
 
@@ -1994,6 +1999,9 @@ def kb_list(request):
     print "TICKET TYPES:"
     print Ticket.TICKET_TYPE
 
+    form = form_data(request)
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+
     return render_to_response('helpdesk/kb_list.html',
         RequestContext(request, dict(
             context,
@@ -2009,6 +2017,8 @@ def kb_list(request):
             from_saved_query=from_saved_query,
             saved_query=saved_query,
             search_message=search_message,
+            assignable_users= assignable_users,
+            form=form,
 
         )))
 

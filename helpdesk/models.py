@@ -1250,4 +1250,18 @@ class UserDefaultSort(models.Model):
 
     def __unicode__(self):
         return u'%s %s' % (self.user_id, self.sort)
-        
+
+#Funding Opportunities
+class FundingOpportunity(models.Model):
+    name = models.CharField(_('Name'), max_length=100,)
+    phone = models.CharField(_('Phone Number'), max_length=15,)
+    email = models.EmailField(_('E-Mail Address'), blank=True, null=True,)
+    project_description = models.TextField(_('Project Description'),blank=True,help_text=_('Short Description of Project.'),)
+    project_start_date = models.DateTimeField(_('Project Start Date'), blank=True, help_text=_('Anticipated Start Date of Project'),)
+    total_estimated_amount = models.DecimalField(_('Estimated Amount'), max_digits=10, decimal_places=2)
+    additional_comments = models.TextField(_('Comment'),blank=True,null=True,)
+
+    class Meta:
+        ordering = ['name',]
+        verbose_name = _('Funding Opportunity')
+        verbose_name_plural = _('Funding Opportunities')
