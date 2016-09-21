@@ -180,7 +180,7 @@
      
       {% for ticket in tickets.object_list.reverse %}
       
-      <div class="panel ">
+      <div class="panel" id = "auto_load_div{{ticket.id}}">
         <div class="panel-heading color_{{ticket.queue_id}}"><a href='{{ ticket.get_absolute_url }}' >
           {{ ticket.ticket | upper}} <strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}
           {% endif %}</strong></a>
@@ -195,7 +195,7 @@
             <p class="description">{%  highlight ticket.description with query css_class "highlight" html_tag "span" %}</p>
           {% else %}
 
-          <p class="description">{{ ticket.description }}</p>
+          <p class="description">{{ ticket.description }}</p> 
           {% endif %}
           <div class="col-md-12 ">
             <div class="col-md-7"></div>
@@ -573,7 +573,7 @@
                 </div> 
                 <div class="ticket_form_cover">
                   <div class="ticket_form info">
-                    <form  method='post' action='/helpdesk/tickets/ticket_edit/?ticket_id={{ticket.id}}' enctype='multipart/form-data' >
+                    <form  method='post' id="ticket_edit-form{{ticket.id}}" >
                       <div class=" row task_spacing">
                         <div class="col-md-12 ticket_padding row ticket_edit">
                           <label class="col-md-2"><p><strong>{% trans "Title:" %}</strong></p></label>
@@ -600,13 +600,13 @@
                         <div class= "col-md-6 row ticket_edit" >
                           <label class="col-md-4"><p><strong>{% trans "Error Message:" %}</strong></p></label>
                           <div class="col-md-8">
-                            <textarea class="form-control" name="error_msg" rows="4"  > {{ ticket.error_msg|escape }} </textarea>
+                            <textarea class="form-control" name="error_msg" rows="4" id="id_error_msg" > {{ ticket.error_msg|escape }} </textarea>
                           </div>
                         </div>
                          <div class= "col-md-6 row ticket_edit" >
                           <label class="col-md-4"><p><strong>{% trans "Description of Issue:" %}</strong></p></label>
                           <div class="col-md-8">
-                            <textarea class="form-control" name="description" rows="4" > {{ ticket.description|escape }} </textarea>
+                            <textarea class="form-control" name="description" rows="4" id="id_description"> {{ ticket.description|escape }} </textarea>
                           </div>    
                         </div>
                       </div>
@@ -647,7 +647,7 @@
 
                           <div class="col-md-8">
                             <span id="helpBlock" class="help-block">To add <strong>NEW</strong> tag(s), type in then press <strong>'ENTER'</strong></span>
-                            <select class = " form-control multi_select {{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
+                            <select class = "form-control multi_select {{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags{{ticket.id}}' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
                                 {% for q in tags %} 
 
                                   <option value='{{ q.id }}' {% for tag in ticket.tags.all %} {% ifequal q.id tag.id %} selected='selected'{% endifequal %}{% endfor %}>{{q.name}}</option>
@@ -667,7 +667,8 @@
                                                   isNew: true
                                               };
                                           },
-                                      }).on("change", function(e) {
+
+                                        }).on("change", function(e) {
                                           var isNew = $(this).find('[data-select2-tag="true"]');
                                           if(isNew.length){
                                               isNew.replaceWith('<option selected="selected" value="'+isNew.val()+'">'+isNew.text()+'</option>');
@@ -685,6 +686,13 @@
                       </div>
                      {% csrf_token %}
                     </form> 
+                    <script>
+                    $('#ticket_edit-form{{ticket.id}}').on('submit', function(event){
+                        event.preventDefault();
+                        var csrftoken = $("#ticket_edit-form{{ticket.id}}").find('input[name="csrfmiddlewaretoken"]').val();
+                        edit_ticket_post('{{ticket.id}}', csrftoken);
+                    });
+                    </script>
                   </div>
                 </div>
               </div>
@@ -1327,6 +1335,11 @@ $(document).ready(function() {
 
     $(function () {
         $('[data-toggle="popover"]').popover()
+      });
+
+    $('#ticket_edit-form').on('submit', function(event){
+          event.preventDefault();
+          edit_ticket_post();
       });
 </script>
 {% endblock content %}
