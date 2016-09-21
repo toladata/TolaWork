@@ -29,153 +29,153 @@
        </div>
       {% endif %}
       <div class="panel panel-info">
-        <div class="panel-body">
-          {% if query_params and number_of_tickets %}
-          {% if query_params.sorting %}
-          <p><b>Sorted by:</b> {{query_params.sorting}}</p>
-          {% endif %}
-          {% if query_params.filtering %}
-            <p>
-              <b>Filtered by:</b> 
-              {% if query_params.filtering %} 
-                <!-- queue -->
-                {% if query_params.filtering.queue__id__in %}
-                  <b>Queue(s):-</b>
-                  {% for q in ticket_queue %}
-                    {% if q.id|in_list:query_params.filtering.queue__id__in %}
-                      {% if not forloop.first %}, {% endif %}
-                      <input type="checkbox" name="queue" id="id_queue{{q.id}}" {% if q.id|in_list:query_params.filtering.queue__id__in %} checked="checked" {% endif %}> {{q.title}}
-                    
-                      <script type="text/javascript">
-                        document.getElementById('id_queue{{q.id}}').onclick = function() {
-                           if($(this).is(":checked")){         
-                                window.location.href = this.getAttribute('href');
-                              }else {
-                                 // Code in the case checkbox is NOT checked.
-                             /*window.location.href = '/helpdesk/tickets/{% query_string "queue=5" "queue=2" %}';*/
-                             window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if q.id|in_list:query_params.filtering.queue__id__in %}removequeue={{q.id}}{% endif %}';
-                            }
+        {% if query_params and number_of_tickets %}
+          <div class="panel-body">
+            {% if query_params.sorting %}
+            <p><b>Sorted by:</b> {{query_params.sorting}}</p>
+            {% endif %}
+            {% if query_params.filtering %}
+              <p>
+                <b>Filtered by:</b> 
+                {% if query_params.filtering %} 
+                  <!-- queue -->
+                  {% if query_params.filtering.queue__id__in %}
+                    <b>Queue(s):-</b>
+                    {% for q in ticket_queue %}
+                      {% if q.id|in_list:query_params.filtering.queue__id__in %}
+                        {% if not forloop.first %}, {% endif %}
+                        <input type="checkbox" name="queue" id="id_queue{{q.id}}" {% if q.id|in_list:query_params.filtering.queue__id__in %} checked="checked" {% endif %}> {{q.title}}
+                      
+                        <script type="text/javascript">
+                          document.getElementById('id_queue{{q.id}}').onclick = function() {
+                             if($(this).is(":checked")){         
+                                  window.location.href = this.getAttribute('href');
+                                }else {
+                                   // Code in the case checkbox is NOT checked.
+                               /*window.location.href = '/helpdesk/tickets/{% query_string "queue=5" "queue=2" %}';*/
+                               window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if q.id|in_list:query_params.filtering.queue__id__in %}removequeue={{q.id}}{% endif %}';
+                              }
 
-                          }
-                      </script>
+                            }
+                        </script>
+                        {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                  <!-- status -->
+                  {% if query_params.filtering.status__in %}
+                    <b>Status(es):-</b>
+                     {% for status in status_choices %}
+                      {% if status.0|in_list:query_params.filtering.status__in %}
+                        {% if not forloop.first %}, {% endif %}
+                        <input type="checkbox" name="status" id="id_status{{status.0}}" {% if status.0|in_list:query_params.filtering.status__in %} checked="checked" {% endif %}> {{status.1}}
+                        <script type="text/javascript">
+                          document.getElementById('id_status{{status.0}}').onclick = function() {
+                             if($(this).is(":checked")){         
+                                  window.location.href = this.getAttribute('href');
+                                }else {
+                                   // Code in the case checkbox is NOT checked.
+                               window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if status.0|in_list:query_params.filtering.status__in %}removestatus={{status.0}}{% endif %}';
+                              }
+
+                            }
+                        </script>
                       {% endif %}
-                  {% endfor %}
-                {% endif %}
-                <!-- status -->
-                {% if query_params.filtering.status__in %}
-                  <b>Status(es):-</b>
-                   {% for status in status_choices %}
-                    {% if status.0|in_list:query_params.filtering.status__in %}
-                      {% if not forloop.first %}, {% endif %}
-                      <input type="checkbox" name="status" id="id_status{{status.0}}" {% if status.0|in_list:query_params.filtering.status__in %} checked="checked" {% endif %}> {{status.1}}
-                      <script type="text/javascript">
-                        document.getElementById('id_status{{status.0}}').onclick = function() {
-                           if($(this).is(":checked")){         
-                                window.location.href = this.getAttribute('href');
-                              }else {
-                                 // Code in the case checkbox is NOT checked.
-                             window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if status.0|in_list:query_params.filtering.status__in %}removestatus={{status.0}}{% endif %}';
+                    {% endfor %}
+                  {% endif %}
+                  <!-- type -->
+                  {% if query_params.filtering.type__in %}
+                    <b>Type(s):-</b>
+                    {% for type in type_choices %}
+                      {% if type.0|in_list:query_params.filtering.type__in %}
+                        {% if not forloop.first %}, {% endif %}
+                        <input type="checkbox" name="types" id="id_type{{type.0}}" {% if type.0|in_list:query_params.filtering.type__in %} checked="checked" {% endif %}> {{type.1}}
+                        <script type="text/javascript">
+                          document.getElementById('id_type{{type.0}}').onclick = function() {
+                             if($(this).is(":checked")){         
+                                  window.location.href = this.getAttribute('href');
+                                }else {
+                                   // Code in the case checkbox is NOT checked.
+                               window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if type.0|in_list:query_params.filtering.type__in %}removetype={{type.0}}{% endif %}';
+                              }
+
                             }
-
-                          }
-                      </script>
-                    {% endif %}
-                  {% endfor %}
-                {% endif %}
-                <!-- type -->
-                {% if query_params.filtering.type__in %}
-                  <b>Type(s):-</b>
-                  {% for type in type_choices %}
-                    {% if type.0|in_list:query_params.filtering.type__in %}
-                      {% if not forloop.first %}, {% endif %}
-                      <input type="checkbox" name="types" id="id_type{{type.0}}" {% if type.0|in_list:query_params.filtering.type__in %} checked="checked" {% endif %}> {{type.1}}
-                      <script type="text/javascript">
-                        document.getElementById('id_type{{type.0}}').onclick = function() {
-                           if($(this).is(":checked")){         
-                                window.location.href = this.getAttribute('href');
-                              }else {
-                                 // Code in the case checkbox is NOT checked.
-                             window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if type.0|in_list:query_params.filtering.type__in %}removetype={{type.0}}{% endif %}';
-                            }
-
-                          }
-                      </script>
-                    {% endif %}
-                  {% endfor %}
-                {% endif %}
-                <!-- Date -->
-                {% if query_params.filtering.created__gte %}
-                  <b>Date From:-</b> <input type="checkbox" name='date_from' id="id_date_gte" {% if query_params.filtering.created__gte %} checked="checked" {% endif %} > {{query_params.filtering.created__gte}}
-                  <script type="text/javascript">
-                    document.getElementById('id_date_gte').onclick = function() {
-                       if($(this).is(":checked")){         
-                            window.location.href = this.getAttribute('href');
-                          }else {
-                             // Code in the case checkbox is NOT checked.
-                         window.location.href = '/helpdesk/tickets/{% query_string " " "date_from" %}';
-                        }
-
-                    }
-                  </script>
-                {% endif %}
-                {% if query_params.filtering.created__lte %}
-                  <b>Date To:-</b>
-                  <input type="checkbox" name='date_to' id="id_date_lte" {% if query_params.filtering.created__lte %} checked="checked" {% endif %} > {{query_params.filtering.created__lte}}
-                  <script type="text/javascript">
-                    document.getElementById('id_date_lte').onclick = function() {
-                       if($(this).is(":checked")){         
-                            window.location.href = this.getAttribute('href');
-                          }else {
-                             // Code in the case checkbox is NOT checked.
-                         window.location.href = '/helpdesk/tickets/{% query_string " " "date_to" %}';
-                        }
-
-                    }
-                  </script> 
-                {% endif %}
-                <!-- assigned_to_me -->
-                {% if query_params.filtering.assigned_to__id__in %}
-                  <b>Tickets Assigned:-</b> 
-                    <input type="checkbox" name="assigned_to" id="id_assigned" {% if query_params.filtering.assigned_to__id__in %} checked="checked" {% endif %} > to me
+                        </script>
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                  <!-- Date -->
+                  {% if query_params.filtering.created__gte %}
+                    <b>Date From:-</b> <input type="checkbox" name='date_from' id="id_date_gte" {% if query_params.filtering.created__gte %} checked="checked" {% endif %} > {{query_params.filtering.created__gte}}
                     <script type="text/javascript">
-                      document.getElementById('id_assigned').onclick = function() {
+                      document.getElementById('id_date_gte').onclick = function() {
                          if($(this).is(":checked")){         
                               window.location.href = this.getAttribute('href');
                             }else {
                                // Code in the case checkbox is NOT checked.
-                           window.location.href = '/helpdesk/tickets/{% query_string " " "assigned_to" %}';
+                           window.location.href = '/helpdesk/tickets/{% query_string " " "date_from" %}';
                           }
 
                       }
                     </script>
-                {% endif %}
-                <!-- Created by me -->
-                {% if query_params.filtering.submitter_email__in %}
-                  <b>Tickets Created:-</b>
-                  {% for u in user_choices %}
-                    {% if u.email|in_list:query_params.filtering.submitter_email__in %}
-                       <input type="checkbox" name="submitter_email" id="id_created" {% if u.email|in_list:query_params.filtering.submitter_email__in %} checked="checked" {% endif %} > by me
-                         <script type="text/javascript">
-                         document.getElementById('id_created').onclick = function() {
-                          if($(this).is(":checked")){ 
-                              window.location.href = this.getAttribute('href');
-                                  }
-                                  else {
-                                  // Code in the case checkbox is NOT checked.
-                                   window.location.href = '/helpdesk/tickets/{% query_string " " "submitter_email" %}';
-                                 }                      
-                               }
-                          </script>
-                      {% endif %}
-                    {% endfor %}
                   {% endif %}
+                  {% if query_params.filtering.created__lte %}
+                    <b>Date To:-</b>
+                    <input type="checkbox" name='date_to' id="id_date_lte" {% if query_params.filtering.created__lte %} checked="checked" {% endif %} > {{query_params.filtering.created__lte}}
+                    <script type="text/javascript">
+                      document.getElementById('id_date_lte').onclick = function() {
+                         if($(this).is(":checked")){         
+                              window.location.href = this.getAttribute('href');
+                            }else {
+                               // Code in the case checkbox is NOT checked.
+                           window.location.href = '/helpdesk/tickets/{% query_string " " "date_to" %}';
+                          }
 
-              {% endif %}
-            </p>
-            <p class="font11">Untick to remove the filter</p>
-          {% endif %}
+                      }
+                    </script> 
+                  {% endif %}
+                  <!-- assigned_to_me -->
+                  {% if query_params.filtering.assigned_to__id__in %}
+                    <b>Tickets Assigned:-</b> 
+                      <input type="checkbox" name="assigned_to" id="id_assigned" {% if query_params.filtering.assigned_to__id__in %} checked="checked" {% endif %} > to me
+                      <script type="text/javascript">
+                        document.getElementById('id_assigned').onclick = function() {
+                           if($(this).is(":checked")){         
+                                window.location.href = this.getAttribute('href');
+                              }else {
+                                 // Code in the case checkbox is NOT checked.
+                             window.location.href = '/helpdesk/tickets/{% query_string " " "assigned_to" %}';
+                            }
+
+                        }
+                      </script>
+                  {% endif %}
+                  <!-- Created by me -->
+                  {% if query_params.filtering.submitter_email__in %}
+                    <b>Tickets Created:-</b>
+                    {% for u in user_choices %}
+                      {% if u.email|in_list:query_params.filtering.submitter_email__in %}
+                         <input type="checkbox" name="submitter_email" id="id_created" {% if u.email|in_list:query_params.filtering.submitter_email__in %} checked="checked" {% endif %} > by me
+                           <script type="text/javascript">
+                           document.getElementById('id_created').onclick = function() {
+                            if($(this).is(":checked")){ 
+                                window.location.href = this.getAttribute('href');
+                                    }
+                                    else {
+                                    // Code in the case checkbox is NOT checked.
+                                     window.location.href = '/helpdesk/tickets/{% query_string " " "submitter_email" %}';
+                                   }                      
+                                 }
+                            </script>
+                        {% endif %}
+                      {% endfor %}
+                    {% endif %}
+
+                {% endif %}
+              </p>
+              <p class="font11">Untick to remove the filter</p>
+            {% endif %}
+          </div>
         {% endif %}
-        </div>
       </div>
      
       {% for ticket in tickets.object_list.reverse %}
