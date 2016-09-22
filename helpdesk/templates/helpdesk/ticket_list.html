@@ -759,21 +759,23 @@
               <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
             </span>
           </form>
-          {% if query%}
-            <input type="checkbox" name="removesearch" id="id_search" {% if query_params.q %} checked='checked'{% endif %} href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&removesearch=on">
-            <script type="text/javascript">
-              document.getElementById('id_search').onclick = function() {
-             if($(this).is(":checked")){         
-                  window.location.href = this.getAttribute('href');
-                }else {
-                   // Code in the case checkbox is NOT checked.
-               window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&removesearch=off';
-              }
-
-          }
-            </script>
-          {% endif %}
         </div>
+        {% if query%}
+          
+          <p><input type="checkbox" name='search' id="id_search" {% if query %} checked="checked" {% endif %} > Remove Search</p>
+          <script type="text/javascript">
+            document.getElementById('id_search').onclick = function() {
+               if($(this).is(":checked")){         
+                    window.location.href = this.getAttribute('href');
+                  }else {
+                     // Code in the case checkbox is NOT checked.
+                 window.location.href = '/helpdesk/tickets/{% query_string " " "q" %}';
+                }
+
+            }
+          </script>
+
+        {% endif %}
         <!-- end search -->
 
         <!-- start my tickets summary -->
