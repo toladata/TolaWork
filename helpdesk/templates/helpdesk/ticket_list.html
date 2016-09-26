@@ -1141,10 +1141,10 @@
               <div class='thumbnail  sorting_form filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
                 <div class="keywords">
                   <label for='id_query'>{% trans "Keywords: " %}</label>
-                  <input class="status_select" type='text' name='q' value='{{query}}' id='q' />
+                  <input class="status_select" type='text' name='q' {% if query %} value={{query}} {% else %} value='' {% endif %}' id='q' />
                 </div>
                 <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
-                <input type='button' class='filterBuilderRemove' value='-' />
+                <input type='button' class='filterBuilderRemove' value='' />
               </div>
 
               <div class='thumbnail  sorting_form filterBox{% if query_params.filtering.type__in %} filterBoxShow{% endif %}' id='filterBoxType'>
