@@ -8,7 +8,7 @@ import datetime
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('helpdesk', '0005_merge'),
+        ('helpdesk', '0004_auto_20160808_0338'),
     ]
 
     operations = [
@@ -33,6 +33,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='ticket',
             name='remind_date',
-            field=models.DateTimeField(default=datetime.datetime(2016, 9, 18, 10, 49, 41, 132056), help_text='Date the last reminder was sent', verbose_name='Reminder', blank=True),
+            field=models.DateTimeField(default=datetime.datetime(2016, 10, 4, 19, 33, 39, 412600), help_text='Date the last reminder was sent', verbose_name='Reminder', blank=True),
         ),
     ]
