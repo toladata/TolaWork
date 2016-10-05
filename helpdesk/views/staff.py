@@ -849,7 +849,6 @@ def ticket_list(request):
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     form = form_data(request)
 
-<<<<<<< HEAD
     # try:
     #     if request.user.email:
     #         initial_data['submitter_email'] = request.user.email
@@ -865,8 +864,6 @@ def ticket_list(request):
     #     pass
    #ticket_list 
 
-=======
->>>>>>> tasks2.0
     context = {}
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
