@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load i18n %}
 {% load highlight %}
+{% load url_replace %}
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 
 {% block helpdesk_head %}
@@ -27,65 +28,167 @@
         <h4>No results were found</h4>
        </div>
       {% endif %}
-      {% if query_params and number_of_tickets %}
-        {% if query_params.sorting %}
-        <p><b>Sorted by:</b> {{query_params.sorting}}</p>
-        {% endif %}
-        {% if query_params.filtering %}
-          <p>
-            <b>Filtered by:</b> 
-            {% if query_params.filtering %} 
-              <!-- queue -->
-              {% if query_params.filtering.queue__id__in %}
-                <b>Queue(s):-</b>
-                {% for q in ticket_queue %}
-                  {% if q.id|in_list:query_params.filtering.queue__id__in %}
-                  {{q.title}},
-                  {% endif %}
-                {% endfor %}
-              {% endif %}
-              <!-- status -->
-              {% if query_params.filtering.status__in %}
-                <b>Status(es):-</b>
-                 {% for status in status_choices %}
-                  {% if status.0|in_list:query_params.filtering.status__in %}
-                    {{status.1}}, 
-                  {% endif %}
-                {% endfor %}
-              {% endif %}
-              <!-- type -->
-              {% if query_params.filtering.type__in %}
-                <b>Type(s):-</b>
-                {% for type in type_choices %}
-                  {% if type.0|in_list:query_params.filtering.type__in %}
-                    {{type.1}},
-                  {% endif %}
-                {% endfor %}
-              {% endif %}
-              <!-- Date -->
-              {% if query_params.filtering.created__gte %}
-                Date From-{{query_params.filtering.created__gte}} |
-              {% endif %}
-              {% if query_params.filtering.created__lte %}
-                Date To-{{query_params.filtering.created__lte}} |
-              {% endif %}
-              <!-- assigned_to_me -->
-              {% if query_params.filtering.assigned_to__id__in %}
-                <b>Tickets Assigned:-</b> to me
-              {% endif %}
-              <!-- Created by me -->
-               {% if query_params.filtering.submitter_email__in %}
-                <b>Tickets Created:-</b> by me
-              {% endif %}
+      <div class="panel panel-info">
+        {% if query_params and number_of_tickets %}
+          <div class="panel-body">
+            {% if query_params.sorting %}
+            <p><b>Sorted by:</b> {{query_params.sorting}}</p>
             {% endif %}
-          </p>
+            {% if query_params.filtering %}
+              <p>
+                <b>Filtered by:</b> 
+                {% if query_params.filtering %} 
+                  <!-- queue -->
+                  {% if query_params.filtering.queue__id__in %}
+                    <b>Queue(s):-</b>
+                    {% for q in ticket_queue %}
+                      {% if q.id|in_list:query_params.filtering.queue__id__in %}
+                        {% if not forloop.first %}, {% endif %}
+                        <input type="checkbox" name="queue" id="id_queue{{q.id}}" {% if q.id|in_list:query_params.filtering.queue__id__in %} checked="checked" {% endif %}> {{q.title}}
+                      
+                        <script type="text/javascript">
+                          document.getElementById('id_queue{{q.id}}').onclick = function() {
+                             if($(this).is(":checked")){         
+                                  window.location.href = this.getAttribute('href');
+                                }else {
+                                   // Code in the case checkbox is NOT checked.
+                               /*window.location.href = '/helpdesk/tickets/{% query_string "queue=5" "queue=2" %}';*/
+                               window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if q.id|in_list:query_params.filtering.queue__id__in %}removequeue={{q.id}}{% endif %}';
+                              }
+
+                            }
+                        </script>
+                        {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                  <!-- status -->
+                  {% if query_params.filtering.status__in %}
+                    <b>Status(es):-</b>
+                     {% for status in status_choices %}
+                      {% if status.0|in_list:query_params.filtering.status__in %}
+                        {% if not forloop.first %}, {% endif %}
+                        <input type="checkbox" name="status" id="id_status{{status.0}}" {% if status.0|in_list:query_params.filtering.status__in %} checked="checked" {% endif %}> {{status.1}}
+                        <script type="text/javascript">
+                          document.getElementById('id_status{{status.0}}').onclick = function() {
+                             if($(this).is(":checked")){         
+                                  window.location.href = this.getAttribute('href');
+                                }else {
+                                   // Code in the case checkbox is NOT checked.
+                               window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if status.0|in_list:query_params.filtering.status__in %}removestatus={{status.0}}{% endif %}';
+                              }
+
+                            }
+                        </script>
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                  <!-- type -->
+                  {% if query_params.filtering.type__in %}
+                    <b>Type(s):-</b>
+                    {% for type in type_choices %}
+                      {% if type.0|in_list:query_params.filtering.type__in %}
+                        {% if not forloop.first %}, {% endif %}
+                        <input type="checkbox" name="types" id="id_type{{type.0}}" {% if type.0|in_list:query_params.filtering.type__in %} checked="checked" {% endif %}> {{type.1}}
+                        <script type="text/javascript">
+                          document.getElementById('id_type{{type.0}}').onclick = function() {
+                             if($(this).is(":checked")){         
+                                  window.location.href = this.getAttribute('href');
+                                }else {
+                                   // Code in the case checkbox is NOT checked.
+                               window.location.href = '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}{% endif %}&{% if type.0|in_list:query_params.filtering.type__in %}removetype={{type.0}}{% endif %}';
+                              }
+
+                            }
+                        </script>
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                  <!-- Date -->
+                  {% if query_params.filtering.created__gte %}
+                    <b>Date From:-</b> <input type="checkbox" name='date_from' id="id_date_gte" {% if query_params.filtering.created__gte %} checked="checked" {% endif %} > {{query_params.filtering.created__gte}}
+                    <script type="text/javascript">
+                      document.getElementById('id_date_gte').onclick = function() {
+                         if($(this).is(":checked")){         
+                              window.location.href = this.getAttribute('href');
+                            }else {
+                               // Code in the case checkbox is NOT checked.
+                           window.location.href = '/helpdesk/tickets/{% query_string " " "date_from" %}';
+                          }
+
+                      }
+                    </script>
+                  {% endif %}
+                  {% if query_params.filtering.created__lte %}
+                    <b>Date To:-</b>
+                    <input type="checkbox" name='date_to' id="id_date_lte" {% if query_params.filtering.created__lte %} checked="checked" {% endif %} > {{query_params.filtering.created__lte}}
+                    <script type="text/javascript">
+                      document.getElementById('id_date_lte').onclick = function() {
+                         if($(this).is(":checked")){         
+                              window.location.href = this.getAttribute('href');
+                            }else {
+                               // Code in the case checkbox is NOT checked.
+                           window.location.href = '/helpdesk/tickets/{% query_string " " "date_to" %}';
+                          }
+
+                      }
+                    </script> 
+                  {% endif %}
+                  <!-- assigned_to_me -->
+                  {% if query_params.filtering.assigned_to__id__in %}
+                    <b>Tickets Assigned:-</b> 
+                      <input type="checkbox" name="assigned_to" id="id_assigned" {% if query_params.filtering.assigned_to__id__in %} checked="checked" {% endif %} > to me
+                      <script type="text/javascript">
+                        document.getElementById('id_assigned').onclick = function() {
+                           if($(this).is(":checked")){         
+                                window.location.href = this.getAttribute('href');
+                              }else {
+                                 // Code in the case checkbox is NOT checked.
+                             window.location.href = '/helpdesk/tickets/{% query_string " " "assigned_to" %}';
+                            }
+
+                        }
+                      </script>
+                  {% endif %}
+                  <!-- Created by me -->
+                  {% if query_params.filtering.submitter_email__in %}
+                    <b>Tickets Created:-</b>
+                    {% for u in user_choices %}
+                      {% if u.email|in_list:query_params.filtering.submitter_email__in %}
+                         <input type="checkbox" name="submitter_email" id="id_created" {% if u.email|in_list:query_params.filtering.submitter_email__in %} checked="checked" {% endif %} > by me
+                           <script type="text/javascript">
+                           document.getElementById('id_created').onclick = function() {
+                            if($(this).is(":checked")){ 
+                                window.location.href = this.getAttribute('href');
+                                    }
+                                    else {
+                                    // Code in the case checkbox is NOT checked.
+                                     window.location.href = '/helpdesk/tickets/{% query_string " " "submitter_email" %}';
+                                   }                      
+                                 }
+                            </script>
+                        {% endif %}
+                      {% endfor %}
+                    {% endif %}
+
+                {% endif %}
+              </p>
+              <p class="font11">Untick to remove the filter</p>
+            {% endif %}
+          </div>
         {% endif %}
-      {% endif %}
+      </div>
+     
       {% for ticket in tickets.object_list.reverse %}
       
+<<<<<<< HEAD
       <div class="panel panel-info">
         <div class="panel-heading"><a href='{{ ticket.get_absolute_url }}'>
           {% if query%}{% highlight ticket.ticket with query css_class "highlight" html_tag "span" %}{% else %}{{ticket.ticket}}{% endif %}<strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}</p>
+=======
+      <div class="panel" id = "auto_load_div{{ticket.id}}">
+        <div class="panel-heading color_{{ticket.queue_id}}"><a href='{{ ticket.get_absolute_url }}' >
+          {{ ticket.ticket | upper}} <strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}
+>>>>>>> tasks2.0
           {% endif %}</strong></a>
           {% if ticket.progress %}
           <div class="read_more">
@@ -93,12 +196,12 @@
           </div>
           {% endif %}
         </div>
-        <div class="panel-body">
+        <div class="panel-body ticket_body">
           {% if query%}
             <p class="description">{%  highlight ticket.description with query css_class "highlight" html_tag "span" %}</p>
           {% else %}
 
-          <p class="description">{{ ticket.description }}</p>
+          <p class="description">{{ ticket.description }}</p> 
           {% endif %}
           <div class="col-md-12 ">
             <div class="col-md-7"></div>
@@ -390,7 +493,7 @@
                         {% endif %}
                         {% else %}
 
-                        <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Ticket in Github" %}' onClick="location.href='{{ ticket.github_issue_url }}'"/>
+                        <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Ticket in Github" %}' onclick="window.open('{{ ticket.github_issue_url }}', '_blank');"/>
                         {% endif %}
 
                         {% if ticket.slack_status == 0 %}
@@ -476,7 +579,7 @@
                 </div> 
                 <div class="ticket_form_cover">
                   <div class="ticket_form info">
-                    <form  method='post' action='/helpdesk/tickets/ticket_edit/?ticket_id={{ticket.id}}' enctype='multipart/form-data' >
+                    <form  method='post' id="ticket_edit-form{{ticket.id}}" >
                       <div class=" row task_spacing">
                         <div class="col-md-12 ticket_padding row ticket_edit">
                           <label class="col-md-2"><p><strong>{% trans "Title:" %}</strong></p></label>
@@ -503,13 +606,13 @@
                         <div class= "col-md-6 row ticket_edit" >
                           <label class="col-md-4"><p><strong>{% trans "Error Message:" %}</strong></p></label>
                           <div class="col-md-8">
-                            <textarea class="form-control" name="error_msg" rows="4"  > {{ ticket.error_msg|escape }} </textarea>
+                            <textarea class="form-control" name="error_msg" rows="4" id="id_error_msg" > {{ ticket.error_msg|escape }} </textarea>
                           </div>
                         </div>
                          <div class= "col-md-6 row ticket_edit" >
                           <label class="col-md-4"><p><strong>{% trans "Description of Issue:" %}</strong></p></label>
                           <div class="col-md-8">
-                            <textarea class="form-control" name="description" rows="4" > {{ ticket.description|escape }} </textarea>
+                            <textarea class="form-control" name="description" rows="4" id="id_description"> {{ ticket.description|escape }} </textarea>
                           </div>    
                         </div>
                       </div>
@@ -550,7 +653,7 @@
 
                           <div class="col-md-8">
                             <span id="helpBlock" class="help-block">To add <strong>NEW</strong> tag(s), type in then press <strong>'ENTER'</strong></span>
-                            <select class = " form-control multi_select {{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
+                            <select class = "form-control multi_select {{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags{{ticket.id}}' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
                                 {% for q in tags %} 
 
                                   <option value='{{ q.id }}' {% for tag in ticket.tags.all %} {% ifequal q.id tag.id %} selected='selected'{% endifequal %}{% endfor %}>{{q.name}}</option>
@@ -570,7 +673,8 @@
                                                   isNew: true
                                               };
                                           },
-                                      }).on("change", function(e) {
+
+                                        }).on("change", function(e) {
                                           var isNew = $(this).find('[data-select2-tag="true"]');
                                           if(isNew.length){
                                               isNew.replaceWith('<option selected="selected" value="'+isNew.val()+'">'+isNew.text()+'</option>');
@@ -588,6 +692,13 @@
                       </div>
                      {% csrf_token %}
                     </form> 
+                    <script>
+                    $('#ticket_edit-form{{ticket.id}}').on('submit', function(event){
+                        event.preventDefault();
+                        var csrftoken = $("#ticket_edit-form{{ticket.id}}").find('input[name="csrfmiddlewaretoken"]').val();
+                        edit_ticket_post('{{ticket.id}}', csrftoken);
+                    });
+                    </script>
                   </div>
                 </div>
               </div>
@@ -649,6 +760,7 @@
 
         <!-- string search -->
         <div class="search" >
+<<<<<<< HEAD
           <form class="navbar-form navbar-left input-group" id='ticketsearch' method='get' action="{% url 'helpdesk_list' %}">
 
               <input type='text' name='q' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' />
@@ -657,6 +769,41 @@
                 </span>
           </form>
         </div >
+=======
+          <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
+            <input type="text" name='q' class="form-control" placeholder="Search" id='q'>
+            <span class="input-group-btn">
+              <button class="btn btn-info" type="button" onclick="submit_query()"><span class="glyphicon glyphicon-search"></span>
+            </span></button>
+            <script type="text/javascript">
+              function submit_query(){
+                 var input = document.getElementById("q").value;
+                  if (input!==""){ 
+                  window.location.href =  '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&{% endif %}q='+input;
+                  }
+                  else
+                    alert("kindly enter a search term");
+              }
+          </script>
+          </form>
+        </div>
+        {% if query%}
+          
+          <p><input type="checkbox" name='search' id="id_search" {% if query %} checked="checked" {% endif %} > Remove Search</p>
+          <script type="text/javascript">
+            document.getElementById('id_search').onclick = function() {
+               if($(this).is(":checked")){         
+                    window.location.href = this.getAttribute('href');
+                  }else {
+                     // Code in the case checkbox is NOT checked.
+                 window.location.href = '/helpdesk/tickets/{% query_string " " "q" %}';
+                }
+
+            }
+          </script>
+
+        {% endif %}
+>>>>>>> tasks2.0
         <!-- end search -->
 
         <!-- start my tickets summary -->
@@ -962,7 +1109,7 @@
                   <label for='id_owners'>{% trans "Created by Me: " %}</label>
                   <select id='id_owners1' name='submitter_email' multiple='selected' rows="4" class="owners_select">
                     {% for u in user_choices %}
-                    <option value='{{ u.email }}'{% if u.email|in_list:query_params.filtering.submitter_email__in %} selected='selected'{% endif %}>
+                    <option value='{{ u.email }}'{% if u.email|in_list:query_params.filtering.submitter_email__in %} selected='selected' {% endif %}>
                         {%trans "Created By Me"%}
                     </option>
                     {% endfor %}
@@ -1012,10 +1159,10 @@
               <div class='thumbnail  sorting_form filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
                 <div class="keywords">
                   <label for='id_query'>{% trans "Keywords: " %}</label>
-                  <input class="status_select" type='text' name='q' value='{{query_params.keyword}}' id='id_query' />
+                  <input class="status_select" type='text' name='q' {% if query %} value={{query}} {% else %} value='' {% endif %}' id='q' />
                 </div>
                 <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
-                <input type='button' class='filterBuilderRemove' value='-' />
+                <input type='button' class='filterBuilderRemove' value='' />
               </div>
 
               <div class='thumbnail  sorting_form filterBox{% if query_params.filtering.type__in %} filterBoxShow{% endif %}' id='filterBoxType'>
@@ -1202,8 +1349,6 @@ $(document).ready(function() {
                 });
             }
         });
-
-        $("[data-toggle=tooltip]").tooltip();
     });
 
     function processAddFileClick() {
@@ -1220,6 +1365,11 @@ $(document).ready(function() {
 
     $(function () {
         $('[data-toggle="popover"]').popover()
+      });
+
+    $('#ticket_edit-form').on('submit', function(event){
+          event.preventDefault();
+          edit_ticket_post();
       });
 </script>
 {% endblock content %}

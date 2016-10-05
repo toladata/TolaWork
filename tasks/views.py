@@ -40,6 +40,7 @@ import re
 import json
 from tasks.forms import TaskForm
 from tasks.models import Task
+from helpdesk.views.staff import form_data, user_tickets
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -55,10 +56,6 @@ def task_list(request):
     created_by = request.user
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     context = {}
-
-    created_by = request.user
-    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-
 
     tasks = Task.objects.select_related()
     ## sorting tasks
@@ -89,18 +86,15 @@ def task_list(request):
         except ValueError:
             pass
 
-
-
-
+    form = form_data(request)
 
     return render_to_response('tasks/task_index.html',
         RequestContext(request, {
         'tasks': tasks,
         'assignable_users': assignable_users,
         'created_by': created_by,
-            'status_choices':Task.STATUS_CHOICES
-
-
+        'status_choices':Task.STATUS_CHOICES, 
+        'form' : form
 
         }))
 
@@ -123,8 +117,6 @@ def create_task(request):
 
 		task = Task(task=title, submitter_email=submitter_mail, status=status, priority=priority, due_date=due_date, created_date=created_date,created_by_id=created_by, assigned_to_id=assigned_to, note=note)
 		task.save()
-
-		print (task)
 
     tasks = Task.objects.all()
     return render_to_response('tasks/task_index.html',
