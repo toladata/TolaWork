@@ -180,15 +180,9 @@
      
       {% for ticket in tickets.object_list.reverse %}
       
-<<<<<<< HEAD
-      <div class="panel panel-info">
-        <div class="panel-heading"><a href='{{ ticket.get_absolute_url }}'>
-          {% if query%}{% highlight ticket.ticket with query css_class "highlight" html_tag "span" %}{% else %}{{ticket.ticket}}{% endif %}<strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}</p>
-=======
       <div class="panel" id = "auto_load_div{{ticket.id}}">
         <div class="panel-heading color_{{ticket.queue_id}}"><a href='{{ ticket.get_absolute_url }}' >
           {{ ticket.ticket | upper}} <strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}
->>>>>>> tasks2.0
           {% endif %}</strong></a>
           {% if ticket.progress %}
           <div class="read_more">
@@ -581,12 +575,12 @@
                   <div class="ticket_form info">
                     <form  method='post' id="ticket_edit-form{{ticket.id}}" >
                       <div class=" row task_spacing">
-                        <div class="col-md-12 ticket_padding row ticket_edit">
-                          <label class="col-md-2"><p><strong>{% trans "Title:" %}</strong></p></label>
-                          <div class=" col-md-9">
-                            <input class="form-control" type='text' name='title' id='id_title'  value='{{ ticket.title|escape }}' />
-                          </div>
-                        </div> 
+                        <div class="col-md-12 ticket_padding row">
+                           <label class="col-md-1"><p><strong>{% trans "Title:" %}</strong></p></label>
+                           <div class=" col-md-9">
+                              <input class="form-control ticket_title" type='text' name='title' id='id_title'  value='{{ ticket.title|escape }}' />
+                           </div>
+                        </div>
                       </div>
                       <div class="row">
                         <div class= "col-md-6 row ticket_edit" >
@@ -641,7 +635,7 @@
                           </div>
                         </div>                            
                       </div>
-                      <div class="row task_spacing">
+                      <div class="row">
                         <div class= "col-md-8 row">
                           <label class="col-md-3"><p><strong>{% trans "Due Date:" %}</strong></p></label>
                           <p class="col-md-9">{{ form.due_date }}</p>
@@ -757,19 +751,8 @@
 
       <!-- the right side of the tickets page -->
       <div class="col-md-3 col-sm-3 ">
-
-        <!-- string search -->
+        <!-- start search -->
         <div class="search" >
-<<<<<<< HEAD
-          <form class="navbar-form navbar-left input-group" id='ticketsearch' method='get' action="{% url 'helpdesk_list' %}">
-
-              <input type='text' name='q' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' />
-                <span class="input-group-btn">
-                  <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span> Go</button>
-                </span>
-          </form>
-        </div >
-=======
           <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
             <input type="text" name='q' class="form-control" placeholder="Search" id='q'>
             <span class="input-group-btn">
@@ -803,7 +786,6 @@
           </script>
 
         {% endif %}
->>>>>>> tasks2.0
         <!-- end search -->
 
         <!-- start my tickets summary -->
