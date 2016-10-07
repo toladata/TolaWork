@@ -19,7 +19,7 @@
         {% if user.is_authenticated %}
         <button class="btn btn-md btn-success" type="submit" data-toggle="modal" data-target="#ticketModal"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</button>
 
-        <button class="btn btn-md btn-info float_right" type="submit" data-toggle="modal" data-target="#fundingModal"><b><span class="glyphicon glyphicon-usd"></span></b> Add Funding Opportunity</button>
+        <button class="btn btn-md btn-info float_right" type="submit" data-toggle="modal" data-target="#fundingModal"><b><span class="glyphicon glyphicon-usd"></span></b> Get a Project Quote</button>
         {% endif %}
         {% if not user.is_authenticated %}
           <a href="{% url 'login' %}" role="button"  class="btn btn-lg btn-success "><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
@@ -585,9 +585,12 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h3 class="modal-title font9">Submit a Funding Opportunity</h3>
+        <h3 class="modal-title font9">Get a Project Quote</h3>
       </div>
       <div class="modal-body">
+        <div class="alert alert-success">
+          <p>Please describe your project in detail and someone from the TolaData team will get back to you with a quote on how long it would take us to complete and when we could get started.</p>
+        </div>
         <form class="form-horizontal" method='post' name="funding_form" id="f_opportunity-form">
         {% csrf_token %}
         <div class=" row task_spacing">
