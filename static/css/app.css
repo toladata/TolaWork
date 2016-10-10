@@ -216,6 +216,7 @@ margin-right: 0px
     border-radius: 5px;
     position: relative;
     margin-right: 5px;
+    margin-top: 10px;
     overflow: hidden;
     padding: 0px;
     
@@ -232,7 +233,6 @@ margin-right: 0px
 }
 .logged_in_users
 {
-    margin-left: 15px;
     position: relative;
     overflow: hidden;
     margin-right: 3px;

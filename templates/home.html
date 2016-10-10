@@ -538,8 +538,27 @@
     <!-- home right side section (minor_home) -->
     <div class="row">
       <div class="col-md-3 col-sm-3 minor_home">
+        <div class="search" >
+          <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
+            <input type="text" name='q' class="form-control" placeholder="Search tickets" id='q'>
+            <span class="input-group-btn">
+              <button class="btn btn-info" type="button" onclick="submit_query()"><span class="glyphicon glyphicon-search"></span>
+            </button>
+            </span>
+            <script type="text/javascript">
+              function submit_query(){
+                 var input = document.getElementById("q").value;
+                  if (input!==""){ 
+                  window.location.href =  '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&{% endif %}q='+input;
+                  }
+                  else
+                    alert("kindly enter a search term");
+              }
+          </script>
+          </form>
+        </div>
         {% if user.is_superuser %}
-          <div class="col-md-10 col-md-offset-2 githubsync">
+          <div class=" githubsync">
             <a href="{% url 'githubSync' %}" class="btn btn-info"><b><span class="glyphicon glyphicon-refresh"></span></b> Sync Tickets with Github</a>
           </div>
         {% endif %}
@@ -547,7 +566,7 @@
         <br>
         <br>
         <!-- users logged_in section -->
-        <div class= "logged_in_users">
+        <div class= "col-md-12 logged_in_users">
           <h4>Users Online:</h4>
           <div id="active_users">
 
