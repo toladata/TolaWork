@@ -249,19 +249,6 @@
                         <td><p><strong>Type: </strong></p></td>
                         <td><p>{{ ticket.get_type_display }}</p></td>
                       </tr>
-                      <tr>
-                        <td><p><strong>Developer(s) Progress:</strong></p></td>
-                        <td>
-                          <p>
-                            {% if ticket.git_label == 0 %}In {% blocktrans with ticket.queue as queue %}&nbsp;{{ queue }}{% endblocktrans %}&nbsp;Backlog
-                            {% elif ticket.git_label == 1 %}Accepted and moved into the Ready Queue
-                            {% elif ticket.git_label == 2 %}Developers have started working on the Ticket
-                            {% elif ticket.git_label == 4 %}Done
-                            {% elif ticket.git_label == 5 %}<span class="label label-info">Accepted by QA Lead </span>
-                            {% endif%}
-                          </p>
-                        </td>
-                      </tr>
                     </table>
                   </div><!-- end the ticket details table -->
                 </div> 
@@ -553,6 +540,16 @@
               {% endif %}
 
               &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
+              {% if ticket.git_label %}
+                &nbsp;<span class="label label-primary"> 
+                  {% if ticket.git_label == 1 %}Backlog
+                    {% elif ticket.git_label == 2 %}Ready
+                    {% elif ticket.git_label == 3 %}working
+                    {% elif ticket.git_label == 4 %}InDev
+                    {% elif ticket.git_label == 5 %}Done
+                    {% endif%} 
+                  </span>
+              {% endif %}
 
               <strong>&nbsp;&nbsp;Tags:</strong>
               {%if tags %}
