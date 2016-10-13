@@ -13,14 +13,13 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
-class Task(models.Model):
 
+class Task(models.Model):
 
     ACTIVE_STATUS = 1
     REOPENED_STATUS = 2
     COMPLETED_STATUS = 3
     CANCELLED_STATUS = 4
-
 
     STATUS_CHOICES = (
         (ACTIVE_STATUS, _('Active')),
@@ -30,11 +29,10 @@ class Task(models.Model):
 
     )
 
-
     PRIORITY_CHOICES = (
-        (1, ('1. High')),
-        (2, ('2. Normal')),
-        (3, ('3. Low')),
+        (1, _('1. High')),
+        (2, _('2. Normal')),
+        (3, _('3. Low')),
 
     )
 
@@ -62,6 +60,7 @@ class Task(models.Model):
                 return self.assigned_to.get_username()
     get_assigned_to = property(_get_assigned_to)
     # Has due date for an instance of this object passed?
+
     def overdue_status(self):
         "Returns whether the item's due date has passed or not."
         if self.due_date and datetime.date.today() > self.due_date:
@@ -92,7 +91,6 @@ class Task(models.Model):
 
     class Meta:
         ordering = ["priority"]
-
 
 
 class TaskFollowUpManager(models.Manager):
