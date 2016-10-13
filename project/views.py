@@ -474,6 +474,7 @@ def githubSync(request):
 
     tickets = Ticket.objects.select_related('queue').exclude(
             status__in=[Ticket.RESOLVED_STATUS],
+            github_issue_number__isnull=True
         )
     for ticket in tickets:
         # Sync 'Closed' status in github to 'Resolved' status in TW
