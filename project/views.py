@@ -339,6 +339,13 @@ def logout_view(request):
     # Redirect to a success page.
     return HttpResponseRedirect("/home")
 
+def login_view(request):
+    """Login a User"""
+
+    form = form_data(request)
+    login(request)
+
+    return render(request, "registration/login.html", {'form':form})
 
 def permission_denied(request):
     """
