@@ -600,13 +600,13 @@
             <div class="table-responsive">
               <table class="table table-condensed">
                 <tr>
-                  <th>Title</th>
                   <th>Votes</th>
+                  <th>Title</th>
                 </tr>
                 {% for item in votes_tickets %}
                 <tr>
-                  <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
                   <td>{{ item.votes }}</td>
+                  <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
                 </tr>
                 {% endfor %}
               </table>
