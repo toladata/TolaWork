@@ -490,6 +490,8 @@ def view_ticket(request, ticket_id):
 
     progress=''
 
+    ticket_state = get_object_or_404(Ticket, id=ticket_id)
+
     # check status of ticket in github
     if ticket.github_issue_id:
         queue = queue_repo(ticket)
@@ -500,7 +502,6 @@ def view_ticket(request, ticket_id):
         if response == 200:
 
             #synced status wth github
-            ticket_state = get_object_or_404(Ticket, id=ticket_id)
             status = ticket_state.status
             if status == 4:
                 state = 'Closed'
@@ -514,7 +515,6 @@ def view_ticket(request, ticket_id):
         label_response = get_label(queue,ticket)
         print label_response
 
-    ticket_state = get_object_or_404(Ticket, id=ticket_id)
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
 
@@ -849,21 +849,6 @@ def ticket_list(request):
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     form = form_data(request)
 
-    # try:
-    #     if request.user.email:
-    #         initial_data['submitter_email'] = request.user.email
-    #     if 'queue' in request.GET:
-    #         initial_data['queue'] = request.GET['queue']
-
-    #     if request.user.is_staff:
-    #         form = TicketForm(initial=initial_data)
-    #         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-    #         form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        
-    # except Exception, e:
-    #     pass
-   #ticket_list 
-
     context = {}
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
@@ -956,8 +941,6 @@ def ticket_list(request):
             my_sort = get_object_or_404(UserDefaultSort, user_id=user)
         except Exception, e:
             pass
-
-        # print my_sort
 
         if my_sort:
             query_params = {
@@ -1258,6 +1241,10 @@ def ticket_edit(request):
 
         ticket = get_object_or_404(Ticket, id=ticket_id)
         ticket = {'title':ticket.title, 'queue': ticket.queue.id, 'status': ticket.status, 'priority':ticket.priority, 'description':ticket.description}
+
+        if request.GET.get('action'):
+
+            return view_ticket(request, ticket_id)
 
         return HttpResponse(
             json.dumps(ticket),
