@@ -64,7 +64,7 @@ urlpatterns += patterns('',
     #local login
     url(r'^login/$', 'django.contrib.auth.views.login', name='login'),
 
-    url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),
+    url(r'^accounts/login/$', 'project.views.login_view', name='login'),
     url(r'^accounts/logout/$', 'project.views.logout_view', name='logout'),
 
     #accounts
