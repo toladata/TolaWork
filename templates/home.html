@@ -19,7 +19,7 @@
         {% if user.is_authenticated %}
         <button class="btn btn-md btn-success" type="submit" data-toggle="modal" data-target="#ticketModal"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</button>
 
-        <button class="btn btn-md btn-info float_right" type="submit" data-toggle="modal" data-target="#fundingModal"><b><span class="glyphicon glyphicon-usd"></span></b> Get a Project Quote</button>
+        <button class="btn btn-md btn-info float_right" type="submit" data-toggle="modal" data-target="#fundingModal"><b>Get a Project Quote</button>
         {% endif %}
         {% if not user.is_authenticated %}
           <a href="{% url 'login' %}" role="button"  class="btn btn-lg btn-success "><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
