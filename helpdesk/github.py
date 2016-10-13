@@ -22,7 +22,7 @@ def get_issue_status(repo,ticket):
         state = data['state']
 
         if state == 'closed':
-            status = 3 # If 'Closed' in github, save as 'Resolved' in TW
+            status = 4 # If 'Closed' in github, save as 'Closed' in TW
             state_txt = 'Closed'
         else:
             status = 1 #open

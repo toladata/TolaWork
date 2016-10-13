@@ -490,6 +490,8 @@ def view_ticket(request, ticket_id):
 
     progress=''
 
+    ticket_state = get_object_or_404(Ticket, id=ticket_id)
+
     # check status of ticket in github
     if ticket.github_issue_id:
         queue = queue_repo(ticket)
@@ -500,7 +502,6 @@ def view_ticket(request, ticket_id):
         if response == 200:
 
             #synced status wth github
-            ticket_state = get_object_or_404(Ticket, id=ticket_id)
             status = ticket_state.status
             if status == 4:
                 state = 'Closed'
@@ -514,7 +515,6 @@ def view_ticket(request, ticket_id):
         label_response = get_label(queue,ticket)
         print label_response
 
-    ticket_state = get_object_or_404(Ticket, id=ticket_id)
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
 
