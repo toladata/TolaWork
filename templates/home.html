@@ -480,7 +480,7 @@
                       {% if tolaActivityData %}
                         <h4>Latest Projects</h4>
                         <div class="table-responsive">
-                          <table class="table table-responsive">
+                          <table class="table table-striped">
                             <tr>
                               <th>Project</th>
                               <th>Status</th>
@@ -597,18 +597,20 @@
             Top Enhancement Requests
           </div>
           <div class="panel-body" id="enhancement">
-            <table class="table table-striped">
-              <tr>
-                <th>Title</th>
-                <th>Votes</th>
-              </tr>
-              {% for item in votes_tickets %}
-              <tr>
-                <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
-                <td>{{ item.votes }}</td>
-              </tr>
-              {% endfor %}
-            </table>
+            <div class="table-responsive">
+              <table class="table table-condensed">
+                <tr>
+                  <th>Title</th>
+                  <th>Votes</th>
+                </tr>
+                {% for item in votes_tickets %}
+                <tr>
+                  <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
+                  <td>{{ item.votes }}</td>
+                </tr>
+                {% endfor %}
+              </table>
+            </div>
           </div><!-- end top enhancement -->
         </div>
     </div> <!-- end minor_home -->
