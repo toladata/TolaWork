@@ -479,8 +479,8 @@
                     <div id="activity" class="tab-pane fade">
                       {% if tolaActivityData %}
                         <h4>Latest Projects</h4>
-                        <div class=" table-responsive">
-                          <table class="table table-striped">
+                        <div class="table-responsive">
+                          <table class="table table-condensed table-striped">
                             <tr>
                               <th>Project</th>
                               <th>Status</th>
@@ -567,7 +567,7 @@
         <!-- users logged_in section -->
         <div class="panel panel-info">
           <div class="panel-heading">
-            Users Online:
+            Users Online
           </div>
           <div id="active_users">
 
@@ -599,13 +599,11 @@
           <div class="panel-body" id="enhancement">
             <table class="table table-striped">
               <tr>
-                <th>Queue</th>
                 <th>Title</th>
                 <th>Votes</th>
               </tr>
               {% for item in votes_tickets %}
               <tr>
-                <td>{{ item.queue }}</td>
                 <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
                 <td>{{ item.votes }}</td>
               </tr>
@@ -617,7 +615,7 @@
     
   </div> <!-- end home_cover -->
 </div> <!-- end container -->
-
+</div>
 <!-- add funding opportunity modal -->
 <div class="modal fade " id="fundingModal" role="dialog">
   <div class="modal-dialog task_form modal-lg">
@@ -702,8 +700,9 @@
         <div class='buttons form-group '>
           <input type='submit' class="btn btn-primary col-md-offset-3" value='Submit' />
         </div>
-          </div> 
-        </form>
+       </form>
+      </div>
+
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
