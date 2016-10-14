@@ -450,7 +450,7 @@ margin-right: 0px
 }
 .color_1
 {
-    background-color: rgba(204, 204, 204, 0.2);
+    background-color: rgba(232, 148, 36, 0.8); 
 }
 .color_2
 {
@@ -460,9 +460,7 @@ margin-right: 0px
  
 .color_3
 {
-    background-color: rgba(232, 148, 36, 0.8);
-   
-    
+    background-color: rgba(204, 204, 204, 0.2); 
 }
 .border_3
 {
@@ -470,7 +468,7 @@ margin-right: 0px
     position: relative;
     overflow: hidden;F
 }
-.color_3 a
+.color_1 a
 {
     color: #fff;
     
