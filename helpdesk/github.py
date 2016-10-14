@@ -111,6 +111,7 @@ def get_label(repo,ticket):
     if int(r.status_code) == 200:
         data = json.loads(r.content)
         label_txt2 = ""
+        label_txt = ""
         label_int = '0'
 
         for item in range(len(data)):

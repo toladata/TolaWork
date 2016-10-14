@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/form_validator.js"></script>
 
 <div class="container col-md-12">
   <div class="home_cover">
@@ -616,7 +617,7 @@
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Name:</strong></p></label>
               <div class=" col-md-8">
-                <input class="form-control" type='text' name='name' id='id_name' required/>
+                <input class="form-control" type='text' name='name' id='id_name'/>
               </div>
             </div> 
         </div>
@@ -624,7 +625,7 @@
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Phone:</strong></p></label>
               <div class=" col-md-8">
-                <input class="form-control" type='text' name='phone' id='id_phone' required/>
+                <input class="form-control" type='text' name='phone' id='id_phone'/>
               </div>
             </div> 
         </div>
@@ -632,7 +633,7 @@
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Email:</strong></p></label>
               <div class=" col-md-8">
-                <input class="form-control" type='text' name='email' id='id_email' required/>
+                <input class="form-control" type='text' name='email' id='id_email'/>
               </div>
             </div> 
         </div>
@@ -640,7 +641,7 @@
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Project Description:</strong></p></label>
               <div class=" col-md-8">
-                <textarea class="form-control" name="project_description" id='id_project_description' rows="4" required ></textarea>
+                <textarea class="form-control" name="project_description" id='id_project_description' rows="4" ></textarea>
               </div>
             </div> 
         </div>
@@ -655,7 +656,7 @@
                         });
                       } );
                     </script>
-                <input class="form-control" type='text' name='project_start_date' id='id_project_start_date' required/>
+                <input class="form-control" type='text' name='project_start_date' id='id_project_start_date'/>
               </div>
             </div> 
         </div>
@@ -664,7 +665,7 @@
               <label class="col-md-3"><p><strong>Total Estimated Amount:</strong></p></label>
               <div class=" col-md-8 input-group">
                 <span class="input-group-addon">$</span>
-                <input class="form-control" type='number' name='total_estimated_amount' id='id_total_estimated_amount' required/>
+                <input class="form-control" type='number' name='total_estimated_amount' id='id_total_estimated_amount'/>
               </div>
             </div> 
         </div>
