@@ -45,6 +45,7 @@ except ImportError:
 
 import requests
 import json
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from helpdesk.serializer import UserSerializer, TicketSerializer, QueueSerializer, FollowUpSerializer, TicketDependencySerializer, AttachmentSerializer, TicketChangeSerializer
 from helpdesk.forms import TicketForm, UserSettingsForm, CommentTicketForm, CommentFollowUpForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
@@ -489,6 +490,8 @@ def view_ticket(request, ticket_id):
 
     progress=''
 
+    ticket_state = get_object_or_404(Ticket, id=ticket_id)
+
     # check status of ticket in github
     if ticket.github_issue_id:
         queue = queue_repo(ticket)
@@ -499,7 +502,6 @@ def view_ticket(request, ticket_id):
         if response == 200:
 
             #synced status wth github
-            ticket_state = get_object_or_404(Ticket, id=ticket_id)
             status = ticket_state.status
             if status == 4:
                 state = 'Closed'
@@ -513,7 +515,6 @@ def view_ticket(request, ticket_id):
         label_response = get_label(queue,ticket)
         print label_response
 
-    ticket_state = get_object_or_404(Ticket, id=ticket_id)
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.
 
@@ -844,28 +845,9 @@ def reminder(ticket_id):
 
 @login_required
 def ticket_list(request):
-    # #Form data
+    #Form data
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     form = form_data(request)
-    #initial_data = {}
-
-    # form = PublicTicketForm(initial=initial_data)
-    # form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-
-    # try:
-    #     if request.user.email:
-    #         initial_data['submitter_email'] = request.user.email
-    #     if 'queue' in request.GET:
-    #         initial_data['queue'] = request.GET['queue']
-
-    #     if request.user.is_staff:
-    #         form = TicketForm(initial=initial_data)
-    #         form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-    #         form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        
-    # except Exception, e:
-    #     pass
-   #ticket_list 
 
     context = {}
     # Query_params will hold a dictionary of parameters relating to
@@ -960,8 +942,6 @@ def ticket_list(request):
         except Exception, e:
             pass
 
-        # print my_sort
-
         if my_sort:
             query_params = {
                 'filtering': {'status__in': [1, 2, 3]},
@@ -986,6 +966,7 @@ def ticket_list(request):
                 pass
 
         submitter_email = request.GET.getlist('submitter_email')
+        print submitter_email
         if submitter_email:
             try:
 
@@ -993,6 +974,7 @@ def ticket_list(request):
                 
             except ValueError:
                 pass
+
         statuses = request.GET.getlist('status')
         if statuses:
             try:
@@ -1036,6 +1018,40 @@ def ticket_list(request):
         ### SORTING
         data_sorting(request,query_params)
 
+    removequeues = request.GET.getlist('removequeue')
+    if removequeues:
+        try:
+            query_params['filtering']['queue__id__in'] = queues
+            removequeues = [int(s) for s in removequeues]
+            for s in removequeues:
+                queues.remove(s)
+            query_params['filtering']['queue__id__in'] = queues
+        except ValueError:
+            pass
+
+    removestatuses = request.GET.getlist('removestatus')
+    if removestatuses:
+        try:
+            statuses = query_params['filtering']['status__in']
+            removestatuses = [int(s) for s in removestatuses]
+            for s in removestatuses:
+                statuses.remove(s)
+            query_params['filtering']['status__in'] = statuses
+        except ValueError:
+            pass
+
+    removetypes = request.GET.getlist('removetype')
+    if removetypes:
+        try:
+            query_params['filtering']['type__in'] = types
+            removetypes = [int(s) for s in removetypes]
+            for s in removetypes:
+                types.remove(s)
+            query_params['filtering']['type__in'] = types
+        except ValueError:
+            pass
+
+    
     tickets = Ticket.objects.select_related()
     tickets_filtered = tickets
 
@@ -1168,62 +1184,78 @@ def ticket_list(request):
         )))
     ticket_list = staff_member_required(ticket_list)
 
+@ensure_csrf_cookie
 def ticket_edit(request):
 
     ticket_id = request.GET.get('ticket_id')
-
+    
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
-        form = CommentTicketForm(request.POST)
-        if form.is_valid():
-            ticket_id = ticket.id
-            title = request.POST.get('title')
-            if ticket.github_issue_id:
-                queue = ticket.queue_id
-            else:
-                queue = request.POST.get('queue')
+        ticket_id = ticket.id
+        title = request.POST.get('title')
+        if ticket.github_issue_id:
+            queue = ticket.queue_id
+        else:
+            queue = request.POST.get('queue')
 
-            type = request.POST.get('type')
-            owner = request.POST.get('owner')
-            priority = request.POST.get('priority')
-            error_msg = request.POST.get('error_msg')
-            description = request.POST.get('description')
-            email = request.POST.get('email')
-            due_date = ticket.due_date
-            tags = request.POST.getlist('edit_tags')
-            update_comments = Ticket(id=ticket_id, title=title, description=description, assigned_to_id=owner,
-                                     submitter_email=email, priority=priority, due_date=due_date,
-                                     queue_id=queue, type=type, error_msg=error_msg)
-            update_comments.save(update_fields=['title','queue_id','type','assigned_to_id','error_msg','priority','description','submitter_email', 'due_date'])
-            messages.success(request, 'Success, Ticket # ' + str(ticket_id) + ' updated.')
+        type = request.POST.get('type')
+        owner = request.POST.get('owner')
+        priority = request.POST.get('priority')
+        error_msg = request.POST.get('error_msg')
+        description = request.POST.get('description')
+        email = request.POST.get('email')
+        due_date = ticket.due_date
+        tags = request.POST.getlist('edit_tags[]')
+
+        response_data = {}
+
+        update_comments = Ticket(id=ticket_id, title=title, description=description, assigned_to_id=owner,
+                                 submitter_email=email, priority=priority, due_date=due_date,
+                                 queue_id=queue, type=type, error_msg=error_msg)
+        update_comments.save(update_fields=['title','queue_id','type','assigned_to_id','error_msg','priority','description','submitter_email', 'due_date'])
+        messages.success(request, 'Success, Ticket # ' + str(ticket_id) + ' updated.')
 
             
-            #updating tags
+        #updating tags
 
-            tags = request.POST.getlist('edit_tags')
+        new_tags = request.POST.copy()
 
-            new_tags = request.POST.copy()
+        if tags: del new_tags.getlist('edit_tags[]')[:]
 
-            if tags: del new_tags.getlist('edit_tags')[:]
-  
-            for i, t in enumerate(tags):
-                if t.isdigit():
-                    new_tags.getlist('edit_tags').append(t)
-                else:
-                    tag, created = Tag.objects.get_or_create(name=t)
-                    if created:
+        for i, t in enumerate(tags):
+            if t.isdigit():
+                new_tags.getlist('edit_tags[]').append(t)
+            else:
+                tag, created = Tag.objects.get_or_create(name=t)
+                if created:
 
-                        tags[i] = tag.id
+                    tags[i] = tag.id
 
-                    new_tags.getlist('edit_tags').append(tag.id)
-                    
-            Ticket.tags.through.objects.filter(ticket_id = ticket_id).delete()
+                new_tags.getlist('edit_tags[]').append(tag.id)
+                
+        Ticket.tags.through.objects.filter(ticket_id = ticket_id).delete()
 
-            for tag in new_tags.getlist('edit_tags'):
+        for tag in new_tags.getlist('edit_tags[]'):
 
-                ticket.tags.add(tag) 
+            ticket.tags.add(tag) 
 
-    return redirect('helpdesk_list')
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+        ticket = {'id': ticket.id,'title':ticket.title, 'queue': ticket.queue.id, 'status': ticket.status, 'priority':ticket.priority, 'description':ticket.description}
+
+        if request.GET.get('action'):
+
+            return view_ticket(request, ticket_id)
+
+        return HttpResponse(
+            json.dumps(ticket),
+            content_type="application/json"
+            )
+    else:
+        return HttpResponse(
+            json.dumps({"response": "there was an error"}),
+            content_type="application/json"
+        )
+
 
 @login_required
 def create_ticket(request):
@@ -1257,7 +1289,7 @@ def create_ticket(request):
             file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            #post_tola_slack(ticket.id)
+            post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
@@ -1353,11 +1385,13 @@ def report_index(request):
         more_3_months = paginator.page(paginator.num_pages)
 
     print "Number of Older Tickets : " + str(tickets_3_months.count())
+    form = form_data(request)
     return render_to_response('helpdesk/report_index.html',
         RequestContext(request, {
             'number_tickets': number_tickets,
             'saved_query': saved_query,
             'more_3_months': more_3_months,
+            'form': form
         }))
 report_index = staff_member_required(report_index)
 
@@ -1526,7 +1560,7 @@ def run_report(request, report):
         for hdr in possible_options:
             data.append(summarytable[item, hdr])
         table.append([item] + data)
-
+    form = form_data(request)
     return render_to_response('helpdesk/report_output.html',
         RequestContext(request, {
             'title': title,
@@ -1535,6 +1569,7 @@ def run_report(request, report):
             'headings': column_headings,
             'from_saved_query': from_saved_query,
             'saved_query': saved_query,
+            'form': form,
         }))
 run_report = staff_member_required(run_report)
 
@@ -1801,32 +1836,44 @@ def index(request):
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         item_list = paginator.page(paginator.num_pages)
-
+    form = form_data(request)
     # TODO: It'd be great to have a list of most popular items here.
     return render_to_response('helpdesk/kb_index.html',
         RequestContext(request, {
             'kb_categories': category_list,
-            'kb_items': item_list
+            'kb_items': item_list,
+            'form': form
         }))
 
 
 def category(request, slug):
     category = get_object_or_404(KBCategory, slug__iexact=slug)
     items = category.kbitem_set.all()
+
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+
+    form = form_data(request)
     return render_to_response('helpdesk/kb_category.html',
         RequestContext(request, {
             'category': category,
             'items': items,
+            'assignable_users': assignable_users,
+            'form': form
         }))
 
 def item(request, item):
     from django.utils.html import escape, format_html
     item = get_object_or_404(KBItem, pk=item)
-    item.answer = format_html(item.answer) 
+    item.answer = format_html(item.answer)
+
+    form = form_data(request)
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     return render_to_response('helpdesk/kb_item.html',
         RequestContext(request, {
-            'item': item
+            'item': item,
+            'assignable_users': assignable_users,
+            'form': form
         }))
 
 
@@ -1989,6 +2036,9 @@ def kb_list(request):
     print "TICKET TYPES:"
     print Ticket.TICKET_TYPE
 
+    form = form_data(request)
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+
     return render_to_response('helpdesk/kb_list.html',
         RequestContext(request, dict(
             context,
@@ -2004,6 +2054,8 @@ def kb_list(request):
             from_saved_query=from_saved_query,
             saved_query=saved_query,
             search_message=search_message,
+            assignable_users= assignable_users,
+            form=form,
 
         )))
 
@@ -2030,7 +2082,8 @@ def key_word_searching(request, context, query_params):
             Q(title__icontains=q) |
             Q(description__icontains=q) |
             Q(resolution__icontains=q) |
-            Q(submitter_email__icontains=q)
+            Q(submitter_email__icontains=q) |
+            Q(tags__name__icontains = q)
         )
 
         context = dict(context, query=q)
@@ -2255,13 +2308,14 @@ def remind_messages(tickets):
         #check Ticket (open or re-opened) and send email reminders
         months = reminder(ticket.id)
 
-        print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
-        print "Since created (in Months) : " + str(months) + " Months"
+        # print "Ticket ID : " + str(ticket.id) + " Date Created :" + str(ticket.created) + " Ticket Status: " + str(ticket.status)
+        # print "Since created (in Months) : " + str(months) + " Months"
 
         if ticket.status == 1 or ticket.status == 2:
 
             if months == 0:
-                print "Reminder Email : No reminder"
+                # print "Reminder Email : No reminder"
+                pass
 
             elif months == 1 and ticket.remind == 0:
                 #1st email reminders for 'Open' ticket - after 1 month
@@ -2282,12 +2336,13 @@ def remind_messages(tickets):
                 third_remind.save(update_fields=['remind','remind_date'])
 
             elif months > 3:
-                print "Ticket is " + str(months) + " Months old and still open. Move this into a dashboard"
+                # print "Ticket is " + str(months) + " Months old and still open. Move this into a dashboard"
                 dashboard_remind = Ticket(id=ticket.id,remind=4,remind_date=datetime.now())
                 dashboard_remind.save(update_fields=['remind','remind_date'])
 
             else:
-                print "Ticket is " + str(months) + " Months old"
+                # print "Ticket is " + str(months) + " Months old"
+                pass
 
 #get user specific tickets
 def user_tickets(request):

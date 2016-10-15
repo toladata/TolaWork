@@ -3,6 +3,9 @@
 {% block content %}
 
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/form_validator.js"></script>
 
 <div class="container col-md-12">
   <div class="home_cover">
@@ -15,68 +18,14 @@
         <br/>
         <!--  add ticket button -->
         {% if user.is_authenticated %}
-        <button class="btn btn-lg btn-success" type="submit" data-toggle="modal" data-target="#ticketModal"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</button>
+        <span>
+        <button class="btn btn-md btn-success" type="submit" data-toggle="modal" data-target="#ticketModal"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</button>&nbsp;
+        <button class="btn btn-md btn-info" type="submit" data-toggle="modal" data-target="#fundingModal"><b>Get a Project Quote</b></button>
+        </span>
         {% endif %}
         {% if not user.is_authenticated %}
-          <a href="{% url 'login' %}" role="button"  class="btn btn-lg btn-success"><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
+          <a href="{% url 'login' %}" role="button"  class="btn btn-lg btn-success "><b><span class="glyphicon glyphicon-plus"></span></b> Enter a Ticket</a>
         {% endif %}
-        <!-- add ticket modal -->
-        <div class="modal fade " id="ticketModal" role="dialog">
-          <div class="modal-dialog task_form modal-lg">
-            <!-- Modal content-->
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h3 class="modal-title font9">Submit a Ticket</h3>
-                <p class="font9">Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
-              </div>
-              <div class="modal-body">
-                <div class="alert alert-success" role="alert">
-                  <p>'We recommend that you search if such ticket or request already exists before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!'</p>
-                </div>
-                <form class="form-horizontal" method='post' action='/helpdesk/tickets/submit/' enctype='multipart/form-data'  name="most">
-                  {% load crispy_forms_tags %}
-                  {% crispy form form.helper %}
-                  {% comment %}{% for field in form %}
-                    {% if field.is_hidden %}
-                        {{ field }}
-                    {% else %}
-                      <dt>
-                        <label for='id_{{ field.name }}'>{% trans field.label %}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}
-                      </dt>
-                      <dd>{{ field }}</dd>
-                      {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
-                      {% if field.help_text %}<dd class='form_help_text'>{% trans field.help_text %}</dd>{% endif %}
-
-                    {% endif %}
-                  {% endfor %}
-                  {% endcomment %}
-                 <!--  attach file section -->
-                  <div class = "col-md-offset-2 col-md-10">
-                    <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'><b>Attach More File(s) &raquo;</b></a></p>
-                    <div id='FileUpload' style='display: none;'>
-                     <dl>
-                        <dt><label for='id_file'> <b>Attach a File</b></label></dt>
-                        <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'><b>Add Another File</b></a>)</span></dd>
-                      </dl>
-                    </div>
-                    <div class='buttons form-group'>
-                      <input type='submit' class="btn btn-primary" value='Submit Ticket' />
-                    </div>
-                 </div> 
-                {{ form.media }}
-
-                {% csrf_token %}
-                </form>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              </div>
-            </div> 
-          </div>
-        </div>
-        <!-- end add ticket modal -->
-
 
         <!-- the tickets, tasks and tools section -->
         <br/>
@@ -531,20 +480,18 @@
                     <div id="activity" class="tab-pane fade">
                       {% if tolaActivityData %}
                         <h4>Latest Projects</h4>
-                        <div class=" table-responsive">
+                        <div class="table-responsive">
                           <table class="table table-striped">
                             <tr>
                               <th>Project</th>
-                              <th>Program</th>
                               <th>Status</th>
-                              <th>Date Created</th>
+                              <th>Start Date</th>
                             </tr>
-                            {% for data in tolaActivityData.projects %}
+                            {% for data in tolaActivityData|dictsort:"expected_start_date" reversed %}
                               <tr>
                                 <td>{{data.project_name}}</td>
-                                <td>{{data.program.name}}</td>
                                 <td>{{data.approval}}</td>
-                                <td>{{data.create_date}}</td>
+                                <td>{{data.expected_start_date}}</td>
                               </tr>
                             {% endfor %}
                           </table>
@@ -593,17 +540,36 @@
     <!-- home right side section (minor_home) -->
     <div class="row">
       <div class="col-md-3 col-sm-3 minor_home">
+        <div class="search" >
+          <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
+            <input type="text" name='q' class="form-control" placeholder="Search tickets" id='q'>
+            <span class="input-group-btn">
+              <button class="btn btn-info" type="button" onclick="submit_query()"><span class="glyphicon glyphicon-search"></span>
+            </button>
+            </span>
+            <script type="text/javascript">
+              function submit_query(){
+                 var input = document.getElementById("q").value;
+                  if (input!==""){ 
+                  window.location.href =  '{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&{% endif %}q='+input;
+                  }
+                  else
+                    alert("kindly enter a search term");
+              }
+          </script>
+          </form>
+        </div>
         {% if user.is_superuser %}
-          <div class="col-md-10 col-md-offset-2 githubsync">
+          <div class=" githubsync">
             <a href="{% url 'githubSync' %}" class="btn btn-info"><b><span class="glyphicon glyphicon-refresh"></span></b> Sync Tickets with Github</a>
           </div>
         {% endif %}
-        <br>
-        <br>
-        <br>
+        <br/>
         <!-- users logged_in section -->
-        <div class= "logged_in_users">
-          <h4>Users Online:</h4>
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            Users Online
+          </div>
           <div id="active_users">
 
             {% if logged_users%}
@@ -627,11 +593,126 @@
             {% endif %}
           </div>
         </div> <!-- end users logged_in section -->
-      </div>
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            Top Enhancement Requests
+          </div>
+          <div class="panel-body" id="enhancement">
+            <div class="table-responsive">
+              <table class="table table-condensed">
+                <tr>
+                  <th>Votes</th>
+                  <th>Title</th>
+                </tr>
+                {% for item in votes_tickets %}
+                <tr>
+                  <td>{{ item.votes }}</td>
+                  <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
+                </tr>
+                {% endfor %}
+              </table>
+            </div>
+          </div><!-- end top enhancement -->
+        </div>
     </div> <!-- end minor_home -->
     
   </div> <!-- end home_cover -->
 </div> <!-- end container -->
+</div>
+<!-- add funding opportunity modal -->
+<div class="modal fade " id="fundingModal" role="dialog">
+  <div class="modal-dialog task_form modal-lg">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h3 class="modal-title font9">Get a Project Quote</h3>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-success">
+          <p>Please describe your project in detail and someone from the TolaData team will get back to you with a quote on how long it would take us to complete and when we could get started.</p>
+        </div>
+        <form class="form-horizontal" method='post' name="funding_form" id="f_opportunity-form">
+        {% csrf_token %}
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Name:</strong></p></label>
+              <div class=" col-md-8">
+                <input class="form-control" type='text' name='name' id='id_name'/>
+              </div>
+            </div> 
+        </div>
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Phone:</strong></p></label>
+              <div class=" col-md-8">
+                <input class="form-control" type='text' name='phone' id='id_phone'/>
+              </div>
+            </div> 
+        </div>
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Email:</strong></p></label>
+              <div class=" col-md-8">
+                <input class="form-control" type='text' name='email' id='id_email'/>
+              </div>
+            </div> 
+        </div>
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Project Description:</strong></p></label>
+              <div class=" col-md-8">
+                <textarea class="form-control" name="project_description" id='id_project_description' rows="4" ></textarea>
+              </div>
+            </div> 
+        </div>
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Project's Start Date:</strong></p></label>
+              <div class=" col-md-8">
+                  <script>
+                      $( function() {
+                        $( "#id_project_start_date" ).datepicker({
+                          dateFormat: "yy-mm-dd"
+                        });
+                      } );
+                    </script>
+                <input class="form-control" type='text' name='project_start_date' id='id_project_start_date'/>
+              </div>
+            </div> 
+        </div>
+        <div class=" row task_spacing ">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Total Estimated Amount:</strong></p></label>
+              <div class=" col-md-8 input-group">
+                <span class="input-group-addon">$</span>
+                <input class="form-control" type='number' name='total_estimated_amount' id='id_total_estimated_amount'/>
+              </div>
+            </div> 
+        </div>
+
+        <div class=" row task_spacing">
+            <div class="col-md-12 ticket_padding row ticket_edit">
+              <label class="col-md-3"><p><strong>Additional Comments:</strong></p></label>
+              <div class=" col-md-8">
+                <textarea class="form-control" name="project_description" id='id_additional_comments' rows="4" ></textarea>
+              </div>
+            </div> 
+        </div>
+
+        <div class='buttons form-group '>
+          <input type='submit' class="btn btn-primary col-md-offset-3" value='Submit' />
+        </div>
+       </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div> 
+  </div>
+</div>
+<!-- end add ticket modal -->
 <script>
   $("#id_tags").select2({
               tags: true,
@@ -645,11 +726,6 @@
             $("#FurtherEditOptions").fadeIn();
             $("#ShowFurtherOptPara").show();
             return false;
-        });
-
-        $("#id_tags").select2({
-                tags: true,
-                allowClear: true,
         });
 
         processAddFileClick();
@@ -682,6 +758,12 @@
         });
 
     }
+
+    $('#f_opportunity-form').on('submit', function(event){
+          event.preventDefault();
+          create_post();
+      });
+
 </script>
 
 {% endblock content %}

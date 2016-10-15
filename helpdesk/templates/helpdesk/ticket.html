@@ -257,8 +257,7 @@
                                         <input name="github" type='button ' class="btn btn-info" value='{% trans "Send to Github" %}' onClick="location.href='/helpdesk/tickets/{{ticket.id}}/send_to_github/'"/>
                                       {% endif %}
                                       {% else %}
-
-                                      <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Ticket in Github" %}' onClick="location.href='{{ ticket.github_issue_url }}'"/>
+                                      <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Ticket in Github" %}' onclick="window.open('{{ ticket.github_issue_url }}', '_blank');"/>
                                       {% endif %}
 
                                       {% if ticket.slack_status == 0 %}
@@ -310,9 +309,11 @@
                             </div>
                 </div>
                 <div class="panel-footer">
-                   <div class="panel-heading"><a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
-
-                  <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
+                   <div class="panel-heading">
+                   {% if user.is_superuser %}
+                      <a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
+                      <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
+                  {% endif %}
 
                      <!-- <strong>Ticket Status: </strong><font>In Progress </font>&nbsp;<span class="badge"> 2 </span>&nbsp;&nbsp;<span class="glyphicon glyphicon-tags"></span> -->
                     <strong>Queue:</strong>{% blocktrans with ticket.queue as queue %}&nbsp;[{{ queue }}] {% endblocktrans %}
@@ -341,12 +342,12 @@
                       </div>
                       <div class="ticket_form_cover">
                         <div class="ticket_form info">
-                          <form  method='post' action='/helpdesk/tickets/ticket_edit/?ticket_id={{ticket.id}}' enctype='multipart/form-data' >
+                          <form  method='post' id="ticket_edit-form{{ticket.id}}">
                           <div class=" row task_spacing">
-                            <div class="col-md-12 ticket_padding row ticket_edit">
-                               <label class="col-md-2"><p><strong>{% trans "Title:" %}</strong></p></Label>
-                               <div class=" col-md-9">
-                                  <input class="form-control" type='text' name='title' id='id_title'  value='{{ ticket.title|escape }}' />
+                            <div class="col-md-12 ticket_padding row">
+                               <label class="col-md-1"><p><strong>{% trans "Title:" %}</strong></p></label>
+                               <div class=" col-md-10">
+                                  <input class="form-control ticket_title" type='text' name='title' id='id_title'  value='{{ ticket.title|escape }}' />
                                </div>
                             </div>
                           </div>
@@ -379,12 +380,14 @@
                             </div>
                           </div>
                           <div class=" row">
-                            <div class="col-md-6 row ticket_edit">
-                              <label class="col-md-4"><p><strong>{% trans "Case Owner:" %}</strong></p></label>
-                              <div class="col-md-8">
-                                <select class="form-control" id='id_owner' name='owner'><option value=''>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
+                            {% if user.is_superuser %}
+                              <div class="col-md-6 row ticket_edit">
+                                <label class="col-md-4"><p><strong>{% trans "Case Owner:" %}</strong></p></label>
+                                <div class="col-md-8">
+                                  <select class="form-control" id='id_owner' name='owner'><option value=''>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
+                                </div>
                               </div>
-                            </div>
+                            {% endif %}
                             <div class="col-md-6 row ticket_edit">
                               <label class="col-md-4"><p><strong> {% trans "Type of Ticket:" %}</strong></p></label>
                               <div class="col-md-8 ">
@@ -392,27 +395,58 @@
                               </div>
                             </div>
                           </div>
-                          <div class="row ticket_padding">
-                            <div class= "col-md-6 row ticket_edit" >
+                          <div class="row task_spacing">
+                            <div class= "col-md-6 row" >
                               <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
                               <div class="col-md-8">
                                 <select class="form-control" id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select>
                               </div>
-                            </div>
-                            <div class= "col-md-6 row ticket_edit">
+                            </div>                            
+                          </div>
+                          <div class="row">
+                            <div class= "col-md-8 row">
                               <label class="col-md-3"><p><strong>{% trans "Due Date:" %}</strong></p></label>
                               <p class="col-md-9">{{ form.due_date }}</p>
                             </div>
                           </div>
-                          <!-- <div class="row">
-                            <div class= "col-md-6 row ticket_edit task_spacing" >
+                          <div class="row">
+                            <div class= "col-md-6 row  task_spacing" >
                               <label class="col-md-4"><p><strong>{% trans "Tags:" %}</strong></p></label>
+
                               <div class="col-md-8">
-                                <select class = " form-control multi_select" style="width:200px" multiple = "multiple" id='id_edit_tags' name='edit_tags'> {% for q in edit_tags %} <option value='{{ q.id }}'{% endfor %} {{form.edit_tags }} </option>
-                              </select>
+                                <span id="helpBlock" class="help-block">To add <strong>NEW</strong> tag(s), type in then press <strong>'ENTER'</strong></span>
+                                <select class = "form-control multi_select {{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags{{ticket.id}}' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
+                                    {% for q in tags %} 
+
+                                      <option value='{{ q.id }}' {% for tag in ticket.tags.all %} {% ifequal q.id tag.id %} selected='selected'{% endifequal %}{% endfor %}>{{q.name}}</option>
+
+                                    {% endfor %}
+                                </select>
+                                <script type="text/javascript">
+                                      $(".{{ticket.id}}").select2({
+                                              tags: true,
+                                              allowClear: true,
+                                              placeholder: "Add tags",
+
+                                              createTag: function(tag) {
+                                                  return {
+                                                      id: tag.term,
+                                                      text: tag.term,
+                                                      isNew: true
+                                                  };
+                                              },
+
+                                            }).on("change", function(e) {
+                                              var isNew = $(this).find('[data-select2-tag="true"]');
+                                              if(isNew.length){
+                                                  isNew.replaceWith('<option selected="selected" value="'+isNew.val()+'">'+isNew.text()+'</option>');
+                                              }
+                                          });
+                                </script>
+                                
                               </div>
-                            </div>
-                          </div> -->
+                            </div>  
+                          </div>
                           <div class=" row">
                               <label class= "col-md-6 row ticket_edit">
                                   <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />
@@ -420,6 +454,13 @@
                           </div>
                            {% csrf_token %}
                           </form>
+                           <script>
+                              $('#ticket_edit-form{{ticket.id}}').on('submit', function(event){
+                                  event.preventDefault();
+                                  var csrftoken = $("#ticket_edit-form{{ticket.id}}").find('input[name="csrfmiddlewaretoken"]').val();
+                                  edit_ticket_post('{{ticket.id}}', csrftoken);
+                              });
+                            </script>
                         </div>
                       </div>
                     </div>
@@ -661,6 +702,15 @@
             processAddFileClick();
             return false;
         });
+
+     $(function () {
+        $('[data-toggle="popover"]').popover()
+      });
+
+    $('#ticket_edit-form').on('submit', function(event){
+          event.preventDefault();
+          edit_ticket_post();
+      });
 
     }
 </script>

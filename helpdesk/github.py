@@ -22,7 +22,7 @@ def get_issue_status(repo,ticket):
         state = data['state']
 
         if state == 'closed':
-            status = 3 # If 'Closed' in github, save as 'Resolved' in TW
+            status = 4 # If 'Closed' in github, save as 'Closed' in TW
             state_txt = 'Closed'
         else:
             status = 1 #open
@@ -48,8 +48,8 @@ def new_issue(repo,ticket):
     ticket_comments = FollowUp.objects.filter(ticket_id=ticket.id).all()
     new_comment = ''
     for t in ticket_comments:
-        new_comment = str(new_comment)  + str(t) + '<br>'
-
+        comments = new_comment + t + '<br>'
+        new_comment = unicode(comments).encode('utf-8')
     attachment_note = ''
     ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set')
     for ticket_attachment in ticket_attachments.all():
@@ -61,7 +61,9 @@ def new_issue(repo,ticket):
     payload = {}
     labels = ['Tola-Work Ticket']
     payload['title'] = ticket.title
-    payload['body'] = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment) + " Link to Ticket - " + str(ticket.t_url)
+    #encode to utf-8
+    body = ticket.submitter_email + " " + ticket.description + "     #" + attachment_note + " - " + new_comment + " Link to Ticket - " + ticket.t_url
+    payload['body'] = unicode(body).encode('utf-8')
     payload['labels'] = labels
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues"
@@ -111,6 +113,7 @@ def get_label(repo,ticket):
     if int(r.status_code) == 200:
         data = json.loads(r.content)
         label_txt2 = ""
+        label_txt = ""
         label_int = '0'
 
         for item in range(len(data)):
