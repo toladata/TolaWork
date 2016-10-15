@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load i18n %}
+      {% extends "base.html" %}{% load i18n %}
 {% load highlight %}
 {% load url_replace %}
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
@@ -575,7 +575,7 @@
                         <div class="col-md-12 ticket_padding row">
                            <label class="col-md-1"><p><strong>{% trans "Title:" %}</strong></p></label>
                            <div class=" col-md-9">
-                              <input class="form-control ticket_title" type='text' name='title' id='id_title'  value='{{ ticket.title|escape }}' />
+                              <input class="form-control ticket_title" type='text' name='title' id='id_title{{ticket.id}}'  value='{{ ticket.title|escape }}' />
                            </div>
                         </div>
                       </div>
@@ -583,13 +583,13 @@
                         <div class= "col-md-6 row ticket_edit" >
                           <label class="col-md-4"><p><strong>{% trans "Queue:" %}</strong></p></label>
                           <div class="col-md-8">
-                            <select class="form-control" id='id_queue' name='queue'>{% for q in ticket_queue %}<option value='{{ q.id }}'{% ifequal q.id ticket.queue_id %} selected='selected'{% endifequal %}>{{ q }}</option>{% endfor %}</select>
+                            <select class="form-control" id='id_queue{{ticket.id}}' name='queue'>{% for q in ticket_queue %}<option value='{{ q.id }}'{% ifequal q.id ticket.queue_id %} selected='selected'{% endifequal %}>{{ q }}</option>{% endfor %}</select>
                           </div>  
                         </div> 
                         <div class= "col-md-6 row ticket_edit" >
                           <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
                           <div class="col-md-8">
-                            <input class="form-control" type='text' name='email' id='id_email' value='{{ ticket.submitter_email|escape }}' />
+                            <input class="form-control" type='text' name='email' id='id_email{{ticket.id}}' value='{{ ticket.submitter_email|escape }}' />
                           </div>
                         </div>
                       </div>
@@ -597,13 +597,13 @@
                         <div class= "col-md-6 row ticket_edit" >
                           <label class="col-md-4"><p><strong>{% trans "Error Message:" %}</strong></p></label>
                           <div class="col-md-8">
-                            <textarea class="form-control" name="error_msg" rows="4" id="id_error_msg" > {{ ticket.error_msg|escape }} </textarea>
+                            <textarea class="form-control" name="error_msg" rows="4" id="id_error_msg{{ticket.id}}" > {{ ticket.error_msg|escape }} </textarea>
                           </div>
                         </div>
                          <div class= "col-md-6 row ticket_edit" >
                           <label class="col-md-4"><p><strong>{% trans "Description of Issue:" %}</strong></p></label>
                           <div class="col-md-8">
-                            <textarea class="form-control" name="description" rows="4" id="id_description"> {{ ticket.description|escape }} </textarea>
+                            <textarea class="form-control" name="description" rows="4" id="id_description{{ticket.id}}"> {{ ticket.description|escape }} </textarea>
                           </div>    
                         </div>
                       </div>
@@ -613,14 +613,14 @@
                             <label class="col-md-4"><p><strong>{% trans "Case Owner:" %}</strong></p></label>
                             
                             <div class="col-md-8">
-                              <select class="form-control" id='id_owner' name='owner'><option value=''>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
+                              <select class="form-control" id='id_owner{{ticket.id}}' name='owner'><option value=''>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
                             </div>
                           </div>
                           {% endif %}
                         <div class="col-md-6 row ticket_edit">
                           <label class="col-md-4"><p><strong> {% trans "Type of Ticket:" %}</strong></p></label>
                           <div class="col-md-8 ">
-                            <select class="form-control" id='id_type' name='type'>{% for tt in ticket_type %}<option value='{{ tt.0 }}'{% ifequal tt.0 ticket.type %} selected='selected'{% endifequal %}>{{ tt.1 }}</option>{% endfor %}</select>
+                            <select class="form-control" id='id_type{{ticket.id}}' name='type'>{% for tt in ticket_type %}<option value='{{ tt.0 }}'{% ifequal tt.0 ticket.type %} selected='selected'{% endifequal %}>{{ tt.1 }}</option>{% endfor %}</select>
                           </div>
                         </div>
                       </div>
@@ -628,7 +628,7 @@
                         <div class= "col-md-6 row" >
                           <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
                           <div class="col-md-8">
-                            <select class="form-control" id='id_priority' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select>
+                            <select class="form-control" id='id_priority{{ticket.id}}' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select>
                           </div>
                         </div>                            
                       </div>
@@ -687,7 +687,7 @@
                     $('#ticket_edit-form{{ticket.id}}').on('submit', function(event){
                         event.preventDefault();
                         var csrftoken = $("#ticket_edit-form{{ticket.id}}").find('input[name="csrfmiddlewaretoken"]').val();
-                        edit_ticket_post('{{ticket.id}}', csrftoken);
+                        edit_ticket_post({{ticket.id}}, csrftoken);
                     });
                     </script>
                   </div>

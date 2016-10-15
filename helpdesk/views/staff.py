@@ -1240,7 +1240,7 @@ def ticket_edit(request):
             ticket.tags.add(tag) 
 
         ticket = get_object_or_404(Ticket, id=ticket_id)
-        ticket = {'title':ticket.title, 'queue': ticket.queue.id, 'status': ticket.status, 'priority':ticket.priority, 'description':ticket.description}
+        ticket = {'id': ticket.id,'title':ticket.title, 'queue': ticket.queue.id, 'status': ticket.status, 'priority':ticket.priority, 'description':ticket.description}
 
         if request.GET.get('action'):
 
