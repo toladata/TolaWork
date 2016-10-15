@@ -540,11 +540,11 @@
               {% endif %}
 
               &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
-              {% if ticket.git_label %}
+              {% if ticket.github_issue_id %}
                 &nbsp;<span class="label label-primary"> 
-                  {% if ticket.git_label == 1 %}Backlog
-                    {% elif ticket.git_label == 2 %}Ready
-                    {% elif ticket.git_label == 3 %}working
+                  {% if ticket.git_label == 0 %}Backlog
+                    {% elif ticket.git_label == 1 %}Ready
+                    {% elif ticket.git_label == 2 %}working
                     {% elif ticket.git_label == 4 %}InDev
                     {% elif ticket.git_label == 5 %}Done
                     {% endif%} 
@@ -754,7 +754,8 @@
             <input type="text" name='q' class="form-control" placeholder="Search" id='q'>
             <span class="input-group-btn">
               <button class="btn btn-info" type="button" onclick="submit_query()"><span class="glyphicon glyphicon-search"></span>
-            </span></button>
+            </button>
+            </span>
             <script type="text/javascript">
               function submit_query(){
                  var input = document.getElementById("q").value;
