@@ -432,20 +432,18 @@
                     <!-- tolaTables -->
                     <div id="tables" class="tab-pane fade in active">
                     {% if user.is_authenticated %}
-                      {% if tolaTablesData.tables %}
+                      {% if tolaTablesData%}
                         <h4>Your Tables</h4>
                         <div class=" table-responsive">
                           <table class="table table-striped">
                             <tr>
                               <th>Name</th>
-                              <th>Description</th>
                               <th>Public</th>
                               <th>Date Created</th>
                             </tr>
-                            {% for table in tolaTablesData.tables %}
+                            {% for table in tolaTablesData %}
                             <tr>
                               <td>{{table.name}}</td>
-                              <td>{{table.description}}</td>
                               <td>{{table.public}}</td>
                               <td>{{table.create_date}} </td>
                             </tr>
