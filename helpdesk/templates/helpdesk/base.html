@@ -6,6 +6,7 @@
 {% with user|saved_queries as user_saved_queries_ %}
 
 <link rel='stylesheet' href='{% static "helpdesk/helpdesk-extend.css" %}' type='text/css' />
+<link href="{{ STATIC_URL}}css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 <div id='container2'>
     <div id='header' class="row">
         <h1>{% block h1_title %}{% trans "TolaWork" %}{% endblock %}</h1>
@@ -16,7 +17,6 @@ if you have already done a search, ignore this message!</p>
 
     <div id='body' class="row">
         {% block helpdesk_body %}{% endblock %}
-    </div>
 </div>
 {% endwith %}
 {% endblock %}
