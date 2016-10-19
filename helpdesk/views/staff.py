@@ -1010,7 +1010,9 @@ def ticket_list(request):
                 Q(title__icontains=q) |
                 Q(description__icontains=q) |
                 Q(resolution__icontains=q) |
-                Q(submitter_email__icontains=q)
+                Q(submitter_email__icontains=q) |
+                Q(tags__name__icontains = q)
+
             )
             context = dict(context, query=q)
             query_params['other_filter'] = qset
