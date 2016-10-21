@@ -409,41 +409,41 @@
 
                         {% if ticket.status == 1 %}
                           <dd>
-                            <input type='radio'  name='new_status' value='1' id='st_open{{ticket.id}}' checked='checked'><label for='st_open' class='active'> &nbsp;{% trans "Open" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='3' id='st_resolved{{ticket.id}}' {% if new_status == '3'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_resolved'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio'  name='new_status' value='4' id='st_closed{{ticket.id}}'{% if new_status == '4'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='5' id='st_duplicate{{ticket.id}}'{% if new_status == '5'%}checked='checked'{% endif%}><label for='st_duplicate'>&nbsp;{% trans "Duplicate" %}</label>
+                            <input type='radio'  name='new_status{{ticket.id}}' value='1' id='st_open' checked='checked'><label for='st_open' class='active'> &nbsp;{% trans "Open" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='3' id='st_resolved' {% if new_status == '3'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='status'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio'  name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='5' id='st_duplicate'{% if new_status == '5'%}checked='checked'{% endif%}><label for='st_duplicate'>&nbsp;{% trans "Duplicate" %}</label>
                           </dd>
                         {% endif %}
 
                         {% if ticket.status == 2 %}
                           <dd>
-                            <input type='radio' name='new_status' value='2' id='st_reopened{{ticket.id}}' checked='checked'><label for='st_reopened' class='active'>&nbsp;{% trans "Reopened" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='3' id='st_resolved{{ticket.id}}'{% if new_status == '3'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_resolved'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='4' id="st_closed{{ticket.id}}" {% if new_status == '4'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='5' id='st_duplicate{{ticket.id}}'{% if new_status == '5'%}checked="checked"{% endif%}><label for='st_duplicate'>&nbsp;{% trans "Duplicate" %}</label>
+                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened' checked='checked'><label for='st_reopened' class='active'>&nbsp;{% trans "Reopened" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='3' id='st_resolved'{% if new_status == '3'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_resolved'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='4' id="st_closed" {% if new_status == '4'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='5' id='st_duplicate'{% if new_status == '5'%}checked="checked"{% endif%}><label for='st_duplicate'>&nbsp;{% trans "Duplicate" %}</label>
                           </dd>
                         {% endif %}
 
                         {% if ticket.status == 3 %}
                           <dd>
-                            <input type='radio' name='new_status' value='2' id='st_reopened{{ticket.id}}'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='3' id='st_resolved{{ticket.id}}' checked='checked'><label for='st_resolved' class='active'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='4' id='st_closed{{ticket.id}}'{% if new_status == '4'%}checked='checked'{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
+                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='3' id='st_resolved' checked='checked'><label for='st_resolved' class='active'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}checked='checked'{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
                           </dd>
                         {% endif %}
 
                         {% if ticket.status == 4 %}
                           <dd>
-                            <input type='radio' name='new_status' value='2' id='st_reopened{{ticket.id}}'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='4' id='st_closed{{ticket.id}}' checked='checked'><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
+                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed' checked='checked'><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
                           </dd>
                         {% endif %}
 
                         {% if ticket.status == 5 %}
                           <dd>
-                            <input type='radio' name='new_status' value='2' id='st_reopened{{ticket.id}}'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='5' id='st_duplicate{{ticket.id}}' checked='checked'><label for='st_duplicate'>{% trans "Duplicate" %}</label>
+                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='5' id='st_duplicate' checked='checked'><label for='st_duplicate'>{% trans "Duplicate" %}</label>
                           </dd>
                         {% endif %}
 
