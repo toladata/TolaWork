@@ -195,7 +195,7 @@
             <p class="description">{%  highlight ticket.description with query css_class "highlight" html_tag "span" %}</p>
           {% else %}
 
-          <p class="description">{{ ticket.description }}</p> 
+          <p class="description">{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</p> 
           {% endif %}
           <div class="col-md-12 ">
             <div class="col-md-7"></div>
