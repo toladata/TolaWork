@@ -132,41 +132,37 @@ function edit_ticket_post(ticket_id, csrftoken) {
 
 //change ticket status
 function edit_ticket_status(ticket_id, csrftoken) {
-    function csrfSafeMethod(method) {
-        // these HTTP methods do not require CSRF protection
-        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-    }
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            }
-        },
-        headers: { "cache-control": "no-cache" }
-    });
-    var open = $('#st_open'+ticket_id).val();
-    /*var reopened = $('#st_reopened'+ticket_id).val();
-    var resolved = $('#st_resolved'+ticket_id).val();
-    var closed = $('#st_closed'+ticket_id).val();
-    var duplicate = $('#st_duplicate'+ticket_id).val();*/
-    var comment = $('#commentBox'+ticket_id).val();
-    var public = $('#id_public'+ticket_id).val();
-    $.ajax({
-        url : "/helpdesk/tickets/"+ticket_id+"/post_comment/",
-        type : "POST", 
-        data : {
-            new_status : open,
-            comment : comment,
-            public : public
-            
-        },
+   function csrfSafeMethod(method) {
+       // these HTTP methods do not require CSRF protection
+       return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+   }
+   $.ajaxSetup({
+       beforeSend: function(xhr, settings) {
+           if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+               xhr.setRequestHeader("X-CSRFToken", csrftoken);
+           }
+       },
+       headers: { "cache-control": "no-cache" }
+   });
 
-        success : function(ticket1) {
-                alert("You have Succefully updated ticket"+ticket_id+". Your changes will show on Page reload");
-                console.log(ticket1); 
-        },
-        error : function(xhr,errmsg,err) {
-            console.log(xhr.status + ": " + xhr.responseText); 
-        }
-    });
+   var new_status = $('input[name="new_status'+ticket_id+'"]:checked').val();
+   var comment = $('#commentBox'+ticket_id).val();
+   var public = $('#id_public'+ticket_id).val();
+   $.ajax({
+       url : "/helpdesk/tickets/"+ticket_id+"/post_comment/",
+       type : "POST", 
+       data : {
+           new_status : new_status,
+           comment : comment,
+           public : public
+           
+       },
+
+       success : function() {
+            alert("You have Succefully updated ticket "+ticket_id+". Your changes will show on Page reload");
+       },
+       error : function(xhr,errmsg,err) {
+           console.log(xhr.status + ": " + xhr.responseText); 
+       }
+   });
 };

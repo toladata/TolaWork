@@ -37,7 +37,7 @@
                 </div>
                 <div class="panel-body">
                     <strong>Description:<br/></strong>
-                <p class="description">{{ ticket.description }}</p>
+                <p class="description">{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</p>
 
                     <div class="sort_panels">
 
