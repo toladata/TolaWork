@@ -424,7 +424,7 @@ def get_TolaTables_data(request):
     #public_tables
     url2 ='http://tables.toladata.io/api/public_tables/'
 
-    token = settings.TOLA_TABLES_TOKEN
+    token = 'bd43de0c16ac0400bc404c6598a6fe0e4ce73aa2'
 
     header = {'Authorization': 'token %s' % token}
 
