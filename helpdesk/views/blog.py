@@ -7,6 +7,8 @@ import os
 from helpdesk.hackpad import Hackpad
 import requests
 import json
+from helpdesk.views.staff import form_data
+
 
 
 def index(request, entry=0):
@@ -19,5 +21,6 @@ def index(request, entry=0):
 
     next = my_hackpads[0]
     previous = my_hackpads[-1]
+    form = form_data(request)
 
-    return render_to_response('blog/base.html',RequestContext(request, {'hackpad': my_hackpads, 'entry': entry, 'previous':previous, 'next':next }))
+    return render_to_response('blog/base.html',RequestContext(request, {'hackpad': my_hackpads, 'entry': entry, 'previous':previous, 'next':next, 'form':form }))
