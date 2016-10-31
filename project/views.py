@@ -447,7 +447,6 @@ def get_TolaTables_data(request):
             for data in json_obj:
                 if data['email'] == email:
                     user = data
-            print user['url']
 
             if user:
                 try:
