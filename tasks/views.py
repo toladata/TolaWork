@@ -41,6 +41,7 @@ import json
 from tasks.forms import TaskForm
 from tasks.models import Task
 from helpdesk.views.staff import form_data, user_tickets
+from project.views import get_TolaActivity_data
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -87,6 +88,7 @@ def task_list(request):
             pass
 
     form = form_data(request)
+    tolaActivityData = get_TolaActivity_data()
 
     return render_to_response('tasks/task_index.html',
         RequestContext(request, {
@@ -94,7 +96,8 @@ def task_list(request):
         'assignable_users': assignable_users,
         'created_by': created_by,
         'status_choices':Task.STATUS_CHOICES, 
-        'form' : form
+        'form' : form,
+        'tolaActivityData': tolaActivityData
 
         }))
 
