@@ -447,10 +447,15 @@ def get_TolaTables_data(request):
             for data in json_obj:
                 if data['email'] == email:
                     user = data
+            print user['url']
 
-            for silo in json_obj2:
-                if silo['owner'] == user['url']:
-                    my_tables.append(silo)
+            if user:
+                try:
+                    for silo in json_obj2:
+                        if silo['owner'] == user['url']:
+                            my_tables.append(silo)
+                except Exception, e:
+                    pass
 
         return my_tables
 
