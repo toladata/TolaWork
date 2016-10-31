@@ -415,7 +415,7 @@ class PublicTicketForm(forms.Form):
             comment = self.cleaned_data['body'],
             )
 
-        f.save()
+        # f.save()
 
         files = []
         if self.cleaned_data['attachment']:

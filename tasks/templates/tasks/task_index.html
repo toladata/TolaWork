@@ -349,6 +349,31 @@
                 
               </div>
             </div>
+            <div id="activity">
+              {% if tolaActivityData %}
+                <h4>Latest Projects</h4>
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <tr>
+                      <th>Project</th>
+                      <th>Status</th>
+                      <th>Start Date</th>
+                    </tr>
+                    {% for data in tolaActivityData|dictsort:"expected_start_date" reversed %}
+                      <tr>
+                        <td>{{data.project_name}}</td>
+                        <td>{{data.approval}}</td>
+                        <td>{{data.expected_start_date}}</td>
+                      </tr>
+                    {% endfor %}
+                  </table>
+                </div>
+              {% else %}
+                <div class="alert alert-warning" role="alert">
+                  <h5>There was a Problem loading Project(s) From <a href="#" class="alert-link">TolaActivity</a></h5>
+                </div>
+              {% endif %}
+            </div>
             <!-- start gaming -->
            <!-- <div class="col-md-12 row">
             <h3 class="font9">Task Solving Game</h3>
