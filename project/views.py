@@ -404,7 +404,6 @@ def get_TolaActivity_loggedUser():
             return {}
 
         json_obj = response.json()
-        print json_obj
         return json_obj
 
     except requests.exceptions.RequestException as e:
@@ -420,7 +419,7 @@ def get_TolaActivity_loggedUser():
 def get_TolaTables_data(request):
     import json
 
-    url = 'http://tables.toladata.io/api/users/' #TolaActivity Url
+    url = 'http://tables.toladata.io/api/users/' 
     #public_tables
     url2 ='http://tables.toladata.io/api/public_tables/'
 
@@ -444,10 +443,10 @@ def get_TolaTables_data(request):
         my_tables = []
         if request.user.is_authenticated():
             email = request.user.email
+            print email
             for data in json_obj:
                 if data['email'] == email:
                     user = data
-
             if user:
                 try:
                     for silo in json_obj2:
@@ -455,7 +454,7 @@ def get_TolaTables_data(request):
                             my_tables.append(silo)
                 except Exception, e:
                     pass
-
+        
         return my_tables
 
     except requests.exceptions.RequestException as e:
