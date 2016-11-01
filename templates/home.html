@@ -629,6 +629,7 @@
       <div class="modal-body">
         <div class="alert alert-success">
           <p>Please describe your project in detail and someone from the TolaData team will get back to you with a quote on how long it would take us to complete and when we could get started.</p>
+          <p><b>*</b> is a required field</p>
         </div>
         <form class="form-horizontal" method='post' name="funding_form" id="f_opportunity-form">
         {% csrf_token %}
@@ -636,10 +637,7 @@
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Name:<b>*</b></strong></p></label>
               <div class=" col-md-8">
-                <input class="form-control" type='text' name='name' id='id_name' aria-describedby="nameHelpBlock"/>
-                <p id="nameHelpBlock" class="form-text text-muted">
-                  is a required field
-                </p>
+                <input class="form-control" type='text' name='name' id='id_name'/>
               </div>
             </div> 
         </div>
@@ -647,10 +645,7 @@
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Phone:<b>*</b></strong></p></label>
               <div class=" col-md-8">
-                <input class="form-control" type='text' name='phone' id='id_phone' aria-describedby="phoneHelpBlock"/>
-                <p id="phoneHelpBlock" class="form-text text-muted">
-                  is a required field
-                </p>
+                <input class="form-control" type='text' name='phone' id='id_phone'/>
               </div>
             </div> 
         </div>
@@ -658,10 +653,7 @@
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Email:<b>*</b></strong></p></label>
               <div class=" col-md-8">
-                <input class="form-control" type='text' name='email' id='id_email' aria-describedby="emailHelpBlock"/>
-                <p id="emailHelpBlock" class="form-text text-muted">
-                  is a required field
-                </p>
+                <input class="form-control" type='text' name='email' id='id_email'/>
               </div>
             </div> 
         </div>
@@ -669,10 +661,7 @@
             <div class="col-md-12 ticket_padding row ticket_edit">
               <label class="col-md-3"><p><strong>Project Description:<b>*</b></strong></p></label>
               <div class=" col-md-8">
-                <textarea class="form-control" name="project_description" id='id_project_description' rows="4" aria-describedby="descHelpBlock"></textarea>
-                <p id="descHelpBlock" class="form-text text-muted">
-                  is a required field
-                </p>
+                <textarea class="form-control" name="project_description" id='id_project_description' rows="4"></textarea>
               </div>
             </div> 
         </div>
@@ -687,10 +676,7 @@
                         });
                       } );
                     </script>
-                <input class="form-control" type='text' name='project_start_date' id='id_project_start_date' aria-describedby="datecHelpBlock"/>
-                <p id="datecHelpBlock" class="form-text text-muted">
-                  is a required field
-                </p>
+                <input class="form-control" type='text' name='project_start_date' id='id_project_start_date'/>
 
               </div>
             </div> 
@@ -700,11 +686,8 @@
               <label class="col-md-3"><p><strong>Total Estimated Amount:<b>*</b></strong></p></label>
               <div class=" col-md-8 input-group">
                 <span class="input-group-addon">$</span>
-                <input class="form-control" type='number' name='total_estimated_amount' id='id_total_estimated_amount' aria-describedby="amountHelpBlock"/>
+                <input class="form-control" type='number' name='total_estimated_amount' id='id_total_estimated_amount'/>
               </div>
-                <p id="amountHelpBlock" class="form-text text-muted">
-                  is a required field
-                </p>
             </div> 
         </div>
 
