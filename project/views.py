@@ -443,7 +443,6 @@ def get_TolaTables_data(request):
         my_tables = []
         if request.user.is_authenticated():
             email = request.user.email
-            print email
             for data in json_obj:
                 if data['email'] == email:
                     user = data

@@ -129,6 +129,7 @@ def create_task(request):
             due_date=due_date, created_date=created_date,created_by_id=created_by, assigned_to_id=assigned_to, 
             project_agreement=project_agreement, table=table, note=note)
         task.save()
+    form = form_data(request)
 
     tasks = Task.objects.all()
     return render_to_response('tasks/task_index.html',
@@ -136,7 +137,7 @@ def create_task(request):
         	'tasks':Task.objects.all(),
             'assignable_users': assignable_users,
             'created_by': created_by,
-
+            'form': form
             
         }))
 
@@ -241,8 +242,9 @@ def get_TolaActivity_byUser(request):
             if user:
                 try:
                     for activity in json_obj2:
-                        # if  activity['approved_by'] == user['url']:
-                        agreements.append(activity)
+                        if  activity['approved_by'] == user['url']:
+                            print activity
+                            agreements.append(activity)
                 except Exception, e:
                     pass
         return agreements
