@@ -125,7 +125,7 @@ function edit_ticket_post(ticket_id, csrftoken) {
                 console.log(ticket1); 
         },
         error : function(xhr,errmsg,err) {
-            console.log(xhr.status + ": " + xhr.responseText); 
+            alert("An error was encountered!!! Try again Later."); 
         }
     });
 };
