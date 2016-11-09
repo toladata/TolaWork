@@ -46,6 +46,8 @@ class Task(models.Model):
     assigned_to = models.ForeignKey(User,blank=True,null=True,verbose_name=_('Assigned to'),related_name='task_assigned_to')
     note = models.TextField(blank=True, null=True)
     priority = models.IntegerField(choices=PRIORITY_CHOICES)
+    project_agreement = models.TextField(blank=True, null=True)
+    table = models.TextField(blank=True, null=True)
 
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a

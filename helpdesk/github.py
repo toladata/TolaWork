@@ -48,7 +48,7 @@ def new_issue(repo,ticket):
     ticket_comments = FollowUp.objects.filter(ticket_id=ticket.id).all()
     new_comment = ''
     for t in ticket_comments:
-        comments = new_comment + t + '<br>'
+        comments = new_comment + str(t.comment) + '<br>'
         new_comment = unicode(comments).encode('utf-8')
     attachment_note = ''
     ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set')
@@ -70,6 +70,7 @@ def new_issue(repo,ticket):
 
     header = {'Authorization': 'token %s' % token}
     r = requests.post(repo,json.dumps(payload),headers=header)
+    print(json.loads(r.content))
 
     if int(r.status_code) == 201:
         data = json.loads(r.content)

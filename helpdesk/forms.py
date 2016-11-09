@@ -270,7 +270,7 @@ class TicketForm(forms.Form):
                 'name': t.get_assigned_to
             }
 
-        f.save()
+        # f.save()
 
         context = safe_template_context(t)
         context['comment'] = f.comment
@@ -415,7 +415,7 @@ class PublicTicketForm(forms.Form):
             comment = self.cleaned_data['body'],
             )
 
-        f.save()
+        # f.save()
 
         files = []
         if self.cleaned_data['attachment']:

@@ -105,6 +105,8 @@ class TaskForm(forms.Form):
                     completed_date=self.cleaned_data['completed_date'],
                     status = Task.OPEN_STATUS,
                     note = self.cleaned_data['Note'],
+                    project_agreement = self.cleaned_data['project_agreement'],
+                    table = self.cleaned_data['table'],
                     priority = self.cleaned_data['priority'],
                     due_date = self.cleaned_data['due_date'],
                   )

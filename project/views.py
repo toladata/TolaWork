@@ -239,6 +239,9 @@ def home(request):
 
     users = get_current_users()
 
+    country = get_user_country(request)
+    
+
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
                                          'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
@@ -401,7 +404,6 @@ def get_TolaActivity_loggedUser():
             return {}
 
         json_obj = response.json()
-        print json_obj
         return json_obj
 
     except requests.exceptions.RequestException as e:
@@ -417,30 +419,46 @@ def get_TolaActivity_loggedUser():
 def get_TolaTables_data(request):
     import json
 
-    url = 'http://127.0.0.1:8200/api/tolatablesdata' #TolaActivity Url
+    url = 'http://tables.toladata.io/api/users/' 
+    #public_tables
+    url2 ='http://tables.toladata.io/api/public_tables/'
 
-    token = settings.TOLA_TABLES_TOKEN
+    token = 'bd43de0c16ac0400bc404c6598a6fe0e4ce73aa2'
 
     header = {'Authorization': 'token %s' % token}
 
-    email = request.user.email
-
-    payload = {'email': email}
-
     #print email
     try:
-        response = requests.get(url, params = payload, headers=header)
+        response = requests.get(url, headers=header)
+        response2 = requests.get(url2, headers=header)
 
         # Consider any status other than 2xx an error
-        if not response.status_code // 100 == 2:
+        if not response.status_code // 100 == 2 and response2.status_code // 100 == 2:
             return {}
 
         json_obj = response.json()
+        json_obj2 = response2.json()
 
-        return json_obj
+        user = {}
+        my_tables = []
+        if request.user.is_authenticated():
+            email = request.user.email
+            for data in json_obj:
+                if data['email'] == email:
+                    user = data
+            if user:
+                try:
+                    for silo in json_obj2:
+                        if silo['owner'] == user['url']:
+                            my_tables.append(silo)
+                except Exception, e:
+                    pass
+        
+        return my_tables
 
     except requests.exceptions.RequestException as e:
         # A serious problem happened, like an SSLError or InvalidURL
+        print e
         return {}
 
     except ValueError:
@@ -531,5 +549,15 @@ def create_funding_opportunity(request):
             json.dumps({"response": "there was an error"}),
             content_type="application/json"
         )
+def get_user_country(request):
 
+    # Automatically geolocate the connecting IP
+    ip = request.META.get('REMOTE_ADDR')
+    try:
+        response = urlopen('http://ipinfo.io/'+ip+'/json').read()
+        response = json.loads(response)
+        return response['country'].lower()
 
+    except Exception, e:
+        response = "undefined"
+        return response

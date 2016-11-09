@@ -1,4 +1,4 @@
-      {% extends "base.html" %}{% load i18n %}
+{% extends "base.html" %}{% load i18n %}
 {% load highlight %}
 {% load url_replace %}
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
@@ -9,7 +9,7 @@
 
 {% block content %}
 {% load in_list %}
-<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<link href="{{ STATIC_URL}}css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 <div class="container" ng-controller="TicketController">
   {% if tickets and not query  %}
    <h3>Submitted Tickets</h3>
@@ -195,7 +195,7 @@
             <p class="description">{%  highlight ticket.description with query css_class "highlight" html_tag "span" %}</p>
           {% else %}
 
-          <p class="description">{{ ticket.description }}</p> 
+          <p class="description">{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</p> 
           {% endif %}
           <div class="col-md-12 ">
             <div class="col-md-7"></div>
@@ -384,7 +384,7 @@
                 <!-- respond to ticket and status section -->
                 <div id='add-followup' class="well">
                   <h4><strong>{% trans "Respond to this ticket" %}</strong></h4>
-                  <form method='post' action='{% url "post_comment" ticket.id %}' enctype='multipart/form-data' class="form-horizontal">
+                  <form method='post' id="ticket_new_status{{ticket.id}}"  enctype='multipart/form-data' class="form-horizontal">
                     <fieldset>
                       <dl>
                         {% if preset_replies %}
@@ -397,7 +397,7 @@
                           <label for='commentBox'>{% trans "Comment / Resolution:" %}</label>
                         </dt>
                         <dd>
-                          <textarea class="form-control preview_links" rows="3" name='comment' id='commentBox'></textarea>
+                          <textarea class="form-control preview_links" rows="3" name='comment' id='commentBox{{ticket.id}}'></textarea>
                         </dd>
                         <dd class='form_help_text'><p> You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>.</p></dd>
 
@@ -409,49 +409,49 @@
 
                         {% if ticket.status == 1 %}
                           <dd>
-                            <input type='radio' name='new_status' value='1' id='st_open' checked='checked'><label for='st_open' class='active'> &nbsp;{% trans "Open" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='3' id='st_resolved'{% if new_status == '3'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_resolved'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='4' id='st_closed'{% if new_status == '4'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='5' id='st_duplicate'{% if new_status == '5'%}checked='checked'{% endif%}><label for='st_duplicate'>&nbsp;{% trans "Duplicate" %}</label>
+                            <input type='radio'  name='new_status{{ticket.id}}' value='1' id='st_open' checked='checked'><label for='st_open' class='active'> &nbsp;{% trans "Open" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='3' id='st_resolved' {% if new_status == '3'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='status'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio'  name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='5' id='st_duplicate'{% if new_status == '5'%}checked='checked'{% endif%}><label for='st_duplicate'>&nbsp;{% trans "Duplicate" %}</label>
                           </dd>
                         {% endif %}
 
                         {% if ticket.status == 2 %}
                           <dd>
-                            <input type='radio' name='new_status' value='2' id='st_reopened' checked='checked'><label for='st_reopened' class='active'>&nbsp;{% trans "Reopened" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='3' id='st_resolved'{% if new_status == '3'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_resolved'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='4' id='st_closed'{% if new_status == '4'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='5' id='st_duplicate'{% if new_status == '5'%}checked='checked'{% endif%}><label for='st_duplicate'>&nbsp;{% trans "Duplicate" %}</label>
+                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened' checked='checked'><label for='st_reopened' class='active'>&nbsp;{% trans "Reopened" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='3' id='st_resolved'{% if new_status == '3'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_resolved'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='4' id="st_closed" {% if new_status == '4'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='5' id='st_duplicate'{% if new_status == '5'%}checked="checked"{% endif%}><label for='st_duplicate'>&nbsp;{% trans "Duplicate" %}</label>
                           </dd>
                         {% endif %}
 
                         {% if ticket.status == 3 %}
                           <dd>
-                            <input type='radio' name='new_status' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='3' id='st_resolved' checked='checked'><label for='st_resolved' class='active'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='4' id='st_closed'{% if new_status == '4'%}checked='checked'{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
+                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='3' id='st_resolved' checked='checked'><label for='st_resolved' class='active'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}checked='checked'{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
                           </dd>
                         {% endif %}
 
                         {% if ticket.status == 4 %}
                           <dd>
-                            <input type='radio' name='new_status' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='4' id='st_closed' checked='checked'><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
+                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed' checked='checked'><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
                           </dd>
                         {% endif %}
 
                         {% if ticket.status == 5 %}
                           <dd>
-                            <input type='radio' name='new_status' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status' value='5' id='st_duplicate' checked='checked'><label for='st_duplicate'>{% trans "Duplicate" %}</label>
+                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='5' id='st_duplicate' checked='checked'><label for='st_duplicate'>{% trans "Duplicate" %}</label>
                           </dd>
                         {% endif %}
 
                         {% if helpdesk_settings.HELPDESK_UPDATE_PUBLIC_DEFAULT %}
-                          <input type='hidden' name='public' value='1'>
+                          <input type='hidden' name='public' id= "id_public{{ticket.id}}" value='1'>
                           {% else %}
                           <dt><label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
-                          <dd><input type='checkbox' name='public' value='1' checked='checked' /></dd>
+                          <dd><input type='checkbox' name='public' id= "id_public{{ticket.id}}" value='1' checked='checked' /></dd>
                           <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
                         {% endif %}
                       </dl>
@@ -486,12 +486,19 @@
                         {% csrf_token %}
 
                   </form>
-
+                   <script>
+                    $('#ticket_new_status{{ticket.id}}').on('submit', function(event){
+                        event.preventDefault();
+                        var csrftoken = $("#ticket_new_status{{ticket.id}}").find('input[name="csrfmiddlewaretoken"]').val();
+                        edit_ticket_status({{ticket.id}}, csrftoken);
+                    });
+                   
+                    </script>
 
                   <!-- ticket on-hold and delete section -->
                   <div class="col-md-2 col-md-offset-1">
                     {% if user.is_superuser %}
-                      <a href='#' data-toggle="modal" data-target="#deleteModal{{ticket.id}}"class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+                      <a href='#' data-toggle="modal" data-target="#deleteModal{{ticket.id}}" class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
                       <span>
                       {% if ticket.on_hold %}
                         | <a href='{% url "helpdesk_unhold" ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>

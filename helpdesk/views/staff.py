@@ -1010,7 +1010,9 @@ def ticket_list(request):
                 Q(title__icontains=q) |
                 Q(description__icontains=q) |
                 Q(resolution__icontains=q) |
-                Q(submitter_email__icontains=q)
+                Q(submitter_email__icontains=q) |
+                Q(tags__name__icontains = q)
+
             )
             context = dict(context, query=q)
             query_params['other_filter'] = qset
@@ -1282,11 +1284,12 @@ def create_ticket(request):
 
             #ticket.comment = ''
             comment = ""
-            f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
-            f.save()
+            if len(request.FILES) != 0:
+                f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+                f.save()
 
-            #Attch a File
-            file_attachment(request, f)
+                # #Attach a File
+                file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
             post_tola_slack(ticket.id)
@@ -1660,10 +1663,13 @@ email_ignore_del = superuser_required(email_ignore_del)
 def ticket_cc(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     copies_to = ticket.ticketcc_set.all()
+    form = form_data(request)
+
     return render_to_response('helpdesk/ticket_cc_list.html',
         RequestContext(request, {
             'copies_to': copies_to,
             'ticket': ticket,
+            'form':form,
         }))
 ticket_cc = staff_member_required(ticket_cc)
 
@@ -1675,6 +1681,8 @@ def ticket_cc_add(request, ticket_id):
             ticketcc = form.save(commit=False)
             ticketcc.ticket = ticket
             ticketcc.save()
+
+
             return HttpResponseRedirect(reverse('helpdesk_ticket_cc', kwargs={'ticket_id': ticket.id}))
     else:
         form = TicketCCForm()

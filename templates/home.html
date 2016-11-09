@@ -432,20 +432,18 @@
                     <!-- tolaTables -->
                     <div id="tables" class="tab-pane fade in active">
                     {% if user.is_authenticated %}
-                      {% if tolaTablesData.tables %}
+                      {% if tolaTablesData%}
                         <h4>Your Tables</h4>
                         <div class=" table-responsive">
                           <table class="table table-striped">
                             <tr>
                               <th>Name</th>
-                              <th>Description</th>
                               <th>Public</th>
                               <th>Date Created</th>
                             </tr>
-                            {% for table in tolaTablesData.tables %}
+                            {% for table in tolaTablesData %}
                             <tr>
                               <td>{{table.name}}</td>
-                              <td>{{table.description}}</td>
                               <td>{{table.public}}</td>
                               <td>{{table.create_date}} </td>
                             </tr>
@@ -631,12 +629,13 @@
       <div class="modal-body">
         <div class="alert alert-success">
           <p>Please describe your project in detail and someone from the TolaData team will get back to you with a quote on how long it would take us to complete and when we could get started.</p>
+          <p><b>*</b> is a required field</p>
         </div>
         <form class="form-horizontal" method='post' name="funding_form" id="f_opportunity-form">
         {% csrf_token %}
         <div class=" row task_spacing">
             <div class="col-md-12 ticket_padding row ticket_edit">
-              <label class="col-md-3"><p><strong>Name:</strong></p></label>
+              <label class="col-md-3"><p><strong>Name:<b>*</b></strong></p></label>
               <div class=" col-md-8">
                 <input class="form-control" type='text' name='name' id='id_name'/>
               </div>
@@ -644,7 +643,7 @@
         </div>
         <div class=" row task_spacing">
             <div class="col-md-12 ticket_padding row ticket_edit">
-              <label class="col-md-3"><p><strong>Phone:</strong></p></label>
+              <label class="col-md-3"><p><strong>Phone:<b>*</b></strong></p></label>
               <div class=" col-md-8">
                 <input class="form-control" type='text' name='phone' id='id_phone'/>
               </div>
@@ -652,7 +651,7 @@
         </div>
         <div class=" row task_spacing">
             <div class="col-md-12 ticket_padding row ticket_edit">
-              <label class="col-md-3"><p><strong>Email:</strong></p></label>
+              <label class="col-md-3"><p><strong>Email:<b>*</b></strong></p></label>
               <div class=" col-md-8">
                 <input class="form-control" type='text' name='email' id='id_email'/>
               </div>
@@ -660,15 +659,15 @@
         </div>
         <div class=" row task_spacing">
             <div class="col-md-12 ticket_padding row ticket_edit">
-              <label class="col-md-3"><p><strong>Project Description:</strong></p></label>
+              <label class="col-md-3"><p><strong>Project Description:<b>*</b></strong></p></label>
               <div class=" col-md-8">
-                <textarea class="form-control" name="project_description" id='id_project_description' rows="4" ></textarea>
+                <textarea class="form-control" name="project_description" id='id_project_description' rows="4"></textarea>
               </div>
             </div> 
         </div>
         <div class=" row task_spacing">
             <div class="col-md-12 ticket_padding row ticket_edit">
-              <label class="col-md-3"><p><strong>Project's Start Date:</strong></p></label>
+              <label class="col-md-3"><p><strong>Project's Start Date:<b>*</b></strong></p></label>
               <div class=" col-md-8">
                   <script>
                       $( function() {
@@ -678,12 +677,13 @@
                       } );
                     </script>
                 <input class="form-control" type='text' name='project_start_date' id='id_project_start_date'/>
+
               </div>
             </div> 
         </div>
         <div class=" row task_spacing ">
             <div class="col-md-12 ticket_padding row ticket_edit">
-              <label class="col-md-3"><p><strong>Total Estimated Amount:</strong></p></label>
+              <label class="col-md-3"><p><strong>Total Estimated Amount:<b>*</b></strong></p></label>
               <div class=" col-md-8 input-group">
                 <span class="input-group-addon">$</span>
                 <input class="form-control" type='number' name='total_estimated_amount' id='id_total_estimated_amount'/>

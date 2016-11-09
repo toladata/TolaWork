@@ -125,7 +125,44 @@ function edit_ticket_post(ticket_id, csrftoken) {
                 console.log(ticket1); 
         },
         error : function(xhr,errmsg,err) {
-            console.log(xhr.status + ": " + xhr.responseText); 
+            alert("An error was encountered!!! Try again Later."); 
         }
     });
+};
+
+//change ticket status
+function edit_ticket_status(ticket_id, csrftoken) {
+   function csrfSafeMethod(method) {
+       // these HTTP methods do not require CSRF protection
+       return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+   }
+   $.ajaxSetup({
+       beforeSend: function(xhr, settings) {
+           if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+               xhr.setRequestHeader("X-CSRFToken", csrftoken);
+           }
+       },
+       headers: { "cache-control": "no-cache" }
+   });
+
+   var new_status = $('input[name="new_status'+ticket_id+'"]:checked').val();
+   var comment = $('#commentBox'+ticket_id).val();
+   var public = $('#id_public'+ticket_id).val();
+   $.ajax({
+       url : "/helpdesk/tickets/"+ticket_id+"/post_comment/",
+       type : "POST", 
+       data : {
+           new_status : new_status,
+           comment : comment,
+           public : public
+           
+       },
+
+       success : function() {
+            alert("You have Succefully updated ticket "+ticket_id+". Your changes will show on Page reload");
+       },
+       error : function(xhr,errmsg,err) {
+           console.log(xhr.status + ": " + xhr.responseText); 
+       }
+   });
 };

@@ -267,6 +267,36 @@
                           </div>
                       </div>
                     </div>
+                    <div class="col-md-12 row">
+                      <div class="col-md-6 row ticket_edit">
+                         <label class="col-md-4"><p><strong> {% trans "Agreement:" %}</strong></p></label>
+                         <div class="col-md-8">
+                            <select class=" form-control" name='project_agreement'> 
+                                <option value= "">Select Agreement</option>
+                                {% if tolaActivityData %}
+                                  {% for data in tolaActivityData|dictsort:"expected_start_date" reversed %}
+                                    <option  value="{{data.project_name}}">{{data.project_name}}</option>
+                                  {% endfor %} 
+                                {% endif %}
+                              </select>
+                            <span style="font-size: 9pt">For tasks related to project agreements in TolaActivity</span>
+                         </div>
+                      </div>
+                      <div class="col-md-6 row ticket_edit">
+                            <label class="col-md-4"><p><strong>{% trans "Table:" %}</strong></p></label>
+                            <div class="col-md-8" >
+                              <select class=" form-control" name='table'> 
+                                <option value= "">Select table</option>
+                                {% if tolaTablesData %}
+                                  {% for table in tolaTablesData %}
+                                    <option  value="{{table.name}}">{{table.name}}</option>
+                                  {% endfor %} 
+                                {% endif %}
+                              </select>
+                              <span style="font-size: 9pt">For tasks related to tables in TolaTables</span>
+                            </div>
+                        </div>
+                      </div>
                       <div class="col-md-12 row task_spacing">
                        <div class="col-md-6 row ticket_edit">
                               <label class="col-md-4"><p><strong>{% trans "Status:" %}</strong></p></label>
