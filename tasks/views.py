@@ -232,7 +232,8 @@ def get_TolaActivity_byUser(request):
         json_obj2 = get_TolaActivity_data()   
         user = {}
         agreements = []
-
+        approvals = []
+        total_agreements = {}
         if request.user.is_authenticated():
             email = request.user.email
             for data in json_obj1:
@@ -242,12 +243,20 @@ def get_TolaActivity_byUser(request):
             if user:
                 try:
                     for activity in json_obj2:
-                        if  activity['approved_by'] == user['url']:
-                            print activity
+                        if  activity['approved_by'] == 'http://activity.toladata.io/api/tolauser/2/':
                             agreements.append(activity)
                 except Exception, e:
                     pass
-        return agreements
+            if agreements:
+                try:
+                    for agreement in agreements:
+                        if agreement['approval'] == 'approved':
+                            approvals.append(agreement)
+                except Exception, e:
+                    pass
+            total_agreements = {'agreements': agreements, 'approvals': approvals}
+
+        return total_agreements
 
     except requests.exceptions.RequestException as e:
         # A serious problem happened, like an SSLError or InvalidURL

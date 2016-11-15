@@ -110,12 +110,8 @@
                           <form method= "POST" action='{% url 'task_edit' task.id  %}'>
                             <div class="col-md-12 row">
                               <div class="col-md-6 row ticket_edit">
-
                                  <label class="col-md-4"><p><strong> {% trans "Title:" %}</strong></p></label>
-
                                  <div class="col-md-8">
-
-
                                     <input class="form-control" type="text" id='id_title' name='task' required value="{{task.task}}" />
                                  </div>
                               </div>
@@ -223,8 +219,8 @@
 
                   </td>
                 </tr>
-
                 {% endfor %}
+
                 <tr>
                   <td colspan="6">
                     {% get_pages %}
@@ -274,7 +270,7 @@
                             <select class=" form-control" name='project_agreement'> 
                                 <option value= "">Select Agreement</option>
                                 {% if tolaActivityData %}
-                                  {% for data in tolaActivityData|dictsort:"expected_start_date" reversed %}
+                                  {% for data in tolaActivityData.agreements|dictsort:"expected_start_date" reversed %}
                                     <option  value="{{data.project_name}}">{{data.project_name}}</option>
                                   {% endfor %} 
                                 {% endif %}
@@ -379,6 +375,41 @@
                 
               </div>
             </div>
+            
+            <div>
+                <button class= "btn btn-warning" data-toggle="collapse" data-target="#tolaactivity">Project Agreements</button>
+                <div id="tolaactivity" class="panel-collapse collapse" style="margin-top: 10px">
+                    <ul class="nav nav-tabs">
+                      <li class="active"><a data-toggle="tab" href="#agreements">Project Agreements</a></li>
+                      <li><a data-toggle="tab" href="#checklist">Checklist Items</a></li>
+                    </ul>
+
+                    <div class="tab-content">
+                      <div id="agreements" class="tab-pane fade in active">
+                        <div class="panel-body">
+                          <table class="table table-striped">
+                            <tr>
+                              <th>Project</th>
+                              <th>Status</th>
+                              <th>Start Date</th>
+                              <th>Due Date</th>
+                              <th></th>
+                            </tr>
+                            {% for agreement in tolaActivityData.approvals|dictsort:"expected_start_date" reversed%}
+                            <tr>
+                              <td>{{agreement.project_name}}</td>
+                              <td> {% if agreement.approval == 'approved' %} Done {% else %} Active {% endif %}</td>
+                              <td>{{agreement.expected_start_date}}</td>
+                              <td>{{agreement.expected_end_date}}</td>
+                              <td><a href="#"><span class="glyphicon glyphicon-ok"></span> Approve</a></td>
+                            </tr>
+                            {% endfor %}
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+              </div>
             <!-- start gaming -->
            <!-- <div class="col-md-12 row">
             <h3 class="font9">Task Solving Game</h3>
