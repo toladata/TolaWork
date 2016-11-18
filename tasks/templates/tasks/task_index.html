@@ -375,7 +375,7 @@
                 
               </div>
             </div>
-            
+            {% if tolaActivityData.approvals %}
             <div>
                 <button class= "btn btn-warning" data-toggle="collapse" data-target="#tolaactivity">Project Agreements</button>
                 <div id="tolaactivity" class="panel-collapse collapse" style="margin-top: 10px">
@@ -401,7 +401,7 @@
                               <td> {% if agreement.approval == 'approved' %} Done {% else %} Active {% endif %}</td>
                               <td>{{agreement.expected_start_date}}</td>
                               <td>{{agreement.expected_end_date}}</td>
-                              <td><a href="#"><span class="glyphicon glyphicon-ok"></span> Approve</a></td>
+                              <td><a href="http://activity.toladata.io"  target="_blank"><span class="glyphicon glyphicon-ok"></span> Approve</a></td>
                             </tr>
                             {% endfor %}
                           </table>
@@ -410,6 +410,7 @@
                     </div>
                 </div>
               </div>
+              {% endif %}
             <!-- start gaming -->
            <!-- <div class="col-md-12 row">
             <h3 class="font9">Task Solving Game</h3>

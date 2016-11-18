@@ -243,14 +243,14 @@ def get_TolaActivity_byUser(request):
             if user:
                 try:
                     for activity in json_obj2:
-                        if  activity['approved_by'] == 'http://activity.toladata.io/api/tolauser/2/':
+                        if  activity['approved_by'] == user['url']:
                             agreements.append(activity)
                 except Exception, e:
                     pass
             if agreements:
                 try:
                     for agreement in agreements:
-                        if agreement['approval'] == 'approved':
+                        if agreement['approval'] == 'awaiting approval':
                             approvals.append(agreement)
                 except Exception, e:
                     pass
