@@ -20,6 +20,7 @@ def get_issue_status(repo,ticket):
         title = data['title']
         updated_date = data['updated_at']
         state = data['state']
+        description = data['body']
 
         if state == 'closed':
             status = 4 # If 'Closed' in github, save as 'Closed' in TW
@@ -39,6 +40,8 @@ def get_issue_status(repo,ticket):
             new_followup.save()
 
         update_ticket.status = status
+        update_ticket.title =title
+        update_ticket.description = description
         update_ticket.save()
 
     return r.status_code
