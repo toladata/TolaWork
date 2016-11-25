@@ -135,6 +135,10 @@ def get_label(repo,ticket):
                 label_txt2 = ' and Developers have started working on the Ticket'
                 label_int = '2'
 
+            elif label == "3 - In Dev":
+                label_txt2 = ' and moved to Dev'
+                label_int = '3'
+
             elif label == "4 - Done":
                 label_txt2 = ' and its Done'
                 label_int = '4'
