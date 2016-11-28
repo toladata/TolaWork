@@ -558,7 +558,7 @@ def view_ticket(request, ticket_id):
 
     # TODO: shouldn't this template get a form to begin with?
     tags = [t.pk for t in ticket.tags.all()]
-    form = TicketForm(initial={'due_date':ticket_state.due_date, 'tags':tags})
+    form = form_data(request)
     tags = Tag.objects.all()
 
     #ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)

@@ -182,7 +182,7 @@
       
       <div class="panel" id = "auto_load_div{{ticket.id}}">
         <div class="panel-heading color_{{ticket.queue_id}}"><a href='{{ ticket.get_absolute_url }}' >
-          {{ ticket.ticket | upper}} <strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}
+         {% if query%} {% highlight ticket.ticket with query css_class "highlight" html_tag "span" %} {% else %} {{ ticket.ticket | upper}} {% endif %}<strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}
           {% endif %}</strong></a>
           {% if ticket.progress %}
           <div class="read_more">
