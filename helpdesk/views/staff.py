@@ -1284,7 +1284,8 @@ def create_ticket(request):
 
             #ticket.comment = ''
             comment = ""
-            if len(request.FILES) != 0:
+            if len(request.FILES.getlist('attachment')) != 0:
+                print request.FILES.getlist('attachment')
                 f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
                 f.save()
 
@@ -1292,7 +1293,7 @@ def create_ticket(request):
                 file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
+            #post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
