@@ -723,18 +723,6 @@
 </script>
 <script>
     $(document).ready(function() {
-        $("#ShowFurtherEditOptions").click(function() {
-            $("#FurtherEditOptions").fadeIn();
-            $("#ShowFurtherOptPara").show();
-            return false;
-        });
-
-        processAddFileClick();
-        $("#ShowFileUpload").click(function() {
-            $("#FileUpload").fadeIn();
-            $("#ShowFileUploadPara").show();
-            return false;
-        });
 
         $('#id_preset').change(function() {
             preset = $('#id_preset').val();
@@ -748,17 +736,6 @@
         $("[data-toggle=tooltip]").tooltip();
     });
 
-    function processAddFileClick() {
-        /* Until jQuery includes some 'livequery' functionality in the core
-           distribution, this will have to do. */
-        $(".AddAnotherFile>a").click(function() {
-            $(this).parent().remove();
-            $("#FileUpload>dl").append("<dt><label>Attach another File</label></dt><dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>Add Another File</a>)</span></dd>");
-            processAddFileClick();
-            return false;
-        });
-
-    }
 
     $('#f_opportunity-form').on('submit', function(event){
           event.preventDefault();

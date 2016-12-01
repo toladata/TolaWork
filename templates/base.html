@@ -38,8 +38,7 @@
 
         {% block extra_js_in_header %}
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-        <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.11.1.min.js"></script>
-        <script type="text/javascript" src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
         
         <!-- App specific Javascript -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/app.js"></script>
@@ -191,11 +190,11 @@
                                     <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'><b>Add Another File</b></a>)</span></dd>
                                   </dl>
                                 </div>
-                                <div class="row mydropdiv">
+                               <!--  <div class="row mydropdiv">
                                     <div class=" col-md-offset-1 dropzone col-md-10" id="dZUpload" style="margin-botttom:10px" ></div>
                                     <div class="col-md-1"></div>
                                 </div>
-                                <br><br>
+                                <br><br> -->
                                 <div class='buttons form-group'>
                                 <input type='submit' class="btn btn-primary" value='Submit Ticket' />
                                 </div>
@@ -246,6 +245,30 @@
           ga('send', 'pageview');
 
     $(document).ready(function(){
+        $("#ShowFurtherEditOptions").click(function() {
+            $("#FurtherEditOptions").fadeIn();
+            $("#ShowFurtherOptPara").show();
+            return false;
+        });
+
+        processAddFileClick();
+        $("#ShowFileUpload").click(function() {
+            $("#FileUpload").fadeIn();
+            $("#ShowFileUploadPara").show();
+            return false;
+        });
+
+        function processAddFileClick() {
+        /* Until jQuery includes some 'livequery' functionality in the core
+           distribution, this will have to do. */
+        $(".AddAnotherFile>a").click(function() {
+            $(this).parent().remove();
+            $("#FileUpload>dl").append("<dt><label>Attach another File</label></dt><dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>Add Another File</a>)</span></dd>");
+            processAddFileClick();
+            return false;
+        });
+
+    }
           
         $("#id_tags").select2({
                 tags: true,
