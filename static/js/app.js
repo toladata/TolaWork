@@ -90,8 +90,7 @@ function create_post() {
 };
 
 //Submit ticket edit data
-function edit_ticket_post(ticket_id, csrftoken) {
-    console.log(ticket_id);
+function edit_ticket_post(data, csrftoken, ticket_id) {
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
@@ -105,10 +104,7 @@ function edit_ticket_post(ticket_id, csrftoken) {
         headers: { "cache-control": "no-cache" }
     });
 
-    $.ajax({
-        url : "/helpdesk/tickets/ticket_edit/?ticket_id="+ticket_id,
-        type : "POST", 
-        data : {
+   /* data = {
                 title : $('#id_title'+ticket_id).val(), 
                 queue : $('#id_queue'+ticket_id).val(), 
                 type: $('#id_type'+ticket_id).val(),
@@ -118,14 +114,24 @@ function edit_ticket_post(ticket_id, csrftoken) {
                 description: $('#id_description'+ticket_id).val(),
                 email: $('#id_email'+ticket_id).val(),
                 due_date: $('#id_due_date'+ticket_id).val(),
-                edit_tags: $('#id_edit_tags'+ticket_id).val()
-             },
+                edit_tags: $('#id_edit_tags'+ticket_id).val(),
+                files: $('#id_file'+ticket_id).val()
+             };*/
+
+    console.log(data)
+
+    $.ajax({
+        url : "/helpdesk/tickets/ticket_edit/?ticket_id="+ticket_id,
+        type : "POST", 
+        processData: false,
+        contentType: false,
+        data: data,
         success : function(ticket1) {
                 alert("You have Succefully Edited ticket #"+ticket_id+". Your changes will show on Page reload");
                 console.log(ticket1); 
         },
         error : function(xhr,errmsg,err) {
-            alert("An error was encountered!!! Try again Later."); 
+            console.log(xhr.status + ": " + xhr.responseText); 
         }
     });
 };
