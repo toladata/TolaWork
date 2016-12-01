@@ -1306,7 +1306,12 @@ def create_ticket(request):
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
-            return HttpResponseRedirect(ticket.get_absolute_url())
+            ticket = {'ticket_id': ticket.id}
+
+            return HttpResponse(
+                            json.dumps(ticket),
+                            content_type="application/json"
+                        )
     else:
         form = form_data(request)
         

@@ -675,7 +675,7 @@
                           </div>
                         </div>  
                       </div>
-                      <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</a></p>
+                      <!-- <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</a></p>
 
                       <div id='FileUpload' style='display: none;'>
 
@@ -683,8 +683,13 @@
                             <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
                               <dd><input type='file' name='attachment' id='id_file{{ticket.id}}' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>
                           </dl>
-                      </div>
-                      <div class=" row">
+                      </div> -->
+                        <div class="row mydropdiv">
+                                <div class=" col-md-offset-1 dropzone col-md-10" id="file_upload" style="margin-botttom:10px" ></div>
+                                <div class="col-md-1"></div>
+                            </div>
+                            <br><br>
+                        <div class=" row">
                         <label class= "col-md-6 row ticket_edit">
                           <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />
                         </label>
@@ -692,17 +697,48 @@
                      {% csrf_token %}
                     </form> 
                     <script>
-                         $('form#ticket_edit-form{{ticket.id}}').on('submit', function(event){
-                              event.preventDefault();
-                              var data = new FormData($(this)[0]);
-                              var edit_tags = $('#id_edit_tags{{ticket.id}}').val();
-                              for (var i = 0; i < edit_tags.length; i++) {
-                                data.append('edit_tags[]', edit_tags[i]);
-                              };
+                         $(document).ready(function(){
 
-                              var csrftoken = $("#ticket_edit-form{{ticket.id}}").find('input[name="csrfmiddlewaretoken"]').val();
-                              edit_ticket_post(data, csrftoken, '{{ticket.id}}');
-                          });
+                                var list_of_files = new Array();
+                                Dropzone.autoDiscover = false;
+
+                                var mydropzone1 = new Dropzone("#file_upload", {
+                                      url: "/helpdesk/tickets/submit/",
+                                      uploadMultiple: true,
+                                      maxFiles: 5,
+                                      autoProcessQueue : false,
+                                      init : function() {
+                                          this.on("addedfile", function(file)
+                                              {
+                                                  if (list_of_files.length < 5)
+                                                  {
+                                                      list_of_files.push(file)
+                                                      console.log("file added");
+                                                  }
+                                              });
+                                      }
+                                  });
+
+                                  $('form#ticket_edit-form{{ticket.id}}').on('submit', function(event){
+                                      event.preventDefault();
+
+                                      var data = new FormData($(this)[0]);
+                                      var edit_tags = $('#id_edit_tags{{ticket.id}}').val();
+                                      for (var i = 0; i < edit_tags.length; i++) {
+                                        data.append('edit_tags[]', edit_tags[i]);
+                                      };
+
+                                      console.log(list_of_files);
+
+                                      for(i=0;i<list_of_files.length;i++)
+                                          {
+                                            data.append('attachment', list_of_files[i]);
+                                          }
+
+                                      var csrftoken = $("#ticket_edit-form{{ticket.id}}").find('input[name="csrfmiddlewaretoken"]').val();
+                                      edit_ticket_post(data, csrftoken, '{{ticket.id}}');
+                                  });
+                               });
                     </script>
                   </div>
                 </div>
