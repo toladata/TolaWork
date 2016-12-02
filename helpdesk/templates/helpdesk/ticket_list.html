@@ -461,15 +461,7 @@
                           <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
                         {% endif %}
                       </dl>
-                      <!-- <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</a></p>
-
-                      <div id='FileUpload' style='display: none;'>
-
-                          <dl>
-                            <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
-                              <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>
-                          </dl>
-                      </div> -->
+                      
                     </fieldset>
                     <div class="row">
                       <div class="col-md-9">
@@ -558,8 +550,8 @@
                   {% if ticket.git_label == 0 %}Backlog
                     {% elif ticket.git_label == 1 %}Ready
                     {% elif ticket.git_label == 2 %}working
-                    {% elif ticket.git_label == 4 %}InDev
-                    {% elif ticket.git_label == 5 %}Done
+                    {% elif ticket.git_label == 3 %}In Dev
+                    {% elif ticket.git_label == 4 %}Done
                     {% endif%} 
                   </span>
               {% endif %}
@@ -689,7 +681,21 @@
                           </div>
                         </div>  
                       </div>
-                      <div class=" row">
+                      <!-- <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</a></p>
+
+                      <div id='FileUpload' style='display: none;'>
+
+                          <dl>
+                            <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
+                              <dd><input type='file' name='attachment' id='id_file{{ticket.id}}' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>
+                          </dl>
+                      </div> -->
+                        <div class="row mydropdiv">
+                                <div class=" col-md-offset-1 dropzone col-md-10" id="dZUpload-edit" style="margin-botttom:10px" ></div>
+                                <div class="col-md-1"></div>
+                            </div>
+                            <br><br>
+                        <div class=" row">
                         <label class= "col-md-6 row ticket_edit">
                           <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />
                         </label>
@@ -697,11 +703,62 @@
                      {% csrf_token %}
                     </form> 
                     <script>
-                    $('#ticket_edit-form{{ticket.id}}').on('submit', function(event){
-                        event.preventDefault();
-                        var csrftoken = $("#ticket_edit-form{{ticket.id}}").find('input[name="csrfmiddlewaretoken"]').val();
-                        edit_ticket_post({{ticket.id}}, csrftoken);
-                    });
+                         $(document).ready(function(){
+
+                                var list_of_files = new Array();
+                                Dropzone.autoDiscover = false;
+
+                                $("div#dZUpload-edit").dropzone({
+                                      url: "/helpdesk/tickets/submit/",
+                                      uploadMultiple: true,
+                                      maxFiles: 5,
+                                      autoProcessQueue : false,
+                                      init : function() {
+                                          this.on("addedfile", function(file)
+                                              {
+                                                  if (list_of_files.length < 5)
+                                                  {
+                                                      list_of_files.push(file)
+                                                      console.log("file added");
+                                                  }
+                                              });
+                                      }
+                                  });
+
+
+                              /*document.onpaste = function(event){
+                                  var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+
+                                  for (index in items) {
+                                    var item = items[index];
+                                    if (item.kind === 'file') {
+                                      // adds the file to your dropzone instance
+                                      //mydropzone1.addFile(item.getAsFile());
+                                    }
+                                  }
+                                }*/
+
+
+                                  $('form#ticket_edit-form{{ticket.id}}').on('submit', function(event){
+                                      event.preventDefault();
+
+                                      var data = new FormData($(this)[0]);
+                                      var edit_tags = $('#id_edit_tags{{ticket.id}}').val();
+                                      for (var i = 0; i < edit_tags.length; i++) {
+                                        data.append('edit_tags[]', edit_tags[i]);
+                                      };
+
+                                      console.log(list_of_files);
+
+                                      for(i=0;i<list_of_files.length;i++)
+                                          {
+                                            data.append('attachment', list_of_files[i]);
+                                          }
+
+                                      var csrftoken = $("#ticket_edit-form{{ticket.id}}").find('input[name="csrfmiddlewaretoken"]').val();
+                                      edit_ticket_post(data, csrftoken, '{{ticket.id}}');
+                                  });
+                               });
                     </script>
                   </div>
                 </div>
@@ -774,60 +831,6 @@
             <span class="glyphicon glyphicon-user font10"></span>&nbsp;<strong class="font10">My Tickets </strong>
             <button class="btn btn-sm btn-warning read_more" type="submit" data-toggle="modal" data-target="#ticketModal" ><b><span class="glyphicon glyphicon-plus"></span></b> New Ticket</button>
           </div>
-            <!-- Create ticket modal -->
-            <div class="modal fade " id="ticketModal" role="dialog">
-              <div class="modal-dialog task_form modal-lg">
-                <!-- Modal content-->
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h3 class="modal-title font9">Submit a Ticket</h3>
-                    <p class="font9">Unless otherwise stated, all fields are required. Please provide as descriptive a title and description as possible.</p>
-                  </div>
-                  <div class="modal-body">
-                    <div class="alert alert-success" role="alert">
-                      <p>'We recommend that you search for your ticket or request before you enter a new ticket. Just check if a similar ticket has not been raised<br>If you have done a search, ignore this message!'</p>
-                    </div>
-                    <form class="form-horizontal" method='post' action='/helpdesk/tickets/submit/' enctype='multipart/form-data'  name="most">
-                      {% load crispy_forms_tags %}
-                      {% crispy form form.helper %}
-                      {% comment %}
-                        {% for field in form %}
-                          {% if field.is_hidden %}
-                            {{ field }}
-                          {% else %}
-                            <dt><label for='id_{{ field.name }}'>{% trans field.label %}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
-                            <dd>{{ field }}</dd>
-                            {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
-                            {% if field.help_text %}<dd class='form_help_text'>{% trans field.help_text %}</dd>{% endif %}
-
-                          {% endif %}
-                        {% endfor %}
-                      {% endcomment %}
-                      <div class = "col-md-offset-2 col-md-10">
-                        <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'><b>{% trans "Attach More File(s) &raquo;" %}</b></a></p>
-                        <div id='FileUpload' style='display: none;'>
-                          <dl>
-                            <dt><label for='id_file'> <b>{% trans "Attach a File" %}</b></label></dt>
-                            <dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'><b>{% trans "Add Another File" %}</b></a>)</span></dd>
-                          </dl>
-                        </div>
-                        <div class='buttons form-group'>
-                            <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
-                        </div>
-                      </div> 
-                      {{ form.media }}
-
-                      {% csrf_token %}
-                    </form>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                  </div>
-                </div> 
-              </div>
-            </div>
-            <!-- end add ticket modal -->
 
             <!-- user ticket summary -->
             <div class="panel-body">
@@ -1121,7 +1124,7 @@
               <div class='thumbnail  sorting_form filterBox{% if query %} filterBoxShow{% endif %}' id='filterBoxKeywords'>
                 <div class="keywords">
                   <label for='id_query'>{% trans "Keywords: " %}</label>
-                  <input class="status_select" type='text' name='q' {% if query %} value={{query}} {% else %} value='' {% endif %}' id='q' />
+                  <input class="status_select" type='text' name='q' {% if query %} value={{query}} {% else %} value='' {% endif %} id='q' />
                 </div>
                 <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for in the title, body and submitter fields." %}</p>
                 <input type='button' class='filterBuilderRemove' value='' />
@@ -1285,22 +1288,9 @@ $(document).ready(function() {
  </script>
 <script>
     $(document).ready(function() {
-        $("#ShowFurtherEditOptions").click(function() {
-            $("#FurtherEditOptions").fadeIn();
-            $("#ShowFurtherOptPara").show();
-            return false;
-        });
-
         $("#id_tags").select2({
                 tags: true,
                 allowClear: true,
-        });
-
-        processAddFileClick();
-        $("#ShowFileUpload").click(function() {
-            $("#FileUpload").fadeIn();
-            $("#ShowFileUploadPara").show();
-            return false;
         });
 
         $('#id_preset').change(function() {
@@ -1313,20 +1303,8 @@ $(document).ready(function() {
         });
     });
 
-    function processAddFileClick() {
-        /* Until jQuery includes some 'livequery' functionality in the core
-           distribution, this will have to do. */
-        $(".AddAnotherFile>a").click(function() {
-            $(this).parent().remove();
-            $("#FileUpload>dl").append("<dt><label>Attach another File</label></dt><dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>Add Another File</a>)</span></dd>");
-            processAddFileClick();
-            return false;
-        });
-
-    }
-
     $(function () {
-        $('[data-toggle="popover"]').popover()
+        $('[data-toggle="popover"]').popover();
       });
 
     $('#ticket_edit-form').on('submit', function(event){

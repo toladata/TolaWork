@@ -90,8 +90,7 @@ function create_post() {
 };
 
 //Submit ticket edit data
-function edit_ticket_post(ticket_id, csrftoken) {
-    console.log(ticket_id);
+function edit_ticket_post(data, csrftoken, ticket_id) {
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
@@ -105,30 +104,56 @@ function edit_ticket_post(ticket_id, csrftoken) {
         headers: { "cache-control": "no-cache" }
     });
 
+    console.log(data)
+
     $.ajax({
         url : "/helpdesk/tickets/ticket_edit/?ticket_id="+ticket_id,
         type : "POST", 
-        data : {
-                title : $('#id_title'+ticket_id).val(), 
-                queue : $('#id_queue'+ticket_id).val(), 
-                type: $('#id_type'+ticket_id).val(),
-                owner: $('#id_owner'+ticket_id).val(),
-                priority: $('#id_priority'+ticket_id).val(),
-                error_msg: $('#id_error_msg'+ticket_id).val(),
-                description: $('#id_description'+ticket_id).val(),
-                email: $('#id_email'+ticket_id).val(),
-                due_date: $('#id_due_date'+ticket_id).val(),
-                edit_tags: $('#id_edit_tags'+ticket_id).val()
-             },
+        processData: false,
+        contentType: false,
+        data: data,
         success : function(ticket1) {
                 alert("You have Succefully Edited ticket #"+ticket_id+". Your changes will show on Page reload");
                 console.log(ticket1); 
         },
         error : function(xhr,errmsg,err) {
-            alert("An error was encountered!!! Try again Later."); 
+            console.log(xhr.status + ": " + xhr.responseText); 
         }
     });
 };
+
+function create_ticket(data, csrftoken){
+
+  function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        },
+        headers: { "cache-control": "no-cache" }
+    });
+
+
+  $.ajax({
+        url : "/helpdesk/tickets/submit/",
+        type : "POST", 
+        processData: false,
+        contentType: false,
+        data: data,
+        success : function(ticket) {
+                alert("You have Succefully submitted a ticket!!");
+                console.log(ticket); 
+                window.location.href = '/helpdesk/tickets/'+ticket.ticket_id;
+        },
+        error : function(xhr,errmsg,err) {
+            console.log("There was a problem submitting your ticket"); 
+        }
+    });
+}
 
 //change ticket status
 function edit_ticket_status(ticket_id, csrftoken) {

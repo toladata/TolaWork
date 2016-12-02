@@ -496,12 +496,15 @@ def githubSync(request):
         )
     for ticket in tickets:
         # Sync 'Closed' status in github to 'Resolved' status in TW
-        if ticket.github_issue_number:
-            queue = queue_repo(ticket)
-            response = get_issue_status(queue,ticket)
+        try:
+            if ticket.github_issue_number:
+                queue = queue_repo(ticket)
+                response = get_issue_status(queue,ticket)
 
-            if response == 200:
-                print 'GitHubSync Success - #' + str(ticket.github_issue_number)
+                if response == 200:
+                    print 'GitHubSync Success - #' + str(ticket.github_issue_number)
+        except Exception, e:
+            pass
 
     return HttpResponseRedirect('/home')
 

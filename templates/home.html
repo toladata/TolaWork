@@ -617,6 +617,7 @@
   </div> <!-- end home_cover -->
 </div> <!-- end container -->
 </div>
+
 <!-- add funding opportunity modal -->
 <div class="modal fade " id="fundingModal" role="dialog">
   <div class="modal-dialog task_form modal-lg">
@@ -712,7 +713,7 @@
     </div> 
   </div>
 </div>
-<!-- end add ticket modal -->
+<!-- end add Funding Opportunity modal -->
 <script>
   $("#id_tags").select2({
               tags: true,
@@ -722,18 +723,6 @@
 </script>
 <script>
     $(document).ready(function() {
-        $("#ShowFurtherEditOptions").click(function() {
-            $("#FurtherEditOptions").fadeIn();
-            $("#ShowFurtherOptPara").show();
-            return false;
-        });
-
-        processAddFileClick();
-        $("#ShowFileUpload").click(function() {
-            $("#FileUpload").fadeIn();
-            $("#ShowFileUploadPara").show();
-            return false;
-        });
 
         $('#id_preset').change(function() {
             preset = $('#id_preset').val();
@@ -747,17 +736,6 @@
         $("[data-toggle=tooltip]").tooltip();
     });
 
-    function processAddFileClick() {
-        /* Until jQuery includes some 'livequery' functionality in the core
-           distribution, this will have to do. */
-        $(".AddAnotherFile>a").click(function() {
-            $(this).parent().remove();
-            $("#FileUpload>dl").append("<dt><label>Attach another File</label></dt><dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>Add Another File</a>)</span></dd>");
-            processAddFileClick();
-            return false;
-        });
-
-    }
 
     $('#f_opportunity-form').on('submit', function(event){
           event.preventDefault();

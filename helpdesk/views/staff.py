@@ -1222,6 +1222,15 @@ def ticket_edit(request):
 
             ticket.tags.add(tag) 
 
+        comment = ""
+        if len(request.FILES) != 0:
+                print request.FILES
+                f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
+                f.save()
+
+                # #Attach a File
+                file_attachment(request, f)
+
         ticket = get_object_or_404(Ticket, id=ticket_id)
         ticket = {'id': ticket.id,'title':ticket.title, 'queue': ticket.queue.id, 'status': ticket.status, 'priority':ticket.priority, 'description':ticket.description}
 
@@ -1266,6 +1275,7 @@ def create_ticket(request):
             #ticket.comment = ''
             comment = ""
             if len(request.FILES) != 0:
+                print request.FILES
                 f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
                 f.save()
 
@@ -1273,11 +1283,16 @@ def create_ticket(request):
                 file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
+            #post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
-            return HttpResponseRedirect(ticket.get_absolute_url())
+            ticket = {'ticket_id': ticket.id}
+
+            return HttpResponse(
+                            json.dumps(ticket),
+                            content_type="application/json"
+                        )
     else:
         form = form_data(request)
         

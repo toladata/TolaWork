@@ -20,6 +20,7 @@ def get_issue_status(repo,ticket):
         title = data['title']
         updated_date = data['updated_at']
         state = data['state']
+        description = data['body']
 
         if state == 'closed':
             status = 4 # If 'Closed' in github, save as 'Closed' in TW
@@ -39,6 +40,8 @@ def get_issue_status(repo,ticket):
             new_followup.save()
 
         update_ticket.status = status
+        update_ticket.title =title
+        update_ticket.description = description
         update_ticket.save()
 
     return r.status_code
@@ -134,6 +137,10 @@ def get_label(repo,ticket):
             elif label == "2 - Working":
                 label_txt2 = ' and Developers have started working on the Ticket'
                 label_int = '2'
+
+            elif label == "3 - In Dev":
+                label_txt2 = ' and moved to Dev'
+                label_int = '3'
 
             elif label == "4 - Done":
                 label_txt2 = ' and its Done'
