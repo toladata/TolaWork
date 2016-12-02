@@ -237,37 +237,11 @@
           ga('send', 'pageview');
 
     $(document).ready(function(){
-        $("#ShowFurtherEditOptions").click(function() {
-            $("#FurtherEditOptions").fadeIn();
-            $("#ShowFurtherOptPara").show();
-            return false;
-        });
-
-        processAddFileClick();
-        $("#ShowFileUpload").click(function() {
-            $("#FileUpload").fadeIn();
-            $("#ShowFileUploadPara").show();
-            return false;
-        });
-
-        function processAddFileClick() {
-        /* Until jQuery includes some 'livequery' functionality in the core
-           distribution, this will have to do. */
-        $(".AddAnotherFile>a").click(function() {
-            $(this).parent().remove();
-            $("#FileUpload>dl").append("<dt><label>Attach another File</label></dt><dd><input type='file' name='attachment' id='file' multiple/> <span class='AddAnotherFile'>(<a href='#'>Add Another File</a>)</span></dd>");
-            processAddFileClick();
-            return false;
-        });
-
-    }
           
         $("#id_tags").select2({
                 tags: true,
                 allowClear: true,
         });
-
-
 
         var csrftoken = $("#ticket_form").find('input[name="csrfmiddlewaretoken"]').val();
 
@@ -280,9 +254,10 @@
         });
 
         var list_of_files = new Array();
+
         console.log(csrftoken);
 
-        var mydropzone = $("#dZUpload").dropzone({
+        var mydropzone1 = new Dropzone("#dZUpload", {
             url: "/helpdesk/tickets/submit/",
             uploadMultiple: true,
             maxFiles: 5,
@@ -298,6 +273,19 @@
                     });
             }
         });
+
+        document.onpaste = function(event){
+            var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+
+            for (index in items) {
+              var item = items[index];
+              console.log(item);
+              if (item.kind === 'file') {
+                // adds the file to your dropzone instance
+               mydropzone1.addFile(item.getAsFile());
+              }
+            }
+          }
 
         $('#ticket_form').on('submit', function(event){
                 event.preventDefault();
@@ -318,7 +306,7 @@
 
                 })
     });
-        </script>
+</script>
 
         {% endblock %}
     </body>
