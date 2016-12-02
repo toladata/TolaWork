@@ -29,8 +29,10 @@
         <!-- lookup_override.1.8 -->
 
         <!-- Data tables CSS -->
-        <link href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
+        <link href="{{ STATIC_URL}}css/datatables.min.css" rel="stylesheet" type="text/css" />
+
         <link href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css" rel="stylesheet" type="text/css" />
+
 
         <!--- Django Tables2 css -->
         <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
@@ -213,6 +215,9 @@
         <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.10.4.min.js"></script>
         <!-- data tables jquery javascript library -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
+        <script type="text/javascript" src="//code.jquery.com/jquery-1.12.3.js"></script>
+
         <!-- Bootstrap compiled javascript plugins -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
         <script type="text/javascript" src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
