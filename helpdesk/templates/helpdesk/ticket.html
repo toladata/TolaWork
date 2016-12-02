@@ -496,6 +496,18 @@
                                       }
                                   });
 
+                                document.onpaste = function(event){
+                                    var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+
+                                    for (index in items) {
+                                      var item = items[index];
+                                      if (item.kind === 'file') {
+                                        // adds the file to your dropzone instance
+                                        mydropzone1.addFile(item.getAsFile());
+                                      }
+                                    }
+                                  }
+
                                   $('form#ticket_edit-form{{ticket.id}}').on('submit', function(event){
                                       event.preventDefault();
 

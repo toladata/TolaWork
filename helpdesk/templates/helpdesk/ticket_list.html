@@ -685,7 +685,7 @@
                           </dl>
                       </div> -->
                         <div class="row mydropdiv">
-                                <div class=" col-md-offset-1 dropzone col-md-10" id="file_upload" style="margin-botttom:10px" ></div>
+                                <div class=" col-md-offset-1 dropzone col-md-10" id="dZUpload-edit" style="margin-botttom:10px" ></div>
                                 <div class="col-md-1"></div>
                             </div>
                             <br><br>
@@ -702,7 +702,7 @@
                                 var list_of_files = new Array();
                                 Dropzone.autoDiscover = false;
 
-                                var mydropzone1 = new Dropzone("#file_upload", {
+                                $("div#dZUpload-edit").dropzone({
                                       url: "/helpdesk/tickets/submit/",
                                       uploadMultiple: true,
                                       maxFiles: 5,
@@ -718,6 +718,20 @@
                                               });
                                       }
                                   });
+
+
+                              /*document.onpaste = function(event){
+                                  var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+
+                                  for (index in items) {
+                                    var item = items[index];
+                                    if (item.kind === 'file') {
+                                      // adds the file to your dropzone instance
+                                      //mydropzone1.addFile(item.getAsFile());
+                                    }
+                                  }
+                                }*/
+
 
                                   $('form#ticket_edit-form{{ticket.id}}').on('submit', function(event){
                                       event.preventDefault();
