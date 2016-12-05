@@ -1143,7 +1143,6 @@ def ticket_list(request):
             ticket_queue=q,
             ticket_type=Ticket.TICKET_TYPE,
             my_tickets = len(tickets_created),
-            items_per_page=items_per_page,
             number_of_tickets=len(ticket_qs),
             assigned_to_me=len(tickets_assigned),
             num_tickets=num_tickets,
