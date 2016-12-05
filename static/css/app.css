@@ -11,7 +11,9 @@ body {
     font-size: 15px;
     margin-bottom: 60px;
 }
-
+#t_table tr:first-child{
+border-top: 0px;
+}
 #footer {
     position: fixed;
     bottom: 0px;

@@ -1115,23 +1115,7 @@ def ticket_list(request):
         ticket_qs = apply_query(tickets, query_params)
 
 
-    #Change items per_page by a user
-    items_per_page = 10
-    user_choice_pageItems = request.GET.get('items_per_page')
-
-    if user_choice_pageItems:
-        items_per_page = user_choice_pageItems
-
-    ticket_paginator = paginator.Paginator(ticket_qs, items_per_page)
-    try:
-        page = int(request.GET.get('page', '1'))
-    except ValueError:
-        page = 1
-
-    try:
-        tickets = ticket_paginator.page(page)
-    except (paginator.EmptyPage, paginator.InvalidPage):
-        tickets = ticket_paginator.page(ticket_paginator.num_pages)
+    
 
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
@@ -1145,18 +1129,15 @@ def ticket_list(request):
     from helpdesk.lib import b64encode
     urlsafe_query = b64encode(pickle.dumps(query_params))
 
-    querydict = request.GET.copy()
-    querydict.pop('page', 1)
-
     q = Queue.objects.all()
     tags = Tag.objects.all()
+
 
     return render_to_response('helpdesk/ticket_list.html',
         RequestContext(request, dict(
             context,
-            query_string=querydict.urlencode(),
             query = request.GET.get('q'),
-            tickets=tickets,
+            tickets=ticket_qs,
             tags=tags,
             priorities = Ticket.PRIORITY_CHOICES,
             ticket_queue=q,
