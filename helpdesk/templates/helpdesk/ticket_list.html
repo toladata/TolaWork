@@ -178,7 +178,7 @@
         {% endif %}
       </div>
      
-      {% for ticket in tickets.object_list.reverse %}
+      {% for ticket in tickets %}
       
       <div class="panel" id = "auto_load_div{{ticket.id}}">
         <div class="panel-heading color_{{ticket.queue_id}}"><a href='{{ ticket.get_absolute_url }}' >

@@ -1690,8 +1690,10 @@ ticket_cc = staff_member_required(ticket_cc)
 
 def ticket_cc_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
+    form = form_data(request)
+
     if request.method == 'POST':
-        form = TicketCCForm(request.POST)
+        form1 = TicketCCForm(request.POST)
         if form.is_valid():
             ticketcc = form.save(commit=False)
             ticketcc.ticket = ticket
@@ -1700,15 +1702,17 @@ def ticket_cc_add(request, ticket_id):
 
             return HttpResponseRedirect(reverse('helpdesk_ticket_cc', kwargs={'ticket_id': ticket.id}))
     else:
-        form = TicketCCForm()
+        form1 = TicketCCForm()
     return render_to_response('helpdesk/ticket_cc_add.html',
         RequestContext(request, {
             'ticket': ticket,
-            'form': form,
+            'form1': form1,
+            'form' : form,
         }))
 ticket_cc_add = staff_member_required(ticket_cc_add)
 
 def ticket_cc_del(request, ticket_id, cc_id):
+    form = form_data(request)
     cc = get_object_or_404(TicketCC, ticket__id=ticket_id, id=cc_id)
     if request.method == 'POST':
         cc.delete()
@@ -1716,6 +1720,7 @@ def ticket_cc_del(request, ticket_id, cc_id):
     return render_to_response('helpdesk/ticket_cc_del.html',
         RequestContext(request, {
             'cc': cc,
+            'form': form,
         }))
 ticket_cc_del = staff_member_required(ticket_cc_del)
 
