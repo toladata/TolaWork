@@ -96,7 +96,7 @@ def task_list(request):
 
     return render_to_response('tasks/task_index.html',
         RequestContext(request, {
-        'tasks': tasks,
+        'tasks': tasks.order_by('created_date').reverse,
         'assignable_users': assignable_users,
         'created_by': created_by,
         'status_choices':Task.STATUS_CHOICES, 
@@ -134,7 +134,7 @@ def create_task(request):
     tasks = Task.objects.all()
     return render_to_response('tasks/task_index.html',
         RequestContext(request, {
-        	'tasks':Task.objects.all(),
+        	'tasks':Task.objects.all().order_by('created_date').reverse,
             'assignable_users': assignable_users,
             'created_by': created_by,
             'form': form
