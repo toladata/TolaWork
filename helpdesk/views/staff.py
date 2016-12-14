@@ -1085,7 +1085,7 @@ def ticket_list(request):
     num_tickets = tickets.count()
 
     #reminders
-    remind_messages(tickets)
+    #remind_messages(tickets)
         
     #save mysort
     my_sort = None
