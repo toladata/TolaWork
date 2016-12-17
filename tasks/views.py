@@ -53,12 +53,11 @@ def task_list(request):
 
     # Query_params will hold a dictionary of parameters relating to
     # a query, to be saved if needed:
-
-    created_by = request.user
+    tasks = Task.objects.select_related()
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     context = {}
 
-    tasks = Task.objects.select_related()
+   
     ## sorting tasks
     sort = request.GET.get('sort', None)
     if sort:
@@ -98,7 +97,6 @@ def task_list(request):
         RequestContext(request, {
         'tasks': tasks.order_by('created_date').reverse,
         'assignable_users': assignable_users,
-        'created_by': created_by,
         'status_choices':Task.STATUS_CHOICES, 
         'form' : form,
         'tolaActivityData': tolaActivityData,

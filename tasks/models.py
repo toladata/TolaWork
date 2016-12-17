@@ -63,6 +63,15 @@ class Task(models.Model):
     get_assigned_to = property(_get_assigned_to)
     # Has due date for an instance of this object passed?
 
+    def _get_created_by(self):
+        """ Custom property to allow us to easily print 'Unassigned' if a
+        task has no owner, or the users name if it's assigned. If the user
+        has a full name configured, we use that, otherwise their username. """
+        if self.created_by.get_username():
+            return self.created_by.get_username()
+        
+    get_created_by = property(_get_created_by)
+
     def overdue_status(self):
         "Returns whether the item's due date has passed or not."
         if self.due_date and datetime.date.today() > self.due_date:
