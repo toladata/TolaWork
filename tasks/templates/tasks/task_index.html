@@ -345,6 +345,7 @@
                             <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong></p></label>
                             <div class="col-md-8">
                               <select class="form-control" name='assigned_to' id='id_assigned_to'>
+                                <option>-------</option>
                                 {% for user in assignable_users%}
                                   <option value='{{user.id}}'>{{user.username}}</option>
                                 {% endfor %}
