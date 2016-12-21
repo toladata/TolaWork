@@ -181,11 +181,7 @@
         {% endif %}
       </div>
 
-     <table width="100%" id="t_table">
-      {% for ticket in tickets.reverse %}
-      <tr><th></th></tr>
-      <tr>
-      <td>
+      {% for ticket in tickets.object_list.reverse %}
       <div class="panel" id = "auto_load_div{{ticket.id}}">
         <div class="panel-heading color_{{ticket.queue_id}}"><a href='{{ ticket.get_absolute_url }}' >
          {% if query%} {% highlight ticket.ticket with query css_class "highlight" html_tag "span" %} {% else %} {{ ticket.ticket | upper}} {% endif %}<strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}
@@ -767,21 +763,51 @@
           </div>
           <!-- end panel footer -->
           </div>
-          </td></tr>
         {% endfor %}
-        </table>
-        <script type="text/javascript">
-          $(document).ready(function(){
-             $('#t_table').DataTable( {
-                "order": [], 
-                "bFilter": false,
-                'bLengthChange': false,
-                "aoColumnDefs": [
-                    { "bSortable": false, "targets": [0 ] }
-                       ]
-                } );
-          });
-        </script>
+        
+         <!-- start paginator -->
+        <div class="row">
+          <div class="col-md-8">
+           <ul class="pagination">
+              {% if tickets.has_previous %}
+                <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "Previous" %} </a></li>
+                <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {{tickets.previous_page_number}} </a></li>
+              {% endif %}
+              {% blocktrans with tickets.number as ticket_num and tickets.paginator.num_pages as num_pages %}
+                <li><a class="active" href=""> {{ ticket_num }}</a></li>
+              {% endblocktrans %}
+
+              {% if tickets.has_next %}
+               <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}"> {{ tickets.next_page_number }}</a></li>
+                {% ifnotequal tickets.next_page_number tickets.paginator.num_pages %}
+                   {% with tickets.paginator.num_pages as num_pages %}
+                    <li><a href="">...</a></li>
+                    <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ num_pages }}"> {{ num_pages }}  </a></li>
+                  {% endwith %}
+                {% endifnotequal %}
+                <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a></li>
+              {% endif %}
+            </ul>
+          </div>
+          <div class="read_more ticket_paginator">
+            <ul class="pagination">
+             <li>
+                <a class = "{% if items_per_page == 5 %} active {% endif %}"
+                  href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=5">5</a>
+              </li>
+             <li>
+                <a class = "{% if items_per_page == 10 %} active {% endif %}"
+                  href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=10">10 </a>
+              </li>
+             <li>
+                <a class = "{% if items_per_page == 20 %} active {% endif %}"
+                  href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=20" >20</a>
+              </li>
+             <li><a href="#">per page</a></li>
+            </ul>
+          </div> 
+        </div>
+        <!-- end paginator -->
       </div>
 
 
