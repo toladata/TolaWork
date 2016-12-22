@@ -645,7 +645,7 @@
 
                           <div class="col-md-8">
                             <span id="helpBlock" class="help-block">To add <strong>NEW</strong> tag(s), type in then press <strong>'ENTER'</strong></span>
-                            <select class = "form-control multi_select {{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags{{ticket.id}}' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
+                            <select class = "form-control multi_select tag{{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags{{ticket.id}}' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
                                 {% for q in tags %} 
 
                                   <option value='{{ q.id }}' {% for tag in ticket.tags.all %} {% ifequal q.id tag.id %} selected='selected'{% endifequal %}{% endfor %}>{{q.name}}</option>
@@ -653,7 +653,7 @@
                                 {% endfor %}
                             </select>
                             <script type="text/javascript">
-                                  $(".{{ticket.id}}").select2({
+                                  $(".tag{{ticket.id}}").select2({
                                           tags: true,
                                           allowClear: true,
                                           placeholder: "Add tags",
