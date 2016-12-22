@@ -1299,16 +1299,11 @@ def create_ticket(request):
                 file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
+            #post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
-            ticket = {'ticket_id': ticket.id}
-
-            return HttpResponse(
-                            json.dumps(ticket),
-                            content_type="application/json"
-                        )
+            return view_ticket(request, ticket.id)
     else:
         form = form_data(request)
         
