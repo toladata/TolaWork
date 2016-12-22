@@ -22,7 +22,6 @@
 
         <!-- Custom Footer CSS -->
         <link href="{{ STATIC_URL }}css/app.css" rel="stylesheet" type="text/css">
-        <link href="{{ STATIC_URL }}css/test.css" rel="stylesheet" type="text/css">
 
         <!-- Tagging -->
         <link href="{{ STATIC_URL }}easy_select2/vendor/select2/css/select2.min.css" rel="stylesheet" type="text/css">
@@ -198,6 +197,12 @@
                             {{ form.media }}
 
                             {% csrf_token %}
+                            <script>
+                                $("#id_tags").select2({
+                                        tags: true,
+                                       allowClear: true,
+                                });
+                            </script>
                             </form>
                           </div>
                           <div class="modal-footer">
@@ -230,7 +235,6 @@
         <script type="text/javascript" src="{{ STATIC_URL }}js/buttons.html5.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
         <script src="{{STATIC_URL}}js/dropzone.js"></script>
-
         {% block extra_js_in_body %}
         <script>
           (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -242,11 +246,6 @@
           ga('send', 'pageview');
 
     $(document).ready(function(){
-          
-        $("#id_tags").select2({
-                tags: true,
-                allowClear: true,
-        });
 
         var csrftoken = $("#ticket_form").find('input[name="csrfmiddlewaretoken"]').val();
 
@@ -261,12 +260,13 @@
         var list_of_files = new Array();
 
         console.log(csrftoken);
-
+        Dropzone.autoDiscover = false;
+        
         var mydropzone1 = new Dropzone("#dZUpload", {
-            url: "/helpdesk/tickets/submit/",
             uploadMultiple: true,
             maxFiles: 5,
             autoProcessQueue : false,
+            url: "/helpdesk/tickets/submit/",
             init : function() {
                 this.on("addedfile", function(file)
                     {
