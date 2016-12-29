@@ -296,8 +296,11 @@
                 event.preventDefault();
                 var data = new FormData($(this)[0]);
                       var tags = $('#id_tags').val();
-                      for (var i = 0; i < tags.length; i++) {
-                        data.append('tags[]', tags[i]);
+                      if (tags !== null) {
+
+                         for (var i = 0; i < tags.length; i++) {
+                            data.append('tags[]', tags[i]);
+                          };
                       };
 
                       console.log(list_of_files);
