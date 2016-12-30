@@ -329,6 +329,7 @@ class Ticket(models.Model):
     CLOSED_STATUS = 4
     DUPLICATE_STATUS = 5
     PROGRESS_STATUS = 6
+    IN_DEV_QUEUE_STATUS = 7
 
     STATUS_CHOICES = (
         (OPEN_STATUS, _('Open')),
@@ -336,7 +337,8 @@ class Ticket(models.Model):
         (RESOLVED_STATUS, _('Resolved')),
         (CLOSED_STATUS, _('Closed')),
         (DUPLICATE_STATUS, _('Duplicate')),
-        (PROGRESS_STATUS, _('Progress')),
+        (PROGRESS_STATUS, _('In Progress')),
+        (IN_DEV_QUEUE_STATUS, _('In  Dev Queue')),
     )
 
     PROBLEM = 1

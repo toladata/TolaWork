@@ -547,7 +547,13 @@
                 <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
               {% endif %}
 
-              &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
+              {% if ticket.github_issue_number%}
+                 &nbsp;<span class="label label-warning"> In Dev Queue</span>
+              {% else %}
+                 &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
+
+              {% endif %}
+
               {% if ticket.github_issue_id %}
                 &nbsp;<span class="label label-primary"> 
                   {% if ticket.git_label == 0 %}Backlog

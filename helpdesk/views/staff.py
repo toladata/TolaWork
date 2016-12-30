@@ -1106,7 +1106,6 @@ def ticket_list(request):
     #saved Queries
     user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
 
-
     try:
         ticket_qs = apply_query(tickets, query_params)
     except ValidationError:
@@ -1139,7 +1138,6 @@ def ticket_list(request):
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
         search_message = _('<p><strong>Note:</strong> The keyword search is case sensitive. This means the search will <strong>not</strong> be accurate.')
-
 
     try:
         import pickle
