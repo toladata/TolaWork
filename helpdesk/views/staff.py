@@ -790,6 +790,8 @@ def tickets_dependency(request,ticket_id):
     querydict = request.GET.copy()
     querydict.pop('page', 1)
 
+    form = form_data(request)
+
     print "TICKET TYPES:"
     print Ticket.TICKET_TYPE
 
@@ -798,6 +800,7 @@ def tickets_dependency(request,ticket_id):
             context,
             query_string=querydict.urlencode(),
             tickets=tickets,
+            form = form,
             user_choices=User.objects.filter(is_active=True,is_staff=True),
             queue_choices=queue_choices,
             status_choices=Ticket.STATUS_CHOICES,
