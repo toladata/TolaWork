@@ -456,6 +456,12 @@
                           </dd>
                         {% endif %}
 
+                        {% if ticket.status == 7 %}
+                          <dd>
+                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress' checked='checked' disabled='disabled'><label for='st_progress'>{% trans "In Dev Queue" %}</label>
+                          </dd>
+                        {% endif %}
+
                         {% if helpdesk_settings.HELPDESK_UPDATE_PUBLIC_DEFAULT %}
                           <input type='hidden' name='public' id= "id_public{{ticket.id}}" value='1'>
                           {% else %}
@@ -546,13 +552,7 @@
                 <a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
                 <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
               {% endif %}
-
-              {% if ticket.github_issue_number%}
-                 &nbsp;<span class="label label-warning"> In Dev Queue</span>
-              {% else %}
                  &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
-
-              {% endif %}
 
               {% if ticket.github_issue_id %}
                 &nbsp;<span class="label label-primary"> 
