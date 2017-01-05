@@ -468,13 +468,22 @@ margin-right: 0px
 {
     background-color: rgba(204, 204, 204, 0.2); 
 }
+.color_4
+{
+    background-color: rgb(162,173, 0); 
+}
 .border_3
 {
     border: 1px solid#e89424;
     position: relative;
-    overflow: hidden;F
+    overflow: hidden;
 }
 .color_1 a
+{
+    color: #fff;
+    
+}
+.color_4 a
 {
     color: #fff;
     
