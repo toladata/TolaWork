@@ -386,6 +386,10 @@ def send_to_github(request, ticket_id):
         response = new_issue(repo,ticket)
 
         if int(response) == 201:
+            
+            ticket.status = 7
+            ticket.save()
+
             messages.success(request, 'Success, ticket sent to Github')
 
         else:
