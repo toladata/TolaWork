@@ -51,7 +51,7 @@ from helpdesk.serializer import UserSerializer, TicketSerializer, QueueSerialize
 from helpdesk.forms import TicketForm, UserSettingsForm, CommentTicketForm, CommentFollowUpForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
 from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
 from helpdesk.models import Ticket, UserVotes, Queue, UserSettings, KBCategory, Tag, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate, UserDefaultSort
-from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo, get_label
+from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo, get_label, get_issue
 from helpdesk.slack import post_slack,post_tola_slack
 from helpdesk.email import email, reminders
 
@@ -395,9 +395,15 @@ def send_to_github(request, ticket_id):
     if not ticket.github_issue_id:
         response = new_issue(repo,ticket)
 
-        if int(response) == 201:
+        if int(response['status_code']) == 201:
+
+            result = response['data']
 
             ticket.status = 7
+            ticket.github_issue_number = result['number']
+            ticket.github_issue_url = result['html_url']
+            ticket.github_issue_id = result['id']
+            
             ticket.save()
 
             messages.success(request, 'Success, ticket sent to Github')
