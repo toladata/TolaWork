@@ -73,7 +73,6 @@ def new_issue(repo,ticket):
 
     header = {'Authorization': 'token %s' % token}
     r = requests.post(repo,json.dumps(payload),headers=header)
-    print(json.loads(r.content))
 
     if int(r.status_code) == 201:
         data = json.loads(r.content)
@@ -87,7 +86,7 @@ def new_issue(repo,ticket):
         update_ticket.github_issue_id = github_issue_id
         update_ticket.save(update_fields=['github_issue_url','github_issue_number','github_issue_id'])
 
-    return r.status_code
+    return {'status_code':r.status_code, 'data':data}
 
 
 def add_comments(comment,repo,ticket):
