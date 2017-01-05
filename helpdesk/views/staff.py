@@ -1164,6 +1164,9 @@ def ticket_list(request):
     from helpdesk.lib import b64encode
     urlsafe_query = b64encode(pickle.dumps(query_params))
 
+    querydict = request.GET.copy()
+    querydict.pop('page', 1)
+
     q = Queue.objects.all()
     tags = Tag.objects.all()
 
@@ -1172,6 +1175,7 @@ def ticket_list(request):
         RequestContext(request, dict(
             context,
             query = request.GET.get('q'),
+            query_string=querydict.urlencode(),
             tickets=tickets,
             tags=tags,
             priorities = Ticket.PRIORITY_CHOICES,
