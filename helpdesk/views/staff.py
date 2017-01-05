@@ -403,7 +403,7 @@ def send_to_github(request, ticket_id):
             ticket.github_issue_number = result['number']
             ticket.github_issue_url = result['html_url']
             ticket.github_issue_id = result['id']
-            
+
             ticket.save()
 
             messages.success(request, 'Success, ticket sent to Github')
@@ -1328,7 +1328,7 @@ def create_ticket(request):
                 file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-           # post_tola_slack(ticket.id)
+            post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
