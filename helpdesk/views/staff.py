@@ -308,6 +308,16 @@ def post_comment(request, ticket_id):
                 #email notification for 'Duplicate' issue
                 email(ticket, comment, status_text)
 
+            elif int(status) == 6:
+
+                status_text = 'IN PROGRESS'
+
+                #email notification for 'Resolved' issue
+                email(ticket, comment, status_text)
+
+            elif int(status) == 7:
+                status_text = 'IN DEV QUEUE'
+
             else:
                 status_text = 'Not a status'
 
@@ -386,7 +396,7 @@ def send_to_github(request, ticket_id):
         response = new_issue(repo,ticket)
 
         if int(response) == 201:
-            
+
             ticket.status = 7
             ticket.save()
 
@@ -571,6 +581,10 @@ def view_ticket(request, ticket_id):
 
     tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
 
+    if ticket_state.github_issue_number:
+        ticket_state.status = 7
+    print (ticket_state.status)
+
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket_state,
@@ -715,7 +729,7 @@ def tickets_dependency(request,ticket_id):
         # date.
 
         query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
+            'filtering': {'status__in': [1, 2, 3, 6, 7]},
             'sorting': 'created',
         }
     else:
@@ -937,7 +951,7 @@ def ticket_list(request):
         # date.
 
         query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
+            'filtering': {'status__in': [1, 2, 3, 6, 7]},
             'sorting': 'created',
         }
 
@@ -951,7 +965,7 @@ def ticket_list(request):
 
         if my_sort:
             query_params = {
-                'filtering': {'status__in': [1, 2, 3]},
+                'filtering': {'status__in': [1, 2, 3, 6, 7]},
                 'sorting': my_sort.sort,
             }
 
@@ -1115,7 +1129,7 @@ def ticket_list(request):
     except ValidationError:
         # invalid parameters in query, return default query
         query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
+            'filtering': {'status__in': [1, 2, 3, 6, 7]},
             'sorting': 'created',
         }
         ticket_qs = apply_query(tickets, query_params)
@@ -1304,7 +1318,7 @@ def create_ticket(request):
                 file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
+           # post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
@@ -1989,7 +2003,7 @@ def kb_list(request):
         # date.
 
         query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
+            'filtering': {'status__in': [1, 2, 3, 6, 7]},
             'sorting': 'created',
         }
     else:
@@ -2158,7 +2172,7 @@ def data_query_pagination(request, data_items, query_params):
     except ValidationError:
         # invalid parameters in query, return default query
         query_params = {
-            'filtering': {'status__in': [1, 2, 3]},
+            'filtering': {'status__in': [1, 2, 3, 6, 7]},
             'sorting': 'created',
         }
         data_item_qs = apply_query(data_items, query_params)
