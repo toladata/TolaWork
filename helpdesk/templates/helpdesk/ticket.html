@@ -233,14 +233,16 @@
                                         {% endif %}
                                         {% if ticket.status == 6 %}
                                           <dd>
-                                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress' checked='checked'><label for='st_progress'>{% trans "In Progress" %}</label>&laquo;&nbsp;&nbsp;
-                                            <input type='radio' name='new_status' value='4' id='st_closed'><label for='st_closed'>{% trans "Closed" %}</label>
+                                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress' checked='checked'><label for='st_progress'>{% trans "In Progress" %}</label>&raquo;&nbsp;&nbsp;
+                                            <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
                                           </dd>
                                         {% endif %}
+
                                         {% if ticket.status == 7 %}
                                           <dd>
-                                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress' checked='checked' disabled='disabled'><label for='st_progress'>{% trans "In Dev Queue" %}</label>
+                                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
+                                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress'><label for='st_progress'>{% trans "In Progress" %}</label>&laquo;&nbsp;&nbsp;
+                                            <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
                                           </dd>
                                         {% endif %}
 
@@ -338,7 +340,16 @@
                      <!-- <strong>Ticket Status: </strong><font>In Progress </font>&nbsp;<span class="badge"> 2 </span>&nbsp;&nbsp;<span class="glyphicon glyphicon-tags"></span> -->
                     <strong>Queue:</strong>{% blocktrans with ticket.queue as queue %}&nbsp;[{{ queue }}] {% endblocktrans %}
                     <strong>&nbsp;Ticket Status:</strong>&nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
-
+                    {% if ticket.github_issue_id %}
+                      &nbsp;<span class="label label-primary"> 
+                        {% if ticket.git_label == 0 %}Backlog
+                          {% elif ticket.git_label == 1 %}Ready
+                          {% elif ticket.git_label == 2 %}working
+                          {% elif ticket.git_label == 3 %}In Dev
+                          {% elif ticket.git_label == 4 %}Done
+                          {% endif%} 
+                        </span>
+                    {% endif %}
 
                        <strong>&nbsp;&nbsp;Tags:</strong>
                     {%if tags %}
