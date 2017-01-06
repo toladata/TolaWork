@@ -242,84 +242,87 @@ def post_comment(request, ticket_id):
             f_public = request.POST.get('public', False)
             status = request.POST.get('new_status')
 
-            if int(status) == 1:
-                status_text = 'OPEN'
+            try:
+                if int(status) == 1:
+                    status_text = 'OPEN'
 
-                if ticket.github_issue_id:
-                    #if there are comments, update github
-                    repo = queue_repo(ticket)
-                    if not comment == '':
-                        add_comments(comment,repo,ticket)
+                    if ticket.github_issue_id:
+                        #if there are comments, update github
+                        repo = queue_repo(ticket)
+                        if not comment == '':
+                            add_comments(comment,repo,ticket)
 
-                #email notification for 'Open' issue
-                email(ticket, comment, status_text)
+                    #email notification for 'Open' issue
+                    email(ticket, comment, status_text)
 
-            elif int(status) == 2:
-                status_text = 'RE-OPENED'
+                elif int(status) == 2:
+                    status_text = 'RE-OPENED'
 
-                if ticket.github_issue_id:
+                    if ticket.github_issue_id:
 
-                    repo = queue_repo(ticket)
-                    if not comment == '':
-                        add_comments(comment,repo,ticket)
+                        repo = queue_repo(ticket)
+                        if not comment == '':
+                            add_comments(comment,repo,ticket)
 
-                    #re-open issue in GitHUb
-                    response = open_issue(repo,ticket)
+                        #re-open issue in GitHUb
+                        response = open_issue(repo,ticket)
 
-                    if int(response) == 200:
-                        messages.success(request, 'Success, ticket also re-opened in Github')
-                    else:
-                        messages.success(request, str(response) + ': There was a problem re-opening the ticket in GitHub')
-                    print response
+                        if int(response) == 200:
+                            messages.success(request, 'Success, ticket also re-opened in Github')
+                        else:
+                            messages.success(request, str(response) + ': There was a problem re-opening the ticket in GitHub')
+                        print response
 
-                #email notification for 'Re-Opened' issue
-                email(ticket, comment, status_text)
+                    #email notification for 'Re-Opened' issue
+                    email(ticket, comment, status_text)
 
-            elif int(status) == 3:
-                status_text = 'RESOLVED'
+                elif int(status) == 3:
+                    status_text = 'RESOLVED'
 
-                #email notification for 'Resolved' issue
-                email(ticket, comment, status_text)
+                    #email notification for 'Resolved' issue
+                    email(ticket, comment, status_text)
 
-            elif int(status) == 4:
-                status_text = 'CLOSED'
+                elif int(status) == 4:
+                    status_text = 'CLOSED'
 
-                if ticket.github_issue_id:
+                    if ticket.github_issue_id:
 
-                    repo = queue_repo(ticket)
-                    if not comment == '':
-                        add_comments(comment,repo,ticket)
+                        repo = queue_repo(ticket)
+                        if not comment == '':
+                            add_comments(comment,repo,ticket)
 
-                    #close issue in GitHUb
-                    response=close_issue(repo,ticket)
+                        #close issue in GitHUb
+                        response=close_issue(repo,ticket)
 
-                    if int(response) == 200:
-                        messages.success(request, 'Success, ticket also closed in Github')
-                    else:
-                        messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
-                    print response
+                        if int(response) == 200:
+                            messages.success(request, 'Success, ticket also closed in Github')
+                        else:
+                            messages.success(request, str(response) + ': There was a problem closing the ticket in GitHub')
+                        print response
 
-                #email notification for 'Closed' issue
-                email(ticket, comment, status_text)
+                    #email notification for 'Closed' issue
+                    email(ticket, comment, status_text)
 
-            elif int(status) == 5:
-                status_text = 'DUPLICATE'
+                elif int(status) == 5:
+                    status_text = 'DUPLICATE'
 
-                #email notification for 'Duplicate' issue
-                email(ticket, comment, status_text)
+                    #email notification for 'Duplicate' issue
+                    email(ticket, comment, status_text)
 
-            elif int(status) == 6:
+                elif int(status) == 6:
 
-                status_text = 'IN PROGRESS'
+                    status_text = 'IN PROGRESS'
 
-                #email notification for 'Resolved' issue
-                email(ticket, comment, status_text)
+                    #email notification for 'Resolved' issue
+                    email(ticket, comment, status_text)
 
-            elif int(status) == 7:
-                status_text = 'IN DEV QUEUE'
+                elif int(status) == 7:
+                    status_text = 'IN DEV QUEUE'
 
-            else:
-                status_text = 'Not a status'
+                else:
+                    status_text = 'Not a status'
+            except Exception, e:
+                pass
 
             created = ticket.created
 
