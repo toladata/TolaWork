@@ -10,6 +10,8 @@
 {% block content %}
 {% load in_list %}
 <link href="{{ STATIC_URL}}css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css" />
 <div class="container" ng-controller="TicketController">
   {% if tickets and not query  %}
    <h3>Submitted Tickets</h3>
@@ -178,7 +180,11 @@
         {% endif %}
       </div>
 
-      {% for ticket in tickets.object_list.reverse %}
+       <table width="100%" id="t_table">
+       <tbody>
+      {% for ticket in tickets.reverse %}
+      <tr>
+      <td>
       <div class="panel" id = "auto_load_div{{ticket.id}}">
         <div class="panel-heading {% if ticket.queue_id == 1 %} color_1 {% elif ticket.queue_id == 2 %} color_2 {% elif ticket.queue_id == 3 %} color_3 {% elif ticket.queue_id %} color_4 {% endif %}"><a href='{{ ticket.get_absolute_url }}' >
          {% if query%} {% highlight ticket.ticket with query css_class "highlight" html_tag "span" %} {% else %} {{ ticket.ticket | upper}} {% endif %}<strong class="font8"> {% if query%} {% highlight ticket.title with query css_class "highlight" html_tag "span" %} {% else %}{{ ticket.title }}
@@ -776,10 +782,28 @@
           </div>
           <!-- end panel footer -->
           </div>
+          </td></tr>
         {% endfor %}
+        </tbody>
+        </table>
+
+        <script type="text/javascript">
+          $(document).ready(function(){
+             $('#t_table').DataTable( {
+                "order": [], 
+                "bFilter": false,
+                'bLengthChange': false,
+                "deferRender": true,
+                "aoColumnDefs": [
+                    { "bSortable": false, "targets": [0 ] }
+                       ]
+                } );
+          });
+        </script>
+
         
          <!-- start paginator -->
-        <div class="row">
+        <!-- <div class="row">
           <div class="col-md-8">
            <ul class="pagination">
               {% if tickets.has_previous %}
@@ -819,7 +843,7 @@
              <li><a href="#">per page</a></li>
             </ul>
           </div> 
-        </div>
+        </div> -->
         <!-- end paginator -->
       </div>
 
