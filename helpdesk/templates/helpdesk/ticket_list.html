@@ -457,14 +457,16 @@
                         {% endif %}
                         {% if ticket.status == 6 %}
                           <dd>
-                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress' checked='checked'><label for='st_progress'>{% trans "In Progress" %}</label>
+                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress' checked='checked'><label for='st_progress'>{% trans "In Progress" %}</label>&raquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
                           </dd>
                         {% endif %}
 
                         {% if ticket.status == 7 %}
                           <dd>
-                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress' checked='checked' disabled='disabled'><label for='st_progress'>{% trans "In Dev Queue" %}</label>
+                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress'><label for='st_progress'>{% trans "In Progress" %}</label>&laquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
                           </dd>
                         {% endif %}
 
