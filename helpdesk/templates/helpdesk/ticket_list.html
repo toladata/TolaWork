@@ -402,7 +402,7 @@
                           <label for='commentBox'>{% trans "Comment / Resolution:" %}</label>
                         </dt>
                         <dd>
-                          <textarea class="form-control preview_links" rows="3" name='comment' id='commentBox{{ticket.id}}'></textarea>
+                          <textarea class="form-control preview_links" rows="3" name='comment' id='commentBox{{ticket.id}}' style="width:550px"></textarea>
                         </dd>
                         <dd class='form_help_text'><p> You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>.</p></dd>
 
@@ -801,53 +801,13 @@
                     { "bSortable": false, "targets": [0 ] }
                        ]
                 } );
+             $('#t_table').on( 'page.dt', function () {
+                $('html, body').animate({
+                    scrollTop: 0
+                }, 300);
+            } );
           });
         </script>
-
-        
-         <!-- start paginator -->
-        <!-- <div class="row">
-          <div class="col-md-8">
-           <ul class="pagination">
-              {% if tickets.has_previous %}
-                <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "Previous" %} </a></li>
-                <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {{tickets.previous_page_number}} </a></li>
-              {% endif %}
-              {% blocktrans with tickets.number as ticket_num and tickets.paginator.num_pages as num_pages %}
-                <li><a class="active" href=""> {{ ticket_num }}</a></li>
-              {% endblocktrans %}
-
-              {% if tickets.has_next %}
-               <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}"> {{ tickets.next_page_number }}</a></li>
-                {% ifnotequal tickets.next_page_number tickets.paginator.num_pages %}
-                   {% with tickets.paginator.num_pages as num_pages %}
-                    <li><a href="">...</a></li>
-                    <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ num_pages }}"> {{ num_pages }}  </a></li>
-                  {% endwith %}
-                {% endifnotequal %}
-                <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a></li>
-              {% endif %}
-            </ul>
-          </div>
-          <div class="read_more ticket_paginator">
-            <ul class="pagination">
-             <li>
-                <a class = "{% if items_per_page == 5 %} active {% endif %}"
-                  href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=5">5</a>
-              </li>
-             <li>
-                <a class = "{% if items_per_page == 10 %} active {% endif %}"
-                  href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=10">10 </a>
-              </li>
-             <li>
-                <a class = "{% if items_per_page == 20 %} active {% endif %}"
-                  href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=20" >20</a>
-              </li>
-             <li><a href="#">per page</a></li>
-            </ul>
-          </div> 
-        </div> -->
-        <!-- end paginator -->
       </div>
 
 
