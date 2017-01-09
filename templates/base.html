@@ -43,6 +43,8 @@
         
         <!-- App specific Javascript -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/app.js"></script>
+        <link href="{{ STATIC_URL }}css/jquery.growl.css" rel="stylesheet" type="text/css">
+
       <!--   <script type="text/javascript" src="{{ STATIC_URL }}js/angular.min.js"></script>
         <script type="text/javascript" src="{{ STATIC_URL }}js/paginate.js"></script>
         <script type="text/javascript" src="{{ STATIC_URL }}js/ng-text-truncate.js"></script> -->
@@ -235,6 +237,8 @@
         <script type="text/javascript" src="{{ STATIC_URL }}js/buttons.html5.min.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
         <script src="{{STATIC_URL}}js/dropzone.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.growl.js"></script>
+        
         {% block extra_js_in_body %}
         <script>
           (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -249,17 +253,8 @@
 
         var csrftoken = $("#ticket_form").find('input[name="csrfmiddlewaretoken"]').val();
 
-        $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                }
-            }
-        });
-
         var list_of_files = new Array();
 
-        console.log(csrftoken);
         Dropzone.autoDiscover = false;
         
         var mydropzone1 = new Dropzone("#dZUpload", {
