@@ -195,3 +195,23 @@ function edit_ticket_status(ticket_id, csrftoken) {
        }
    });
 };
+
+//Post a ticket to Github without reloading the page
+function send_to_github(ticketid){
+
+  $.get('/helpdesk/tickets/'+ticketid+'/send_to_github/', function(data){
+    if (data.success_message) { 
+       $.growl.notice({title: "Success Message", message: data.success_message });
+       $('#before_github_send').addClass('hidden');
+       $('#after_github_send').removeClass('hidden');
+    }
+    else if (data.failure_message) {
+       $.growl.error({title: "Success Message", message: data.failure_message });
+
+    }
+    else{
+       $.growl.warning({title: "Success Message", message: data.warning_message });
+
+    }
+  });
+};
