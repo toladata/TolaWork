@@ -768,3 +768,6 @@ form .thumbnail
 {
     margin-left:80px;
 }
+.hidden {
+  display: none;
+}
