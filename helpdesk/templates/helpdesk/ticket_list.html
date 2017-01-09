@@ -459,7 +459,7 @@
                         {% if ticket.status == 7 %}
                           <dd>
                             <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress'><label for='st_progress'>{% trans "In Progress" %}</label>&laquo;&nbsp;&nbsp;
+                            <input type='radio' name='new_status{{ticket.id}}' value='3' id='st_resolved'><label for='st_resolved' class='active'>&nbsp;{% trans "Resolved" %}</label>&laquo;&nbsp;&nbsp;
                             <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
                           </dd>
                         {% endif %}
@@ -479,7 +479,8 @@
                         <input class="btn btn-primary" type='submit' value='{% trans "Update This Ticket" %}' />
                         {% if not ticket.github_issue_url %}
                         {% if request.user.is_staff %}
-                        <input name="github" type='button ' class="btn btn-info" value='{% trans "Send to Github" %}' onClick="location.href='/helpdesk/tickets/{{ticket.id}}/send_to_github/'"/>
+                        <input name="github" type='button ' class="btn btn-info" id="before_github_send" value='{% trans "Send to Github" %}' onClick="send_to_github({{ticket.id}})"/>
+                        <input name="view_github" type='button ' class="btn btn-info hidden" id="after_github_send" value='{% trans "View Ticket in Github" %}' onclick="window.open('{{ ticket.github_issue_url }}', '_blank');"/>
                         {% endif %}
                         {% else %}
 
@@ -1348,5 +1349,7 @@ $(document).ready(function() {
           event.preventDefault();
           edit_ticket_post();
       });
+
+
 </script>
 {% endblock content %}
