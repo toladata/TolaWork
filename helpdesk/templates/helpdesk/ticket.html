@@ -31,8 +31,7 @@
                     <strong>Ticket CC:&nbsp;</strong>
                     {{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk_ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong>{% trans "Manage" %}</strong></a>{% if SHOW_SUBSCRIBE %}, <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'>{% trans "Subscribe" %}</a></strong>{% endif %}
                     <br/>
-                    <strong>Priority:&nbsp;</strong>[{{ ticket.get_priority_display }}]&nbsp;<strong>Type:&nbsp;</strong>{{ ticket.get_type_display }}&nbsp;&nbsp;<strong>Developer(s) Progress:</strong>&nbsp;
-                            <span class="label label-info">{% if ticket.git_label == 0 %}In {% blocktrans with ticket.queue as queue %}&nbsp;{{ queue }}{% endblocktrans %}&nbsp;Backlog{% elif ticket.git_label == 1 %} Ready {% elif ticket.git_label == 2 %} Working {% elif ticket.git_label == 3 %} In Dev {% elif ticket.git_label == 4 %}Done{% endif%}</span>
+                    <strong>Priority:&nbsp;</strong>[{{ ticket.get_priority_display }}]&nbsp;<strong>Type:&nbsp;</strong>{{ ticket.get_type_display }}&nbsp;&nbsp;
 
                 </div>
                 <div class="panel-body">
@@ -239,7 +238,7 @@
                                     {% if ticket.status == 7 %}
                                       <dd>
                                         <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                                        <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress'><label for='st_progress'>{% trans "In Progress" %}</label>&laquo;&nbsp;&nbsp;
+                                        <input type='radio' name='new_status{{ticket.id}}' value='3' id='st_resolved'><label for='st_resolved' class='active'>&nbsp;{% trans "Resolved" %}</label>&laquo;&nbsp;&nbsp;
                                         <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
                                       </dd>
                                     {% endif %}
