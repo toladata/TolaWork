@@ -8,7 +8,7 @@ from helpdesk.models import DocumentationApp, FAQ
 from django.contrib.auth.views import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from helpdesk.github import latest_release, update_issue, get_issue, queue_repo, get_issue_status
+from helpdesk.github import latest_release, update_issue, get_issue, queue_repo, get_issue_status, get_label
 from helpdesk.models import Ticket, Queue, FollowUp, FundingOpportunity
 from tasks.models import Task
 from django.conf import settings
@@ -500,6 +500,11 @@ def githubSync(request):
             if ticket.github_issue_number:
                 queue = queue_repo(ticket)
                 response = get_issue_status(queue,ticket)
+
+                update_label = get_label(queue,ticket)
+
+                if update_label == 200:
+                    print 'Label Updated for ticket -#' + str(ticket.id)
 
                 if response == 200:
                     print 'GitHubSync Success - #' + str(ticket.github_issue_number)
