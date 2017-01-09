@@ -31,7 +31,7 @@
                     <strong>Ticket CC:&nbsp;</strong>
                     {{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk_ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong>{% trans "Manage" %}</strong></a>{% if SHOW_SUBSCRIBE %}, <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'>{% trans "Subscribe" %}</a></strong>{% endif %}
                     <br/>
-                    <strong>Priority:&nbsp;</strong>[{{ ticket.get_priority_display }}]&nbsp;<strong>Type:&nbsp;</strong>{{ ticket.get_type_display }}&nbsp;&nbsp;
+                    <strong>Priority:&nbsp;</strong>[{{ ticket.get_priority_display }}]&nbsp;<strong>Type:&nbsp;</strong>{{ ticket.get_type_display }}&nbfsp;&nbsp;f
 
                 </div>
                 <div class="panel-body">
@@ -258,7 +258,8 @@
                                     <input class="btn btn-primary" type='submit' value='{% trans "Update This Ticket" %}' />
                                     {% if not ticket.github_issue_url %}
                                     {% if request.user.is_staff %}
-                                    <input name="github" type='button ' class="btn btn-info" value='{% trans "Send to Github" %}' onClick="location.href='/helpdesk/tickets/{{ticket.id}}/send_to_github/'"/>
+                                    <input name="github" type='button ' class="btn btn-info" id="before_github_send" value='{% trans "Send to Github" %}' onClick="send_to_github({{ticket.id}})"/>
+                                    <input name="view_github" type='button ' class="btn btn-info hidden" id="after_github_send" value='{% trans "View Ticket in Github" %}' onclick="window.open('{{ ticket.github_issue_url }}', '_blank');"/>
                                     {% endif %}
                                     {% else %}
 
