@@ -22,7 +22,7 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.db import connection
 from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render,render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, loader, Context
 from django.utils.dates import MONTHS_3
@@ -391,12 +391,16 @@ def taskview(request):
         }))
 taskview = staff_member_required(taskview)
 
+
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     repo = queue_repo(ticket)
 
+    resp_data = {}
+
     if not ticket.github_issue_id:
         response = new_issue(repo,ticket)
+
 
         if int(response['status_code']) == 201:
 
@@ -409,13 +413,18 @@ def send_to_github(request, ticket_id):
 
             ticket.save()
 
-            messages.success(request, 'Success, ticket sent to Github')
+            resp_data = {"success_message" : 'Ticket #'+str(ticket_id)+' sent to Github'}
 
         else:
-            messages.success(request, 'There was a problem sending the ticket to GitHub')
-            print response
 
-    return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
+            resp_data = {"failure_message" : 'There was a problem sending the ticket #'+str(ticket_id)+' to GitHub'}
+    else:
+        
+        resp_data = {"warning_message" : 'The ticket #'+str(ticket_id)+' already exists in GitHub'}
+
+
+    return HttpResponse(json.dumps(resp_data),
+                                content_type="application/json" )
 
 #@method_decorator(staff_member_required)
 def delete_ticket(request, ticket_id):
@@ -738,7 +747,7 @@ def tickets_dependency(request,ticket_id):
         # date.
 
         query_params = {
-            'filtering': {'status__in': [1, 2, 3, 6, 7]},
+            'filtering': {'status__in': [1, 2, 3, 5, 6, 7]},
             'sorting': 'created',
         }
     else:
@@ -1331,7 +1340,7 @@ def create_ticket(request):
                 file_attachment(request, f)
                    
             #autopost new ticket to #tola-work slack channel in Tola
-            post_tola_slack(ticket.id)
+            #post_tola_slack(ticket.id)
 
             messages.add_message(request, messages.SUCCESS, 'New ticket submitted')
 
@@ -1754,12 +1763,14 @@ ticket_cc_del = staff_member_required(ticket_cc_del)
 
 def ticket_dependency_del(request, ticket_id, dependency_id):
     dependency = get_object_or_404(TicketDependency, ticket__id=ticket_id, id=dependency_id)
+    form = form_data(request)
     if request.method == 'POST':
         dependency.delete()
         return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_id]))
     return render_to_response('helpdesk/ticket_dependency_del.html',
         RequestContext(request, {
             'dependency': dependency,
+            'form': form,
         }))
 ticket_dependency_del = staff_member_required(ticket_dependency_del)
 
