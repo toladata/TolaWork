@@ -183,13 +183,12 @@ function edit_ticket_status(ticket_id, csrftoken) {
    $.ajax({
        url : "/helpdesk/tickets/"+ticket_id+"/post_comment/",
        type : "POST", 
-       data : data,
+       data : data_object,
 
        success : function() {
             alert("You have Succefully updated ticket "+ticket_id+". Your changes will show on Page reload");
        },
        error : function(xhr,errmsg,err) {
-          console.log(data);
 
            console.log(xhr.status + ": " + xhr.responseText); 
        }
