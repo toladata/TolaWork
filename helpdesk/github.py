@@ -26,8 +26,7 @@ def get_issue_status(repo,ticket):
             status = 4 # If 'Closed' in github, save as 'Closed' in TW
             state_txt = 'Closed'
         else:
-            status = 1 #open
-            state_txt = 'Open'
+            pass
 
         # add a comment/explanation for the change of state in TW
         comments = '[GitHub Sync] Ticket is ' + str(state_txt) + ' in GitHub'
@@ -65,7 +64,7 @@ def new_issue(repo,ticket):
     labels = ['Tola-Work Ticket']
     payload['title'] = ticket.title
     #encode to utf-8
-    body = ticket.submitter_email + " " + ticket.description + "     #" + attachment_note + " - " + new_comment + " Link to Ticket - " + ticket.t_url
+    body = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment) + " Link to Ticket - " + str(ticket.t_url)
     payload['body'] = unicode(body).encode('utf-8')
     payload['labels'] = labels
     token = settings.GITHUB_AUTH_TOKEN
