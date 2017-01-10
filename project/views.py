@@ -490,14 +490,17 @@ def  get_tasks_by_user(email):
 @login_required
 def githubSync(request):
 
-    tickets = Ticket.objects.select_related('queue').exclude(
+    tickets = Ticket.objects.exclude(
             status__in=[Ticket.RESOLVED_STATUS],
-            github_issue_number__isnull=True
-        )
-    for ticket in tickets:
-        # Sync 'Closed' status in github to 'Resolved' status in TW
-        try:
-            if ticket.github_issue_number:
+        ).filter(github_issue_number__exact='')
+
+    num_tickets = tickets.count()
+    print num_tickets
+    if num_tickets > 0:
+        for ticket in tickets:
+            # Sync 'Closed' status in github to 'Resolved' status in TW
+            try:
+                
                 queue = queue_repo(ticket)
                 response = get_issue_status(queue,ticket)
 
@@ -508,8 +511,10 @@ def githubSync(request):
 
                 if response == 200:
                     print 'GitHubSync Success - #' + str(ticket.github_issue_number)
-        except Exception, e:
-            pass
+            except Exception, e:
+                print "It seems like all tickets are in github"
+    else:
+        print "No tickets to Sync"
 
     return HttpResponseRedirect('/home')
 
