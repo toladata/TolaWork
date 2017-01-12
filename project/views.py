@@ -8,7 +8,7 @@ from helpdesk.models import DocumentationApp, FAQ
 from django.contrib.auth.views import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from helpdesk.github import latest_release, update_issue, get_issue, queue_repo, get_issue_status, get_label
+from helpdesk.github import latest_release, new_issue, update_issue, get_issue, queue_repo, get_issue_status, get_label
 from helpdesk.models import Ticket, Queue, FollowUp, FundingOpportunity
 from tasks.models import Task
 from django.conf import settings
@@ -490,31 +490,60 @@ def  get_tasks_by_user(email):
 @login_required
 def githubSync(request):
 
-    tickets = Ticket.objects.exclude(
-            status__in=[Ticket.RESOLVED_STATUS],
-        ).filter(github_issue_number__exact='')
+    # tickets = Ticket.objects.exclude(
+    #         status__in=[Ticket.RESOLVED_STATUS],
+    #     ).filter(github_issue_number__exact='')
 
-    num_tickets = tickets.count()
-    print num_tickets
-    if num_tickets > 0:
-        for ticket in tickets:
-            # Sync 'Closed' status in github to 'Resolved' status in TW
-            try:
+    # num_tickets = tickets.count()
+    # print num_tickets
+    # if num_tickets > 0:
+    #     for ticket in tickets:
+
+    #         print 'Trying Ticket #'+str(ticket.id)
+    #         # Sync 'Closed' status in github to 'Resolved' status in TW
+    #         try:
                 
-                queue = queue_repo(ticket)
-                response = get_issue_status(queue,ticket)
+    #             queue = queue_repo(ticket)
+    #             response = get_issue_status(queue,ticket)
 
-                update_label = get_label(queue,ticket)
+    #             update_label = get_label(queue,ticket)
 
-                if update_label == 200:
-                    print 'Label Updated for ticket -#' + str(ticket.id)
+    #             if update_label == 200:
+    #                 print 'Label Updated for ticket -#' + str(ticket.id)
 
-                if response == 200:
-                    print 'GitHubSync Success - #' + str(ticket.github_issue_number)
-            except Exception, e:
-                print "It seems like all tickets are in github"
-    else:
-        print "No tickets to Sync"
+    #             if response == 200:
+    #                 print 'GitHubSync Success - #' + str(ticket.github_issue_number)
+    #         except Exception, e:
+    #             print "It seems like all tickets are in github"
+    # else:
+    #     print "No tickets to Sync"
+
+    # return HttpResponseRedirect('/home')
+    tickets = Ticket.objects.all().exclude(
+           status__in=[Ticket.RESOLVED_STATUS])
+    
+    for ticket in tickets:
+
+        # Sync 'Closed' status in github to 'Resolved' status in TW
+        queue = queue_repo(ticket)
+
+        if not ticket.github_issue_number:
+           sent = new_issue(queue, ticket)
+
+           if sent['status_code'] == 200:
+               print 'Ticket #'+str(ticket.id)+' sent to github'
+
+        else:
+
+           response = get_issue_status(queue,ticket)
+
+           update_label = get_label(queue,ticket)
+
+           if update_label == 200:
+               print 'Label Updated for ticket -#' + str(ticket.id)
+
+           if response == 200:
+               print 'GitHubSync Success - #' + str(ticket.github_issue_number)
 
     return HttpResponseRedirect('/home')
 
