@@ -22,7 +22,7 @@ def get_issue_status(repo,ticket):
             title = data['title']
             updated_date = data['updated_at']
             state = data['state']
-            description = data['body']
+            description = ticket.description
             state_txt = ''
             if state == 'closed':
                 status = 4 # If 'Closed' in github, save as 'Closed' in TW
@@ -46,10 +46,6 @@ def get_issue_status(repo,ticket):
                 pass
             update_ticket.title =title
             update_ticket.description = description
-            
-            print 'ticket title is '+update_ticket.title
-            print update_ticket.description
-            print update_ticket.status
 
             try:
                 update_ticket.save()
@@ -79,8 +75,8 @@ def new_issue(repo,ticket):
     labels = ['Tola-Work Ticket']
     payload['title'] = ticket.title
     #encode to utf-8
-    body = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment) + " Link to Ticket - " + str(ticket.t_url)
-    payload['body'] = unicode(body).encode('utf-8')
+    body = unicode(ticket.submitter_email).encode('utf-8') + " " + unicode(ticket.description).encode('utf-8') + "     #" + str(attachment_note) + " - " + unicode(new_comment).encode('utf-8') + " Link to Ticket - " + unicode(ticket.t_url).encode('utf-8')
+    payload['body'] = body
     payload['labels'] = labels
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues"
