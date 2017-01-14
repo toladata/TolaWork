@@ -8,7 +8,7 @@ from helpdesk.models import DocumentationApp, FAQ
 from django.contrib.auth.views import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from helpdesk.github import latest_release, update_issue, get_issue, queue_repo, get_issue_status, get_label
+from helpdesk.github import latest_release, new_issue, update_issue, get_issue, queue_repo, get_issue_status, get_label
 from helpdesk.models import Ticket, Queue, FollowUp, FundingOpportunity
 from tasks.models import Task
 from django.conf import settings
@@ -489,27 +489,32 @@ def  get_tasks_by_user(email):
 #GitHub Sync
 @login_required
 def githubSync(request):
+    
+    tickets = Ticket.objects.all().exclude(
+           status__in=[Ticket.RESOLVED_STATUS])
 
-    tickets = Ticket.objects.select_related('queue').exclude(
-            status__in=[Ticket.RESOLVED_STATUS],
-            github_issue_number__isnull=True
-        )
     for ticket in tickets:
+
         # Sync 'Closed' status in github to 'Resolved' status in TW
-        try:
-            if ticket.github_issue_number:
-                queue = queue_repo(ticket)
-                response = get_issue_status(queue,ticket)
+        queue = queue_repo(ticket)
 
-                update_label = get_label(queue,ticket)
+        if not ticket.github_issue_number:
+           sent = new_issue(queue, ticket)
 
-                if update_label == 200:
-                    print 'Label Updated for ticket -#' + str(ticket.id)
+           if sent['status_code'] == 200:
+               print 'Ticket #'+str(ticket.id)+' sent to github'
 
-                if response == 200:
-                    print 'GitHubSync Success - #' + str(ticket.github_issue_number)
-        except Exception, e:
-            pass
+        else:
+
+           response = get_issue_status(queue,ticket)
+
+           update_label = get_label(queue,ticket)
+
+           if update_label == 200:
+               print 'Label Updated for ticket -#' + str(ticket.id)
+
+           if response == 200:
+               print 'GitHubSync Success - #' + str(ticket.github_issue_number)
 
     return HttpResponseRedirect('/home')
 

@@ -13,35 +13,46 @@ def get_issue_status(repo,ticket):
 
     repo = repo + "/issues/" + ticket.github_issue_number
     r = requests.get(repo)
+    try:
+        if int(r.status_code) == 200:
+            data = json.loads(r.content)
 
-    if int(r.status_code) == 200:
-        data = json.loads(r.content)
+            update_ticket = Ticket.objects.get(id=ticket.id)
 
-        title = data['title']
-        updated_date = data['updated_at']
-        state = data['state']
-        description = data['body']
+            title = data['title']
+            updated_date = data['updated_at']
+            state = data['state']
+            description = ticket.description
+            state_txt = ''
+            if state == 'closed':
+                status = 4 # If 'Closed' in github, save as 'Closed' in TW
+                state_txt = 'Closed'
+            else:
+                status = update_ticket.status
 
-        if state == 'closed':
-            status = 4 # If 'Closed' in github, save as 'Closed' in TW
-            state_txt = 'Closed'
-        else:
-            pass
+            # add a comment/explanation for the change of state in TW
+            comments = '[GitHub Sync] Ticket is ' + str(state_txt) + ' in GitHub'
 
-        # add a comment/explanation for the change of state in TW
-        comments = '[GitHub Sync] Ticket is ' + str(state_txt) + ' in GitHub'
+            current_status = update_ticket.status
 
-        update_ticket = Ticket.objects.get(id=ticket.id)
-        current_status = update_ticket.status
-        print 'Ticket#' + str(ticket.id) + str(comments)
-        if not int(current_status) == int(status):
-            new_followup = FollowUp(title=title, date=updated_date, ticket_id=ticket.id, comment=comments, public=1, new_status=status, )
-            new_followup.save()
+            print 'Ticket#' + str(ticket.id) + str(comments)
+            try: 
+                if not int(current_status) == int(status):
+                    new_followup = FollowUp(title=title, date=updated_date, ticket_id=ticket.id, comment=comments, public=1, new_status=status, )
+                    new_followup.save()
+                    
+                update_ticket.status = status
+            except Exception, e:
+                pass
+            update_ticket.title =title
+            update_ticket.description = description
 
-        update_ticket.status = status
-        update_ticket.title =title
-        update_ticket.description = description
-        update_ticket.save()
+            try:
+                update_ticket.save()
+            except Exception, e:
+                pass
+    except Exception, e:
+        raise e
 
     return r.status_code
 
@@ -64,8 +75,8 @@ def new_issue(repo,ticket):
     labels = ['Tola-Work Ticket']
     payload['title'] = ticket.title
     #encode to utf-8
-    body = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment) + " Link to Ticket - " + str(ticket.t_url)
-    payload['body'] = unicode(body).encode('utf-8')
+    body = unicode(ticket.submitter_email).encode('utf-8') + " " + unicode(ticket.description).encode('utf-8') + "     #" + str(attachment_note) + " - " + unicode(new_comment).encode('utf-8') + " Link to Ticket - " + unicode(ticket.t_url).encode('utf-8')
+    payload['body'] = body
     payload['labels'] = labels
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues"
@@ -73,11 +84,13 @@ def new_issue(repo,ticket):
     header = {'Authorization': 'token %s' % token}
     r = requests.post(repo,json.dumps(payload),headers=header)
 
+    response = {}
     if int(r.status_code) == 201:
         data = json.loads(r.content)
         github_issue_url = data['html_url']
         github_issue_number = data['number']
         github_issue_id = data['id']
+        response = data
 
         update_ticket = Ticket.objects.get(id=ticket.id)
         update_ticket.github_issue_url = github_issue_url
@@ -85,7 +98,7 @@ def new_issue(repo,ticket):
         update_ticket.github_issue_id = github_issue_id
         update_ticket.save(update_fields=['github_issue_url','github_issue_number','github_issue_id'])
 
-    return {'status_code':r.status_code, 'data':data}
+    return {'status_code':r.status_code, 'data':response}
 
 
 def add_comments(comment,repo,ticket):
@@ -112,49 +125,53 @@ def get_label(repo,ticket):
     repo = repo + "/issues/" + ticket.github_issue_number + "/labels"
     r = requests.get(repo)
 
-    if int(r.status_code) == 200:
-        data = json.loads(r.content)
-        label_txt2 = ""
-        label_txt = ""
-        label_int = '0'
+    try:
 
-        for item in range(len(data)):
-            label = data[item]['name']
+        if int(r.status_code) == 200:
+            data = json.loads(r.content)
+            label_txt2 = ""
+            label_txt = ""
+            label_int = '0'
 
-            if label == "Tola-Work Ticket":
-                label_txt = 'Submitted from TolaWork '
+            for item in range(len(data)):
+                label = data[item]['name']
 
-            elif label == "accepted":
-                label_txt2 = ', accepted by QA Lead and moved into the Ready Queue'
-                label_int = '5'
+                if label == "Tola-Work Ticket":
+                    label_txt = 'Submitted from TolaWork '
 
-            elif label == "1 - Ready":
-                label_txt2 = ', accepted by Developers and moved into the Ready Queue'
-                label_int = '1'
+                elif label == "accepted":
+                    label_txt2 = ', accepted by QA Lead and moved into the Ready Queue'
+                    label_int = '5'
 
-            elif label == "2 - Working":
-                label_txt2 = ' and Developers have started working on the Ticket'
-                label_int = '2'
+                elif label == "1 - Ready":
+                    label_txt2 = ', accepted by Developers and moved into the Ready Queue'
+                    label_int = '1'
 
-            elif label == "3 - In Dev":
-                label_txt2 = ' and moved to Dev'
-                label_int = '3'
+                elif label == "2 - Working":
+                    label_txt2 = ' and Developers have started working on the Ticket'
+                    label_int = '2'
 
-            elif label == "4 - Done":
-                label_txt2 = ' and its Done'
-                label_int = '4'
+                elif label == "3 - In Dev":
+                    label_txt2 = ' and moved to Dev'
+                    label_int = '3'
 
-        comments = '[Progress Update] Ticket ' + str(label_txt) + str(label_txt2)
+                elif label == "4 - Done":
+                    label_txt2 = ' and its Done'
+                    label_int = '4'
 
-        update_ticket = Ticket.objects.get(id=ticket.id)
-        db_label = update_ticket.git_label
+            comments = '[Progress Update] Ticket ' + str(label_txt) + str(label_txt2)
 
-        if not int(db_label) == int(label_int):
-            new_followup = FollowUp(title=ticket.title, ticket_id=ticket.id, comment=comments, public=1, )
-            new_followup.save()
+            update_ticket = Ticket.objects.get(id=ticket.id)
+            db_label = update_ticket.git_label
 
-            update_ticket.git_label = label_int
-            update_ticket.save()
+            if not int(db_label) == int(label_int):
+                new_followup = FollowUp(title=ticket.title, ticket_id=ticket.id, comment=comments, public=1, )
+                new_followup.save()
+
+                update_ticket.git_label = label_int
+                update_ticket.save()
+    except Exception, e:
+        raise e
 
     return r.status_code
 
@@ -219,8 +236,6 @@ def update_issue(repo,ticket):
         getComments = FollowUp.objects.all().filter(ticket=ticket)
         for comment in getComments:
             comment_status = add_comments(comment, repo, ticket)
-
-    print r.status_code
 
     return r.status_code
 
