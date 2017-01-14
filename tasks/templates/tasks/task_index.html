@@ -400,9 +400,9 @@
                             <tr>
                               <td>{{agreement.project_name}}</td>
                               <td> {% if agreement.approval == 'approved' %} Done {% else %} Active {% endif %}</td>
-                              <td>{{agreement.expected_start_date}}</td>
+                              <td>{{agreement.id}}</td>
                               <td>{{agreement.expected_end_date}}</td>
-                              <td><a href="http://activity.toladata.io"  target="_blank"><span class="glyphicon glyphicon-ok"></span> Approve</a></td>
+                              <td><a href="http://activity.toladata.io/workflow/projectagreement_update/{{agreement.id}}/"  target="_blank"><span class="glyphicon glyphicon-ok"></span> Approve</a></td>
                             </tr>
                             {% endfor %}
                           </table>

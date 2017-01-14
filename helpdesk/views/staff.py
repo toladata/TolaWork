@@ -36,6 +36,7 @@ from django.template.loader import render_to_string
 from django.core import paginator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.safestring import mark_safe
+from django.core.serializers.json import DjangoJSONEncoder
 
 try:
     from django.utils import timezone
@@ -1223,6 +1224,7 @@ def ticket_list(request):
 
         )))
     ticket_list = staff_member_required(ticket_list)
+
 
 @ensure_csrf_cookie
 def ticket_edit(request):
@@ -2460,3 +2462,314 @@ def form_data(request):
         pass
 
     return form
+
+#ticket object
+def tickets_object(request):
+    #Form data
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    form = form_data(request)
+
+    context = {}
+    # Query_params will hold a dictionary of parameters relating to
+    # a query, to be saved if needed:
+
+    query_params = {
+        'filtering': {},
+        'sorting': None,
+        'sortreverse': True,
+        'keyword': None,
+        'other_filter': None,
+        }
+
+    from_saved_query = False
+
+    # If the user is coming from the header/navigation search box, lets' first
+    # look at their query to see if they have entered a valid ticket number. If
+    # they have, just redirect to that ticket number. Otherwise, we treat it as
+    # a keyword search.
+
+    if request.GET.get('search_type', None) == 'header':
+        query = request.GET.get('q')
+        filter = None
+        if query.find('-') > 0:
+            try:
+                queue, id = query.split('-')
+                id = int(id)
+            except ValueError:
+                id = None
+
+            if id:
+                filter = {'queue__slug': queue, 'id': id }
+        else:
+            try:
+                query = int(query)
+            except ValueError:
+                query = None
+
+            if query:
+                filter = {'id': int(query) }
+
+        if filter:
+            try:
+                ticket = Ticket.objects.get(**filter)
+                return HttpResponseRedirect(ticket.staff_url)
+            except Ticket.DoesNotExist:
+                # Go on to standard keyword searching
+                pass
+
+    saved_query = None
+    if request.GET.get('saved_query', None):
+        from_saved_query = True
+        try:
+            saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
+        except SavedSearch.DoesNotExist:
+            return HttpResponseRedirect(reverse('helpdesk_list'))
+        if not (saved_query.shared or saved_query.user == request.user):
+            return HttpResponseRedirect(reverse('helpdesk_list'))
+
+        try:
+            import pickle
+        except ImportError:
+            import cPickle as pickle
+        from helpdesk.lib import b64decode
+        query_params = pickle.loads(b64decode(str(saved_query.query)))
+
+    elif not (  'queue' in request.GET
+            or  'assigned_to' in request.GET
+            or  'status' in request.GET
+            or  'q' in request.GET
+            or  'sort' in request.GET
+            or  'sortreverse' in request.GET
+            or  'clossed' in request.GET
+            or  'assigned' in request.GET
+            or  'created' in request.GET
+                ):
+
+        # Fall-back if no querying is being done, force the list to only
+        # show open/reopened/resolved (not closed) cases sorted by creation
+        # date.
+
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3, 6, 7]},
+            'sorting': 'created',
+        }
+
+        my_sort = None
+        user_id = User.objects.get(username=request.user).id
+        user = User.objects.get(id=user_id)
+        try:
+            my_sort = get_object_or_404(UserDefaultSort, user_id=user)
+        except Exception, e:
+            pass
+
+        if my_sort:
+            query_params = {
+                'filtering': {'status__in': [1, 2, 3, 6, 7]},
+                'sorting': my_sort.sort,
+            }
+
+    else:
+        queues = request.GET.getlist('queue')
+        if queues:
+            try:
+                queues = [int(q) for q in queues]
+                query_params['filtering']['queue__id__in'] = queues
+            except ValueError:
+                pass
+
+        owners = request.GET.getlist('assigned_to')
+        if owners:
+            try:
+                owners = [int(u) for u in owners]
+                query_params['filtering']['assigned_to__id__in'] = owners
+            except ValueError:
+                pass
+
+        submitter_email = request.GET.getlist('submitter_email')
+        print submitter_email
+        if submitter_email:
+            try:
+
+                query_params['filtering']['submitter_email__in'] = submitter_email
+                
+            except ValueError:
+                pass
+
+        statuses = request.GET.getlist('status')
+        if statuses:
+            try:
+                statuses = [int(s) for s in statuses]
+                query_params['filtering']['status__in'] = statuses
+            except ValueError:
+                pass
+
+        types = request.GET.getlist('types')
+        if types:
+            try:
+                types = [int(s) for s in types]
+                query_params['filtering']['type__in'] = types
+            except ValueError:
+                pass
+
+        date_from = request.GET.get('date_from')
+        if date_from:
+            query_params['filtering']['created__gte'] = date_from
+
+        date_to = request.GET.get('date_to')
+        if date_to:
+            query_params['filtering']['created__lte'] = date_to
+
+
+        ### KEYWORD SEARCHING
+        #key_word_searching(request, context, query_params)
+        q = request.GET.get('q', None)
+
+        if q:
+            qset = (
+                Q(id__icontains=q) |
+                Q(title__icontains=q) |
+                Q(description__icontains=q) |
+                Q(resolution__icontains=q) |
+                Q(submitter_email__icontains=q) |
+                Q(tags__name__icontains = q)
+
+            )
+            context = dict(context, query=q)
+            query_params['other_filter'] = qset
+
+        ### SORTING
+        data_sorting(request,query_params)
+
+    removequeues = request.GET.getlist('removequeue')
+    if removequeues:
+        try:
+            query_params['filtering']['queue__id__in'] = queues
+            removequeues = [int(s) for s in removequeues]
+            for s in removequeues:
+                queues.remove(s)
+            query_params['filtering']['queue__id__in'] = queues
+        except ValueError:
+            pass
+
+    removestatuses = request.GET.getlist('removestatus')
+    if removestatuses:
+        try:
+            statuses = query_params['filtering']['status__in']
+            removestatuses = [int(s) for s in removestatuses]
+            for s in removestatuses:
+                statuses.remove(s)
+            query_params['filtering']['status__in'] = statuses
+        except ValueError:
+            pass
+
+    removetypes = request.GET.getlist('removetype')
+    if removetypes:
+        try:
+            query_params['filtering']['type__in'] = types
+            removetypes = [int(s) for s in removetypes]
+            for s in removetypes:
+                types.remove(s)
+            query_params['filtering']['type__in'] = types
+        except ValueError:
+            pass
+
+    
+    tickets = Ticket.objects.select_related().values('id', 'title','description','queue_id')
+    tickets_filtered = tickets
+
+    tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
+
+    #other filters
+    my_email1 = request.GET.get('created')
+    if my_email1:
+        try:  
+            tickets = tickets_filtered.filter(submitter_email=my_email1)
+        except Exception, e:
+            pass
+
+    my_email2 = request.GET.get('assigned')
+    if my_email2:
+        try:
+            assigned_id = request.user.id
+            tickets = tickets_filtered.filter(assigned_to__id=assigned_id)
+        except Exception, e:
+                pass
+    my_email3 = request.GET.get('clossed')
+    if my_email3:
+        try:
+            assigned_id = request.user.id
+            tickets = tickets_filtered.filter(assigned_to__id=assigned_id, status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+        except Exception, e:
+                pass
+
+    num_tickets = tickets.count()
+
+    #reminders
+    #remind_messages(tickets)
+        
+    #save mysort
+    my_sort = None
+    my_default_sort(request)
+    try:
+        user_id = User.objects.get(username=request.user).id
+        user = User.objects.get(id=user_id)
+        my_sort = get_object_or_404(UserDefaultSort, user_id=user)
+
+    except Exception, e:
+        pass
+
+    queue_choices = Queue.objects.all()
+    
+    #saved Queries
+    user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
+
+    try:
+        ticket_qs = apply_query(tickets, query_params)
+    except ValidationError:
+        # invalid parameters in query, return default query
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3, 6, 7]},
+            'sorting': 'created',
+        }
+        ticket_qs = apply_query(tickets, query_params)
+
+    #Change items per_page by a user
+    # items_per_page = 10
+    # user_choice_pageItems = request.GET.get('items_per_page')
+
+    # if user_choice_pageItems:
+    #     items_per_page = user_choice_pageItems
+
+    # ticket_paginator = paginator.Paginator(ticket_qs, items_per_page)
+    # try:
+    #     page = int(request.GET.get('page', '1'))
+    # except ValueError:
+    #     page = 1
+
+    # try:
+    #     tickets = ticket_paginator.page(page)
+    # except (paginator.EmptyPage, paginator.InvalidPage):
+    #     tickets = ticket_paginator.page(ticket_paginator.num_pages)
+
+
+    search_message = ''
+    if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
+        search_message = _('<p><strong>Note:</strong> The keyword search is case sensitive. This means the search will <strong>not</strong> be accurate.')
+
+    try:
+        import pickle
+    except ImportError:
+        import cPickle as pickle
+    from helpdesk.lib import b64encode
+    urlsafe_query = b64encode(pickle.dumps(query_params))
+
+    querydict = request.GET.copy()
+    querydict.pop('page', 1)
+
+    q = Queue.objects.all()
+    tags = Tag.objects.all()
+    tickets = ticket_qs
+
+    tickets = json.dumps(list(tickets), cls=DjangoJSONEncoder)
+    final_dict = {'tickets': tickets}
+    return JsonResponse(final_dict, safe=False)

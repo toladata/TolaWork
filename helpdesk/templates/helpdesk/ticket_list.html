@@ -10,8 +10,8 @@
 {% block content %}
 {% load in_list %}
 <link href="{{ STATIC_URL}}css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-<link href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css" />
+<!-- <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css" /> -->
 <div class="container" ng-controller="TicketController">
   {% if tickets and not query  %}
    <h3>Submitted Tickets</h3>
@@ -808,6 +808,7 @@
             } );
           });
         </script>
+        <table id="stakeholdertable" class="table table-striped"></table>
       </div>
 
 
@@ -1336,4 +1337,5 @@ $(document).ready(function() {
 
 
 </script>
+
 {% endblock content %}
