@@ -490,8 +490,10 @@ def  get_tasks_by_user(email):
 @login_required
 def githubSync(request):
     
-    tickets = Ticket.objects.all().exclude(
+    tickets = Ticket.objects.all().exclude(github_issue_number__exact="",
            status__in=[Ticket.RESOLVED_STATUS])
+
+    print tickets.count()
 
     for ticket in tickets:
 
@@ -499,11 +501,8 @@ def githubSync(request):
         queue = queue_repo(ticket)
 
         if not ticket.github_issue_number:
-           sent = new_issue(queue, ticket)
-
-           if sent['status_code'] == 200:
-               print 'Ticket #'+str(ticket.id)+' sent to github'
-
+           pass
+           
         else:
 
            response = get_issue_status(queue,ticket)
