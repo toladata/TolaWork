@@ -61,8 +61,8 @@ def new_issue(repo,ticket):
     ticket_comments = FollowUp.objects.filter(ticket_id=ticket.id).all()
     new_comment = ''
     for t in ticket_comments:
-        comments = new_comment + str(t.comment) + '<br>'
-        new_comment = comments.encode('ascii', 'ignore').decode('ascii')
+        comments = new_comment + t.comment.encode('ascii', 'ignore') + '<br>'
+        new_comment = comments.encode('ascii', 'ignore')
     attachment_note = ''
     ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set')
     for ticket_attachment in ticket_attachments.all():
@@ -76,7 +76,7 @@ def new_issue(repo,ticket):
     payload['title'] = ticket.title
     #encode to utf-8
     body = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment) + " Link to Ticket - " + str(ticket.t_url)
-    payload['body'] = body.encode('ascii', 'ignore').decode('ascii')
+    payload['body'] = body.encode('ascii', 'ignore')
     payload['labels'] = labels
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues"
