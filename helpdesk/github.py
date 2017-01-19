@@ -75,7 +75,7 @@ def new_issue(repo,ticket):
     labels = ['Tola-Work Ticket']
     payload['title'] = ticket.title
     #encode to utf-8
-    body = str(ticket.submitter_email) + " " + str(ticket.description) + "     #" + str(attachment_note) + " - " + str(new_comment) + " Link to Ticket - " + str(ticket.t_url)
+    body = ticket.submitter_email.encode('ascii', 'ignore') + " " + ticket.description.encode('ascii', 'ignore') + "     #" + attachment_note.encode('ascii', 'ignore') + " - " + new_comment + " Link to Ticket - " + ticket.t_url.encode('ascii', 'ignore')
     payload['body'] = body.encode('ascii', 'ignore')
     payload['labels'] = labels
     token = settings.GITHUB_AUTH_TOKEN
