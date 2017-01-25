@@ -257,10 +257,10 @@
                       <div class="col-md-9">
                         <input class="btn btn-primary" type='submit' value='Update This Ticket' />
                         {% if not ticket.github_issue_url %}
-                        {% if request.user.is_staff %}
+                        {% if user.is_superuser %}
                         <input name="github" type='button ' class="btn btn-info" id="before_github_send" value='Send to Github' onClick="send_to_github({{ticket.id}})"/>
-                        <input name="view_github" type='button ' class="btn btn-info hidden" id="after_github_send" value='View Ticket in Github' onclick="window.open('{{ ticket.github_issue_url }}', '_blank');"/>
                         {% endif %}
+                        <input name="view_github" type='button ' class="btn btn-info hidden" id="after_github_send" value='View Ticket in Github' onclick="window.open('{{ ticket.github_issue_url }}', '_blank');"/>
                         {% else %}
 
                         <input name="view_github" type='button ' class="btn btn-info" value='View Ticket in Github' onclick="window.open('{{ ticket.github_issue_url }}', '_blank');"/>
