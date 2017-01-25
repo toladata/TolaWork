@@ -8,6 +8,7 @@ try:
     from django.utils import timezone
 except ImportError:
     from datetime import datetime as timezone
+import unicodedata
 
 def get_issue_status(repo,ticket):
 
@@ -61,8 +62,8 @@ def new_issue(repo,ticket):
     ticket_comments = FollowUp.objects.filter(ticket_id=ticket.id).all()
     new_comment = ''
     for t in ticket_comments:
-        comments = new_comment + str(t.comment) + '<br>'
-        new_comment = unicode(comments).encode('utf-8')
+        comments = new_comment + unicodedata.normalize('NFKD', unicode(t.comment)).encode('ascii', 'ignore') + '<br>'
+        new_comment = unicodedata.normalize('NFKD' ,unicode(comments)).encode('ascii', 'ignore')
     attachment_note = ''
     ticket_attachments = FollowUp.objects.filter(ticket_id = ticket.id).prefetch_related('attachment_set')
     for ticket_attachment in ticket_attachments.all():
@@ -75,8 +76,8 @@ def new_issue(repo,ticket):
     labels = ['Tola-Work Ticket']
     payload['title'] = ticket.title
     #encode to utf-8
-    body = unicode(ticket.submitter_email).encode('utf-8') + " " + unicode(ticket.description).encode('utf-8') + "     #" + str(attachment_note) + " - " + unicode(new_comment).encode('utf-8') + " Link to Ticket - " + unicode(ticket.t_url).encode('utf-8')
-    payload['body'] = body
+    body = unicodedata.normalize('NFKD', unicode(ticket.submitter_email)).encode('ascii','ignore') + " " + unicodedata.normalize('NFKD', unicode(ticket.description)).encode('ascii','ignore') + "     #" + unicodedata.normalize('NFKD', unicode(attachment_note)).encode('ascii', 'ignore') + " - " + new_comment + " Link to Ticket - " + unicodedata.normalize( 'NFKD',unicode(ticket.t_url)).encode('ascii', 'ignore')
+    payload['body'] = unicodedata.normalize('NFKD' ,unicode(body)).encode('ascii', 'ignore')
     payload['labels'] = labels
     token = settings.GITHUB_AUTH_TOKEN
     repo = repo + "/issues"
