@@ -214,3 +214,18 @@ function send_to_github(ticketid){
     }
   });
 };
+
+function github_sync(){
+  $.growl.warning({title: "Warning Message", message: "Github Sync Process might take long!!!" });
+
+  $.ajax({
+        type: 'GET',
+        url: '/githubSync/',
+        timeout: 0,
+        success: function(response) {
+          $.growl.notice({title: "Success Message", message: response.status_lbl });
+            
+        }
+    });
+
+};
