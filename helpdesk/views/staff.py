@@ -600,10 +600,6 @@ def view_ticket(request, ticket_id):
 
     tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
 
-    if ticket_state.github_issue_number:
-        ticket_state.status = 7
-    print (ticket_state.status)
-
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
             'ticket': ticket_state,
