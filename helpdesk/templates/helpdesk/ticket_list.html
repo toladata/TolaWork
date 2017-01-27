@@ -561,9 +561,20 @@
                 <a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
                 <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
               {% endif %}
-                 &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
 
-              {% if ticket.github_issue_id %}
+              {% if not ticket.github_issue_id %}
+                &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
+
+              {% else %}
+
+                {% if not ticket.status == 4 %}
+                  &nbsp;<span class="label label-warning"> In Dev Queue</span>
+
+                {% else %}
+                  &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
+
+                {% endif %}
+                
                 &nbsp;<span class="label label-primary"> 
                   {% if ticket.git_label == 0 %}Backlog
                     {% elif ticket.git_label == 1 %}Ready
@@ -572,6 +583,8 @@
                     {% elif ticket.git_label == 4 %}Done
                     {% endif%} 
                   </span>
+
+
               {% endif %}
 
               <strong>&nbsp;&nbsp;Tags:</strong>

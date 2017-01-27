@@ -334,16 +334,30 @@
                      <!-- <strong>Ticket Status: </strong><font>In Progress </font>&nbsp;<span class="badge"> 2 </span>&nbsp;&nbsp;<span class="glyphicon glyphicon-tags"></span> -->
                     <strong>Queue:</strong>{% blocktrans with ticket.queue as queue %}&nbsp;[{{ queue }}] {% endblocktrans %}
                     <strong>&nbsp;Ticket Status:</strong>&nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
-                    {% if ticket.github_issue_id %}
-                      &nbsp;<span class="label label-primary"> 
-                        {% if ticket.git_label == 0 %}Backlog
-                          {% elif ticket.git_label == 1 %}Ready
-                          {% elif ticket.git_label == 2 %}working
-                          {% elif ticket.git_label == 3 %}In Dev
-                          {% elif ticket.git_label == 4 %}Done
-                          {% endif%} 
-                        </span>
-                    {% endif %}
+                     {% if not ticket.github_issue_id %}
+                        &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
+
+                     {% else %}
+
+                        {% if not ticket.status == 4 %}
+                          &nbsp;<span class="label label-warning"> In Dev Queue</span>
+
+                        {% else %}
+                          &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
+
+                        {% endif %}
+                        
+                        &nbsp;<span class="label label-primary"> 
+                          {% if ticket.git_label == 0 %}Backlog
+                            {% elif ticket.git_label == 1 %}Ready
+                            {% elif ticket.git_label == 2 %}working
+                            {% elif ticket.git_label == 3 %}In Dev
+                            {% elif ticket.git_label == 4 %}Done
+                            {% endif%} 
+                          </span>
+
+
+                      {% endif %}
 
                        <strong>&nbsp;&nbsp;Tags:</strong>
                     {%if tags %}

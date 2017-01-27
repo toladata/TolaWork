@@ -559,7 +559,7 @@
         </div>
         {% if user.is_superuser %}
           <div class=" githubsync">
-            <a href="{% url 'githubSync' %}" class="btn btn-info"><b><span class="glyphicon glyphicon-refresh"></span></b> Sync Tickets with Github</a>
+            <a href="{% url 'githubSync' %}" class="btn btn-info" onClick="github_sync()"><b><span class="glyphicon glyphicon-refresh"></span></b> Sync Tickets with Github</a>
           </div>
         {% endif %}
         <br/>
