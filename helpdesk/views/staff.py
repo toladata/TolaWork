@@ -37,6 +37,7 @@ from django.core import paginator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.safestring import mark_safe
 from django.core.serializers.json import DjangoJSONEncoder
+from django.core import serializers 
 
 try:
     from django.utils import timezone
@@ -1221,12 +1222,140 @@ def ticket_list(request):
         )))
     ticket_list = staff_member_required(ticket_list)
 
+def more_details(request, ticket_id):
+    if not (request.user.is_active):
+        return HttpResponseRedirect('%s?next=%s' % (reverse('login'), request.path))
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if not ticket.t_url:
+        ticket.t_url = request.build_absolute_uri()
+        ticket.save(update_fields=['t_url'])
+
+    progress=''
+
+    ticket_state = get_object_or_404(Ticket, id=ticket_id)
+
+    # check status of ticket in github
+    if ticket.github_issue_id:
+        queue = queue_repo(ticket)
+
+        #check status of ticket in GitHub
+        response = get_issue_status(queue,ticket)
+
+        if response == 200:
+
+            #synced status wth github
+            status = ticket_state.status
+            if status == 4:
+                state = 'Closed'
+            else:
+                state = 'Open'
+            print 'Ticket status in Github is: [' + str(state) + ']'
+        else:
+            print 'Check ticket status in GitHub'
+
+        #check github label
+        label_response = get_label(queue,ticket)
+        print label_response
+
+    if 'take' in request.GET:
+        # Allow the user to assign the ticket to themselves whilst viewing it.
+
+        # Trick the update_ticket() view into thinking it's being called with
+        # a valid POST.
+        request.POST = {
+            'owner': request.user.id,
+            'public': 1,
+            'title': ticket_state.title,
+            'comment': ''
+        }
+        return post_comment(request, ticket_id)
+
+    if 'subscribe' in request.GET:
+        # Allow the user to subscribe him/herself to the ticket whilst viewing it.
+        ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
+        if SHOW_SUBSCRIBE:
+            subscribe_staff_member_to_ticket(ticket_state, request.user)
+            return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket_state.id]))
+
+    if 'close' in request.GET and ticket_state.status == Ticket.RESOLVED_STATUS:
+        if not ticket_state.assigned_to:
+            owner = ''
+        else:
+            owner = ticket_state.assigned_to.id
+
+        # Trick the update_ticket() view into thinking it's being called with
+        # a valid POST.
+        request.POST = {
+            'new_status': Ticket.CLOSED_STATUS,
+            'public': 1,
+            'owner': owner,
+            'title': ticket_state.title,
+            'comment': _('Accepted resolution and closed ticket'),
+            }
+
+        return post_comment(request, ticket_id)
+
+    users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    q = Queue.objects.all()
+
+    # TODO: shouldn't this template get a form to begin with?
+    tags = [t.pk for t in ticket.tags.all()]
+    form = form_data(request)
+    tags = Tag.objects.all()
+
+    #ticketcc_string, SHOW_SUBSCRIBE = return_ticketccstring_and_show_subscribe(request.user, ticket_state)
+
+    #tickets, reported by current user
+
+    tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
+
+    if ticket_state.github_issue_number:
+        ticket_state.status = 7
+    print (ticket_state.status)
+
+    return render_to_response('helpdesk/more_details.html',
+        RequestContext(request, {
+            'ticket': ticket_state,
+            'form': form,
+            #'progress': progress,
+            'tags': tags,
+            'tickets_assigned': len(tickets_assigned),
+            'tickets_created':len(tickets_created),
+            'tickets_reported':len(tickets_reported),
+            'tickets_closed':len(tickets_closed),
+            'active_users': users,
+            'priorities': Ticket.PRIORITY_CHOICES,
+            'ticket_type': Ticket.TICKET_TYPE,
+            'ticket_queue': q,
+            'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
+            #'ticketcc_string': ticketcc_string,
+            #'SHOW_SUBSCRIBE': SHOW_SUBSCRIBE,
+        }))
+    
+def edit_ticket(request):
+    ticket_id = request.GET.get('ticket_id')
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    tags = [t.pk for t in ticket.tags.all()]
+    form = form_data(request)
+    tags = Tag.objects.all()
+    ticket_state = get_object_or_404(Ticket, id=ticket_id)
+    return render_to_response('helpdesk/edit_ticket.html',
+        RequestContext(request, {
+            'ticket': ticket_state,
+            'ticket_queue': Queue.objects.all(),
+            'priorities' : Ticket.PRIORITY_CHOICES,
+            'ticket_type': Ticket.TICKET_TYPE,
+            'form' : form,
+            'tags': tags,
+        }))
+    
+
 
 @ensure_csrf_cookie
 def ticket_edit(request):
 
     ticket_id = request.GET.get('ticket_id')
-    
     ticket = get_object_or_404(Ticket, id=ticket_id)
     if request.method == 'POST':
         ticket_id = ticket.id
@@ -1302,7 +1431,6 @@ def ticket_edit(request):
             json.dumps({"response": "there was an error"}),
             content_type="application/json"
         )
-
 
 @login_required
 def create_ticket(request):
@@ -2459,8 +2587,7 @@ def form_data(request):
 
     return form
 
-#ticket object
-def tickets_object(request):
+def ticket_object(request):
     #Form data
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     form = form_data(request)
@@ -2670,7 +2797,7 @@ def tickets_object(request):
             pass
 
     
-    tickets = Ticket.objects.select_related().values('id', 'title','description','queue_id')
+    tickets = Ticket.objects.select_related()
     tickets_filtered = tickets
 
     tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
@@ -2729,25 +2856,6 @@ def tickets_object(request):
         }
         ticket_qs = apply_query(tickets, query_params)
 
-    #Change items per_page by a user
-    # items_per_page = 10
-    # user_choice_pageItems = request.GET.get('items_per_page')
-
-    # if user_choice_pageItems:
-    #     items_per_page = user_choice_pageItems
-
-    # ticket_paginator = paginator.Paginator(ticket_qs, items_per_page)
-    # try:
-    #     page = int(request.GET.get('page', '1'))
-    # except ValueError:
-    #     page = 1
-
-    # try:
-    #     tickets = ticket_paginator.page(page)
-    # except (paginator.EmptyPage, paginator.InvalidPage):
-    #     tickets = ticket_paginator.page(ticket_paginator.num_pages)
-
-
     search_message = ''
     if 'query' in context and settings.DATABASES['default']['ENGINE'].endswith('sqlite'):
         search_message = _('<p><strong>Note:</strong> The keyword search is case sensitive. This means the search will <strong>not</strong> be accurate.')
@@ -2764,8 +2872,8 @@ def tickets_object(request):
 
     q = Queue.objects.all()
     tags = Tag.objects.all()
-    tickets = ticket_qs
 
-    tickets = json.dumps(list(tickets), cls=DjangoJSONEncoder)
-    final_dict = {'tickets': tickets}
-    return JsonResponse(final_dict, safe=False)
+    tickets=ticket_qs
+    
+    tickets = serializers.serialize('json', tickets)
+    return HttpResponse(json.dumps(tickets), content_type='application/json')

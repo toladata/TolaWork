@@ -1,6 +1,7 @@
 
 from django.conf.urls import *
 from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
 
 urlpatterns = patterns('helpdesk.views.staff',
 
@@ -8,17 +9,25 @@ urlpatterns = patterns('helpdesk.views.staff',
         'ticket_list',
         name='helpdesk_list'),
     
+    url(r'^tickets/ticket_object$',
+        'ticket_object',
+        name='ticket_object'),
+    
     url(r'^tickets/$',
         'my_default_sort',
         name='my_sort'),
 
-   url(r'^tickets/submit/$',
+    url(r'^tickets/submit/$',
     'create_ticket',
     name='helpdesk_submit'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/$',
         'view_ticket',
         name='helpdesk_view'),
+
+    url(r'^tickets/more_details/(?P<ticket_id>[0-9]+)/$',
+        'more_details',
+        name='more_details'),
 
     url(r'^tickets/(?P<page>[0-9]+)/$',
         'ticket_list',
@@ -35,6 +44,10 @@ urlpatterns = patterns('helpdesk.views.staff',
     url(r'^tickets/(?P<ticket_id>[0-9]+)/followup_delete/(?P<followup_id>[0-9]+)/$',
         'followup_delete',
         name='helpdesk_followup_delete'),
+
+    url(r'^tickets/edit_ticket/$',
+        'edit_ticket',
+        name='edit_ticket'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/ticket_edit/$',
         'ticket_edit',

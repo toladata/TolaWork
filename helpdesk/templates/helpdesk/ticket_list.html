@@ -206,7 +206,7 @@
             <div class="col-md-7"></div>
 
             <div class="col-md-3 read_more">
-              <a href="#moredetails{{ticket.id}}" class= "" data-toggle="collapse"><span class="glyphicon glyphicon-th"></span> View More Details</a>
+              <a href="#moredetails{{ticket.id}}" type="button" id="more_link{{ticket.id}}" data-toggle="collapse"><span class="glyphicon glyphicon-th"></span> View More Details</a>
             </div>
             <input hidden id="ticket-link" value="{{ ticket.get_absolute_url }}">
             <div class="col-md-2 read_more">
@@ -225,332 +225,18 @@
           </div>
           <div>
             <!-- the collapse section for view more details -->
-            <div id="moredetails{{ticket.id}}" class="collapse">
-            <br>
-              <div class="ticket_view tab-pane">
-                <h5 class="view_table"><strong>Other Details</strong></h5>
-                <!-- the table with the ticket details -->
-                <div class="col-md-12 row table-responsive">
-                    <table class="table table-striped table-condensed view_table">
-                      <tr>
-                        <td><p><strong>Submitter Email: </strong></p></td>
-                        <td><p>{{ ticket.submitter_email }}</p></td>
-                        <td><p><strong>Submitted on: </strong></p></td>
-                        <td><p>{{ ticket.created | date}}, {{ ticket.created | time}} </p></td>
-                      </tr>
-                      <tr>
-                        <td><p><strong>Assigned to: </strong></p></td>
-                        <td><p> {{ ticket.get_assigned_to }}</p>
-                        {% ifequal ticket.get_assigned_to _('Unassigned') %} 
-                          <strong><a href='?take'><span class='button button_take'>{% trans "Take" %}</span></a></strong>
-                        {% endifequal %}
-                        </td>
-                        <td><p><strong>Ticket CC:</strong></p></td>
-                        <td><p>{{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk_ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong>{% trans "Manage" %}</strong></a>{% if SHOW_SUBSCRIBE %}, <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'>{% trans "Subscribe" %}</a></strong>{% endif %}</p></td>
-                      </tr>
-                      <tr>
-                        <td><p><strong>Priority: </strong></p></td>
-                        <td><p>{{ ticket.get_priority_display }}</p></td>
-                        <td><p><strong>Type: </strong></p></td>
-                        <td><p>{{ ticket.get_type_display }}</p></td>
-                      </tr>
-                    </table>
-                  </div><!-- end the ticket details table -->
-                </div> 
+            <div id="moredetails{{ticket.id}}" class="collapse"> </div>
+            <!-- end the collapse section for view more details -->
+        
 
-                <!-- the dependencies section -->
-                <div>
-                  <h5><strong>Dependencies:</strong></h5>
-                  <div class="row">
-                  {% for dep in ticket.ticketdependency.all %}
-                    <div class="col-md-8">
-                      {% if forloop.first %}
-                      <p>
-                        {% trans "This ticket cannot be resolved until the following ticket(s) it depends on are resolved" %}
-                      </p>
-                      <ul>
-                      {% endif %}
-                        <li>
-                            <a href='{{ dep.depends_on.get_absolute_url }}'>{{ dep.depends_on.ticket }} {{ dep.depends_on.title }}</a>
-                            ({{ dep.depends_on.get_status_display }})
-                            <a href='{% url 'helpdesk_ticket_dependency_del' ticket.id dep.id %}'>{% trans "Remove Dependency" %}</a>
-                        </li>
-                        {% if forloop.last %}
-                      </ul>
-                        {% endif %}
-                    </div>
-                    {% empty %}
-                    <div class="col-md-8">
-                      <p>{% trans "This ticket has no dependencies. If you want to make this ticket dependent on another ticket, search and add a dependent ticket. " %} </p>
-                    </div>
-                    <div class="col-md-4">
-                      <p>
-                        <form class="navbar-form navbar-left" id='searchform' method='get' action='{% url 'helpdesk_ticket_dependency_add' ticket.id %}'>
-                          <div class="input-group">
-                            <input type='text' name='q' size='15' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "If you want to make this ticket dependent on another ticket, search and add a depend ticket." %}'/>
-                            <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' />
-                            <input type='hidden' name='search_type' value='header' />
-                            {% csrf_token %}
-                            <span class="input-group-btn">
-                              <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span> Go </button>
-                            </span>
-                          </div>
-                        </form>
-                      </p>
-                    </div>
-                  {% endfor %}
-                  </div>
-                </div>
-                <!-- end dependencies section -->
+    <script type="text/javascript">
+        $(document).ready(function(){
 
-                <!-- follow-up section -->
-                <div>
-                  {% if ticket.followup_set.all %}
-                  <h3>{% trans "Follow-Ups" %}</h3>
-                  {% load ticket_to_link %}
-                  {% for followup in ticket.followup_set.all %}
-                  {% if helpdesk_settings.HELPDESK_FOLLOWUP_MOD %}
-                    <div class='followup_mod'>
-                      <div class='title'>
-                        <span class='byline text-info'>
-                          {{ followup.user.get_full_name }}&nbsp;&nbsp;&nbsp;&nbsp;{{ followup.date }} ({{ followup.date }})</span>
-                        <small>{{ followup.title }}</small>
-                        {% if not followup.public %}
-                        <span class='private'>({% trans "Private" %})</span>
-                        {% endif %}
-                        {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
-                        {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-                        <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
-                        {% endif %}
-                        {% endif %}
-                        {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-                        <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
-                        {% endif %}
-                      </div>
-                  {% else %}
-                    <div class='followup well'>
-                      <div class='title'>
-                        {{ followup.title }}
-                        <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %}<span title='{{ followup.date|date:"r" }}'>{{ followup.date }}</span>
-                            {% if not followup.public %} <span class='private'>({% trans "Private" %})</span>{% endif %}</span>
-                        {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP %}
-                        {% if followup.user and request.user == followup.user and not followup.ticketchange_set.all %}
-                        <a href="{% url 'helpdesk_followup_edit' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Edit" alt="Edit" src="{{ STATIC_URL }}helpdesk/buttons/edit.png"></a>
-                        {% endif %}
-                        {% endif %}
-                        {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-                        <a href="{% url 'helpdesk_followup_delete' ticket.id followup.id %}" class='followup-edit'><img width="60" height="15" title="Delete" alt="Delete" src="{{ STATIC_URL }}helpdesk/buttons/delete.png"></a>
-                        {% endif %}
-                      </div>
-                  {% endif %}
-
-                  <!-- display ticket comments from 'follow.comment' column -->
-                  <span class='followup-desc'>
-                    {% if followup.comment %}
-                      {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
-                    {% endif %}
-                  </span>
-
-                  {% for change in followup.ticketchange_set.all %}
-                    {% if forloop.first %}
-                      <div class='changes'>
-                        <ul>
-                        {% endif %}
-                        <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
-                    {% if forloop.last %}
-                      </ul>
-                    </div>
-                    {% endif %}
-                  {% endfor %}
-
-                  {% for attachment in followup.attachment_set.all %}
-                    {% if forloop.first %}
-                      <div class='attachments'>
-                        <ul>{% endif %}
-                          <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
-                          {% if followup.user and request.user == followup.user %}
-                          <a href='{% url 'helpdesk_attachment_del' ticket.id attachment.id %}'>delete</a>
-                          {% endif %}
-                          </li>
-                          {% if forloop.last %}
-                        </ul>
-                      </div>
-                    {% endif %}
-                  {% endfor %}
-                  </div>
-                {% endfor %}
-                {% endif %}
-                {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
-                </div>
-                {% endif %}
-                </div>
-                <!-- end follow-up section -->
-
-                <!-- respond to ticket and status section -->
-                <div id='add-followup' class="well">
-                  <h4><strong>{% trans "Respond to this ticket" %}</strong></h4>
-                  <form method='post' id="ticket_new_status{{ticket.id}}"  enctype='multipart/form-data' class="form-horizontal">
-                    <fieldset>
-                      <dl>
-                        {% if preset_replies %}
-                        <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
-                        <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
-                        <dd class='form_help_text'>{% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
-                        {% endif %}
-
-                        <dt>
-                          <label for='commentBox'>{% trans "Comment / Resolution:" %}</label>
-                        </dt>
-                        <dd>
-                          <textarea class="form-control preview_links" rows="3" name='comment' id='commentBox{{ticket.id}}' style="width:550px"></textarea>
-                        </dd>
-                        <dd class='form_help_text'><p> You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>.</p></dd>
-
-                        <!-- ticket status -->
-                        <dt><label>{% trans "New Status" %}</label></dt>
-                          {% if not ticket.can_be_resolved %}
-
-                        <dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
-
-                        {% if ticket.status == 1 %}
-                          <dd>
-                            <input type='radio'  name='new_status{{ticket.id}}' value='1' id='st_open' checked='checked'><label for='st_open' class='active'> &nbsp;{% trans "Open" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='3' id='st_resolved' {% if new_status == '3'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='status'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio'  name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='5' id='st_duplicate'{% if new_status == '5'%}checked='checked'{% endif%}><label for='st_duplicate'>&nbsp;{% trans "Duplicate" %}</label>&raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress'><label for='st_progress'>{% trans "In Progress" %}</label>
-                          </dd>
-                        {% endif %}
-
-                        {% if ticket.status == 2 %}
-                          <dd>
-                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened' checked='checked'><label for='st_reopened' class='active'>&nbsp;{% trans "Reopened" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='3' id='st_resolved'{% if new_status == '3'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_resolved'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='4' id="st_closed" {% if new_status == '4'%}checked='checked'{% endif%}{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='5' id='st_duplicate'{% if new_status == '5'%}checked="checked"{% endif%}><label for='st_duplicate'>&nbsp;{% trans "Duplicate" %}</label>&raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress'><label for='st_progress'>{% trans "In Progress" %}</label>
-                          </dd>
-                        {% endif %}
-
-                        {% if ticket.status == 3 %}
-                          <dd>
-                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='3' id='st_resolved' checked='checked'><label for='st_resolved' class='active'>&nbsp;{% trans "Resolved" %}</label> &raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress' checked='checked'><label for='st_progress'>{% trans "In Progress" %}</label>&raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}checked='checked'{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
-                          </dd>
-                        {% endif %}
-
-                        {% if ticket.status == 4 %}
-                          <dd>
-                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed' checked='checked'><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
-                          </dd>
-                        {% endif %}
-
-                        {% if ticket.status == 5 %}
-                          <dd>
-                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='5' id='st_duplicate' checked='checked'><label for='st_duplicate'>{% trans "Duplicate" %}</label>&laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress' checked='checked'><label for='st_progress'>{% trans "In Progress" %}</label>
-                          </dd>
-                        {% endif %}
-                        {% if ticket.status == 6 %}
-                          <dd>
-                            <input type='radio' name='new_status{{ticket.id}}' value='6' id='st_progress' checked='checked'><label for='st_progress'>{% trans "In Progress" %}</label>&raquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
-                          </dd>
-                        {% endif %}
-
-                        {% if ticket.status == 7 %}
-                          <dd>
-                            <input type='radio' name='new_status{{ticket.id}}' value='2' id='st_reopened'{% if new_status == '2'%}checked='checked'{% endif%}><label for='st_reopened'>&nbsp;{% trans "Reopened" %}</label> &laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='3' id='st_resolved'><label for='st_resolved' class='active'>&nbsp;{% trans "Resolved" %}</label>&laquo;&nbsp;&nbsp;
-                            <input type='radio' name='new_status{{ticket.id}}' value='4' id='st_closed'{% if new_status == '4'%}{% endif%}><label for='st_closed'>&nbsp;{% trans "Closed" %}</label>
-                          </dd>
-                        {% endif %}
-
-                        {% if helpdesk_settings.HELPDESK_UPDATE_PUBLIC_DEFAULT %}
-                          <input type='hidden' name='public' id= "id_public{{ticket.id}}" value='1'>
-                          {% else %}
-                          <dt><label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
-                          <dd><input type='checkbox' name='public' id= "id_public{{ticket.id}}" value='1' checked='checked' /></dd>
-                          <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
-                        {% endif %}
-                      </dl>
-                      
-                    </fieldset>
-                    <div class="row">
-                      <div class="col-md-9">
-                        <input class="btn btn-primary" type='submit' value='{% trans "Update This Ticket" %}' />
-                        {% if not ticket.github_issue_url %}
-                        {% if request.user.is_staff %}
-                        <input name="github" type='button ' class="btn btn-info" id="before_github_send" value='{% trans "Send to Github" %}' onClick="send_to_github({{ticket.id}})"/>
-                        <input name="view_github" type='button ' class="btn btn-info hidden" id="after_github_send" value='{% trans "View Ticket in Github" %}' onclick="window.open('{{ ticket.github_issue_url }}', '_blank');"/>
-                        {% endif %}
-                        {% else %}
-
-                        <input name="view_github" type='button ' class="btn btn-info" value='{% trans "View Ticket in Github" %}' onclick="window.open('{{ ticket.github_issue_url }}', '_blank');"/>
-                        {% endif %}
-
-                        {% if ticket.slack_status == 0 %}
-                        <a href='{% url "post_to_slack" ticket.id %}'><img alt="Add to Slack" height="40" width="139" src="{{ STATIC_URL }}/img/add_to_slack.png"></a>
-                        {% else %}
-                        <a href="https://tola-users.slack.com/archives/tola-work"><img alt="Posted to Slack" height="60" width="140" src="{{ STATIC_URL }}/img/slack.png" /></a>
-                        {% endif %}
-                      </div>
-                        {% csrf_token %}
-
-                  </form>
-                   <script>
-                    $('#ticket_new_status{{ticket.id}}').on('submit', function(event){
-                        event.preventDefault();
-                        var csrftoken = $("#ticket_new_status{{ticket.id}}").find('input[name="csrfmiddlewaretoken"]').val();
-                        edit_ticket_status({{ticket.id}}, csrftoken);
-                    });
-                   
-                    </script>
-
-                  <!-- ticket on-hold and delete section -->
-                  <div class="col-md-2 col-md-offset-1">
-                    {% if user.is_superuser %}
-                      <a href='#' data-toggle="modal" data-target="#deleteModal{{ticket.id}}" class="ticket-delete"><span class="glyphicon glyphicon-remove"></span> Delete</a>
-                      <span>
-                      {% if ticket.on_hold %}
-                        | <a href='{% url "helpdesk_unhold" ticket.id %}' class="ticket-hold">{% trans "Unhold" %}</a>
-                      {% else %}
-                        |<a href='{% url "helpdesk_hold" ticket.id %}' class="ticket-hold">{% trans "Hold" %}</a>
-                      {% endif %}</span>
-                    {% endif %}
-                    <!-- delete ticket modal -->
-                    <div id="deleteModal{{ticket.id}}" class="modal fade" role="dialog">
-                      <div class="modal-dialog">
-                        <!-- Modal content-->
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <h3 class="modal-title font9">Delete Ticket</h3>
-                          </div>
-                          <div class="modal-body">
-                            <p>{% blocktrans with ticket.title as ticket_title %}Are you sure you want to delete this ticket (<em>{{ ticket_title }}</em>)?</p><p> All traces of the ticket, including followups, attachments, and updates will be irreversibly removed.{% endblocktrans %}</p>
-
-                            <p><a href='../'>{% trans "No, Don't Delete It" %}</a></p>
-
-                            <form method='post' action='/helpdesk/tickets/{{ticket.id}}/delete/'>
-                              <input class="btn btn-primary" type='submit' value='{% trans "Yes - Delete It" %}' />{% csrf_token %}
-                            </form>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                          </div>
-                        </div>
-                      </div>
-                    </div><!-- end delete ticket modal -->
-                  </div> <!-- end ticket hold and delete section -->
-                </div>
-              </div><!-- end respond to ticket and status section -->
-
-            </div> <!-- end the collapse section for view more details -->
+          $("#more_link{{ticket.id}}").click(function(){
+            $("#moredetails{{ticket.id}}").load("/helpdesk/tickets/more_details/{{ticket.id}}/");
+          });
+        });
+    </script>
           </div>
         </div> <!-- end panel body -->
             
@@ -599,202 +285,20 @@
               <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>&nbsp; <a href="{% url 'vote_down' ticket.id %}"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
             </div>
             <!-- the collapse section of edit ticket -->
-            <div id="addTask{{ticket.id}}" class="panel-collapse collapse addTask">
-              <div class="ticket_task">
-                <div class="panel-body">
-                  <p>{% blocktrans %}<strong>No new details should be entered when editing a ticket. </strong><br/>This form should only be used to fix incorrect details on a ticket or clean up the submission.{% endblocktrans %}</p>
-                </div> 
-                <div class="ticket_form_cover">
-                  <div class="ticket_form info">
-                    <form  method='post' id="ticket_edit-form{{ticket.id}}" >
-                      <div class=" row task_spacing">
-                        <div class="col-md-12 ticket_padding row">
-                           <label class="col-md-1"><p><strong>{% trans "Title:" %}</strong></p></label>
-                           <div class=" col-md-9">
-                              <input class="form-control ticket_title" type='text' name='title' id='id_title{{ticket.id}}'  value='{{ ticket.title|escape }}' />
-                           </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class= "col-md-6 row ticket_edit" >
-                          <label class="col-md-4"><p><strong>{% trans "Queue:" %}</strong></p></label>
-                          <div class="col-md-8">
-                            <select class="form-control" id='id_queue{{ticket.id}}' name='queue'>{% for q in ticket_queue %}<option value='{{ q.id }}'{% ifequal q.id ticket.queue_id %} selected='selected'{% endifequal %}>{{ q }}</option>{% endfor %}</select>
-                          </div>  
-                        </div> 
-                        <div class= "col-md-6 row ticket_edit" >
-                          <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
-                          <div class="col-md-8">
-                            <input class="form-control" type='text' name='email' id='id_email{{ticket.id}}' value='{{ ticket.submitter_email|escape }}' />
-                          </div>
-                        </div>
-                      </div>
-                      <div class=" row task_spacing">
-                        <div class= "col-md-6 row ticket_edit" >
-                          <label class="col-md-4"><p><strong>{% trans "Error Message:" %}</strong></p></label>
-                          <div class="col-md-8">
-                            <textarea class="form-control" name="error_msg" rows="4" id="id_error_msg{{ticket.id}}" > {{ ticket.error_msg|escape }} </textarea>
-                          </div>
-                        </div>
-                         <div class= "col-md-6 row ticket_edit" >
-                          <label class="col-md-4"><p><strong>{% trans "Description of Issue:" %}</strong></p></label>
-                          <div class="col-md-8">
-                            <textarea class="form-control" name="description" rows="4" id="id_description{{ticket.id}}"> {{ ticket.description|escape }} </textarea>
-                          </div>    
-                        </div>
-                      </div>
-                      <div class=" row">
-                        {% if user.is_superuser %}
-                          <div class="col-md-6 row ticket_edit">
-                            <label class="col-md-4"><p><strong>{% trans "Case Owner:" %}</strong></p></label>
-                            
-                            <div class="col-md-8">
-                              <select class="form-control" id='id_owner{{ticket.id}}' name='owner'><option value=''>{% trans "Unassign" %}</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
-                            </div>
-                          </div>
-                          {% endif %}
-                        <div class="col-md-6 row ticket_edit">
-                          <label class="col-md-4"><p><strong> {% trans "Type of Ticket:" %}</strong></p></label>
-                          <div class="col-md-8 ">
-                            <select class="form-control" id='id_type{{ticket.id}}' name='type'>{% for tt in ticket_type %}<option value='{{ tt.0 }}'{% ifequal tt.0 ticket.type %} selected='selected'{% endifequal %}>{{ tt.1 }}</option>{% endfor %}</select>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row task_spacing">
-                        <div class= "col-md-6 row" >
-                          <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
-                          <div class="col-md-8">
-                            <select class="form-control" id='id_priority{{ticket.id}}' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select>
-                          </div>
-                        </div>                            
-                      </div>
-                      <div class="row">
-                        <div class= "col-md-8 row">
-                          <label class="col-md-3"><p><strong>{% trans "Due Date:" %}</strong></p></label>
-                          <p class="col-md-9">{{ form.due_date }}</p>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class= "col-md-6 row  task_spacing" >
-                          <label class="col-md-4"><p><strong>{% trans "Tags:" %}</strong></p></label>
+            <div id="addTask{{ticket.id}}" class="panel-collapse collapse"> {% include "edit_ticket.html" %}</div> 
+            <!-- end the collapse section for edit ticket -->
+             <!-- <script language="javascript" type="text/javascript">
+        ;(function(){
 
-                          <div class="col-md-8">
-                            <span id="helpBlock" class="help-block">To add <strong>NEW</strong> tag(s), type in then press <strong>'ENTER'</strong></span>
-                            <select class = "form-control multi_select tag{{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags{{ticket.id}}' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
-                                {% for q in tags %} 
+          $("#edit_ticket{{ticket.id}}").click(function(){
+            $("#addTask{{ticket.id}}").load("/helpdesk/tickets/edit_ticket/?ticket_id={{ticket.id}}",function(){
+    $.getScript('{{ STATIC_URL }}js/edit.js', function() {
+  alert('Load was performed.');}); 
+          });
+        });
 
-                                  <option value='{{ q.id }}' {% for tag in ticket.tags.all %} {% ifequal q.id tag.id %} selected='selected'{% endifequal %}{% endfor %}>{{q.name}}</option>
-
-                                {% endfor %}
-                            </select>
-                            <script type="text/javascript">
-                                  $(".tag{{ticket.id}}").select2({
-                                          tags: true,
-                                          allowClear: true,
-                                          placeholder: "Add tags",
-
-                                          createTag: function(tag) {
-                                              return {
-                                                  id: tag.term,
-                                                  text: tag.term,
-                                                  isNew: true
-                                              };
-                                          },
-
-                                        }).on("change", function(e) {
-                                          var isNew = $(this).find('[data-select2-tag="true"]');
-                                          if(isNew.length){
-                                              isNew.replaceWith('<option selected="selected" value="'+isNew.val()+'">'+isNew.text()+'</option>');
-                                          }
-                                      });
-                            </script>
-                            
-                          </div>
-                        </div>  
-                      </div>
-                      <!-- <p id='ShowFileUploadPara'><a href='#' id='ShowFileUpload'>{% trans "Attach File(s) &raquo;" %}</a></p>
-
-                      <div id='FileUpload' style='display: none;'>
-
-                          <dl>
-                            <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
-                              <dd><input type='file' name='attachment' id='id_file{{ticket.id}}' multiple/> <span class='AddAnotherFile'>(<a href='#'>{% trans "Add Another File" %}</a>)</span></dd>
-                          </dl>
-                      </div> -->
-                        <div class="row mydropdiv">
-                                <div class=" col-md-offset-1 dropzone col-md-10" id="dZUpload-edit" style="margin-botttom:10px" ></div>
-                                <div class="col-md-1"></div>
-                            </div>
-                            <br><br>
-                        <div class=" row">
-                        <label class= "col-md-6 row ticket_edit">
-                          <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />
-                        </label>
-                      </div>
-                     {% csrf_token %}
-                    </form> 
-                    <script>
-                         $(document).ready(function(){
-
-                                var list_of_files = new Array();
-                                Dropzone.autoDiscover = false;
-
-                                $("div#dZUpload-edit").dropzone({
-                                      url: "/helpdesk/tickets/submit/",
-                                      uploadMultiple: true,
-                                      maxFiles: 5,
-                                      autoProcessQueue : false,
-                                      init : function() {
-                                          this.on("addedfile", function(file)
-                                              {
-                                                  if (list_of_files.length < 5)
-                                                  {
-                                                      list_of_files.push(file)
-                                                      console.log("file added");
-                                                  }
-                                              });
-                                      }
-                                  });
-
-
-                              /*document.onpaste = function(event){
-                                  var items = (event.clipboardData || event.originalEvent.clipboardData).items;
-
-                                  for (index in items) {
-                                    var item = items[index];
-                                    if (item.kind === 'file') {
-                                      // adds the file to your dropzone instance
-                                      //mydropzone1.addFile(item.getAsFile());
-                                    }
-                                  }
-                                }*/
-
-
-                                  $('form#ticket_edit-form{{ticket.id}}').on('submit', function(event){
-                                      event.preventDefault();
-
-                                      var data = new FormData($(this)[0]);
-                                      var edit_tags = $('#id_edit_tags{{ticket.id}}').val();
-                                      for (var i = 0; i < edit_tags.length; i++) {
-                                        data.append('edit_tags[]', edit_tags[i]);
-                                      };
-
-                                      console.log(list_of_files);
-
-                                      for(i=0;i<list_of_files.length;i++)
-                                          {
-                                            data.append('attachment', list_of_files[i]);
-                                          }
-
-                                      var csrftoken = $("#ticket_edit-form{{ticket.id}}").find('input[name="csrfmiddlewaretoken"]').val();
-                                      edit_ticket_post(data, csrftoken, '{{ticket.id}}');
-                                  });
-                               });
-                    </script>
-                  </div>
-                </div>
-              </div>
-            </div> <!-- end the collapse section for edit ticket -->
+        })(juery);
+    </script> -->
           </div>
           <!-- end panel footer -->
           </div>
@@ -802,14 +306,21 @@
         {% endfor %}
         </tbody>
         </table>
-
+        <table id="t_table"></table>
         <script type="text/javascript">
           $(document).ready(function(){
+            var number = "{{ number_of_tickets }}";
              $('#t_table').DataTable( {
                 "order": [], 
                 "bFilter": false,
                 'bLengthChange': false,
+                "serverSide": true,
                 "deferRender": true,
+                "idisplayLength":10,
+                "iDeferLoading": number,
+                "ajax": {
+                  url: '/tickets/ticket_object',
+                }, 
                 "aoColumnDefs": [
                     { "bSortable": false, "targets": [0 ] }
                        ]
@@ -821,7 +332,7 @@
             } );
           });
         </script>
-        <table id="stakeholdertable" class="table table-striped"></table>
+   
       </div>
 
 
