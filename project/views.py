@@ -500,6 +500,10 @@ def githubSync(request):
         # Sync 'Closed' status in github to 'Resolved' status in TW
         queue = queue_repo(ticket)
 
+        label = ''
+        status = ''
+        lable_status = {}
+
         if not ticket.github_issue_number:
            pass
            
@@ -510,12 +514,17 @@ def githubSync(request):
            update_label = get_label(queue,ticket)
 
            if update_label == 200:
-               print 'Label Updated for ticket -#' + str(ticket.id)
+                print 'Label Updated for ticket -#' + str(ticket.id)
 
            if response == 200:
                print 'GitHubSync Success - #' + str(ticket.github_issue_number)
 
-    return HttpResponseRedirect('/home')
+           lable_status = {'label': 'Github Lables Updated', 'status_lbl': 'Tickets Synced with Github'}
+
+    return HttpResponse(
+        json.dumps(lable_status),
+        content_type="application/json"
+    )
 
 #Get users with active sessions
 def get_current_users():
