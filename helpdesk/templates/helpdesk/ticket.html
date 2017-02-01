@@ -333,7 +333,7 @@
 
                      <!-- <strong>Ticket Status: </strong><font>In Progress </font>&nbsp;<span class="badge"> 2 </span>&nbsp;&nbsp;<span class="glyphicon glyphicon-tags"></span> -->
                     <strong>Queue:</strong>{% blocktrans with ticket.queue as queue %}&nbsp;[{{ queue }}] {% endblocktrans %}
-                    <strong>&nbsp;Ticket Status:</strong>&nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
+                    <strong>&nbsp;Ticket Status:</strong>
                      {% if not ticket.github_issue_id %}
                         &nbsp;<span class="label label-warning"> {{ ticket.get_status }} </span>
 
