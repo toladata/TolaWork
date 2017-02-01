@@ -490,10 +490,8 @@ def  get_tasks_by_user(email):
 @login_required
 def githubSync(request):
     
-    tickets = Ticket.objects.all().exclude(github_issue_number__exact="",
-           status__in=[Ticket.RESOLVED_STATUS])
-
-    print tickets.count()
+    tickets = Ticket.objects.all().exclude(github_issue_number__exact="", github_issue_number__isnull=True,
+           status__in=[Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS])
 
     for ticket in tickets:
 

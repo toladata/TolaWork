@@ -13,7 +13,12 @@ import unicodedata
 def get_issue_status(repo,ticket):
 
     repo = repo + "/issues/" + ticket.github_issue_number
-    r = requests.get(repo)
+
+    token = settings.GITHUB_AUTH_TOKEN
+    header = {'Authorization': 'token %s' % token}
+
+    r = requests.get(repo, headers=header)
+    print json.loads(r.content)
     try:
         if int(r.status_code) == 200:
             data = json.loads(r.content)
@@ -28,8 +33,13 @@ def get_issue_status(repo,ticket):
             if state == 'closed':
                 status = 4 # If 'Closed' in github, save as 'Closed' in TW
                 state_txt = 'Closed'
+
+            elif state == 'open' and update_ticket.status == 4:
+                status = 2
+                state_txt = 'Reopened'
             else:
-                status = update_ticket.status
+                status = 1
+                state_txt = 'Open'
 
             # add a comment/explanation for the change of state in TW
             comments = '[GitHub Sync] Ticket is ' + str(state_txt) + ' in GitHub'
