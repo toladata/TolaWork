@@ -547,7 +547,12 @@ def view_ticket(request, ticket_id):
 
         #check github label
         label_response = get_label(queue,ticket)
-        print label_response
+
+        if label_response['status_code'] == 200:
+
+            print 'Ticket Label is updated to: [' + str(label_response['t_label']) + ']'
+        else:
+            print 'Check ticket label in GitHub'
 
     if 'take' in request.GET:
         # Allow the user to assign the ticket to themselves whilst viewing it.

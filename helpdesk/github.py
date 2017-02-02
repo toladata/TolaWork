@@ -134,7 +134,10 @@ def queue_repo(ticket):
 def get_label(repo,ticket):
 
     repo = repo + "/issues/" + ticket.github_issue_number + "/labels"
-    r = requests.get(repo)
+    token = settings.GITHUB_AUTH_TOKEN
+    header = {'Authorization': 'token %s' % token}
+
+    r = requests.get(repo, headers=header)
 
     try:
 
@@ -143,32 +146,42 @@ def get_label(repo,ticket):
             label_txt2 = ""
             label_txt = ""
             label_int = '0'
+            labels = []
 
             for item in range(len(data)):
-                label = data[item]['name']
+                labels.append(data[item]['name'])
 
-                if label == "Tola-Work Ticket":
-                    label_txt = 'Submitted from TolaWork '
+            for l in labels:
 
-                elif label == "accepted":
+                if "Tola-Work Ticket" in l:
+                        pass
+
+                elif "accepted" in l:
                     label_txt2 = ', accepted by QA Lead and moved into the Ready Queue'
                     label_int = '5'
+                    label = l
 
-                elif label == "1 - Ready":
+                elif "Ready" in l:
                     label_txt2 = ', accepted by Developers and moved into the Ready Queue'
                     label_int = '1'
+                    label = l
 
-                elif label == "2 - Working":
+                elif "Working" in l:
                     label_txt2 = ' and Developers have started working on the Ticket'
                     label_int = '2'
+                    label = l
 
-                elif label == "3 - In Dev":
+                elif "In Dev" in l:
                     label_txt2 = ' and moved to Dev'
                     label_int = '3'
+                    label = l
 
-                elif label == "4 - Done":
+                elif "Done" in l:
                     label_txt2 = ' and its Done'
                     label_int = '4'
+                    label = l
+
+            print labels
 
             comments = '[Progress Update] Ticket ' + str(label_txt) + str(label_txt2)
 
@@ -184,7 +197,7 @@ def get_label(repo,ticket):
     except Exception, e:
         raise e
 
-    return r.status_code
+    return { 'status_code': r.status_code, 't_label': label}
 
 def close_issue(repo,ticket):
     payload = {}
