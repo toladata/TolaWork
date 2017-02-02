@@ -18,7 +18,6 @@ def get_issue_status(repo,ticket):
     header = {'Authorization': 'token %s' % token}
 
     r = requests.get(repo, headers=header)
-    print json.loads(r.content)
     try:
         if int(r.status_code) == 200:
             data = json.loads(r.content)
@@ -147,6 +146,7 @@ def get_label(repo,ticket):
             label_txt = ""
             label_int = '0'
             labels = []
+            label = ''
 
             for item in range(len(data)):
                 labels.append(data[item]['name'])
@@ -195,7 +195,7 @@ def get_label(repo,ticket):
                 update_ticket.git_label = label_int
                 update_ticket.save()
     except Exception, e:
-        raise e
+        pass
 
     return { 'status_code': r.status_code, 't_label': label}
 

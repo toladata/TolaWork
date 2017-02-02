@@ -216,7 +216,6 @@ function send_to_github(ticketid){
 };
 
 function github_sync(){
-  $.growl.warning({title: "Warning Message", message: "Github Sync Process might take long!!!" });
 
   $.ajax({
         type: 'GET',
@@ -224,7 +223,6 @@ function github_sync(){
         timeout: 0,
         success: function(response) {
           window.location.href = '/home/';
-          $.growl.notice({title: "Success Message", message: response.status_lbl });
             
         },       
          error : function(xhr,errmsg,err) {
