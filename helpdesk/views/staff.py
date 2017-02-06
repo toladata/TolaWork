@@ -1058,6 +1058,8 @@ def ticket_list(request):
             )
             context = dict(context, query=q)
             query_params['other_filter'] = qset
+            default_filters = [1, 2, 3, 4, 5, 6, 7]
+            query_params['filtering']['status__in'] = default_filters
 
         ### SORTING
         data_sorting(request,query_params)
