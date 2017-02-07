@@ -1,47 +1,267 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}{% trans "Edit Ticket" %}{% endblock %}
+<script type="text/javascript" src="{{ STATIC_URL }}easy_select2/vendor/select2/js/select2.min.js"></script>
 
-{% block helpdesk_body %}
+    <!-- Main body content -->
+    <p>{% block helpdesk %}<div class="ticket_task">
+        <div class="panel-body">
+          <p><strong>No new details should be entered when editing a ticket. </strong><br/>This form should only be used to fix incorrect details on a ticket or clean up the submission.</p>
+        </div> 
+        <div class="ticket_form_cover">
+          <div class="ticket_form info">
+            <form  method='post' id="ticket_edit-form{{ticket.id}}" >
+              <div class=" row task_spacing">
+                <div class="col-md-12 ticket_padding row">
+                   <label class="col-md-1"><p><strong> Title:</strong></p></label>
+                   <div class=" col-md-9">
+                      <input class="form-control ticket_title" 
+                      type='text' name='title' id='id_title{{ticket.id}}'  value='{{ ticket.title|escape }}' />
+                   </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class= "col-md-6 row ticket_edit" >
+                  <label class="col-md-4"><p><strong> Queue:</strong></p></label>
+                  <div class="col-md-8">
+                    <select class="form-control" id='id_queue{{ticket.id}}' name='queue'>{% for q in ticket_queue %}<option value='{{ q.id }}'{% ifequal q.id ticket.queue_id %} selected='selected'{% endifequal %}>{{ q }}</option>{% endfor %}</select>
+                  </div>  
+                </div> 
+                <div class= "col-md-6 row ticket_edit" >
+                  <label class="col-md-4"><p><strong> Submitter Email: </strong></p></label>
+                  <div class="col-md-8">
+                    <input class="form-control" type='text' name='email' id='id_email{{ticket.id}}' value='{{ ticket.submitter_email|escape }}' />
+                  </div>
+                </div>
+              </div>
+              <div class=" row task_spacing">
+                <div class= "col-md-6 row ticket_edit" >
+                  <label class="col-md-4"><p><strong> Error Message: </strong></p></label>
+                  <div class="col-md-8">
+                    <textarea class="form-control" name="error_msg" rows="4" id="id_error_msg{{ticket.id}}" > {{ ticket.error_msg|escape }} </textarea>
+                  </div>
+                </div>
+                 <div class= "col-md-6 row ticket_edit" >
+                  <label class="col-md-4"><p><strong> Description of Issue: </strong></p></label>
+                  <div class="col-md-8">
+                    <textarea class="form-control" name="description" rows="4" id="id_description{{ticket.id}}"> {{ ticket.description|escape }} </textarea>
+                  </div>    
+                </div>
+              </div>
+              <div class=" row">
+                {% if user.is_superuser %}
+                  <div class="col-md-6 row ticket_edit">
+                    <label class="col-md-4"><p><strong> Case Owner:</strong></p></label>
+                    
+                    <div class="col-md-8">
+                      <select class="form-control" id='id_owner{{ticket.id}}' name='owner'><option value=''>Unassign</option>{% for u in active_users %}<option value='{{ u.id }}' {% ifequal u.id ticket.assigned_to.id %}selected{% endifequal %}>{{ u }}</option>{% endfor %}</select>
+                    </div>
+                  </div>
+                  {% endif %}
+                <div class="col-md-6 row ticket_edit">
+                  <label class="col-md-4"><p><strong> Type of Ticket:</strong></p></label>
+                  <div class="col-md-8 ">
+                    <select class="form-control" id='id_type{{ticket.id}}' name='type'>{% for tt in ticket_type %}<option value='{{ tt.0 }}'{% ifequal tt.0 ticket.type %} selected='selected'{% endifequal %}>{{ tt.1 }}</option>{% endfor %}</select>
+                  </div>
+                </div>
+              </div>
+              <div class="row task_spacing">
+                <div class= "col-md-6 row" >
+                  <label class="col-md-4"><p><strong> Priority: </strong></p></label>
+                  <div class="col-md-8">
+                    <select class="form-control" id='id_priority{{ticket.id}}' name='priority'>{% for p in priorities %}<option value='{{ p.0 }}'{% ifequal p.0 ticket.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}</select>
+                  </div>
+                </div>                            
+              </div>
+              <div class="row">
+                <div class= "col-md-8 row">
+                  <label class="col-md-3"><p><strong> Due Date: </strong></p></label>
+                  <p class="col-md-9">{{ form.due_date }}</p>
+                </div>
+              </div>
+              <div class="row">
+                <div class= "col-md-6 row  task_spacing" >
+                  <label class="col-md-4"><p><strong> Tags: </strong></p></label>
+
+                  <div class="col-md-8">
+                    <span id="helpBlock" class="help-block">To add <strong>NEW</strong> tag(s), type in then press <strong>'ENTER'</strong></span>
+                    <select class = "form-control multi_select tag{{ticket.id}}" multiple = "multiple" id='id_edit_tags{{ticket.id}}' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
+                        {% for q in tags %} 
+
+                          <option value='{{ q.id }}' {% for tag in ticket.tags.all %} {% ifequal q.id tag.id %} selected='selected'{% endifequal %}{% endfor %}>{{q.name}}</option>
+
+                        {% endfor %}
+                    </select>
+                    <script type="text/javascript">
+                          $(".tag{{ticket.id}}").select2({
+                                  tags: true,
+                                  allowClear: true,
+                                  placeholder: "Add tags",
+
+                                  createTag: function(tag) {
+                                      return {
+                                          id: tag.term,
+                                          text: tag.term,
+                                          isNew: true
+                                      };
+                                  },
+
+                                }).on("change", function(e) {
+                                  var isNew = $(this).find('[data-select2-tag="true"]');
+                                  if(isNew.length){
+                                      isNew.replaceWith('<option selected="selected" value="'+isNew.val()+'">'+isNew.text()+'</option>');
+                                  }
+                              });
+                    </script>
+                    
+                  </div>
+                </div>  
+              </div>
+                <div class="row mydropdiv">
+                        <div class=" col-md-offset-1 dropzone col-md-10" id="dZUpload-edit" style="margin-botttom:10px" ></div>
+                        <div class="col-md-1"></div>
+                    </div>
+                    <br><br>
+                <div class=" row">
+                <label class= "col-md-6 row ticket_edit">
+                  <input class="btn btn-primary col-md-offset-5" type='submit' value='Save Changes' />
+                </label>
+              </div>
+             {% csrf_token %}
+            </form> 
+            <script>
+                 $(document).ready(function(){
+
+                        var list_of_files = new Array();
+                        Dropzone.autoDiscover = false;
+
+                        $("div#dZUpload-edit").dropzone({
+                              url: "/helpdesk/tickets/submit/",
+                              uploadMultiple: true,
+                              maxFiles: 5,
+                              autoProcessQueue : false,
+                              init : function() {
+                                  this.on("addedfile", function(file)
+                                      {
+                                          if (list_of_files.length < 5)
+                                          {
+                                              list_of_files.push(file)
+                                              console.log("file added");
+                                          }
+                                      });
+                              }
+                          });
 
 
-<div class="panel-body"><h2>{% trans "Edit a Ticket" %}</h2>
+                      document.onpaste = function(event){
+                          var items = (event.clipboardData || event.originalEvent.clipboardData).items;
 
-<p>{% trans "Unless otherwise stated, all fields are required." %} {% trans "Please provide as descriptive a title and description as possible." %}</p>
-
-<p><strong>{% trans "Note" %}:</strong> {% blocktrans %}Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.{% endblocktrans %}</p>
-
-<form method='post' action='./' class="form-horizontal">
-
-    {% load crispy_forms_tags %}
-    {% crispy form form.helper %}
-    {% comment %}
-        {% for field in form %}
-            {% if field.is_hidden %}
-                {{ field }}
-            {% else %}
-                <dt><label for='id_{{ field.name }}'>{{ field.label }}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
-                <dd>{{ field }}</dd>
-                {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
-                {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}</label>
-            {% endif %}
-        {% endfor %}
-    </dl>
-    {% endcomment %}
-    <div class='buttons form-group'>
-        <input type='submit' class="btn btn-primary" value='{% trans "Save Changes" %}' />
-    </div>
+                          for (index in items) {
+                            var item = items[index];
+                            if (item.kind === 'file') {
+                              // adds the file to your dropzone instance
+                              mydropzone1.addFile(item.getAsFile());
+                            }
+                          }
+                        }
 
 
-{% csrf_token %}</form>
-</div>
+                          $('#ticket_edit-form{{ticket.id}}').on('submit', function(event){
+                              event.preventDefault();
+
+                              var data = new FormData($(this)[0]);
+                              var edit_tags = $('#id_edit_tags{{ticket.id}}').val();
+                              for (var i = 0; i < edit_tags.length; i++) {
+                                data.append('edit_tags[]', edit_tags[i]);
+                              };
+
+                              for(i=0;i<list_of_files.length;i++)
+                                  {
+                                    data.append('attachment', list_of_files[i]);
+                                  }
+
+                              var csrftoken = $("#ticket_edit-form{{ticket.id}}").find('input[name="csrfmiddlewaretoken"]').val();
+                              edit_ticket_post(data, csrftoken, '{{ticket.id}}');
+                          });
+                       });
+            </script>
+          </div>
+        </div>
+      </div>{% endblock %}</p>
+        
+
+
+{% block extra_js_in_body %}
 <script>
-    $(document).ready(function(){
-        $("#id_tags").select2({
-            tags: true,
-            allowClear: true,
-        });
-    });
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-73736890-3', 'auto');
+  ga('send', 'pageview');
+
+$(document).ready(function(){
+
+var csrftoken = $("#ticket_form").find('input[name="csrfmiddlewaretoken"]').val();
+
+var list_of_files = new Array();
+
+Dropzone.autoDiscover = false;
+
+var mydropzone1 = new Dropzone("#dZUpload", {
+    uploadMultiple: true,
+    maxFiles: 5,
+    autoProcessQueue : false,
+    url: "/helpdesk/tickets/submit/",
+    init : function() {
+        this.on("addedfile", function(file)
+            {
+                if (list_of_files.length < 5)
+                {
+                    list_of_files.push(file)
+                    console.log("file added");
+                }
+            });
+    }
+});
+
+document.onpaste = function(event){
+    var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+
+    for (index in items) {
+      var item = items[index];
+      console.log(item);
+      if (item.kind === 'file') {
+        // adds the file to your dropzone instance
+       mydropzone1.addFile(item.getAsFile());
+      }
+    }
+  }
+
+$('#ticket_form').on('submit', function(event){
+        event.preventDefault();
+        var data = new FormData($(this)[0]);
+              var tags = $('#id_tags').val();
+              if (tags !== null) {
+
+                 for (var i = 0; i < tags.length; i++) {
+                    data.append('tags[]', tags[i]);
+                  };
+              };
+
+              console.log(list_of_files);
+
+              for(i=0;i<list_of_files.length;i++)
+                  {
+                    data.append('attachment', list_of_files[i]);
+                  }
+
+            create_ticket(data, csrftoken)
+
+        })
+});
 </script>
 
 {% endblock %}
+  
+
+
