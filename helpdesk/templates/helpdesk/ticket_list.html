@@ -180,11 +180,11 @@
         {% endif %}
       </div>
 
-       <table width="100%" id="t_table">
-       <tbody>
-      {% for ticket in tickets.reverse %}
-      <tr>
-      <td>
+       <!-- <table width="100%" id="t_table">
+       <tbody> -->
+      {% for ticket in tickets.object_list.reverse %}
+      <!-- <tr>
+      <td> -->
       <div class="panel" id = "auto_load_div{{ticket.id}}">
         <div class="panel-heading {% if ticket.queue_id == 1 %} color_1 {% elif ticket.queue_id == 2 %} color_2 {% elif ticket.queue_id == 3 %} color_3 {% elif ticket.queue_id %} color_4 {% endif %}"><a href='{{ ticket.get_absolute_url }}' >
           {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }}
@@ -240,7 +240,7 @@
           <div class="panel-footer">
             <div class="panel-heading">
               {% if user.is_superuser %}
-                <a data-toggle="collapse" data-parent="#dynamicForm" href="#addTask{{ticket.id}}">
+                <a data-toggle="collapse" type="button" id="edit_ticket{{ticket.id}}" href="#addTask{{ticket.id}}">
                 <div class="info read_more"><b><span class="glyphicon glyphicon-edit"></span></b> <strong>Edit Ticket</strong></div></a>
               {% endif %}
 
@@ -281,28 +281,25 @@
               <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a>&nbsp; <a href="{% url 'vote_down' ticket.id %}"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a>
             </div>
             <!-- the collapse section of edit ticket -->
-            <div id="addTask{{ticket.id}}" class="panel-collapse collapse"> {% include "edit_ticket.html" %}</div> 
+            <div id="addTask{{ticket.id}}" class="panel-collapse collapse"> <!-- {% include "edit_ticket.html" %} --></div> 
             <!-- end the collapse section for edit ticket -->
-             <!-- <script language="javascript" type="text/javascript">
-        ;(function(){
+             <script language="javascript" type="text/javascript">
+
+        $(document).ready(function(){
 
           $("#edit_ticket{{ticket.id}}").click(function(){
-            $("#addTask{{ticket.id}}").load("/helpdesk/tickets/edit_ticket/?ticket_id={{ticket.id}}",function(){
-    $.getScript('{{ STATIC_URL }}js/edit.js', function() {
-  alert('Load was performed.');}); 
+            $("#addTask{{ticket.id}}").load("/helpdesk/tickets/edit_ticket/?ticket_id={{ticket.id}}");
           });
         });
-
-        })(juery);
-    </script> -->
+    </script>
           </div>
           <!-- end panel footer -->
-          </div>
-          </td></tr>
+          </div><!-- 
+          </td></tr> -->
         {% endfor %}
-        </tbody>
-        </table>
-        <script type="text/javascript">
+        <!-- </tbody>
+        </table> -->
+        <!-- <script type="text/javascript">
           $(document).ready(function(){
             var number = "{{ number_of_tickets }}";
              $('#t_table').DataTable( {
@@ -326,8 +323,50 @@
                 }, 300);
             } );
           });
-        </script>
-   
+        </script> -->
+      <!-- start paginator -->
+        <div class="row">
+          <div class="col-md-8">
+           <ul class="pagination">
+              {% if tickets.has_previous %}
+                <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {% trans "Previous" %} </a></li>
+                <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.previous_page_number }}"> {{tickets.previous_page_number}} </a></li>
+              {% endif %}
+              {% blocktrans with tickets.number as ticket_num and tickets.paginator.num_pages as num_pages %}
+                <li><a class="active" href=""> {{ ticket_num }}</a></li>
+              {% endblocktrans %}
+
+              {% if tickets.has_next %}
+               <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}"> {{ tickets.next_page_number }}</a></li>
+                {% ifnotequal tickets.next_page_number tickets.paginator.num_pages %}
+                   {% with tickets.paginator.num_pages as num_pages %}
+                    <li><a href="">...</a></li>
+                    <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ num_pages }}"> {{ num_pages }}  </a></li>
+                  {% endwith %}
+                {% endifnotequal %}
+                <li><a href="?{% if query_string %}{{ query_string }}&amp;{% endif %}page={{ tickets.next_page_number }}">{% trans "Next" %}</a></li>
+              {% endif %}
+            </ul>
+          </div>
+          <div class="read_more ticket_paginator">
+            <ul class="pagination">
+             <li>
+                <a class = "{% if items_per_page == 5 %} active {% endif %}"
+                  href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=5">5</a>
+              </li>
+             <li>
+                <a class = "{% if items_per_page == 10 %} active {% endif %}"
+                  href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=10">10 </a>
+              </li>
+             <li>
+                <a class = "{% if items_per_page == 20 %} active {% endif %}"
+                  href="{% url 'helpdesk_list' %}?{% if query_string %}{{ query_string }}&amp;{% endif %}items_per_page=20" >20</a>
+              </li>
+             <li><a href="#">per page</a></li>
+            </ul>
+          </div> 
+        </div>
+        <!-- end paginator -->
       </div>
 
 
