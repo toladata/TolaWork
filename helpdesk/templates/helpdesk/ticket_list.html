@@ -302,7 +302,6 @@
         {% endfor %}
         </tbody>
         </table>
-        <table id="t_table"></table>
         <script type="text/javascript">
           $(document).ready(function(){
             var number = "{{ number_of_tickets }}";
@@ -310,13 +309,13 @@
                 "order": [], 
                 "bFilter": false,
                 'bLengthChange': false,
-                "serverSide": true,
+               /* "serverSide": true,*/
                 "deferRender": true,
                 "idisplayLength":10,
                 "iDeferLoading": number,
-                "ajax": {
+                /*"ajax": {
                   url: '/tickets/ticket_object',
-                }, 
+                }, */
                 "aoColumnDefs": [
                     { "bSortable": false, "targets": [0 ] }
                        ]
