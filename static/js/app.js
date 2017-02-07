@@ -217,6 +217,8 @@ function send_to_github(ticketid){
 
 function github_sync(){
 
+  $.growl.warning({title: "Warning Message", message: "Github sync might take long running in the Background." });
+
   $.ajax({
         type: 'GET',
         url: '/githubSync/',

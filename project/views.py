@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from forms import FeedbackForm, RegistrationForm
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from helpdesk.models import DocumentationApp, FAQ
 from django.contrib.auth.views import login, logout
@@ -20,7 +20,7 @@ from datetime import datetime as timezone
 from helpdesk.views.staff import file_attachment
 from helpdesk.views.staff import data_query_pagination
 from helpdesk.slack import post_slack,post_tola_slack
-
+import json
 from django.contrib.sessions.models import Session
 try:
     from django.utils import timezone
@@ -488,41 +488,56 @@ def  get_tasks_by_user(email):
 
 #GitHub Sync
 @login_required
-def githubSync(request):
+def githubSyncing(request, q):
     
     tickets = Ticket.objects.all().exclude(github_issue_number__exact="", github_issue_number__isnull=True,
            status__in=[Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS])
+    try:
+        if tickets:
+            for ticket in tickets:
 
-    for ticket in tickets:
+                # Sync 'Closed' status in github to 'Resolved' status in TW
+                queue = queue_repo(ticket)
 
-        # Sync 'Closed' status in github to 'Resolved' status in TW
-        queue = queue_repo(ticket)
+                label = ''
+                status = ''
+                lable_status = {}
 
-        label = ''
-        status = ''
-        lable_status = {}
+                if not ticket.github_issue_number:
+                   pass
+                   
+                else:
 
-        if not ticket.github_issue_number:
-           pass
-           
-        else:
+                   response = get_issue_status(queue,ticket)
 
-           response = get_issue_status(queue,ticket)
+                   update_label = get_label(queue,ticket)
 
-           update_label = get_label(queue,ticket)
+                   if update_label == 200:
+                        print 'Label Updated for ticket -#' + str(ticket.id)
 
-           if update_label == 200:
-                print 'Label Updated for ticket -#' + str(ticket.id)
+                   if response == 200:
+                       print 'GitHubSync Success - #' + str(ticket.github_issue_number)
 
-           if response == 200:
-               print 'GitHubSync Success - #' + str(ticket.github_issue_number)
+        lable_status = {'label': 'Github Lables & Statuses Updated', 'status_lbl': 'Tickets Synced with Github'}
 
-           lable_status = {'label': 'Github Lables Updated', 'status_lbl': 'Tickets Synced with Github'}
+        return HttpResponse(json.dumps(lable_status), content_type="application/json")
 
-    return HttpResponse(
-        json.dumps(lable_status),
-        content_type="application/json"
-    )
+    except Exception, e:
+        lable_status = {'label': 'Github Lables & Statuses Update Failed', 'status_lbl': 'Tickets Not Synced with Github'}
+
+        return HttpResponse(json.dumps(lable_status), content_type="application/json" )
+
+
+from threading import Thread
+import time
+import Queue
+def githubSync(request):
+    q = Queue.Queue()
+    t = Thread(target = githubSyncing, args=(request, q))
+    t.daemon = True
+    t.start()
+    
+    return HttpResponseRedirect('/home')
 
 #Get users with active sessions
 def get_current_users():
@@ -539,7 +554,6 @@ def get_current_users():
     return logged_users
 
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.http import HttpResponse
 import json
 
 @ensure_csrf_cookie
