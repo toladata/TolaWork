@@ -10,8 +10,8 @@
 {% block content %}
 {% load in_list %}
 <link href="{{ STATIC_URL}}css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-<!-- <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-<link href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css" rel="stylesheet" type="text/css" /> -->
+<script type="text/javascript" src="{{ STATIC_URL }}js/highlight_keywords.js" charset="UTF-8"></script>
+
 <div class="container" ng-controller="TicketController">
   {% if tickets and not query  %}
    <h3>Submitted Tickets</h3>
@@ -186,7 +186,7 @@
       <!-- <tr>
       <td> -->
       <div class="panel" id = "auto_load_div{{ticket.id}}">
-        <div class="panel-heading {% if ticket.queue_id == 1 %} color_1 {% elif ticket.queue_id == 2 %} color_2 {% elif ticket.queue_id == 3 %} color_3 {% elif ticket.queue_id %} color_4 {% endif %}"><a href='{{ ticket.get_absolute_url }}' >
+        <div class="panel-heading {% if ticket.queue_id == 1 %} color_1 {% elif ticket.queue_id == 2 %} color_2 {% elif ticket.queue_id == 3 %} color_3 {% elif ticket.queue_id %} color_4 {% endif %} highlight_div"><a href='{{ ticket.get_absolute_url }}' >
           {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }}
           </strong></a>
           {% if ticket.progress %}
@@ -195,9 +195,11 @@
           </div>
           {% endif %}
         </div>
-        <div class="panel-body ticket_body">
-          <p class="description" id="trial">{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</p> 
+        <div class="panel-body ticket_body ">
+        <!-- <div class="context"> -->
           
+          <p  class="description highlight_div">{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</p> 
+        
           <div class="col-md-12 ">
             <div class="col-md-7"></div>
 
@@ -743,6 +745,12 @@
       
   </div>
 </div>
+{% if query %}
+<script type="text/javascript">
+    $(".highlight_div").highlight("{{ query }}");
+  
+</script>
+{% endif %}
 <script type="text/javascript">
   $(document).ready(function() {
       // Configure/customize these variables.
@@ -892,8 +900,7 @@ $(document).ready(function() {
           event.preventDefault();
           edit_ticket_post();
       });
-
-
 </script>
+
 
 {% endblock content %}
