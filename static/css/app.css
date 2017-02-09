@@ -614,7 +614,7 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 /*ticket edit form*/
 .task_spacing
 {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .ticket_edit label {

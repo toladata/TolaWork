@@ -2594,7 +2594,10 @@ def form_data(request):
 
     return form
 
-def ticket_object(request):
+from endless_pagination.decorators import page_template
+@page_template('helpdesk/templates/helpdesk/ticket_template.html')  # just add this decorator
+
+def ticket_object(request, template='helpdesk/templates/helpdesk/ticket_list.html', extra_context=None):
     #Form data
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     form = form_data(request)
@@ -2882,5 +2885,22 @@ def ticket_object(request):
 
     tickets=ticket_qs
     
-    tickets = serializers.serialize('json', tickets)
-    return HttpResponse(json.dumps(tickets), content_type='application/json')
+    context = {
+        'tickets': tickets,
+    }
+    if extra_context is not None:
+        context.update(extra_context)
+    return render_to_response(
+        template, context, context_instance=RequestContext(request))
+
+
+
+def entry_index(
+        request, template='myapp/entry_index.html', extra_context=None):
+    context = {
+        'entries': Entry.objects.all(),
+    }
+    if extra_context is not None:
+        context.update(extra_context)
+    return render_to_response(
+        template, context, context_instance=RequestContext(request))
