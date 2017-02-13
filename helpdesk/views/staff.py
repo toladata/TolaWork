@@ -1099,6 +1099,14 @@ def ticket_list(request):
 
     
     tickets = Ticket.objects.select_related()
+
+    for t in tickets:
+        if t.github_issue_number and t.status != 3 and t.status != 4 and t.status != 7:
+            ticket_state = get_object_or_404(Ticket, id=t.id)
+            ticket_state.status = 7
+            ticket_state.save(update_fields=['status'])
+            t.status = 7
+
     tickets_filtered = tickets
 
     tickets_reported, tickets_closed, tickets_assigned, tickets_created = user_tickets(request)
