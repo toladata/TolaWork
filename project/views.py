@@ -14,7 +14,7 @@ from tasks.models import Task
 from django.conf import settings
 from django.db.models import Count, Sum
 import os
-from project.models import LoggedUser
+from project.models import LoggedUser, TolaUser
 from helpdesk.forms import TicketForm, PublicTicketForm
 from datetime import datetime as timezone
 from helpdesk.views.staff import file_attachment
@@ -218,7 +218,7 @@ def home(request):
 
 #----Data From Tola Tools APIs----####
 
-    tolaActivityData = get_TolaActivity_data()
+    tolaActivityData = get_TolaActivity_data(request)
 
     tolaTablesData = {}
     if request.user.is_authenticated():
@@ -359,12 +359,11 @@ def permission_denied(request):
 ###Tola Tools API Views
 import requests
 
-def get_TolaActivity_data():
+def get_TolaActivity_data(request):
 
-    #TolaActivity Url
-    url = 'http://activity.toladata.io/api/projectagreements/' 
-
-    token = settings.TOLA_ACTIVITY_TOKEN
+    user_details = get_object_or_404(TolaUser, user=request.user)
+    token = user_details.activity_api_token
+    url = str(user_details.activity_url)+"/api/projectagreements/"
 
     header = {'Authorization': 'token %s' % token}
 
@@ -417,13 +416,13 @@ def get_TolaActivity_loggedUser():
 
 
 def get_TolaTables_data(request):
-    import json
 
-    url = 'http://tables.toladata.io/api/users/' 
+    user_details = get_object_or_404(TolaUser, user=request.user)
+    token = user_details.activity_api_token
+    url = str(user_details.table_url)+'/api/users/' 
+    
     #public_tables
-    url2 ='http://tables.toladata.io/api/public_tables/'
-
-    token = 'bd43de0c16ac0400bc404c6598a6fe0e4ce73aa2'
+    url2 =str(user_details.table_url)+'/api/public_tables/'
 
     header = {'Authorization': 'token %s' % token}
 
