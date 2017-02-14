@@ -49,7 +49,8 @@ class TolaUser(models.Model):
   user = models.OneToOneField(User, unique=True, related_name='tolawork_user')
   tables_api_token = models.CharField(blank=True, null=True, max_length=255)
   activity_api_token = models.CharField(blank=True, null=True, max_length=255)
-  organization_url = models.CharField(blank=True, null=True, max_length=255)
+  activity_url = models.CharField(blank=True, null=True, max_length=255)
+  table_url = models.CharField(blank=True, null=True, max_length=255)
   country = models.CharField("Country Name", max_length=255, blank=True)
 
   class Meta:

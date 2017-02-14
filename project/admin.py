@@ -5,6 +5,6 @@ from models import *
 
 
 class TolaUserAdmin(admin.ModelAdmin):
-	list_filter = ('country', 'organization_url')
+	list_filter = ('country', 'activity_url')
 
 admin.site.register(TolaUser, TolaUserAdmin)
