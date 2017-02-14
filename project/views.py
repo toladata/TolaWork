@@ -419,27 +419,38 @@ def get_TolaTables_data(request):
 
     user_details = get_object_or_404(TolaUser, user=request.user)
     token = user_details.activity_api_token
-    url = str(user_details.table_url)+'/api/users/' 
-    
+
+    user_url = str(user_details.table_url)+'/api/users/' 
+
     #public_tables
-    url2 =str(user_details.table_url)+'/api/public_tables/'
+    public_table_url =str(user_details.table_url)+'/api/public_tables/'
+    silo_url = str(user_details.table_url)+'/api/silo/'
 
     header = {'Authorization': 'token %s' % token}
 
     #print email
     try:
-        response = requests.get(url, headers=header)
-        response2 = requests.get(url2, headers=header)
+        user_response = requests.get(user_url, headers=header)
+        public_table_response = requests.get(public_table_url, headers=header)
+        silo_response = requests.get(silo_url, headers=header)
 
         # Consider any status other than 2xx an error
-        if not response.status_code // 100 == 2 and response2.status_code // 100 == 2:
+        if not user_response.status_code // 100 == 2 and public_table_response.status_code // 100 == 2:
             return {}
 
-        json_obj = response.json()
-        json_obj2 = response2.json()
+        if not user_response.status_code // 100 == 2 and silo_response.status_code // 100 == 2:
+            return {}
+
+        json_obj = user_response.json()
+        json_obj2 = public_table_response.json()
+        json_obj3 = silo_response.json()
 
         user = {}
-        my_tables = []
+        my_tables = {}
+        my_silos = {}
+
+        table_data = {}
+
         if request.user.is_authenticated():
             email = request.user.email
             for data in json_obj:
@@ -447,13 +458,23 @@ def get_TolaTables_data(request):
                     user = data
             if user:
                 try:
-                    for silo in json_obj2:
-                        if silo['owner'] == user['url']:
-                            my_tables.append(silo)
+                    for table in json_obj2:
+                        if table['owner'] == user['url']:
+                            my_tables.append(table)
                 except Exception, e:
                     pass
+
+                #get silos    
+                try:
+                    for silo in json_obj3:
+                        if silo['owner'] == user['url']:
+                            my_silos.append(silo)
+                except Exception, e:
+                    pass
+
+
         
-        return my_tables
+        return table_data{'my_tables': my_tables, 'my_silos': my_silos}
 
     except requests.exceptions.RequestException as e:
         # A serious problem happened, like an SSLError or InvalidURL
