@@ -477,7 +477,6 @@ def get_TolaTables_data(request):
         return table_data{'my_tables': my_tables, 'my_silos': my_silos}
 
     except requests.exceptions.RequestException as e:
-        # A serious problem happened, like an SSLError or InvalidURL
         print e
         return {}
 

@@ -432,7 +432,7 @@
                     <!-- tolaTables -->
                     <div id="tables" class="tab-pane fade in active">
                     {% if user.is_authenticated %}
-                      {% if tolaTablesData%}
+                      {% if tolaTablesData.my_tables or tolaTablesData.my_silos%}
                         <h4>Your Tables</h4>
                         <div class=" table-responsive">
                           <table class="table table-striped">
@@ -441,11 +441,18 @@
                               <th>Public</th>
                               <th>Date Created</th>
                             </tr>
-                            {% for table in tolaTablesData %}
+                            {% for table in tolaTablesData.my_tables %}
                             <tr>
                               <td>{{table.name}}</td>
                               <td>{{table.public}}</td>
                               <td>{{table.create_date}} </td>
+                            </tr>
+                            {% endfor %}
+                            {% for silo in tolaTablesData.my_silos %}
+                            <tr>
+                              <td>{{silo.name}}</td>
+                              <td>{{silo.public}}</td>
+                              <td>{{silo.create_date}} </td>
                             </tr>
                             {% endfor %}
                           </table>
