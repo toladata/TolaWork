@@ -8,12 +8,19 @@
 {% load in_list %}
 <link href="{{ STATIC_URL}}css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 <div class="container">
-<div>
+<div class="col-md-12 row">
+<div class="col-md-3">
+  
   <h3>{% block h1_title %}{{ ticket.ticket_for_url|upper }}{% endblock %}</h3>
 </div>
-
-<div class="ticket_cover">
-    <div class="col-md-9 col-sm-9 ticket_right">
+  <div class="col-md-offset-8" style="float:right;margin-top:8px">
+    
+  <a class="btn btn-info" href="/helpdesk/tickets" >All Tickets</a>
+  </div>
+</div>
+<div class="col-md-1 col-sm-1 "></div>
+<div class="ticket_cover col-md-12">
+    <div class="col-md-12 col-sm-12">
         <div class="panel panel-info">
                 <div class="panel-heading">
                       {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }} </strong>
@@ -385,12 +392,12 @@
                           <div class=" row task_spacing">
                             <div class="col-md-12 ticket_padding row">
                                <label class="col-md-1"><p><strong>{% trans "Title:" %}</strong></p></label>
-                               <div class=" col-md-10">
-                                  <input class="form-control ticket_title" type='text' name='title' id='id_title{{ticket.id}}'  value='{{ ticket.title|escape }}' />
+                               <div class=" col-md-9 ">
+                                  <input class="form-control" type='text' name='title' id='id_title{{ticket.id}}'  style="margin-left: 80px" value='{{ ticket.title|escape }}' />
                                </div>
                             </div>
                           </div>
-                          <div class="row">
+                          <div class="row task_spacing">
                             <div class= "col-md-6 row ticket_edit" >
                               <label class="col-md-4"><p><strong>{% trans "Queue:" %}</strong></p></label>
                               <div class="col-md-8">
@@ -418,7 +425,7 @@
                               </div>
                             </div>
                           </div>
-                          <div class=" row">
+                          <div class=" row task_spacing">
                             {% if user.is_superuser %}
                               <div class="col-md-6 row ticket_edit">
                                 <label class="col-md-4"><p><strong>{% trans "Case Owner:" %}</strong></p></label>
@@ -454,7 +461,7 @@
 
                               <div class="col-md-8">
                                 <span id="helpBlock" class="help-block">To add <strong>NEW</strong> tag(s), type in then press <strong>'ENTER'</strong></span>
-                                <select class = "form-control multi_select {{ticket.id}}" style="width:200px" multiple = "multiple" id='id_edit_tags{{ticket.id}}' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
+                                <select class = "form-control multi_select {{ticket.id}}" style="width:280px" multiple = "multiple" id='id_edit_tags{{ticket.id}}' name='edit_tags' aria-describedby="helpBlock" id="inputHelpBlock"> 
                                     {% for q in tags %} 
 
                                       <option value='{{ q.id }}' {% for tag in ticket.tags.all %} {% ifequal q.id tag.id %} selected='selected'{% endifequal %}{% endfor %}>{{q.name}}</option>
@@ -496,7 +503,7 @@
                               </dl>
                           </div> -->
                            <div class="row mydropdiv">
-                                <div class=" col-md-offset-1 dropzone col-md-10" id="dZUpload" style="margin-botttom:10px" ></div>
+                                <div class=" ticket_padding col-md-offset-2 dropzone col-md-9" id="dZUpload" style="margin-botttom:10px;" ></div>
                                 <div class="col-md-1"></div>
                             </div>
                             <br><br>
@@ -572,79 +579,8 @@
           </div>
 
     </div>
-    <div class="col-md-3 col-sm-3 ">
-       <!-- start search -->
-          <div class="search" >
-            <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
-                <input type="text" name='q' class="form-control" placeholder="Search" id='search_query'>
-                <span class="input-group-btn">
-                  <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
-                </span>
-              </form>
-          </div>
-          <!-- end search -->
-
-          <!-- start filters -->
-          <div class="panel panel-info ">
-              <div class="panel-heading">
-                <span class="glyphicon glyphicon-user"></span>&nbsp;<strong>My Tasks and Tickets <span class="badge">{{ num_tickets }}</span></strong>
-              </div>
-              <div class="panel-body">
-                <div class="sort_panels">
-                  <span class="glyphicon glyphicon-th-list"></span>&nbsp;Created By Me <strong> <span class="badge read_more"> {{ tickets_created }} </span></strong>
-                </div>
-                <div class="sort_panels">
-                   <span class="glyphicon glyphicon-list-alt"></span>&nbsp;Assigned to Me <strong> <span class="badge read_more"> {{ tickets_assigned }} </span></strong>
-                </div>
-                 <div class="sort_panels">
-                  <span class="glyphicon glyphicon-th"></span>&nbsp;Closed by Me <strong> <span class="badge read_more"> {{ tickets_closed }} </span></strong>
-                 </div>
-              </div>
-          </div>
-
-        <div class="panel panel-info">
-            <div class="panel-heading"> <strong>Sort Tickets</strong></div>
-
-                <form method='get' action='./'>
-                  <div class="panel-body ">
-                    <select   class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
-                      <option value='created'{% ifequal query_params.sorting "created"%} selected='selected'{% endifequal %}>
-                          {% trans "Created" %}
-                      </option>
-                      <option value='title'{% ifequal query_params.sorting "title"%} selected='selected'{% endifequal %}>
-                          {% trans "Title" %}
-                      </option>
-                      <option value='queue'{% ifequal query_params.sorting "queue"%} selected='selected'{% endifequal %}>
-                          {% trans "Queue" %}
-                      </option>
-                      <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %}>
-                          {% trans "Status" %}
-                      </option>
-                      <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %}>
-                          {% trans "Priority" %}
-                      </option>
-                      <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %}>
-                          {% trans "Owner" %}
-                      </option>
-                      <option value='assigned_to'{% ifequal query_params.sorting "type"%} selected='selected'{% endifequal %}>
-                          {% trans "Type" %}
-                      </option>
-                      <option value='votes'{% ifequal query_params.sorting "votes"%} selected='selected'{% endifequal %}>
-                          {% trans "Most Vote Up" %}
-                      </option>
-                    </select>
-                      <div class="col-md-12 row reverse_sort">
-
-                      <label for='id_sortreverse'>{% trans "Reverse: " %}</label>
-                      <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
-                      <p class='filterHelp'>{% trans "Ordering applied to tickets" %}</p>
-                      </div>
-                       <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' />
-                    </div>
-                </form>
-        </div>
     </div>
-    </div>
+<div class="col-md-1 col-sm-1 "></div>
 </div>
 
 <script>

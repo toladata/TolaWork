@@ -645,7 +645,7 @@ ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 }
 .ticket_title
 {
-    margin-left: 55px;
+    margin-left: 80px;
 }
 .ticket_view
 {
@@ -708,6 +708,7 @@ form .thumbnail
 {
     margin-top: 5px;
 }
+
 .sort_add
 {
     margin-left:9px;
