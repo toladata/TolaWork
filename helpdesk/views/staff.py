@@ -608,6 +608,7 @@ def view_ticket(request, ticket_id):
 
     return render_to_response('helpdesk/ticket.html',
         RequestContext(request, {
+            'query' : request.GET.get('q'),
             'ticket': ticket_state,
             'form': form,
             #'progress': progress,
@@ -1345,6 +1346,7 @@ def edit_ticket(request):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     tags = [t.pk for t in ticket.tags.all()]
     form = form_data(request)
+
     tags = Tag.objects.all()
     ticket_state = get_object_or_404(Ticket, id=ticket_id)
     return render_to_response('helpdesk/edit_ticket.html',
