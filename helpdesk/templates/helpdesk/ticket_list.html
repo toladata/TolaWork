@@ -186,9 +186,16 @@
       <!-- <tr>
       <td> -->
       <div class="panel" id = "auto_load_div{{ticket.id}}">
-        <div class="panel-heading {% if ticket.queue_id == 1 %} color_1 {% elif ticket.queue_id == 2 %} color_2 {% elif ticket.queue_id == 3 %} color_3 {% elif ticket.queue_id %} color_4 {% endif %} highlight_div"><a href='{{ ticket.get_absolute_url }}' >
+        <div class="panel-heading {% if ticket.queue_id == 1 %} color_1 {% elif ticket.queue_id == 2 %} color_2 {% elif ticket.queue_id == 3 %} color_3 {% elif ticket.queue_id %} color_4 {% endif %} highlight_div"> 
+        {% if query %} 
+        <form action="{% url 'helpdesk_list' %}" ><a type="submit" name="q" value="{{query}}" href='{{ ticket.get_absolute_url }}?{% if query_string %}{{ query_string }}{% endif %}'>{{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }}</strong></a></form>
+        {% else %}
+        <a href='{{ ticket.get_absolute_url }}?{% if query_string %}{{ query_string }}{% endif %}'>
           {{ ticket.ticket | upper}} <strong class="font8"> {{ ticket.title }}
-          </strong></a>
+          </strong></a> 
+        {% endif %}
+
+        
           {% if ticket.progress %}
           <div class="read_more">
             <strong><span class="badge">{{ticket.progress}} </span></strong>
