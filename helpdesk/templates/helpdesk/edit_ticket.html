@@ -169,8 +169,12 @@
 
                               var data = new FormData($(this)[0]);
                               var edit_tags = $('#id_edit_tags{{ticket.id}}').val();
-                              for (var i = 0; i < edit_tags.length; i++) {
-                                data.append('edit_tags[]', edit_tags[i]);
+
+                              if (edit_tags !== null) {
+                                
+                                for (var i = 0; i < edit_tags.length; i++) {
+                                  data.append('edit_tags[]', edit_tags[i]);
+                                };
                               };
 
                               for(i=0;i<list_of_files.length;i++)
