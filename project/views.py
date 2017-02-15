@@ -29,6 +29,7 @@ except ImportError:
 
 from helpdesk.views.staff import form_data, user_tickets
 from django.contrib.auth.decorators import login_required
+import requests
 
 def splash(request):
     if request.user.is_authenticated():
@@ -219,11 +220,13 @@ def home(request):
 
 #----Data From Tola Tools APIs----####
 
-    tolaActivityData = get_TolaActivity_data(request)
 
+    tolaActivityData = {}
     tolaTablesData = {}
+
     if request.user.is_authenticated():
 
+        tolaActivityData = get_TolaActivity_data(request)
         tolaTablesData = get_TolaTables_data(request)
 
     #create ticket modal
@@ -358,13 +361,21 @@ def permission_denied(request):
     return render(request, '401.html')
 
 ###Tola Tools API Views
-import requests
 @login_required
 def get_TolaActivity_data(request):
 
-    user_details = get_object_or_404(TolaUser, user=request.user)
-    token = user_details.activity_api_token
-    url = str(user_details.activity_url)+"/api/projectagreements/"
+    token = settings.TOLA_ACTIVITY_TOKEN
+    url = 'http://activity.toladata.io/api/projectagreements/'
+
+    user_details = None
+    try:
+        user_details = get_object_or_404(TolaUser, user=request.user)
+    except Exception, e:
+        pass
+
+    if user_details:
+        token = user_details.activity_api_token
+        url = str(user_details.activity_url)+"/api/projectagreements/"
 
     header = {'Authorization': 'token %s' % token}
 
@@ -418,75 +429,78 @@ def get_TolaActivity_loggedUser():
 @login_required
 def get_TolaTables_data(request):
 
-    user_details = get_object_or_404(TolaUser, user=request.user)
     user = {}
     my_tables = {}
     my_silos = {}
-
     table_data = {}
 
+    token = settings.TOLA_TABLES_IO_TOKEN
+    user_url = 'http://tables.toladata.io/api/users/' 
+    public_table_url ='http://tables.toladata.io/api/public_tables/'
+    silo_url = 'http://tables.toladata.io/api/silo/'
+
+    user_details = None
+
+    try:
+        user_details = get_object_or_404(TolaUser, user=request.user)
+    except Exception, e:
+        pass
+
     if user_details:
-        try:
-            token = user_details.tables_api_token
+        token = user_details.tables_api_token
+        user_url = str(user_details.table_url)+'/api/users/' 
+        public_table_url =str(user_details.table_url)+'/api/public_tables/'
+        silo_url = str(user_details.table_url)+'/api/silo/'
 
-            user_url = str(user_details.table_url)+'/api/users/' 
+    header = {'Authorization': 'token %s' % token}
 
-            #public_tables
-            public_table_url =str(user_details.table_url)+'/api/public_tables/'
-            silo_url = str(user_details.table_url)+'/api/silo/'
+    try:
+        user_response = requests.get(user_url, headers=header)
+        public_table_response = requests.get(public_table_url, headers=header)
+        silo_response = requests.get(silo_url, headers=header)
 
-            header = {'Authorization': 'token %s' % token}
-
-
-            if token and user_details.table_url:
-                user_response = requests.get(user_url, headers=header)
-                public_table_response = requests.get(public_table_url, headers=header)
-                silo_response = requests.get(silo_url, headers=header)
-
-                # Consider any status other than 2xx an error
-                if not user_response.status_code // 100 == 2 and public_table_response.status_code // 100 == 2:
-                    return {}
-
-                elif not user_response.status_code // 100 == 2 and silo_response.status_code // 100 == 2:
-                    return {}
-
-                json_obj = user_response.json()
-                json_obj2 = public_table_response.json()
-                json_obj3 = silo_response.json()
-
-                email = request.user.email
-                for data in json_obj:
-                    if data['email'] == email:
-                        user = data
-                if user:
-                    try:
-                        for table in json_obj2:
-                            if table['owner'] == user['url']:
-                                my_tables.append(table)
-                    except Exception, e:
-                        pass
-
-                    #get silos    
-                    try:
-                        for silo in json_obj3:
-                            if silo['owner'] == user['url']:
-                                my_silos.append(silo)
-                    except Exception, e:
-                        pass
-
-
-            table_data = {'my_tables': my_tables, 'my_silos': my_silos}
-            
-            return table_data
-
-        except requests.exceptions.RequestException as e:
-            print e
+        # Consider any status other than 2xx an error
+        if not user_response.status_code // 100 == 2 and public_table_response.status_code // 100 == 2:
             return {}
 
-        except ValueError:
-
+        elif not user_response.status_code // 100 == 2 and silo_response.status_code // 100 == 2:
             return {}
-    else:
+
+        json_obj = user_response.json()
+        json_obj2 = public_table_response.json()
+        json_obj3 = silo_response.json()
+
+        email = request.user.email
+        for data in json_obj:
+            if data['email'] == email:
+                user = data
+        if user:
+            try:
+                for table in json_obj2:
+                    if table['owner'] == user['url']:
+                        my_tables.append(table)
+            except Exception, e:
+                pass
+
+            #get silos    
+            try:
+                for silo in json_obj3:
+                    if silo['owner'] == user['url']:
+                        my_silos.append(silo)
+            except Exception, e:
+                pass
+
+
+        table_data = {'my_tables': my_tables, 'my_silos': my_silos}
+
+        return table_data
+
+    except requests.exceptions.RequestException as e:
+        print e
+        return {}
+
+    except ValueError:
+
         return {}
 
 
