@@ -279,6 +279,8 @@
         $('#ticket_form').on('submit', function(event){
                 event.preventDefault();
                 var data = new FormData($(this)[0]);
+                if (document.getElementById('id_tags')) {
+
                       var tags = $('#id_tags').val();
                       if (tags !== null) {
 
@@ -286,7 +288,8 @@
                             data.append('tags[]', tags[i]);
                           };
                       };
-
+                }
+                
                       console.log(list_of_files);
 
                       for(i=0;i<list_of_files.length;i++)
