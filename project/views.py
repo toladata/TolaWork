@@ -434,7 +434,7 @@ def get_TolaTables_data(request):
     my_silos = {}
     table_data = {}
 
-    token = settings.TOLA_TABLES_IO_TOKEN
+    token = 'bd43de0c16ac0400bc404c6598a6fe0e4ce73aa2'
     user_url = 'http://tables.toladata.io/api/users/' 
     public_table_url ='http://tables.toladata.io/api/public_tables/'
     silo_url = 'http://tables.toladata.io/api/silo/'
