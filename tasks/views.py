@@ -226,8 +226,9 @@ def get_TolaActivity_byUser(request):
         if not response1.status_code // 100 == 2:
             return {}
 
+        
         json_obj1 = response1.json()
-        json_obj2 = get_TolaActivity_data()   
+
         user = {}
         agreements = []
         approvals = []
@@ -237,6 +238,8 @@ def get_TolaActivity_byUser(request):
             for data in json_obj1:
                 if data['email'] == email:
                     user = data
+            json_obj2 = get_TolaActivity_data(request) 
+
 
             if user:
                 try:
