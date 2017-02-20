@@ -140,10 +140,11 @@
                                    <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
                                    <div class="col-md-8">
                                      <select class="form-control" id='id_priority' name='priority'>
+                                     <option >{% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</option>
+                              
                                      <option value='1'>High</option>
                                   <option value='2'>Normal</option>
                                   <option value='3'>Low</option>
-                              <option >{% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</option>
                                       </select>
                                    </div>
                                 </div>
