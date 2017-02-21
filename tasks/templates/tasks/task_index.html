@@ -112,7 +112,7 @@
                               <div class="col-md-6 row ticket_edit">
                                  <label class="col-md-4"><p><strong> {% trans "Title:" %}</strong></p></label>
                                  <div class="col-md-8">
-                                    <input class="form-control" type="text" id='id_title' name='task' required value="{{task.task}}" />
+                                    <input class="form-control" type="text" id='id_title{{task.id}}' name='task' required value="{{task.task}}" />
                                  </div>
                               </div>
                               <div class="col-md-6 row ticket_edit">
@@ -127,12 +127,12 @@
                                     <label class="col-md-4"><p><strong>{% trans "Status:" %}</strong></p></label>
                               <div class="col-md-8">
                                   <select class="form-control" id='id_status' name='status'>
+                                  <option>
+                                      {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</option>
                                   <option value='1'>Active</option>
                                   <option value='2'>Reopened</option>
                                   <option value='3'>Completed</option>
                                   <option value='4'>Cancelled</option>
-                                  <option>
-                                      {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</option>
                                 </select >
                                </div>
                               </div>
@@ -140,10 +140,11 @@
                                    <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
                                    <div class="col-md-8">
                                      <select class="form-control" id='id_priority' name='priority'>
+                                     <option value="{% if task.priority == 1 %} 1 {% elif task.priority == 2 %} 2 {% elif task.priority == 3 %} 3 {% endif %}">{% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</option>
+                              
                                      <option value='1'>High</option>
                                   <option value='2'>Normal</option>
                                   <option value='3'>Low</option>
-                              <option >{% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</option>
                                       </select>
                                    </div>
                                 </div>
@@ -153,13 +154,13 @@
                                 <div class="col-md-6 row ticket_edit">
                                   <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
                                   <div class="col-md-8">
-                                     <input class="form-control" type="Date" name='created_date' id='id_edit_created_date' value="{{ task.created_date | date}}">
+                                     <input class="form-control" type="Date" name='created_date' id='id_edit_created_date' value="{{ task.created_date | date}}{{task.id}}">
                                   </div>
                                 </div>
                                   <div class="col-md-6 row ticket_edit">
                                   <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
                                   <div class="col-md-8">
-                                  <input class="form-control" type="date" name='due_date' id='id_edit_due_date' Value="{{ task.due_date | date}}">
+                                  <input class="form-control" type="date" name='due_date' id='id_edit_due_date{{task.id}}' Value="{{ task.due_date | date}}">
 
                                   </div>
                                 </div>
@@ -550,11 +551,11 @@
    var datestring = ('0000' + date.getFullYear()).slice(-4) + '-' + ('00' + (date.getMonth() + 1)).slice(-2) + '-' + ('00' + date.getDate()).slice(-2);
    document.getElementById('id_created_date').value = datestring;
 
-    $( "#id_edit_due_date" ).datepicker({
+    $( "#id_edit_due_date{{task.id}}" ).datepicker({
       dateFormat: "yy-mm-dd"
     });
 
-    $( "#id_edit_created_date" ).datepicker({
+    $( "#id_edit_created_date{{task.id}}" ).datepicker({
       dateFormat: "yy-mm-dd"
     });
   });
