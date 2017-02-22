@@ -164,6 +164,7 @@ def create_task(request):
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     if request.method == 'POST':
+
         title = request.POST.get('task')
         submitter_mail = request.POST.get('submitter_mail')
         status = request.POST.get('status')
@@ -173,7 +174,10 @@ def create_task(request):
         due_date = datetime.strptime(request.POST.get('due_date'), "%Y-%m-%d")
         created_date = datetime.strptime(request.POST.get('created_date'),"%Y-%m-%d")
         created_by = request.POST.get('created_by')
-        assigned_to = request.POST.get('assigned_to')
+        try:
+            assigned_to = int(request.POST.get('assigned_to'))
+        except Exception, e:
+            assigned_to=None
         note = request.POST.get('note')
 
         task = Task(task=title, submitter_email=submitter_mail, status=status, priority=priority, 
@@ -281,7 +285,7 @@ def get_TolaActivity_byUser(request):
 
         
         json_obj1 = response1.json()
-
+        json_obj2 = get_TolaActivity_data(request) 
         user = {}
         agreements = []
         approvals = []
@@ -291,8 +295,6 @@ def get_TolaActivity_byUser(request):
             for data in json_obj1:
                 if data['email'] == email:
                     user = data
-            json_obj2 = get_TolaActivity_data(request) 
-
 
             if user:
                 try:

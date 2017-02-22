@@ -273,7 +273,7 @@
                     <div class="col-md-6 row ticket_edit">
                           <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
                           <div class="col-md-8" >
-                            <input class="form-control" type="text" name='submitter_mail' id='id_submitter_mail' value="{{created_by.email}}">
+                            <input class="form-control" type="text" name='submitter_mail' id='id_submitter_mail' value="{{request.user.email}}">
                           </div>
                       </div>
                     </div>
@@ -351,7 +351,7 @@
                             <label class="col-md-4"><p><strong>{% trans "Created by:" %}</strong></p></label>
                             <div class="col-md-8">
                               <select class=" form-control" name='created_by' id='id_created_by'>
-                                <option value="{{created_by.id}}">{{created_by}}</option>
+                                <option value="{{request.user.id}}">{{request.user.username}}</option>
                               </select>
                             </div>
                           </div>
