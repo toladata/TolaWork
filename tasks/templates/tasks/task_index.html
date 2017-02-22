@@ -4,6 +4,7 @@
 <style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css' xmlns="http://www.w3.org/1999/html"></style>
 
   <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
   <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 {% endblock %}
@@ -11,6 +12,7 @@
 
 {% block content %}
 {% load in_list %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/highlight_keywords.js" charset="UTF-8"></script>
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css">
 <div class="container">
@@ -20,20 +22,31 @@
          <!-- start search -->
          <div class="row">
            <div class="search col-md-8" >
-              <form class="input-group" id='searchform' method='get' action="">
-                  <input type="text" name='q' class="form-control" placeholder="Search Tasks" id='search_query'>
+              <form class="input-group" id='searchform' method='get' action="{% url 'task_list' %}">
+                  <input type="text" name='q' class="form-control" placeholder="Search Tasks" id='q'>
                   <span class="input-group-btn">
-                    <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                    <button  class="btn btn-info" type="button" onclick="submit_query()"><span class="glyphicon glyphicon-search"></span></button>
+                    <script type="text/javascript">
+                      function submit_query(){
+                         var input = document.getElementById("q").value;
+                          if (input!==""){ 
+                          window.location.href =  '{% url 'task_list' %}?{% if query_string %}{{ query_string }}&{% endif %}q='+input;
+                          }
+                          else
+                            alert("kindly enter a search term");
+                      }
+                  </script>
                   </span>
                 </form>
             </div>
          </div>
           <!-- end search -->
           <!-- start table -->
+         <!--  <p class="highlight_div">{{query}}</p> -->
             <div class="table-responsive">
               <table class="table table-striped table-bordered" style="border-collapse:collapse;">
                 <tr class="info">
-                  <td><strong>Task Title</strong></td>
+                  <td class="highlight_div"><strong>Task Title</strong></td>
                   <td><strong>Start Date</strong></td>
                   <td><strong>Due Date</strong></td>
                   <td><strong>Status</strong></td>
@@ -42,7 +55,7 @@
                 </tr>
                 {% load endless %}
                 {% paginate tasks %}
-                {% for task in tasks %}
+                {% for task in tasks.reverse %}
                 <tr data-toggle="collapse" data-target="#{{ task.id }}" class="accordion-toggle">
 
                 <td><strong><a href= "#">{{ task.task }}</a></strong></td>
@@ -71,7 +84,7 @@
                         <div class="col-md-12 row table-responsive">
                         <table class="table table-striped table-condensed view_table">
                           <tr>
-                            <td><p><strong> {% trans "Title:" %}</strong></p></td>
+                            <td class="highlight_div"><p><strong> {% trans "Title:" %}</strong></p></td>
                             <td><p>[{{task.id}}] {{task.task}}</p></td>
                             <td><p><strong>{% trans "Submitter Email:" %}</strong></p></td>
                             <td><p>{{task.submitter_email}}</p></td>
@@ -95,7 +108,7 @@
                             <td>{{task.assigned_to}}</td>
                           </tr>
                           <tr>
-                            <td><strong>{% trans "Note:" %}</strong></td>
+                            <td class="highlight_div"><strong>{% trans "Note:" %}</strong></td>
                             <td colspan="8">{{ task.note}}</td>
                           </tr>
                         </table>
@@ -127,7 +140,7 @@
                                     <label class="col-md-4"><p><strong>{% trans "Status:" %}</strong></p></label>
                               <div class="col-md-8">
                                   <select class="form-control" id='id_status' name='status'>
-                                  <option>
+                                  <option value = "{% if task.status == 1 %} 1 {%elif task.status == 2%} 2 {% elif task.status == 3%} 3 {% elif task.status == 4%} 4  {% endif %}">
                                       {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</option>
                                   <option value='1'>Active</option>
                                   <option value='2'>Reopened</option>
@@ -154,7 +167,7 @@
                                 <div class="col-md-6 row ticket_edit">
                                   <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
                                   <div class="col-md-8">
-                                     <input class="form-control" type="Date" name='created_date' id='id_edit_created_date' value="{{ task.created_date | date}}{{task.id}}">
+                                     <input class="form-control" type="Date" name='created_date' id='id_edit_created_date' value="{{ task.created_date | date}}">
                                   </div>
                                 </div>
                                   <div class="col-md-6 row ticket_edit">
@@ -451,51 +464,50 @@
           <div>
             <div class="panel panel-info ">
               <div class="panel-heading">
-                <strong>Tasks <span class="badge"></span></strong>
+                <strong>My Tasks <span class="badge"></span></strong>
               </div>
-              <div class="panel-body sort_panels">
-              My Tasks
-              </div>
-              <div class="panel-body">
-              Due Tasks <span class="badge"></span>
+              <div class="panel-body"> 
+                <div class="sort_panels">
+                  <span class="glyphicon glyphicon-th-list"></span><a href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}&{% endif %}created={{request.user.email}}">&nbsp;Created By Me </a> <strong> <span class="badge read_more"> {{ total_tasks_created }} </span></strong>
+                </div> 
+                <div class="sort_panels">
+                   <span class="glyphicon glyphicon-list-alt"></span><a href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}&{% endif %}assigned={{request.user.email}}">&nbsp;Assigned to Me </a><strong> <span class="badge read_more"> {{ total_tasks_assigned }} </span></strong>
+                </div>
               </div>
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Sort Tasks</strong></div>
                      <form method='get' action='./'>
                     <div class="panel-body ">
-                    <select   class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
-                        <option value='task'>
-                            {% trans "Title" %}
-                        </option>
-                        <option value='created_date'>
-                            {% trans "Start" %}
-                        </option>
-                        <option value='due_date'>
-                            {% trans "Due" %}
-                        </option>
-                        <option value='status'>
-                            {% trans "Status" %}
-                        </option>
-                        <option value='priority'>
-                            {% trans "Priority" %}
-                        </option>
-                        <option value='assigned_to_id'>
-                            {% trans "Assigned to" %}
-                        </option>
-                      </select>
-                       
-                         <input class="btn btn-primary" type='submit' value='{% trans "Sort" %}' />
+                    <select class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
+                    <option value='created_date'{% ifequal query_params.sorting "created_date"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=created_date">
+                        {% trans "Created" %}
+                    </option>
+                    <option value='due_date'{% ifequal query_params.sorting "due_date"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=due_date">
+                        {% trans "Due Date" %}
+                    </option>
+                    <option value='task'{% ifequal query_params.sorting "task"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=task">
+                        {% trans "Task Title" %}
+                    </option>
+                    <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=status">
+                        {% trans "status" %}
+                    </option>
+                    <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=priority">
+                        {% trans "Priority" %}
+                    </option>
+                    <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=assigned_to">
+                        {% trans "Assigned" %}
+                    </option>
+                  </select>
                     </div>
                 </form>
+                <script type="text/javascript">
+            document.getElementById('id_sort').onchange = function() {
+                window.location.href = this.children[this.selectedIndex].getAttribute('href');
+            }
+          </script>
                 </div>
              </div>
-            <div class="panel panel-info">
-              <div class="panel-heading"> <strong>Issues By Year/Month</strong></div>
-              <div class="panel-body sort_panels">
-              <b><span class="glyphicon glyphicon-plus"></span></b>2016
-              </div>
-            </div>
 
               <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Filter tasks By:</strong></div>
@@ -537,6 +549,12 @@
         </div>
   </div>
 </div>
+{% if query %}
+  <script type="text/javascript">
+      $(".highlight_div").highlight("{{ query }}");
+    
+  </script>
+{% endif %}
   <script>
   $(function() {
     $( "#id_due_date" ).datepicker({
@@ -563,7 +581,7 @@
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
     // Enable Tabs
-    $("#searchtabs").tabs({
+    /*$("#searchtabs").tabs({
         collapsible:true
     });
     // Hide all tabs by default
@@ -582,7 +600,7 @@ $(document).ready(function() {
             $(this).attr('checked', !$(this).attr('checked'));
         });
         return false;
-    });
+    });*/
 
 //show selected query box when '+' button is clicked
     $("#filterBuilderButton").click(function() {

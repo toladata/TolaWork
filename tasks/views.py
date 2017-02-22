@@ -41,6 +41,7 @@ import json
 from tasks.forms import TaskForm
 from tasks.models import Task
 from helpdesk.views.staff import form_data, user_tickets
+from helpdesk.lib import apply_query, query_to_dict
 from project.views import get_TolaActivity_data, get_TolaTables_data
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
@@ -50,31 +51,35 @@ superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_ac
 # Create your views here.
 @login_required
 def task_list(request):
+    email = request.GET.get('email')
+    username = request.GET.get('username')
+    user = User.objects.filter(email=email).values('username').all()[:1]
 
-    # Query_params will hold a dictionary of parameters relating to
-    # a query, to be saved if needed:
+    try:
+        user_id = User.objects.get(username=user).id
+    except Exception, e:
+        user_id = 0
+
+    # Query_params 
+    query_params = {
+        'filtering': {},
+        'sorting': None,
+        'keyword': None,
+        'other_filter': None,
+        }
+
+
     tasks = Task.objects.select_related()
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     context = {}
 
    
     ## sorting tasks
-    sort = request.GET.get('sort', None)
-    if sort:
-        tasks = Task.objects.all().order_by(sort)
+    sort_tasks(request,query_params)
 
-    ## Keyword searching
-    q = request.GET.get('q', None)
+    #searching
+    search_tasks(request, context, query_params)
 
-    if q:
-        tasks = Task.objects.filter(
-            Q(task__icontains=q) |
-            Q(due_date__icontains=q) |
-            Q(created_date__icontains=q) |
-            Q(status__icontains=q)|
-            Q(priority__icontains=q)
-            
-                   )
     ## Task Filtering
     statuses = request.GET.getlist('status')
     if statuses:
@@ -92,10 +97,58 @@ def task_list(request):
     if request.user.is_authenticated():
         tolaActivityData = get_TolaActivity_byUser(request)
         tolaTablesData = get_TolaTables_data(request)
+    tasks_assigned = {}
+    tasks_created = {}
+    total_tasks_assigned = 0
+    total_tasks_created = 0
+    # User tasks
+    if user_id:
+        try:
+            #created_by 
+            tasks_created = Task.exclude(status__in=([3,4])).order_by('created_date')
+            total_tasks_created = len(tasks_created)
+       
+            my_email1 = request.GET.get('created')
+            if my_email1:
+                try:  
+                    tasks = tasks_created
+                except Exception, e:
+                    pass
+
+            #assigned_to
+            tasks_assigned = Task.objects.filter(assigned_to_id=user_id).exclude(status__in=([3,4])).order_by('created_date')[:5]
+            total_tasks_assigned = len(tasks_assigned)
+
+            my_email2 = request.GET.get('assigned')
+            if my_emaiL2:
+                try:  
+                    tasks = tasks_assigned
+                except Exception, e:
+                    pass
+        except Exception, e:
+            raise e
+        
+        
+
+    try:
+        tasks = apply_query(tasks, query_params)
+    except ValidationError:
+        # invalid parameters in query, return default query
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3, 4]},
+            'sorting': 'created_date',
+        }
+        tasks = apply_query(tasks, query_params)
+
+    querydict = request.GET.copy()
 
     return render_to_response('tasks/task_index.html',
         RequestContext(request, {
-        'tasks': tasks.order_by('created_date').reverse,
+        'query_string': querydict.urlencode(),
+        'query': request.GET.get('q'),
+        'tasks': tasks,
+        'tasks_assigned': tasks_assigned,
+        'total_tasks_assigned': total_tasks_assigned,
         'assignable_users': assignable_users,
         'status_choices':Task.STATUS_CHOICES, 
         'form' : form,
@@ -268,3 +321,40 @@ def get_TolaActivity_byUser(request):
 
         return {}
 
+#Sorting tasks
+def sort_tasks(request,query_params):
+
+    sort = request.GET.get('sort', None)
+
+    user_id = User.objects.get(username=request.user).id
+    user = User.objects.get(id=user_id)
+    my_sort = None
+
+    if sort not in ( 'created_date', 'task', 'priority','status','due_date',''):
+        sort = 'created_date'
+        
+
+    query_params['sorting'] = sort
+
+    return
+
+#Search tasks
+def search_tasks(request, context, query_params):
+    q = request.GET.get('q', None)
+
+    if q:
+        qset = (
+            Q(id__icontains=q) |
+            Q(task__icontains=q) |
+            Q(assigned_to__username__icontains=q) |
+            Q(created_by__id__icontains=q) |
+            Q(due_date__icontains=q) |
+            Q(created_date__icontains=q) |
+            Q(submitter_email__icontains=q) |
+            Q(note__icontains = q)
+        )
+
+        context = dict(context, query=q)
+
+        query_params['other_filter'] = qset
+    return context
