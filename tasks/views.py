@@ -51,14 +51,6 @@ superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_ac
 # Create your views here.
 @login_required
 def task_list(request):
-    email = request.GET.get('email')
-    username = request.GET.get('username')
-    user = User.objects.filter(email=email).values('username').all()[:1]
-
-    try:
-        user_id = User.objects.get(username=user).id
-    except Exception, e:
-        user_id = 0
 
     # Query_params 
     query_params = {
@@ -81,54 +73,71 @@ def task_list(request):
     search_tasks(request, context, query_params)
 
     ## Task Filtering
+        #status
     statuses = request.GET.getlist('status')
     if statuses:
         try:
             statuses = [int(s) for s in statuses]
-            tasks = Task.objects.filter(status=s
-                )
-            print tasks
+            query_params['filtering']['status__in'] = statuses
         except ValueError:
             pass
+
+        #priorities
+    priorities = request.GET.getlist('priority')
+    if priorities:
+        try:
+            priorities = [int(p) for p in priorities]
+            query_params['filtering']['priority__in'] = priorities
+        except ValueError:
+            pass
+
+        #Assigned to
+    assigned = request.GET.getlist('assigned_to')
+    if assigned:
+        try:
+            assigned = [int(a) for a in assigned]
+            query_params['filtering']['assigned_to__id__in'] = assigned
+        except ValueError:
+            pass
+
+        #Due Dates
+    due_from = request.GET.get('due_from')
+    if due_from:
+        query_params['filtering']['due_date__gte'] = due_from
+
+    due_to = request.GET.get('due_to')
+    if due_to:
+        query_params['filtering']['due_date__lte'] = due_to
+
+        #Created dates       
+    created_from = request.GET.get('created_from')
+    if created_from:
+        query_params['filtering']['created_date__gte'] = created_from
+
+    created_to = request.GET.get('created_to')
+    if created_to:
+        query_params['filtering']['created_date__lte'] = created_to
+    
 
     form = form_data(request)
     tolaActivityData = {}
     tolaTablesData = {}
-    if request.user.is_authenticated():
-        tolaActivityData = get_TolaActivity_byUser(request)
-        tolaTablesData = get_TolaTables_data(request)
     tasks_assigned = {}
     tasks_created = {}
     total_tasks_assigned = 0
     total_tasks_created = 0
+    
+    if request.user.is_authenticated():
+        tolaActivityData = get_TolaActivity_byUser(request)
+        tolaTablesData = get_TolaTables_data(request)
     # User tasks
-    if user_id:
-        try:
-            #created_by 
-            tasks_created = Task.exclude(status__in=([3,4])).order_by('created_date')
-            total_tasks_created = len(tasks_created)
-       
-            my_email1 = request.GET.get('created')
-            if my_email1:
-                try:  
-                    tasks = tasks_created
-                except Exception, e:
-                    pass
-
-            #assigned_to
-            tasks_assigned = Task.objects.filter(assigned_to_id=user_id).exclude(status__in=([3,4])).order_by('created_date')[:5]
-            total_tasks_assigned = len(tasks_assigned)
-
-            my_email2 = request.GET.get('assigned')
-            if my_emaiL2:
-                try:  
-                    tasks = tasks_assigned
-                except Exception, e:
-                    pass
-        except Exception, e:
-            raise e
-        
-        
+    #created_by 
+    tasks_created = Task.objects.filter(created_by = request.user).exclude(status__in=([3,4]))
+    total_tasks_created = len(tasks_created)
+    
+    #assigned_to
+    tasks_assigned = Task.objects.filter(assigned_to = request.user).exclude(status__in=([3,4]))
+    total_tasks_assigned = len(tasks_assigned) 
 
     try:
         tasks = apply_query(tasks, query_params)
@@ -148,9 +157,11 @@ def task_list(request):
         'query': request.GET.get('q'),
         'tasks': tasks,
         'tasks_assigned': tasks_assigned,
+        'total_tasks_created':total_tasks_created,
         'total_tasks_assigned': total_tasks_assigned,
         'assignable_users': assignable_users,
         'status_choices':Task.STATUS_CHOICES, 
+        'priority': Task.PRIORITY_CHOICES,
         'form' : form,
         'tolaActivityData': tolaActivityData,
         'tolaTablesData': tolaTablesData
@@ -243,7 +254,7 @@ def task_edit(request, task_id):
         note = request.POST.get('note')
         submitter_email = request.POST.get('submitter_email')
         assigned_to= request.POST.get('assigned_to')
-        due_date = task.due_date
+        due_date = datetime.strptime(request.POST.get('due_date'), "%Y-%m-%d")
         update_comments = Task(id= task_id, task=title, submitter_email=submitter_email, status=status, priority=priority, due_date=due_date,  created_by_id=created_by, assigned_to_id=assigned_to, note=note)
 
 	update_comments.save(update_fields=['task','submitter_email','priority','assigned_to_id','status','due_date','note','created_by_id',])
@@ -360,3 +371,4 @@ def search_tasks(request, context, query_params):
 
         query_params['other_filter'] = qset
     return context
+

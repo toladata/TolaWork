@@ -141,7 +141,7 @@
                               <div class="col-md-8">
                                   <select class="form-control" id='id_status' name='status'>
                                   <option value = "{% if task.status == 1 %} 1 {%elif task.status == 2%} 2 {% elif task.status == 3%} 3 {% elif task.status == 4%} 4  {% endif %}">
-                                      {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</option>
+                                      {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</option>
                                   <option value='1'>Active</option>
                                   <option value='2'>Reopened</option>
                                   <option value='3'>Completed</option>
@@ -167,13 +167,13 @@
                                 <div class="col-md-6 row ticket_edit">
                                   <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
                                   <div class="col-md-8">
-                                     <input class="form-control" type="Date" name='created_date' id='id_edit_created_date' value="{{ task.created_date | date}}">
+                                     <input class="form-control" name='created_date' id='id_edit_created_date' value="{{ task.created_date | date}}">
                                   </div>
                                 </div>
                                   <div class="col-md-6 row ticket_edit">
                                   <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
                                   <div class="col-md-8">
-                                  <input class="form-control" type="date" name='due_date' id='id_edit_due_date{{task.id}}' Value="{{ task.due_date | date}}">
+                                  <input class="form-control" name='due_date' id='id_edit_due_date' Value="{{ task.due_date | date}}">
 
                                   </div>
                                 </div>
@@ -336,13 +336,13 @@
                           <div class="col-md-6 row ticket_edit">
                             <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
                             <div class="col-md-8">
-                               <input class="form-control" type="Date" name='created_date' id='id_created_date' >
+                               <input class="form-control" name='created_date' id='id_created_date' >
                             </div>
                           </div>
                             <div class="col-md-6 row ticket_edit">
                             <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
                             <div class="col-md-8">
-                            <input class="form-control" type="date" name='due_date' id='id_due_date' required>
+                            <input class="form-control" name='due_date' id='id_due_date' required>
                             </div>
                           </div>
                         </div>
@@ -468,10 +468,10 @@
               </div>
               <div class="panel-body"> 
                 <div class="sort_panels">
-                  <span class="glyphicon glyphicon-th-list"></span><a href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}&{% endif %}created={{request.user.email}}">&nbsp;Created By Me </a> <strong> <span class="badge read_more"> {{ total_tasks_created }} </span></strong>
+                  <span class="glyphicon glyphicon-th-list"></span><a href="">&nbsp;Created By Me </a> <strong> <span class="badge read_more"> {{ total_tasks_created }} </span></strong>
                 </div> 
                 <div class="sort_panels">
-                   <span class="glyphicon glyphicon-list-alt"></span><a href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}&{% endif %}assigned={{request.user.email}}">&nbsp;Assigned to Me </a><strong> <span class="badge read_more"> {{ total_tasks_assigned }} </span></strong>
+                   <span class="glyphicon glyphicon-list-alt"></span><a href="">&nbsp;Assigned to Me </a><strong> <span class="badge read_more"> {{ total_tasks_assigned }} </span></strong>
                 </div>
               </div>
             </div>
@@ -502,47 +502,102 @@
                     </div>
                 </form>
                 <script type="text/javascript">
-            document.getElementById('id_sort').onchange = function() {
-                window.location.href = this.children[this.selectedIndex].getAttribute('href');
-            }
-          </script>
+                  document.getElementById('id_sort').onchange = function() {
+                      window.location.href = this.children[this.selectedIndex].getAttribute('href');
+                  }
+                </script>
                 </div>
              </div>
-
-              <div class="panel panel-info">
-                <div class="panel-heading"> <strong>Filter tasks By:</strong></div>
-                <div class="panel-body ">
-                    <div class=" col-md-12">
-                    <strong>Click</strong> on <strong>"+"</strong> to add filters  and  <strong>"-"</strong>  to remove a filter.
-                </div>
-
-                <form class="filter_form" method='get' action='./'>
-                    <select name='select' id='filterBuilderSelect' class="btn btn-default col-md-8 dropdown-toggle">
-                        <option value='Status'>{% trans "Status" %}</option>
-                        <option value='Priority'>{% trans "Priority" %}</option>
-                        <option value='Assigned to'>{% trans "Assigned to" %}</option>
-                        <option value='Start'>{% trans "Start Date" %}</option>
-                        <option value='Due'>{% trans "Due Date" %}</option>
-
-                    </select>
-                    <input class="btn sort_add" type='button' id='filterBuilderButton' value='+' />
-                  {% csrf_token %}
-                </form>
-                  <div>
-                      <div class='thumbnail sorting_form filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
-                  <div class="keywords">
-                <form>
-                  <select id='id_statuses' name='status'class="status_select" multiple='selected' rows="4">
-                    {% for s in status_choices %}
-                          <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}
-                  </select>
-                    <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
-                    <input type='button' class='filterBuilderRemove' value='-' />
-                  <input class="btn btn-primary read_more " type='submit' value='{% trans "Apply " %}' />
-                </form>
-                      </div>
-                </div>
+             <!-- filter tickets -->
+      <div class="panel panel-info">
+        <div class="panel-heading"> 
+          <strong>{% trans "Filter Tickets" %}</strong>
+        </div>
+           
+        <div class="panel-body" id="ko">
+            <div class="row" id="ko1">
+              <div class=" col-md-12">         
+                <strong>Click</strong> on <strong>"+"</strong> to add filters to query on and  <strong>"-"</strong>  to remove a filter.
               </div>
+            </div>
+            <form class="filter_form">
+              <select name='select' id='filterBuilderSelect' class="btn btn-default col-md-8 dropdown-toggle">
+                <option value='Priority'>{% trans "Priority" %}</option>
+                <option value='Assigned_to'>{% trans "Assigned To " %}</option>
+                <option value='Status'>{% trans "Status" %}</option>
+                <option value='Dates'>{% trans "Due Date" %}</option>
+                <option value='Dates_created'>{% trans "Created Date" %}</option>
+              </select>
+              <input class="btn sort_add" type='button' id='filterBuilderButton' value='+' />
+              {% csrf_token %}
+            </form>
+            <form method='get'>
+              <div class='thumbnail sorting_form filterBox{% if query_params.filtering.priority__in %} filterBoxShow{% endif %}' id='filterBoxPriority'>
+                <div class="keywords">
+                    <label for='id_priorities'>{% trans "Priority: " %}</label>
+                    <select id='id_priorities' name='priority' multiple='selected' rows="4" class="owners_select" >{% for p in priority %}
+                      <option value='{{ p.0 }}'{% if p.0|in_list:query_params.filtering.priority__in %} selected='selected'{% endif %}>{{ p.1 }}</option>{% endfor %}
+                    </select>
+                  </div>
+                  <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                  <input type='button' class='filterBuilderRemove' value='-' />
+                </div> 
+
+              <div class='thumbnail sorting_form filterBox{% if query_params.filtering.assigned_to__id__in %} filterBoxShow{% endif %}' id='filterBoxAssigned_to'>
+                <div class="keywords">
+                  <label  for='id_assigned'>{% trans "Assigned To: " %}</label>
+                  <select id='id_assigned' name='assigned_to' multiple='selected' rows="4" class="owners_select">
+                    {% for user in assignable_users%}
+                      <option value='{{user.id}}'>{{user.username}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <p class='filterHelp'>{% trans "Ctrl-Click to select multiple options" %}</p>
+                <input type='button' class='filterBuilderRemove' value='-' />
+              </div>
+
+              <div class='thumbnail sorting_form filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}' id='filterBoxStatus'>
+                <div class="keywords">
+                  <label for='id_statuses'>{% trans "Status(es): " %}</label>
+                  <select id='id_statuses' name='status' multiple='selected' rows="4" class="status_select" >{% for s in status_choices %}
+                    <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}
+                  </select>
+                </div>
+                <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                <input type='button' class='filterBuilderRemove' value='-' />
+              </div>
+
+              <div class='thumbnail sorting_form filterBox{% if query_params.filtering.due_date__gte or query_params.filtering.due_date__lte %} filterBoxShow{% endif %}' id='filterBoxDates'>
+                <label for='id_due_from'>{% trans "Date (From): " %}</label>
+                <input class="date_input" type='text' name='due_from' value='{{ query_params.filtering.due_date__gte }}' id='id_due_from' />
+                <div class="date_to">
+                  <label for='id_due_to'>{% trans "Date (To): " %}</label>
+                  <input  class="date_input" type='text' name='due_to' value='{{ query_params.filtering.due_date__lte }}' id='id_due_to' />
+                </div>
+                <p class='filterHelp'>{% trans "Use YYYY-MM-DD date format, eg 2011-05-29" %}</p>
+                <input type='button' class='filterBuilderRemove' value='-' />
+              </div>
+
+              <div class='thumbnail sorting_form filterBox{% if query_params.filtering.created_date__gte or query_params.filtering.created_date__lte %} filterBoxShow{% endif %}' id='filterBoxDates_created'>
+                <label for='id_created_from'>{% trans "Date (From): " %}</label>
+                <input class="date_input" type='text' name='created_from' value='{{ query_params.filtering.created_date__gte }}' id='id_created_from' />
+                <div class="date_to">
+                  <label for='created_to'>{% trans "Date (To): " %}</label>
+                  <input  class="date_input" type='text' name='created_to' value='{{ query_params.filtering.created_date__lte }}' id='id_created_to' />
+                </div>
+                <p class='filterHelp'>{% trans "Use YYYY-MM-DD date format, eg 2011-05-29" %}</p>
+                <input type='button' class='filterBuilderRemove' value='-' />
+              </div>
+
+              <hr style='clear: both;' />
+              <input class="btn btn-primary" type='submit' value='{% trans "Apply Filter" %}' />
+              
+              {% csrf_token %}
+            </form>
+            </div>
+          </div>
+          <!-- end filters -->
+            
           </div>
 
         </div>
@@ -558,24 +613,29 @@
   <script>
   $(function() {
     $( "#id_due_date" ).datepicker({
-      dateFormat: "yy-mm-dd",
+      dateFormat: "yyyy-mm-dd",
     });
     /*document.getElementById("id_due_date").setAttribute('value', new Date());*/
 
     $( "#id_created_date" ).datepicker({
-      dateFormat: "yy-mm-dd"
+      dateFormat: "yyyy-mm-dd"
     });
-    var date = new Date();
+    $( "#id_edit_due_date" ).datepicker({
+      dateFormat: "yyyy-mm-dd"
+    });
+
+    $( "#id_edit_created_date" ).datepicker({
+      dateFormat: "yyyy-mm-dd"
+    });
+
+   var date = new Date();
    var datestring = ('0000' + date.getFullYear()).slice(-4) + '-' + ('00' + (date.getMonth() + 1)).slice(-2) + '-' + ('00' + date.getDate()).slice(-2);
    document.getElementById('id_created_date').value = datestring;
+   document.getElementById('id_due_date').value = datestring;
+   document.getElementById('id_edit_due_date').value = datestring;
+   document.getElementById('id_edit_created_date').value = datestring;
 
-    $( "#id_edit_due_date{{task.id}}" ).datepicker({
-      dateFormat: "yy-mm-dd"
-    });
-
-    $( "#id_edit_created_date{{task.id}}" ).datepicker({
-      dateFormat: "yy-mm-dd"
-    });
+    
   });
   </script>
 <script type='text/javascript' language='javascript'>
@@ -628,13 +688,13 @@ $(document).ready(function() {
 
 <script type='text/javascript' language='javascript'>
     $(function(){
-    $("#filterBoxOwner").hide();
-    $("#filterBoxOwner").hover(function() {
-        $("filterBoxOwner").slideToggle("fast");
+    $("#filterBoxPriority").hide();
+    $("#filterBoxPriority").hover(function() {
+        $("filterBoxPriority").slideToggle("fast");
     });
-    $("#filterBoxQueue").hide();
-    $("#filterBoxQueue").hover(function() {
-        $("filterBoxQueue").slideToggle("fast");
+    $("#filterBoxAssigned_to").hide();
+    $("#filterBoxAssigned_to").hover(function() {
+        $("filterBoxAssigned_to").slideToggle("fast");
     });
     $("#filterBoxStatus").hide();
     $("#filterBoxStatus").hover(function() {
@@ -644,17 +704,10 @@ $(document).ready(function() {
     $("#filterBoxDates").hover(function() {
         $("filterBoxDates").slideToggle("fast");
     });
-    $("#filterBoxType").hide();
-    $("#filterBoxType").hover(function() {
-        $("filterBoxType").slideToggle("fast");
-    });
-    $("#filterBoxKeywords").hide();
-    $("#filterBoxKeywords").hover(function() {
-    $("filterBoxKeywords").slideToggle("fast");
-    });
-    $("#filterBoxCreated").hide();
-    $("#filterBoxCreated").hover(function() {
-    $("filterBoxCreated").slideToggle("fast");
+
+    $("#filterBoxDates_created").hide();
+    $("#filterBoxDates_created").hover(function() {
+        $("filterBoxDates_created").slideToggle("fast");
     });
 
 });
