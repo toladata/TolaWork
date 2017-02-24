@@ -772,3 +772,11 @@ form .thumbnail
 .hidden {
   display: none;
 }
+
+.ui-autocomplete {
+  z-index: 215000000 !important;
+}
+
+.ui-front {
+    z-index: 9999;
+}
