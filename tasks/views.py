@@ -253,7 +253,7 @@ def task_edit(request, task_id):
         title = request.POST.get('task')
         priority = request.POST.get('priority')
         status = request.POST.get('status')
-        note = request.POST.get('note')
+        note = request.POST.get('note_edit')
         submitter_email = request.POST.get('submitter_email')
         assigned_to= request.POST.get('assigned_to')
         due_date = datetime.strptime(request.POST.get('due_date'), "%Y-%m-%d")
@@ -342,7 +342,7 @@ def get_tickets(request):
     tickets = json.dumps(list(tickets), cls=DjangoJSONEncoder)
     final_dict = {'tickets': tickets}
     return JsonResponse(final_dict, safe=False)
-    
+
 #Sorting tasks
 def sort_tasks(request,query_params):
 
