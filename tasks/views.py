@@ -4,6 +4,7 @@ from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader, Context
 from django.contrib.auth.models import User
 from tasks.models import Task
+from helpdesk.models import Ticket
 from datetime import datetime
 from datetime import datetime, timedelta
 
@@ -18,7 +19,7 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.db import connection
 from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, loader, Context
 from django.utils.dates import MONTHS_3
@@ -42,6 +43,7 @@ from tasks.forms import TaskForm
 from tasks.models import Task
 from helpdesk.views.staff import form_data, user_tickets
 from project.views import get_TolaActivity_data, get_TolaTables_data
+from django.core.serializers.json import DjangoJSONEncoder
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -89,9 +91,9 @@ def task_list(request):
     form = form_data(request)
     tolaActivityData = {}
     tolaTablesData = {}
-    if request.user.is_authenticated():
-        tolaActivityData = get_TolaActivity_byUser(request)
-        tolaTablesData = get_TolaTables_data(request)
+    # if request.user.is_authenticated():
+    #     tolaActivityData = get_TolaActivity_byUser(request)
+    #     tolaTablesData = get_TolaTables_data(request)
 
     return render_to_response('tasks/task_index.html',
         RequestContext(request, {
@@ -269,4 +271,11 @@ def get_TolaActivity_byUser(request):
     except ValueError:
 
         return {}
+
+def get_tickets(request):
+    
+    tickets = Ticket.objects.all().values('id', 'title')
+    tickets = json.dumps(list(tickets), cls=DjangoJSONEncoder)
+    final_dict = {'tickets': tickets}
+    return JsonResponse(final_dict, safe=False)
 

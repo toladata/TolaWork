@@ -23,4 +23,8 @@ urlpatterns = patterns('tasks.views',
         'delete_task',
         name='delete_task'),
 
+    url(r'^tasks/tickets$',
+        'get_tickets',
+        name='ticket_objects'),
+
 )
