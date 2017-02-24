@@ -42,6 +42,7 @@ import json
 from tasks.forms import TaskForm
 from tasks.models import Task
 from helpdesk.views.staff import form_data, user_tickets
+from helpdesk.lib import apply_query, query_to_dict
 from project.views import get_TolaActivity_data, get_TolaTables_data
 from django.core.serializers.json import DjangoJSONEncoder
 
@@ -53,53 +54,116 @@ superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_ac
 @login_required
 def task_list(request):
 
-    # Query_params will hold a dictionary of parameters relating to
-    # a query, to be saved if needed:
+    # Query_params 
+    query_params = {
+        'filtering': {},
+        'sorting': None,
+        'keyword': None,
+        'other_filter': None,
+        }
+
+
     tasks = Task.objects.select_related()
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     context = {}
 
    
     ## sorting tasks
-    sort = request.GET.get('sort', None)
-    if sort:
-        tasks = Task.objects.all().order_by(sort)
+    sort_tasks(request,query_params)
 
-    ## Keyword searching
-    q = request.GET.get('q', None)
+    #searching
+    search_tasks(request, context, query_params)
 
-    if q:
-        tasks = Task.objects.filter(
-            Q(task__icontains=q) |
-            Q(due_date__icontains=q) |
-            Q(created_date__icontains=q) |
-            Q(status__icontains=q)|
-            Q(priority__icontains=q)
-            
-                   )
     ## Task Filtering
+        #status
     statuses = request.GET.getlist('status')
     if statuses:
         try:
             statuses = [int(s) for s in statuses]
-            tasks = Task.objects.filter(status=s
-                )
-            print tasks
+            query_params['filtering']['status__in'] = statuses
         except ValueError:
             pass
+
+        #priorities
+    priorities = request.GET.getlist('priority')
+    if priorities:
+        try:
+            priorities = [int(p) for p in priorities]
+            query_params['filtering']['priority__in'] = priorities
+        except ValueError:
+            pass
+
+        #Assigned to
+    assigned = request.GET.getlist('assigned_to')
+    if assigned:
+        try:
+            assigned = [int(a) for a in assigned]
+            query_params['filtering']['assigned_to__id__in'] = assigned
+        except ValueError:
+            pass
+
+        #Due Dates
+    due_from = request.GET.get('due_from')
+    if due_from:
+        query_params['filtering']['due_date__gte'] = due_from
+
+    due_to = request.GET.get('due_to')
+    if due_to:
+        query_params['filtering']['due_date__lte'] = due_to
+
+        #Created dates       
+    created_from = request.GET.get('created_from')
+    if created_from:
+        query_params['filtering']['created_date__gte'] = created_from
+
+    created_to = request.GET.get('created_to')
+    if created_to:
+        query_params['filtering']['created_date__lte'] = created_to
+    
 
     form = form_data(request)
     tolaActivityData = {}
     tolaTablesData = {}
+    tasks_assigned = {}
+    tasks_created = {}
+    total_tasks_assigned = 0
+    total_tasks_created = 0
+    
     if request.user.is_authenticated():
         tolaActivityData = get_TolaActivity_byUser(request)
         tolaTablesData = get_TolaTables_data(request)
+    # User tasks
+    #created_by 
+    tasks_created = Task.objects.filter(created_by = request.user).exclude(status__in=([3,4]))
+    total_tasks_created = len(tasks_created)
+    
+    #assigned_to
+    tasks_assigned = Task.objects.filter(assigned_to = request.user).exclude(status__in=([3,4]))
+    total_tasks_assigned = len(tasks_assigned) 
+
+    try:
+        tasks = apply_query(tasks, query_params)
+    except ValidationError:
+        # invalid parameters in query, return default query
+        query_params = {
+            'filtering': {'status__in': [1, 2, 3, 4]},
+            'sorting': 'created_date',
+        }
+        tasks = apply_query(tasks, query_params)
+
+    querydict = request.GET.copy()
 
     return render_to_response('tasks/task_index.html',
         RequestContext(request, {
-        'tasks': tasks.order_by('created_date').reverse,
+        'query_string': querydict.urlencode(),
+        'query': request.GET.get('q'),
+        'tasks': tasks,
+        'tasks_assigned': tasks_assigned,
+        'total_tasks_created':total_tasks_created,
+        'total_tasks_assigned': total_tasks_assigned,
         'assignable_users': assignable_users,
         'status_choices':Task.STATUS_CHOICES, 
+        'priority': Task.PRIORITY_CHOICES,
         'form' : form,
         'tolaActivityData': tolaActivityData,
         'tolaTablesData': tolaTablesData
@@ -192,7 +256,7 @@ def task_edit(request, task_id):
         note = request.POST.get('note')
         submitter_email = request.POST.get('submitter_email')
         assigned_to= request.POST.get('assigned_to')
-        due_date = task.due_date
+        due_date = datetime.strptime(request.POST.get('due_date'), "%Y-%m-%d")
         update_comments = Task(id= task_id, task=title, submitter_email=submitter_email, status=status, priority=priority, due_date=due_date,  created_by_id=created_by, assigned_to_id=assigned_to, note=note)
 
 	update_comments.save(update_fields=['task','submitter_email','priority','assigned_to_id','status','due_date','note','created_by_id',])
@@ -278,4 +342,43 @@ def get_tickets(request):
     tickets = json.dumps(list(tickets), cls=DjangoJSONEncoder)
     final_dict = {'tickets': tickets}
     return JsonResponse(final_dict, safe=False)
+    
+#Sorting tasks
+def sort_tasks(request,query_params):
+
+    sort = request.GET.get('sort', None)
+
+    user_id = User.objects.get(username=request.user).id
+    user = User.objects.get(id=user_id)
+    my_sort = None
+
+    if sort not in ( 'created_date', 'task', 'priority','status','due_date',''):
+        sort = 'created_date'
+        
+
+    query_params['sorting'] = sort
+
+    return
+
+#Search tasks
+def search_tasks(request, context, query_params):
+    q = request.GET.get('q', None)
+
+    if q:
+        qset = (
+            Q(id__icontains=q) |
+            Q(task__icontains=q) |
+            Q(assigned_to__username__icontains=q) |
+            Q(created_by__id__icontains=q) |
+            Q(due_date__icontains=q) |
+            Q(created_date__icontains=q) |
+            Q(submitter_email__icontains=q) |
+            Q(note__icontains = q)
+        )
+
+        context = dict(context, query=q)
+
+        query_params['other_filter'] = qset
+    return context
+>>>>>>> 493a6efd2c52c3d719d24cb9e9cc07b7d73184b7
 
