@@ -91,9 +91,9 @@ def task_list(request):
     form = form_data(request)
     tolaActivityData = {}
     tolaTablesData = {}
-    # if request.user.is_authenticated():
-    #     tolaActivityData = get_TolaActivity_byUser(request)
-    #     tolaTablesData = get_TolaTables_data(request)
+    if request.user.is_authenticated():
+        tolaActivityData = get_TolaActivity_byUser(request)
+        tolaTablesData = get_TolaTables_data(request)
 
     return render_to_response('tasks/task_index.html',
         RequestContext(request, {
