@@ -380,5 +380,5 @@ def search_tasks(request, context, query_params):
 
         query_params['other_filter'] = qset
     return context
->>>>>>> 493a6efd2c52c3d719d24cb9e9cc07b7d73184b7
+
 
