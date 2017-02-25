@@ -140,12 +140,7 @@
                                     <label class="col-md-4"><p><strong>{% trans "Status:" %}</strong></p></label>
                               <div class="col-md-8">
                                   <select class="form-control" id='id_status' name='status'>
-                                  <option value = "{% if task.status == 1 %} 1 {%elif task.status == 2%} 2 {% elif task.status == 3%} 3 {% elif task.status == 4%} 4  {% endif %}">
-                                      {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</option>
-                                  <option value='1'>Active</option>
-                                  <option value='2'>Reopened</option>
-                                  <option value='3'>Completed</option>
-                                  <option value='4'>Cancelled</option>
+                                  {% for s in status_choices %}<option value='{{ s.0 }}'{% ifequal s.0 task.status %} selected='selected'{% endifequal %}>{{ s.1 }}</option>{% endfor %}
                                 </select >
                                </div>
                               </div>
@@ -153,11 +148,7 @@
                                    <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
                                    <div class="col-md-8">
                                      <select class="form-control" id='id_priority' name='priority'>
-                                     <option value="{% if task.priority == 1 %} 1 {% elif task.priority == 2 %} 2 {% elif task.priority == 3 %} 3 {% endif %}">{% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</option>
-                              
-                                     <option value='1'>High</option>
-                                  <option value='2'>Normal</option>
-                                  <option value='3'>Low</option>
+                                     {% for p in priority %}<option value='{{ p.0 }}'{% ifequal p.0 task.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}
                                       </select>
                                    </div>
                                 </div>
