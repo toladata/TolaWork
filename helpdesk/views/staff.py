@@ -1033,6 +1033,14 @@ def ticket_list(request):
                 query_params['filtering']['type__in'] = types
             except ValueError:
                 pass
+        tags = request.GET.getlist('tags')
+        if tags:
+            try:
+                tags = [int(s) for s in tags]
+                query_params['filtering']['tags__id__in'] = tags
+            except ValueError:
+                pass
+
 
         date_from = request.GET.get('date_from')
         if date_from:
@@ -1099,7 +1107,7 @@ def ticket_list(request):
             pass
 
     
-    tickets = Ticket.objects.select_related()
+    tickets = Ticket.objects.select_related().distinct()
 
     for t in tickets:
         if t.github_issue_number and t.status != 3 and t.status != 4 and t.status != 7:

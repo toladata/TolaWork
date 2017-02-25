@@ -4,6 +4,7 @@ from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader, Context
 from django.contrib.auth.models import User
 from tasks.models import Task
+from helpdesk.models import Ticket
 from datetime import datetime
 from datetime import datetime, timedelta
 
@@ -18,7 +19,7 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.db import connection
 from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, loader, Context
 from django.utils.dates import MONTHS_3
@@ -43,6 +44,7 @@ from tasks.models import Task
 from helpdesk.views.staff import form_data, user_tickets
 from helpdesk.lib import apply_query, query_to_dict
 from project.views import get_TolaActivity_data, get_TolaTables_data
+from django.core.serializers.json import DjangoJSONEncoder
 
 staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
 
@@ -251,7 +253,7 @@ def task_edit(request, task_id):
         title = request.POST.get('task')
         priority = request.POST.get('priority')
         status = request.POST.get('status')
-        note = request.POST.get('note')
+        note = request.POST.get('note_edit')
         submitter_email = request.POST.get('submitter_email')
         assigned_to= request.POST.get('assigned_to')
         due_date = datetime.strptime(request.POST.get('due_date'), "%Y-%m-%d")
@@ -334,6 +336,13 @@ def get_TolaActivity_byUser(request):
 
         return {}
 
+def get_tickets(request):
+    
+    tickets = Ticket.objects.all().values('id', 'title')
+    tickets = json.dumps(list(tickets), cls=DjangoJSONEncoder)
+    final_dict = {'tickets': tickets}
+    return JsonResponse(final_dict, safe=False)
+
 #Sorting tasks
 def sort_tasks(request,query_params):
 
@@ -371,4 +380,5 @@ def search_tasks(request, context, query_params):
 
         query_params['other_filter'] = qset
     return context
+>>>>>>> 493a6efd2c52c3d719d24cb9e9cc07b7d73184b7
 

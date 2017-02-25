@@ -630,6 +630,7 @@
                 <option value='Keywords'>{% trans "Keywords" %}</option>
                 <option value='Dates'>{% trans "Date Range" %}</option>
                 <option value='Type'>{% trans "Type" %}</option>
+                <option value='Tag'>{% trans "Tag" %}</option>
               </select>
               <input class="btn sort_add" type='button' id='filterBuilderButton' value='+' />
               {% csrf_token %}
@@ -714,6 +715,20 @@
                 <div class="keywords">
                   <label for='id_types'>{% trans "Types: " %}</label>
                   <select id='id_types' name='types' multiple='selected' rows="4" class="types_select">{% for s in type_choices %}<option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.type__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}</select>
+                </div>
+                <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
+                <input type='button' class='filterBuilderRemove' value='-' />
+              </div>
+              <div class='thumbnail sorting_form filterBox{% if query_params.filtering.queue__id__in %} filterBoxShow{% endif %}' id='filterBoxTag'>
+                <div class="keywords">
+                  <label for='id_tags'>{% trans "Tag(s): " %}</label>
+                  <select id='id_tags' name='tags' multiple='selected' rows="4" class="owners_select">
+                    {% for t in tags %}
+                      <option value='{{ t.id }}'{% if t.id|in_list:query_params.filtering.tags__id__in %} selected='selected'{% endif %}>
+                          {{ t.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
                 </div>
                 <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>
                 <input type='button' class='filterBuilderRemove' value='-' />
@@ -852,6 +867,10 @@ $(document).ready(function() {
     $("#filterBoxType").hide();
     $("#filterBoxType").hover(function() {
         $("filterBoxType").slideToggle("fast");
+    });
+    $("#filterBoxTag").hide();
+    $("#filterBoxTag").hover(function() {
+        $("filterBoxTag").slideToggle("fast");
     });
     $("#filterBoxKeywords").hide();
     $("#filterBoxKeywords").hover(function() {

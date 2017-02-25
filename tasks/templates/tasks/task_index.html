@@ -2,11 +2,6 @@
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
 {% block helpdesk_head %}
 <style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css' xmlns="http://www.w3.org/1999/html"></style>
-
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-
-  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 {% endblock %}
 
 
@@ -15,6 +10,7 @@
 <script type="text/javascript" src="{{ STATIC_URL }}js/highlight_keywords.js" charset="UTF-8"></script>
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css">
+<style type="text/css" src='{{ STATIC_URL }}task/css/app.css'></style>
 <div class="container">
 <h3>My Tasks</h3>
   <div class="ticket_cover">
@@ -41,6 +37,8 @@
             </div>
          </div>
           <!-- end search -->
+
+
           <!-- start table -->
          <!--  <p class="highlight_div">{{query}}</p> -->
             <div class="table-responsive">
@@ -108,8 +106,13 @@
                             <td>{{task.assigned_to}}</td>
                           </tr>
                           <tr>
+<<<<<<< HEAD
+                            <td><strong>{% trans "Note:" %}</strong></td>
+                            <td colspan="8">{{ task.note|safe}}</td>
+=======
                             <td class="highlight_div"><strong>{% trans "Note:" %}</strong></td>
                             <td colspan="8">{{ task.note}}</td>
+>>>>>>> 493a6efd2c52c3d719d24cb9e9cc07b7d73184b7
                           </tr>
                         </table>
                         
@@ -158,6 +161,7 @@
                                 <div class="col-md-6 row ticket_edit">
                                   <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
                                   <div class="col-md-8">
+
                                      <input class="form-control" name='created_date' id='id_edit_created_date' value="{{ task.created_date | date}}">
                                   </div>
                                 </div>
@@ -193,7 +197,7 @@
                                 <div class="col-md-11 row ticket_edit">
                                   <label class="col-md-2"><p><strong>{% trans "Note:" %}</strong></p></label>
                                   <div class="col-md-9 edit_note">
-                                      <textarea class="form-control" rows="4" name='note' id='id_note' required>{{ task.note}}</textarea>
+                                      <textarea class="form-control" rows="4" name='note_edit' id='id_note_edit' required>{{ task.note}}</textarea>
                                   </div>
                                 </div>
                               </div>
@@ -253,6 +257,7 @@
                     <h3 class="modal-title font9">Add Task</h3>
                   </div>
                   <div class="modal-body">
+
                     <form method= "POST" action='{% url 'task_submit'%}'>
                     <div class="col-md-12 row">
                     <div class="col-md-6 row ticket_edit">
@@ -268,6 +273,17 @@
                           </div>
                       </div>
                     </div>
+                    <br>
+                    <div class="col-md-12 row ui-front">
+                        <label class="col-md-2"><p><strong>{% trans "Description:" %}</strong></p></label>
+                      <div class="col-md-11 row ticket_edit">
+                        <div class="col-md-9 edit_note examples">
+                            <textarea class=" mention-example2 form-control" rows="4" name='note' id='id_note' required></textarea>
+                            <span style="font-size: 9pt">Type <b>"#"</b> symbol to link this Task to a Ticket(s)</span>
+                        </div>
+                      </div>
+                    </div>
+                    <br>
                     <div class="col-md-12 row">
                       <div class="col-md-6 row ticket_edit">
                          <label class="col-md-4"><p><strong> {% trans "Project Initiation:" %}</strong></p></label>
@@ -358,14 +374,7 @@
                             </div>
                           </div>
                         </div>
-                        <div class="col-md-12 row">
-                          <div class="col-md-11 row ticket_edit">
-                            <label class="col-md-2"><p><strong>{% trans "Note:" %}</strong></p></label>
-                            <div class="col-md-9 edit_note">
-                                <textarea class="form-control" rows="4" name='note' id='id_note' required></textarea>
-                            </div>
-                          </div>
-                        </div>
+                     
                         <div class="col-md-12 row modal_button">
                           <label class= "col-md-6 row ticket_edit">
                               <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Submit" %}' />
@@ -703,4 +712,7 @@ $(document).ready(function() {
 
 });
 </script>
+</script>
+<script src='{{ STATIC_URL }}task/js/task.js' type='text/javascript'></script>
+
 {% endblock content %}
