@@ -30,9 +30,9 @@ class Task(models.Model):
     )
 
     PRIORITY_CHOICES = (
-        (1, _('1. High')),
-        (2, _('2. Normal')),
-        (3, _('3. Low')),
+        (1, _('High')),
+        (2, _('Normal')),
+        (3, _('Low')),
 
     )
 
