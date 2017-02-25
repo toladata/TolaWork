@@ -390,8 +390,6 @@ def get_TolaActivity_data(request):
         return json_obj
 
     except requests.exceptions.RequestException as e:
-        # A serious problem happened, like an SSLError or InvalidURL
-        print e
         return {}
 
     except ValueError:
@@ -418,8 +416,7 @@ def get_TolaActivity_loggedUser():
         return json_obj
 
     except requests.exceptions.RequestException as e:
-        # A serious problem happened, like an SSLError or InvalidURL
-        print e
+
         return {}
 
     except ValueError:
@@ -429,15 +426,14 @@ def get_TolaActivity_loggedUser():
 @login_required
 def get_TolaTables_data(request):
 
-    user = {}
-    my_tables = {}
-    my_silos = {}
+    my_tables = []
+    my_silos = []
     table_data = {}
 
     token = 'bd43de0c16ac0400bc404c6598a6fe0e4ce73aa2'
-    user_url = 'http://tables.toladata.io/api/users/' 
-    public_table_url ='http://tables.toladata.io/api/public_tables/'
-    silo_url = 'http://tables.toladata.io/api/silo/'
+    user_url = 'http://tables.toladata.io/api/users' 
+    public_table_url ='http://tables.toladata.io/api/public_tables'
+    silo_url = 'http://tables.toladata.io/api/silo'
 
     user_details = None
 
@@ -448,9 +444,9 @@ def get_TolaTables_data(request):
 
     if user_details:
         token = user_details.tables_api_token
-        user_url = str(user_details.table_url)+'/api/users/' 
-        public_table_url =str(user_details.table_url)+'/api/public_tables/'
-        silo_url = str(user_details.table_url)+'/api/silo/'
+        user_url = str(user_details.table_url)+'/api/users' 
+        public_table_url =str(user_details.table_url)+'/api/public_tables'
+        silo_url = str(user_details.table_url)+'/api/silo'
 
     header = {'Authorization': 'token %s' % token}
 
@@ -470,7 +466,9 @@ def get_TolaTables_data(request):
         json_obj2 = public_table_response.json()
         json_obj3 = silo_response.json()
 
+
         email = request.user.email
+
         for data in json_obj:
             if data['email'] == email:
                 user = data
@@ -496,7 +494,6 @@ def get_TolaTables_data(request):
         return table_data
 
     except requests.exceptions.RequestException as e:
-        print e
         return {}
 
     except ValueError:
