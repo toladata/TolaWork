@@ -106,13 +106,9 @@
                             <td>{{task.assigned_to}}</td>
                           </tr>
                           <tr>
-<<<<<<< HEAD
                             <td><strong>{% trans "Note:" %}</strong></td>
                             <td colspan="8">{{ task.note|safe}}</td>
-=======
-                            <td class="highlight_div"><strong>{% trans "Note:" %}</strong></td>
-                            <td colspan="8">{{ task.note}}</td>
->>>>>>> 493a6efd2c52c3d719d24cb9e9cc07b7d73184b7
+                        
                           </tr>
                         </table>
                         
@@ -187,7 +183,7 @@
                                   <label class="col-md-4"><p><strong>{% trans "Created by:" %}</strong></p></label>
                                   <div class="col-md-8">
                                     <select class=" form-control" name='created_by' id='id_created_by'>
-                                      <option value="{{created_by.id}}">{{user.username}}</option>
+                                      <option value="{{created_by.id}}">{{task.created_by}}</option>
                                     </select>
                                   </div>
                                 </div>
@@ -285,14 +281,13 @@
                     <br>
                     <div class="col-md-12 row ui-front">
                         <label class="col-md-2"><p><strong>{% trans "Description:" %}</strong></p></label>
-                      <div class="col-md-11 row ticket_edit">
-                        <div class="col-md-9 edit_note examples">
+                      <div class="col-md-10 row ticket_edit">
+                        <div class="edit_note examples">
                             <textarea class=" mention-example2 form-control" rows="4" name='note' id='id_note' required></textarea>
-                            <span style="font-size: 9pt">Type <b>"#"</b> symbol to link this Task to a Ticket(s)</span>
+                            <span style="font-size: 9pt">Type <b>"#"</b> symbol to link this Task to a Ticket(s)</span><br><br>
                         </div>
                       </div>
                     </div>
-                    <br>
                     <div class="col-md-12 row">
                       <div class="col-md-6 row ticket_edit">
                          <label class="col-md-4"><p><strong> {% trans "Project Initiation:" %}</strong></p></label>
@@ -300,7 +295,7 @@
                             <select class=" form-control" name='project_agreement'> 
                                 <option value= "">Select Agreement</option>
                                 {% if tolaActivityData %}
-                                  {% for data in tolaActivityData.agreements|dictsort:"expected_start_date" reversed %}
+                                  {% for data in tolaActivityData.agreements %}
                                     <option  value="{{data.project_name}}">{{data.project_name}}</option>
                                   {% endfor %} 
                                 {% endif %}
@@ -313,8 +308,13 @@
                             <div class="col-md-8" >
                               <select class=" form-control" name='table'> 
                                 <option value= "">Select table</option>
-                                {% if tolaTablesData %}
-                                  {% for table in tolaTablesData %}
+                                {% if tolaTablesData.my_tables %}
+                                  {% for table in tolaTablesData.my_tables %}
+                                    <option  value="{{table.name}}">{{table.name}}</option>
+                                  {% endfor %} 
+                                {% endif %}
+                                {% if tolaTablesData.my_silos %}
+                                  {% for table in tolaTablesData.my_silos %}
                                     <option  value="{{table.name}}">{{table.name}}</option>
                                   {% endfor %} 
                                 {% endif %}
