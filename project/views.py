@@ -425,7 +425,7 @@ def get_TolaActivity_loggedUser():
 
 @login_required
 def get_TolaTables_data(request):
-
+    user = {}
     my_tables = []
     my_silos = []
     table_data = {}
