@@ -282,7 +282,7 @@ def delete_task(request, task_id):
 def get_TolaActivity_byUser(request):
     import json
     #user url
-    url1 = 'http://activity.toladata.io/api/users/'
+    url1 = 'http://activity.toladata.io/api/tolauser/'
 
 
     token = settings.TOLA_ACTIVITY_TOKEN
@@ -298,38 +298,39 @@ def get_TolaActivity_byUser(request):
 
         
         json_obj1 = response1.json()
-        json_obj2 = get_TolaActivity_data(request) 
+        json_obj2 = get_TolaActivity_data(request)
+
         user = {}
         agreements = []
         approvals = []
         total_agreements = {}
         if request.user.is_authenticated():
             email = request.user.email
-            for data in json_obj1:
-                if data['email'] == email:
-                    user = data
+            # for data in json_obj1:
+            #     if data['email'] == email:
+            #         user = data
 
-            if user:
-                try:
-                    for activity in json_obj2:
-                        if  activity['approved_by'] == user['url']:
-                            agreements.append(activity)
-                except Exception, e:
-                    pass
-            if agreements:
-                try:
-                    for agreement in agreements:
-                        if agreement['approval'] == 'awaiting approval':
-                            approvals.append(agreement)
-                except Exception, e:
-                    pass
-            total_agreements = {'agreements': agreements, 'approvals': approvals}
+            # print user['url']
+            # if user:
+            try:
+                for activity in json_obj2:
+                    #if  activity['approved_by'] == user['url']:
+                    agreements.append(activity)
+            except Exception, e:
+                pass
+
+            # if agreements:
+            try:
+                for agreement in agreements:
+                    if agreement['approval'] == 'awaiting approval':
+                        approvals.append(agreement)
+            except Exception, e:
+                pass
+            total_agreements = {'agreements': approvals}
 
         return total_agreements
 
     except requests.exceptions.RequestException as e:
-        # A serious problem happened, like an SSLError or InvalidURL
-        print e
         return {}
 
     except ValueError:
@@ -380,5 +381,4 @@ def search_tasks(request, context, query_params):
 
         query_params['other_filter'] = qset
     return context
->>>>>>> 493a6efd2c52c3d719d24cb9e9cc07b7d73184b7
 
