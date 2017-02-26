@@ -26,16 +26,12 @@
         <!-- Tagging -->
         <link href="{{ STATIC_URL }}easy_select2/vendor/select2/css/select2.min.css" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-        <link href='{{ STATIC_URL }}task/jquery.mentionsInput.css' rel='stylesheet' type='text/css'>
     
 
         {% block extra_js_in_header %}
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
         <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
         <script src='https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js' type='text/javascript'></script>
-        <script src='{{ STATIC_URL }}task/lib/jquery.events.input.js' type='text/javascript'></script>
-        <script src='{{ STATIC_URL }}task/lib/jquery.elastic.js' type='text/javascript'></script>
-        <script src='{{ STATIC_URL }}task/jquery.mentionsInput.js' type='text/javascript'></script>
         
         <!-- App specific Javascript -->
         <script type="text/javascript" src="{{ STATIC_URL }}js/app.js"></script>
@@ -82,12 +78,12 @@
                     {% endif %}
                         <li><a href='{% url 'helpdesk_report_index' %}'><span class="glyphicon glyphicon-stats"></span> <span class="nav-text"><font class="font6">Stats</font></span></a></li>
                     {% endif %}
-                    <li class="font8"><a href="#" class="dropdown-toggle " data-toggle="dropdown"><font class="font8">Knowledgebase</font><b class="caret"></b></a>
+                    <!-- <li class="font8"><a href="#" class="dropdown-toggle " data-toggle="dropdown"><font class="font8">Knowledgebase</font><b class="caret"></b></a>
                         <ul class="dropdown-menu ">
                             <li><a href='{% url 'blog' %}'><span class="glyphicon glyphicon-info-sign"></span> <span class="nav-text"><font class="font6">Blog/Release Info</font></span></a></li>
                             <li><a href='{% url 'helpdesk_kb_index' %}'><span class="glyphicon glyphicon-tree-deciduous"></span> <span class="nav-text"><font class="font6">Knowledgebase</font></span></a></li>
                         </ul>
-                    </li>
+                    </li> -->
                 </ul>
                 {% if user.is_authenticated  %}
                 <span>{{ request.session.country }}</span>
