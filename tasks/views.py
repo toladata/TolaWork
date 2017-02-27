@@ -63,7 +63,7 @@ def task_list(request):
         }
 
 
-    tasks = Task.objects.select_related()
+    tasks = Task.objects.filter(created_by = request.user).exclude(status__in=([3,4]))
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     context = {}
 
@@ -132,11 +132,8 @@ def task_list(request):
     if request.user.is_authenticated():
         tolaActivityData = get_TolaActivity_byUser(request)
         tolaTablesData = get_TolaTables_data(request)
+
     # User tasks
-    #created_by 
-    tasks_created = Task.objects.filter(created_by = request.user).exclude(status__in=([3,4]))
-    total_tasks_created = len(tasks_created)
-    
     #assigned_to
     tasks_assigned = Task.objects.filter(assigned_to = request.user).exclude(status__in=([3,4]))
     total_tasks_assigned = len(tasks_assigned) 
@@ -159,7 +156,6 @@ def task_list(request):
         'query': request.GET.get('q'),
         'tasks': tasks,
         'tasks_assigned': tasks_assigned,
-        'total_tasks_created':total_tasks_created,
         'total_tasks_assigned': total_tasks_assigned,
         'assignable_users': assignable_users,
         'status_choices':Task.STATUS_CHOICES, 
