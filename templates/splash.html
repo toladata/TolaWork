@@ -14,6 +14,7 @@
   <!--  splash screen css files -->
     <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="{{ STATIC_URL }}css/splash.css" rel="stylesheet" type="text/css">
+    <link href="{{ STATIC_URL }}css/app.css" rel="stylesheet" type="text/css">
     <link href="{{ STATIC_URL }}css/fontawesome-4.2.0.min.css" rel="stylesheet" type="text/css">
     <!-- splash screen js files -->
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.11.1.min.js"></script>
@@ -126,7 +127,7 @@
           
             <!--Register form -->
             <div class="form_register">
-              <h2 class="font4"> Register Now! </h2>
+              <h2 class="register_font"> Register Now! </h2>
               
               <form class="row" id="register" method="post" action="/accounts/register/">
                 {% csrf_token %}

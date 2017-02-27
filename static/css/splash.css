@@ -69,7 +69,6 @@ html {
 }
 
 body {
-  
   background-attachment: fixed;
   background: url(../img/img6.jpg) no-repeat;
   background-size: 100% 100%;
@@ -122,7 +121,7 @@ body {
 {
     font-weight: bold;
 }
-.font4
+.register_font
 {
     color:#b20838;
 
