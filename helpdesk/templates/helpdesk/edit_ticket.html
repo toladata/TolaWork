@@ -14,7 +14,7 @@
                    <label class="col-md-1"><p><strong> Title:</strong></p></label>
                    <div class=" col-md-9">
                       <input class="form-control ticket_title" 
-                      type='text' name='title' id='id_title{{ticket.id}}'  value='{{ ticket.title|escape }}' />
+                      type='text' name='title' id='id_title{{ticket.id}}'  style="margin-left: 60px" value='{{ ticket.title|escape }}' />
                    </div>
                 </div>
               </div>
@@ -115,10 +115,10 @@
                   </div>
                 </div>  
               </div>
-                <div class="row mydropdiv">
-                        <div class=" col-md-offset-1 dropzone col-md-10" id="dZUpload-edit" style="margin-botttom:10px" ></div>
-                        <div class="col-md-1"></div>
-                    </div>
+               <div class="row mydropdiv">
+                  <div class="col-md-2"></div>
+                  <div class=" ticket_padding dropzone col-md-8" id="dZUpload" style="margin-botttom:10px;margin-left:6px;"></div>
+                </div>
                     <br><br>
                 <div class=" row">
                 <label class= "col-md-6 row ticket_edit">

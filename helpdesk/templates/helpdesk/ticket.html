@@ -1,12 +1,15 @@
 {% extends "base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "View Ticket Details" %}{% endblock %}
 {% block helpdesk_head %}
-<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>
+ <link href="{{ STATIC_URL }}css/app.css" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block content %}
 {% load in_list %}
-<link href="{{ STATIC_URL}}css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+<style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css'></style>
+
 <div class="container">
 
 <div class="col-md-12 row">
@@ -514,8 +517,8 @@
                               </dl>
                           </div> -->
                            <div class="row mydropdiv">
-                                <div class=" ticket_padding col-md-offset-2 dropzone col-md-9" id="dZUpload" style="margin-botttom:10px;" ></div>
-                                <div class="col-md-1"></div>
+                                <div class="col-md-2"></div>
+                                <div class=" ticket_padding dropzone col-md-8" id="dZUpload" style="margin-botttom:10px;margin-left:9px;"></div>
                             </div>
                             <br><br>
                           <div class=" row">
