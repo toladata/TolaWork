@@ -102,80 +102,23 @@ class Task(models.Model):
 
     class Meta:
         ordering = ["priority"]
+        managed = True
 
 
-class TaskFollowUpManager(models.Manager):
-    def private_followups(self):
-        return self.filter(public=False)
-
-    def public_followups(self):
-        return self.filter(public=True)
 
 
-class TaskFollowUp(models.Model):
-    """
-    A FollowUp is a comment and/or change to a ticket. We keep a simple
-    title, the comment entered by the user, and the new status of a ticket
-    to enable easy flagging of details on the view-ticket page.
-
-    The title is automatically generated at save-time, based on what action
-    the user took.
-
-    Tickets that aren't public are never shown to or e-mailed to the submitter,
-    although all staff can see them.
-    """
+class TaskComment(models.Model):
 
     task = models.ForeignKey(Task,verbose_name=_('Task'),)
     date = models.DateTimeField(_('Date'),default = timezone.now)
-    task_name = models.CharField(_('Task'),max_length=200,blank=True,null=True,)
     comment = models.TextField(_('Comment'),blank=True,null=True,)
-    public = models.BooleanField(_('Public'),blank=True,default=False,help_text=_('Public tasks can be viewed by other users while non-public tasks can only be viewed by the task owner'),)
     user = models.ForeignKey(settings.AUTH_USER_MODEL,blank=True,null=True,verbose_name=_('User'),)
-    new_status = models.IntegerField(_('New Status'),choices=Task.STATUS_CHOICES,blank=True,null=True,help_text=_('If the status was changed, what was it changed to?'),)
-    objects = TaskFollowUpManager()
 
     class Meta:
         ordering = ['date']
-        verbose_name = _('TaskFollow-up')
-        verbose_name_plural = _('TaskFollow-ups')
+        verbose_name = _('Task-Comment')
+        verbose_name_plural = _('Task-Comments')
+        managed = True
 
     def __unicode__(self):
         return u'%s' %(self.comment)
-
-    def get_absolute_url(self):
-        return u"%s#taskfollowup%s" % (self.task.get_absolute_url(), self.id)
-
-    def save(self, *args, **kwargs):
-        t = self.task
-        t.modified = timezone.now()
-        t.save()
-        super(TaskFollowUp, self).save(*args, **kwargs)
-
-
-class TaskChange(models.Model):
-    """
-    For each FollowUp, any changes to the parent ticket (eg Title, Priority,
-    etc) are tracked here for display purposes.
-    """
-
-    taskfollowup = models.ForeignKey(TaskFollowUp,verbose_name=_('TaskFollow-up'),)
-    field = models.CharField(_('Field'),max_length=100,)
-    old_value = models.TextField(_('Old Value'),blank=True,null=True,)
-    new_value = models.TextField(_('New Value'),blank=True,null=True,)
-
-    def __unicode__(self):
-        str = u'%s ' % self.field
-        if not self.new_value:
-            str += ugettext('removed')
-        elif not self.old_value:
-            str += ugettext('set to %s') % self.new_value
-        else:
-            str += ugettext('changed from "%(old_value)s" to "%(new_value)s"') % {
-                'old_value': self.old_value,
-                'new_value': self.new_value
-                }
-        return str
-
-    class Meta:
-        verbose_name = _('Task change')
-        verbose_name_plural = _('Task changes')

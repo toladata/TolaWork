@@ -108,13 +108,49 @@
                           <tr>
                             <td><strong>{% trans "Note:" %}</strong></td>
                             <td colspan="8">{{ task.note|safe}}</td>
-                        
                           </tr>
                         </table>
+                        <div class="view_table">
+                          {% if task.taskcomment_set.all %}
+                            <label class="col-md-2"><p><strong>{% trans "Comments:" %}</strong></p></label>
+                            <div class="col-md-12">
+                              {% for comment in task.taskcomment_set.all %}
+                              <span class='byline text-info glyphicon glyphicon-comment'> 
+                              {{ comment.user.get_full_name }}, {{ comment.date }}</span>
+                                <p>{{ comment }}</p>
+                              {% endfor %}
+                              {% endif %}
+                            </div>
+                        </div>
+                        <br>
+
+                        <!-- Add comment to the tasks -->
+                        <div class="view_table">
+
+                          <form method= "POST" action='{% url 'task_comment' task.id  %}'>
+                            <div class="col-md-12 row">
+                                <div class="row ticket_edit">
+                                  <label class="col-md-4"><p><strong>{% trans "Comment on This Task:" %}</strong></p></label>
+                                  <div class="col-md-12 edit_note">
+                                      <textarea placeholder="Type in your comment..." class="form-control" rows="4" name='comment' id='id_comment' required></textarea>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="col-md-12 row modal_button">
+                                <label class= "col-md-6 row ticket_edit">
+                                    <input class="btn btn-primary" type='submit' value='{% trans "Submit Comment" %}' />
+                                    {% csrf_token %}
+
+                                </label>
+                            </div>
+                          </form>
+                        </div>
+                        <!-- Add comment to the tasks -->
                         
                         </div>
                         
                       </div>
+
                      <!--  Edit Task  -->
                       <div id="tasktab{{ task.id }}" class="tab-pane task_edit fade">
                       <p class="font9"> <strong>Use this form to make any changes to the task</strong></p>

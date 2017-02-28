@@ -373,7 +373,7 @@ def get_TolaActivity_data(request):
     except Exception, e:
         pass
 
-    if user_details:
+    if user_details.activity_api_token and user_details.activity_url:
         token = user_details.activity_api_token
         url = str(user_details.activity_url)+"/api/projectagreements/"
 
@@ -442,7 +442,7 @@ def get_TolaTables_data(request):
     except Exception, e:
         pass
 
-    if user_details:
+    if user_details.tables_api_token and user_details.table_url:
         token = user_details.tables_api_token
         user_url = str(user_details.table_url)+'/api/users' 
         public_table_url =str(user_details.table_url)+'/api/public_tables'
@@ -461,37 +461,37 @@ def get_TolaTables_data(request):
 
         elif not user_response.status_code // 100 == 2 and silo_response.status_code // 100 == 2:
             return {}
-
-        json_obj = user_response.json()
-        json_obj2 = public_table_response.json()
-        json_obj3 = silo_response.json()
-
-
-        email = request.user.email
-
-        for data in json_obj:
-            if data['email'] == email:
-                user = data
-        if user:
-            try:
-                for table in json_obj2:
-                    if table['owner'] == user['url']:
-                        my_tables.append(table)
-            except Exception, e:
-                pass
-
-            #get silos    
-            try:
-                for silo in json_obj3:
-                    if silo['owner'] == user['url']:
-                        my_silos.append(silo)
-            except Exception, e:
-                pass
+        else:
+            json_obj = user_response.json()
+            json_obj2 = public_table_response.json()
+            json_obj3 = silo_response.json()
 
 
-        table_data = {'my_tables': my_tables, 'my_silos': my_silos}
+            email = request.user.email
 
-        return table_data
+            for data in json_obj:
+                if data['email'] == email:
+                    user = data
+            if user:
+                try:
+                    for table in json_obj2:
+                        if table['owner'] == user['url']:
+                            my_tables.append(table)
+                except Exception, e:
+                    pass
+
+                #get silos    
+                try:
+                    for silo in json_obj3:
+                        if silo['owner'] == user['url']:
+                            my_silos.append(silo)
+                except Exception, e:
+                    pass
+
+
+            table_data = {'my_tables': my_tables, 'my_silos': my_silos}
+
+            return table_data
 
     except requests.exceptions.RequestException as e:
         return {}
