@@ -23,8 +23,12 @@ urlpatterns = patterns('tasks.views',
         'delete_task',
         name='delete_task'),
 
-    url(r'^tasks/tickets$',
+    url(r'^tasks/tickets/',
         'get_tickets',
         name='ticket_objects'),
+
+    url(r'^comment/(?P<task_id>[0-9]+)/$',
+        'task_comment',
+        name='task_comment'),
 
 )
