@@ -60,6 +60,7 @@ def task_list(request):
         'sorting': None,
         'keyword': None,
         'other_filter': None,
+        'sortreverse': True,
         }
 
 
@@ -353,6 +354,12 @@ def sort_tasks(request,query_params):
         
 
     query_params['sorting'] = sort
+
+    sortreverse = request.GET.get('sortreverse', None)
+    if sortreverse == 'off':
+        sortreverse = None
+
+    query_params['sortreverse'] = sortreverse
 
     return
 

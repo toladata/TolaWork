@@ -45,7 +45,7 @@
               <table class="table table-striped table-bordered" style="border-collapse:collapse;">
                 <tr class="info">
                   <td class="highlight_div"><strong>Task Title</strong></td>
-                  <td><strong>Start Date</strong></td>
+                  <td><strong>Created Date</strong></td>
                   <td><strong>Due Date</strong></td>
                   <td><strong>Status</strong></td>
                   <td><strong>Priority</strong></td>
@@ -510,33 +510,49 @@
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading"> <strong>Sort Tasks</strong></div>
-                     <form method='get' action='./'>
+                  <form method='get' action='./'>
                     <div class="panel-body ">
+                    <div class="sort_panels">
                     <select class="btn btn-default dropdown-toggle" id='id_sort' name='sort'>
-                    <option value='created_date'{% ifequal query_params.sorting "created_date"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=created_date">
-                        {% trans "Created" %}
-                    </option>
-                    <option value='due_date'{% ifequal query_params.sorting "due_date"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=due_date">
-                        {% trans "Due Date" %}
-                    </option>
-                    <option value='task'{% ifequal query_params.sorting "task"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=task">
-                        {% trans "Task Title" %}
-                    </option>
-                    <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=status">
-                        {% trans "status" %}
-                    </option>
-                    <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=priority">
-                        {% trans "Priority" %}
-                    </option>
-                    <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=assigned_to">
-                        {% trans "Assigned" %}
-                    </option>
-                  </select>
-                    </div>
+                      <option value='created_date'{% ifequal query_params.sorting "created_date"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=created_date">
+                          {% trans "Created" %}
+                      </option>
+                      <option value='due_date'{% ifequal query_params.sorting "due_date"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=due_date">
+                          {% trans "Due Date" %}
+                      </option>
+                      <option value='task'{% ifequal query_params.sorting "task"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=task">
+                          {% trans "Task Title" %}
+                      </option>
+                      <option value='status'{% ifequal query_params.sorting "status"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=status">
+                          {% trans "status" %}
+                      </option>
+                      <option value='priority'{% ifequal query_params.sorting "priority"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=priority">
+                          {% trans "Priority" %}
+                      </option>
+                      <option value='assigned_to'{% ifequal query_params.sorting "assigned_to"%} selected='selected'{% endifequal %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sort=assigned_to">
+                          {% trans "Assigned" %}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="sort_panels">
+                    <label for='id_sortreverse'>{% trans "Reverse: " %}</label>
+                    <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sortreverse=on"/>
+                    <p class='filterHelp'>{% trans "Ordering applied to tasks" %}</p>
+                  </div>
+                  </div>
                 </form>
                 <script type="text/javascript">
                   document.getElementById('id_sort').onchange = function() {
                       window.location.href = this.children[this.selectedIndex].getAttribute('href');
+                  }
+                  document.getElementById('id_sortreverse').onclick = function() {
+                     if($(this).is(":checked")){         
+                          window.location.href = this.getAttribute('href');
+                        }else {
+                           // Code in the case checkbox is NOT checked.
+                       window.location.href = '{% url 'task_list' %}?{% if query_string %}{{ query_string }}{% endif %}&sortreverse=off';
+                      }
+
                   }
                 </script>
                 </div>
