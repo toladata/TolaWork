@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader, Context
 from django.contrib.auth.models import User
-from tasks.models import Task
+from tasks.models import Task, TaskComment
 from helpdesk.models import Ticket
 from datetime import datetime
 from datetime import datetime, timedelta
@@ -129,9 +129,9 @@ def task_list(request):
     total_tasks_assigned = 0
     total_tasks_created = 0
     
-    if request.user.is_authenticated():
-        tolaActivityData = get_TolaActivity_byUser(request)
-        tolaTablesData = get_TolaTables_data(request)
+    # if request.user.is_authenticated():
+    #     tolaActivityData = get_TolaActivity_byUser(request)
+    #     tolaTablesData = get_TolaTables_data(request)
     # User tasks
     #created_by 
     tasks_created = Task.objects.filter(created_by = request.user).exclude(status__in=([3,4]))
@@ -382,3 +382,18 @@ def search_tasks(request, context, query_params):
         query_params['other_filter'] = qset
     return context
 
+def task_comment(request, task_id):
+
+    task = get_object_or_404(Task, id=task_id)
+
+    if request.method == "POST":
+        task = task
+        date = timezone.now()
+        user = request.user
+        comment = request.POST.get('comment')
+
+        comment = TaskComment(task=task, date=date, comment=comment, user = user)
+
+        comment.save()
+
+    return task_list(request)
