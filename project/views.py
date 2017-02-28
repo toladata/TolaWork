@@ -373,9 +373,11 @@ def get_TolaActivity_data(request):
     except Exception, e:
         pass
 
-    if user_details.activity_api_token and user_details.activity_url:
-        token = user_details.activity_api_token
-        url = str(user_details.activity_url)+"/api/projectagreements/"
+    if user_details:
+
+        if user_details.activity_api_token and user_details.activity_url:
+            token = user_details.activity_api_token
+            url = str(user_details.activity_url)+"/api/projectagreements/"
 
     header = {'Authorization': 'token %s' % token}
 
@@ -441,12 +443,13 @@ def get_TolaTables_data(request):
         user_details = get_object_or_404(TolaUser, user=request.user)
     except Exception, e:
         pass
-
-    if user_details.tables_api_token and user_details.table_url:
-        token = user_details.tables_api_token
-        user_url = str(user_details.table_url)+'/api/users' 
-        public_table_url =str(user_details.table_url)+'/api/public_tables'
-        silo_url = str(user_details.table_url)+'/api/silo'
+        
+    if user_details:
+        if user_details.tables_api_token and user_details.table_url:
+            token = user_details.tables_api_token
+            user_url = str(user_details.table_url)+'/api/users' 
+            public_table_url =str(user_details.table_url)+'/api/public_tables'
+            silo_url = str(user_details.table_url)+'/api/silo'
 
     header = {'Authorization': 'token %s' % token}
 
