@@ -26,7 +26,7 @@
                       var text = this.value;
                       var pos = text.lastIndexOf(trigger);
 
-                      this.value = '<a href="/helpdesk/tickets/'+ui.item.value+'/">[Ticket:] '+text.substring(0, pos + trigger.length) +ui.item.value+'</a>';
+                      this.value = '<a href="/helpdesk/tickets/'+ui.item.value+'/">[Ticket: '+ui.item.value+']</a>  '+text.substring(0, pos);
 
                       triggered = false;
 
