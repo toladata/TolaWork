@@ -167,6 +167,7 @@ def task_list(request):
 
         }))
 
+
 @login_required
 def create_task(request):
     
@@ -200,36 +201,19 @@ def create_task(request):
     return task_list(request)
 
 @login_required
-def view_task(request, task_id):
+def task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     task_state = get_object_or_404(Task, id=task_id)
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    form = form_data(request)
 
-    if 'take' in request.GET:
-
-        request.POST = {
-            'owner': request.user.id,
-            'public': 1,
-            'title': task_state.title,
-            'comment': ''
-        }
-        return task(request, task_id)
-
-
-
-    users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-    return render_to_response('tasks/task_index.html',
+    return render_to_response('tasks/task.html',
         RequestContext(request, {
             'task': task_state,
-            'active_users': users,
-            'created_by': task_state.created_by,
-            'assigned_to': task_state.assigned_to,
-            'priority': task_state.priority,
-            'due_date': task_state.due_date,
-            'project_agreement': task_state.project_agreement,
-            'table': task_state.table,
-            'state': task_state.status,
-            'submitter_email': task_state.submitter_email
-
+            'form': form,
+            'assignable_users': assignable_users,
+            'status_choices':Task.STATUS_CHOICES, 
+            'priority': Task.PRIORITY_CHOICES,
         }))
 
 @login_required
