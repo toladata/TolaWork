@@ -196,14 +196,7 @@ def create_task(request):
     form = form_data(request)
 
     tasks = Task.objects.all()
-    return render_to_response('tasks/task_index.html',
-        RequestContext(request, {
-        	'tasks':Task.objects.all().order_by('created_date').reverse,
-            'assignable_users': assignable_users,
-            'created_by': created_by,
-            'form': form
-            
-        }))
+    return task_list(request)
 
 @login_required
 def view_task(request, task_id):
