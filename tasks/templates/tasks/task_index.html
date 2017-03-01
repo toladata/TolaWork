@@ -110,17 +110,19 @@
                             <td colspan="8">{{ task.note|safe}}</td>
                           </tr>
                         </table>
+                        
+                        </div>
                         <div class="view_table">
                           {% if task.taskcomment_set.all %}
                             <label class="col-md-2"><p><strong>{% trans "Comments:" %}</strong></p></label>
-                            <div class="col-md-12">
+                            <div>
                               {% for comment in task.taskcomment_set.all %}
                               <span class='byline text-info glyphicon glyphicon-comment'> 
                               {{ comment.user.get_full_name }}, {{ comment.date }}</span>
                                 <p>{{ comment }}</p>
                               {% endfor %}
-                              {% endif %}
                             </div>
+                          {% endif %}
                         </div>
                         <br>
 
@@ -146,8 +148,6 @@
                           </form>
                         </div>
                         <!-- Add comment to the tasks -->
-                        
-                        </div>
                         
                       </div>
 
@@ -218,8 +218,10 @@
                                   <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong></p></label>
                                   <div class="col-md-8">
                                     <select class="form-control" name='assigned_to' id='id_assigned_to'>
-
-                                      {% for user in assignable_users %}<option value='{{ user.id }}' {% ifequal user.id task.assigned_to_id %} selected {% endifequal %}>{{ user.username }}</option>{% endfor %}
+                                      <option>------</option>
+                                      {% for user in assignable_users %}
+                                      <option value='{{ user.id }}' {% ifequal user.id task.assigned_to_id %} selected='selected' {% endifequal %}>{{ user.username }}</option>
+                                      {% endfor %}
 
                                     </select>
                                   </div>
@@ -662,19 +664,19 @@
   <script>
   $(function() {
     $( "#id_due_date" ).datepicker({
-      dateFormat: "yyyy-mm-dd",
+      dateFormat: "yy-mm-dd",
     });
     /*document.getElementById("id_due_date").setAttribute('value', new Date());*/
 
     $( "#id_created_date" ).datepicker({
-      dateFormat: "yyyy-mm-dd"
+      dateFormat: "yy-mm-dd"
     });
     $( "#id_edit_due_date" ).datepicker({
-      dateFormat: "yyyy-mm-dd"
+      dateFormat: "yy-mm-dd"
     });
 
     $( "#id_edit_created_date" ).datepicker({
-      dateFormat: "yyyy-mm-dd"
+      dateFormat: "yy-mm-dd"
     });
 
    var date = new Date();
