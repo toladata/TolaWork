@@ -155,6 +155,7 @@ def task_list(request):
         'query_string': querydict.urlencode(),
         'query': request.GET.get('q'),
         'tasks': tasks,
+        'query_params': query_params,
         'tasks_assigned': tasks_assigned,
         'total_tasks_assigned': total_tasks_assigned,
         'assignable_users': assignable_users,
@@ -196,14 +197,7 @@ def create_task(request):
     form = form_data(request)
 
     tasks = Task.objects.all()
-    return render_to_response('tasks/task_index.html',
-        RequestContext(request, {
-        	'tasks':Task.objects.all().order_by('created_date').reverse,
-            'assignable_users': assignable_users,
-            'created_by': created_by,
-            'form': form
-            
-        }))
+    return task_list(request)
 
 @login_required
 def view_task(request, task_id):
