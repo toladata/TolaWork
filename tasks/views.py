@@ -155,6 +155,7 @@ def task_list(request):
         'query_string': querydict.urlencode(),
         'query': request.GET.get('q'),
         'tasks': tasks,
+        'query_params': query_params,
         'tasks_assigned': tasks_assigned,
         'total_tasks_assigned': total_tasks_assigned,
         'assignable_users': assignable_users,
