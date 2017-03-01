@@ -64,7 +64,7 @@ def task_list(request):
         }
 
 
-    tasks = Task.objects.filter(created_by = request.user).exclude(status__in=([3,4]))
+    tasks = Task.objects.filter(Q(created_by = request.user) | Q(assigned_to = request.user)).exclude(status__in=([3,4]))
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     context = {}
 
@@ -134,6 +134,8 @@ def task_list(request):
         tolaActivityData = get_TolaActivity_byUser(request)
         tolaTablesData = get_TolaTables_data(request)
     # User tasks
+    tasks_created = Task.objects.filter(created_by = request.user).exclude(status__in=([3,4]))
+    total_tasks_created = len(tasks_created)
     #assigned_to
     tasks_assigned = Task.objects.filter(assigned_to = request.user).exclude(status__in=([3,4]))
     total_tasks_assigned = len(tasks_assigned) 
@@ -157,6 +159,8 @@ def task_list(request):
         'tasks': tasks,
         'query_params': query_params,
         'tasks_assigned': tasks_assigned,
+        'tasks_created': tasks_created,
+        'total_tasks_created': total_tasks_created,
         'total_tasks_assigned': total_tasks_assigned,
         'assignable_users': assignable_users,
         'status_choices':Task.STATUS_CHOICES, 
@@ -234,7 +238,7 @@ def task_edit(request, task_id):
         update_comments = Task(id= task_id, task=title, submitter_email=submitter_email, status=status, priority=priority, due_date=due_date,  created_by_id=created_by, assigned_to_id=assigned_to, note=note)
 
 	update_comments.save(update_fields=['task','submitter_email','priority','assigned_to_id','status','due_date','note','created_by_id',])
-        return HttpResponseRedirect(reverse('task_list'))
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @login_required
 def delete_task(request, task_id):
@@ -376,4 +380,4 @@ def task_comment(request, task_id):
 
         comment.save()
 
-    return task_list(request)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

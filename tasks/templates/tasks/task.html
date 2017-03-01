@@ -79,7 +79,7 @@
     <div class="view_table">
       {% if task.taskcomment_set.all %}
         <label class="col-md-2"><p><strong>{% trans "Comments:" %}</strong></p></label>
-        <div>
+        <div class="col-md-12">
           {% for comment in task.taskcomment_set.all %}
           <span class='byline text-info glyphicon glyphicon-comment'> 
           {{ comment.user.get_full_name }}, {{ comment.date }}</span>

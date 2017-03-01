@@ -115,7 +115,7 @@
                         <div class="view_table">
                           {% if task.taskcomment_set.all %}
                             <label class="col-md-2"><p><strong>{% trans "Comments:" %}</strong></p></label>
-                            <div>
+                            <div class="col-md-12">
                               {% for comment in task.taskcomment_set.all %}
                               <span class='byline text-info glyphicon glyphicon-comment'> 
                               {{ comment.user.get_full_name }}, {{ comment.date }}</span>
@@ -472,7 +472,10 @@
               <div class="panel-heading">
                 <strong>Tasks <span class="badge"></span></strong>
               </div>
-              <div class="panel-body"> 
+              <div class="panel-body">
+              <div class="sort_panels">
+                   <span class="glyphicon glyphicon-list-alt"></span><a href="#">&nbsp;Created by Me </a><strong> <span class="badge read_more"> {{ total_tasks_created }} </span></strong>
+                </div> 
                 <div class="sort_panels">
                    <span class="glyphicon glyphicon-list-alt"></span><a href="#">&nbsp;Assigned to Me </a><strong> <span class="badge read_more"> {{ total_tasks_assigned }} </span></strong>
                 </div>
