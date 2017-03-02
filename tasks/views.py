@@ -246,7 +246,7 @@ def task_edit(request, task_id):
 	task.save(update_fields=['task','submitter_email','priority','assigned_to_id','status','due_date','note','created_by_id',])
     
     file_attachment(request, task)
-    
+
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @login_required
@@ -389,8 +389,9 @@ def task_comment(request, task_id):
 
         comment.save()
 
-<<<<<<< HEAD
-    return task_list(request)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
 
 def file_attachment(request, task):
     files = []
@@ -415,6 +416,3 @@ def file_attachment(request, task):
                 except NotImplementedError:
                     pass
     return
-=======
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
->>>>>>> 4bd979ec895b02b0fa15cdb637aa719ba0fd36dd
