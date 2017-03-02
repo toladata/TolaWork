@@ -122,3 +122,43 @@ class TaskComment(models.Model):
 
     def __unicode__(self):
         return u'%s' %(self.comment)
+
+
+def attachment_path(instance, filename):
+    """
+    Provide a file path that will help prevent files being overwritten, by
+    putting attachments in a folder off attachments for ticket/followup_id/.
+    """
+    import os
+    from django.conf import settings
+    os.umask(0)
+    path = 'task/attachments/%s' % (instance.task.id )
+    att_path = os.path.join(settings.MEDIA_ROOT, path)
+    if settings.DEFAULT_FILE_STORAGE == "django.core.files.storage.FileSystemStorage":
+        if not os.path.exists(att_path):
+            os.makedirs(att_path, 0o777)
+    return os.path.join(path, filename)
+
+class TaskAttachment(models.Model):
+    task = models.ForeignKey(Task, verbose_name=_('Task'),)
+    file = models.FileField(_('File'),upload_to=attachment_path, max_length=1000,)
+    filename = models.CharField(_('Filename'),max_length=1000,)
+    mime_type = models.CharField(_('MIME Type'),max_length=255,)
+    size = models.IntegerField(_('Size'),help_text=_('Size of this file in bytes'),)
+
+    def get_upload_to(self, field_attname):
+        """ Get upload_to path specific to this item """
+        if not self.id:
+            return u''
+        return u'task/attachments/%s' % (
+            
+            self.task.id
+            )
+
+    def __unicode__(self):
+        return u'%s' % self.filename
+
+    class Meta:
+        ordering = ['filename',]
+        verbose_name = _('Attachment')
+        verbose_name_plural = _('Attachments')
