@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader, Context
 from django.contrib.auth.models import User
-from tasks.models import Task, TaskComment
+from tasks.models import Task, TaskComment, TaskAttachment
 from helpdesk.models import Ticket
 from datetime import datetime
 from datetime import datetime, timedelta
@@ -194,10 +194,15 @@ def create_task(request):
             due_date=due_date, created_date=created_date,created_by_id=created_by, assigned_to_id=assigned_to, 
             project_agreement=project_agreement, table=table, note=note)
         task.save()
-    form = form_data(request)
 
-    tasks = Task.objects.all()
-    return task_list(request)
+        file_attachment(request, task)
+
+        task = {'id': task.id}
+
+    return HttpResponse(
+            json.dumps(task),
+            content_type="application/json"
+            )
 
 @login_required
 def view_task(request, task_id):
@@ -247,10 +252,14 @@ def task_edit(request, task_id):
         submitter_email = request.POST.get('submitter_email')
         assigned_to= request.POST.get('assigned_to')
         due_date = datetime.strptime(request.POST.get('due_date'), "%Y-%m-%d")
-        update_comments = Task(id= task_id, task=title, submitter_email=submitter_email, status=status, priority=priority, due_date=due_date,  created_by_id=created_by, assigned_to_id=assigned_to, note=note)
 
-	update_comments.save(update_fields=['task','submitter_email','priority','assigned_to_id','status','due_date','note','created_by_id',])
-        return HttpResponseRedirect(reverse('task_list'))
+        task = Task(id= task_id, task=title, submitter_email=submitter_email, status=status, priority=priority, due_date=due_date,  created_by_id=created_by, assigned_to_id=assigned_to, note=note)
+
+	task.save(update_fields=['task','submitter_email','priority','assigned_to_id','status','due_date','note','created_by_id',])
+    
+    file_attachment(request, task)
+
+    return HttpResponseRedirect(reverse('task_list'))
 
 @login_required
 def delete_task(request, task_id):
@@ -393,3 +402,27 @@ def task_comment(request, task_id):
         comment.save()
 
     return task_list(request)
+
+def file_attachment(request, task):
+    files = []
+    if request.FILES:
+        import mimetypes, os
+        for file in request.FILES.getlist('attachment'):
+            filename = file.name.encode('ascii', 'ignore')
+            a = TaskAttachment(
+                task=task,
+                filename=filename,
+                mime_type=mimetypes.guess_type(filename)[0] or 'application/octet-stream',
+                size=file.size,
+                )
+            a.file.save(filename, file, save=False)
+            a.save()
+
+            if file.size < getattr(settings, 'MAX_EMAIL_ATTACHMENT_SIZE', 512000):
+                # Only files smaller than 512kb (or as defined in
+                #settings.MAX_EMAIL_ATTACHMENT_SIZE) are sent via email.
+                try:
+                    files.append([a.filename, a.file])
+                except NotImplementedError:
+                    pass
+    return
