@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 import django.utils.timezone
+import tasks.models
 from django.conf import settings
 
 
@@ -24,48 +25,47 @@ class Migration(migrations.Migration):
                 ('completed_date', models.DateTimeField(null=True, blank=True)),
                 ('submitter_email', models.EmailField(help_text='The submitter will receive an email for all public follow-ups left for this task.', max_length=254, null=True, verbose_name='Submitter E-Mail', blank=True)),
                 ('note', models.TextField(null=True, blank=True)),
-                ('priority', models.IntegerField(choices=[(1, '1. High'), (2, '2. Normal'), (3, '3. Low')])),
+                ('priority', models.IntegerField(choices=[(1, 'High'), (2, 'Normal'), (3, 'Low')])),
+                ('project_agreement', models.TextField(null=True, blank=True)),
+                ('table', models.TextField(null=True, blank=True)),
                 ('assigned_to', models.ForeignKey(related_name='task_assigned_to', verbose_name='Assigned to', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('created_by', models.ForeignKey(related_name='task_created_by', verbose_name='Created By', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
                 'ordering': ['priority'],
+                'managed': True,
             },
         ),
         migrations.CreateModel(
-            name='TaskChange',
+            name='TaskAttachment',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('field', models.CharField(max_length=100, verbose_name='Field')),
-                ('old_value', models.TextField(null=True, verbose_name='Old Value', blank=True)),
-                ('new_value', models.TextField(null=True, verbose_name='New Value', blank=True)),
+                ('file', models.FileField(upload_to=tasks.models.attachment_path, max_length=1000, verbose_name='File')),
+                ('filename', models.CharField(max_length=1000, verbose_name='Filename')),
+                ('mime_type', models.CharField(max_length=255, verbose_name='MIME Type')),
+                ('size', models.IntegerField(help_text='Size of this file in bytes', verbose_name='Size')),
+                ('task', models.ForeignKey(verbose_name='Task', to='tasks.Task')),
             ],
             options={
-                'verbose_name': 'Task change',
-                'verbose_name_plural': 'Task changes',
+                'ordering': ['filename'],
+                'verbose_name': 'Attachment',
+                'verbose_name_plural': 'Attachments',
             },
         ),
         migrations.CreateModel(
-            name='TaskFollowUp',
+            name='TaskComment',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('date', models.DateTimeField(default=django.utils.timezone.now, verbose_name='Date')),
-                ('task_name', models.CharField(max_length=200, null=True, verbose_name='Task', blank=True)),
                 ('comment', models.TextField(null=True, verbose_name='Comment', blank=True)),
-                ('public', models.BooleanField(default=False, help_text='Public tasks can be viewed by other users while non-public tasks can only be viewed by the task owner', verbose_name='Public')),
-                ('new_status', models.IntegerField(blank=True, help_text='If the status was changed, what was it changed to?', null=True, verbose_name='New Status', choices=[(1, 'Active'), (2, 'Reopened'), (3, 'Completed'), (4, 'Cancelled')])),
                 ('task', models.ForeignKey(verbose_name='Task', to='tasks.Task')),
                 ('user', models.ForeignKey(verbose_name='User', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
                 'ordering': ['date'],
-                'verbose_name': 'TaskFollow-up',
-                'verbose_name_plural': 'TaskFollow-ups',
+                'verbose_name': 'Task-Comment',
+                'managed': True,
+                'verbose_name_plural': 'Task-Comments',
             },
-        ),
-        migrations.AddField(
-            model_name='taskchange',
-            name='taskfollowup',
-            field=models.ForeignKey(verbose_name='TaskFollow-up', to='tasks.TaskFollowUp'),
         ),
     ]
