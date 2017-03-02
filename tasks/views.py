@@ -64,7 +64,7 @@ def task_list(request):
         }
 
 
-    tasks = Task.objects.filter(created_by = request.user).exclude(status__in=([3,4]))
+    tasks = Task.objects.filter(Q(created_by = request.user) | Q(assigned_to = request.user)).exclude(status__in=([3,4]))
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     context = {}
 
@@ -134,6 +134,8 @@ def task_list(request):
         tolaActivityData = get_TolaActivity_byUser(request)
         tolaTablesData = get_TolaTables_data(request)
     # User tasks
+    tasks_created = Task.objects.filter(created_by = request.user).exclude(status__in=([3,4]))
+    total_tasks_created = len(tasks_created)
     #assigned_to
     tasks_assigned = Task.objects.filter(assigned_to = request.user).exclude(status__in=([3,4]))
     total_tasks_assigned = len(tasks_assigned) 
@@ -157,6 +159,8 @@ def task_list(request):
         'tasks': tasks,
         'query_params': query_params,
         'tasks_assigned': tasks_assigned,
+        'tasks_created': tasks_created,
+        'total_tasks_created': total_tasks_created,
         'total_tasks_assigned': total_tasks_assigned,
         'assignable_users': assignable_users,
         'status_choices':Task.STATUS_CHOICES, 
@@ -166,6 +170,7 @@ def task_list(request):
         'tolaTablesData': tolaTablesData
 
         }))
+
 
 @login_required
 def create_task(request):
@@ -205,36 +210,19 @@ def create_task(request):
             )
 
 @login_required
-def view_task(request, task_id):
+def task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     task_state = get_object_or_404(Task, id=task_id)
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    form = form_data(request)
 
-    if 'take' in request.GET:
-
-        request.POST = {
-            'owner': request.user.id,
-            'public': 1,
-            'title': task_state.title,
-            'comment': ''
-        }
-        return task(request, task_id)
-
-
-
-    users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-    return render_to_response('tasks/task_index.html',
+    return render_to_response('tasks/task.html',
         RequestContext(request, {
             'task': task_state,
-            'active_users': users,
-            'created_by': task_state.created_by,
-            'assigned_to': task_state.assigned_to,
-            'priority': task_state.priority,
-            'due_date': task_state.due_date,
-            'project_agreement': task_state.project_agreement,
-            'table': task_state.table,
-            'state': task_state.status,
-            'submitter_email': task_state.submitter_email
-
+            'form': form,
+            'assignable_users': assignable_users,
+            'status_choices':Task.STATUS_CHOICES, 
+            'priority': Task.PRIORITY_CHOICES,
         }))
 
 @login_required
@@ -258,8 +246,8 @@ def task_edit(request, task_id):
 	task.save(update_fields=['task','submitter_email','priority','assigned_to_id','status','due_date','note','created_by_id',])
     
     file_attachment(request, task)
-
-    return HttpResponseRedirect(reverse('task_list'))
+    
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 @login_required
 def delete_task(request, task_id):
@@ -401,6 +389,7 @@ def task_comment(request, task_id):
 
         comment.save()
 
+<<<<<<< HEAD
     return task_list(request)
 
 def file_attachment(request, task):
@@ -426,3 +415,6 @@ def file_attachment(request, task):
                 except NotImplementedError:
                     pass
     return
+=======
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+>>>>>>> 4bd979ec895b02b0fa15cdb637aa719ba0fd36dd

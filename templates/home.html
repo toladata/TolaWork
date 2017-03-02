@@ -253,7 +253,7 @@
                                 <td><strong>Assigned To</strong></td>
                               </tr>
                               {% for task in recent_tasks %}
-                              <tr data-toggle="collapse" data-target="#{{ task.id }}" class="accordion-toggle">  <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
+                              <tr>  <td><strong><a href= "{% url 'task' task.id %} ">{{ task.task }}</a></strong></td>
                                 <td>{{ task.created_date | date}}</td>
                                 <td>{{ task.due_date | date}}</td>
                                  <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</td>
@@ -294,7 +294,7 @@
                                         </tr>
                                         {% for task in tasks_created %}
                                         <tr>
-                                          <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
+                                          <td><strong><a href= "{% url 'task' task.id %} ">{{ task.task }}</a></strong></td>
                                           <td>{{ task.created_date | date}}</td>
                                           <td>{{ task.due_date | date}}</td>
                                           <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</td>
@@ -332,7 +332,7 @@
                                           </tr>
                                           {% for task in tasks_assigned %}
                                           <tr>
-                                            <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
+                                            <td><strong><a href= "{% url 'task' task.id %} ">{{ task.task }}</a></strong></td>
                                             <td>{{ task.created_date | date}}</td>
                                             <td>{{ task.due_date | date}}</td>
                                             <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</td>

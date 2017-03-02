@@ -10,12 +10,14 @@ urlpatterns = patterns('tasks.views',
         'task_list',
         name='task_list'),
 
+    url(r'^task/(?P<task_id>[0-9]+)$',
+        'task',
+        name='task'),
+
     url(r'^tasks/submit/$',
         'create_task',
         name='task_submit'),
-    url(r'^tasks/(?P<task_id>[0-9]+)/$',
-        'view_task',
-        name='view_task'),
+    
     url(r'^tasks/(?P<task_id>[0-9]+)/task_edit/$',
         'task_edit',
         name='task_edit'),
