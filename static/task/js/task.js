@@ -55,3 +55,34 @@
            }  
        });
  });
+
+//Submit task  data
+function create_task(data, csrftoken) {
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        },
+        headers: { "cache-control": "no-cache" }
+    });
+
+    $.ajax({
+        url : "/tasks/tasks/submit/",
+        type : "POST", 
+        processData: false,
+        contentType: false,
+        data: data,
+        success : function(task) {
+                alert("You have Succefully Created task #"+task.id);
+                window.location.href = "/tasks/tasks/";
+        },
+        error : function(xhr,errmsg,err) {
+            console.log(xhr.status + ": " + xhr.responseText); 
+        }
+    });
+};
