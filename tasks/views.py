@@ -238,7 +238,11 @@ def task_edit(request, task_id):
         status = request.POST.get('status')
         note = request.POST.get('note_edit')
         submitter_email = request.POST.get('submitter_email')
-        assigned_to= request.POST.get('assigned_to')
+        try:
+            assigned_to= int(request.POST.get('assigned_to'))
+        except Exception, e:
+            assigned_to = None
+            
         due_date = datetime.strptime(request.POST.get('due_date'), "%Y-%m-%d")
 
         task = Task(id= task_id, task=title, submitter_email=submitter_email, status=status, priority=priority, due_date=due_date,  created_by_id=created_by, assigned_to_id=assigned_to, note=note)
