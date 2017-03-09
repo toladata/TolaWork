@@ -8,17 +8,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.png" type="image/png">
-  <!-- fonts -->
-    <script src="https://use.typekit.net/shi4wqr.js"></script>
-    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+
   <!--  splash screen css files -->
-    <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <link href="{{ STATIC_URL }}css/splash.css" rel="stylesheet" type="text/css">
-    <link href="{{ STATIC_URL }}css/app.css" rel="stylesheet" type="text/css">
-    <link href="{{ STATIC_URL }}css/fontawesome-4.2.0.min.css" rel="stylesheet" type="text/css">
-    <!-- splash screen js files -->
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.11.1.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+  <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" type="text/css">
+  <link href="{{ STATIC_URL }}css/splash.css" rel="stylesheet" type="text/css">
+  <link href="{{ STATIC_URL }}css/fontawesome-4.2.0.min.css" rel="stylesheet" type="text/css">
+  <!-- splash screen js files -->
+  
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+
+   <style type="text/css">
+    body{
+       font-family: "scandia-web", helvetica, Arial,sans-serif;
+    }
+  </style>
+
 </head>
     
 <body>    
@@ -48,15 +53,15 @@
             <li><a id="GoToHome" href="{% url 'documentation' %}" > <font class="font5">About Us</font></a></li>
             <li><a id="GoToAbout" href="#" > <font class="font5">Contact us</font></a></li>
             <li class="dropdown navbar-right"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span class="glyphicon glyphicon-user font9"></span> <font class="font5"> Log In </font><b class="caret font9"></b></a>
-                <ul class="dropdown-menu"> 
+                <ul class="dropdown-menu" > 
                  <li>
-                 <div class=" col-md-12 col-sm-12">
+                 <div class="col-md-12 col-sm-12">
                     <h5 class="font10">Login via</h5>
                       <a type="button" href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-info "><i class="fa fa-google"></i> Google</a>
                     <h4 class="font10" >OR</h4>
                     <h5 class="font10">Login with Tola Account</h5>
                   </div>
-                  <form class=" col-md-12 col-sm-12" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
+                  <form class="col-md-12 col-sm-12" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
                       {% csrf_token %}
                     <div class=" row">
                         <div id="input_detail" class="col-md-12 col-sm-12">
