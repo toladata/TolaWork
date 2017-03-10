@@ -217,20 +217,31 @@ function send_to_github(ticketid){
 
 function github_sync(){
 
-  $.growl.warning({title: "Warning Message", message: "Github sync might take long running in the Background." });
+  $.getJSON("/tickets", function(data) {  
 
-  $.ajax({
-        type: 'GET',
-        url: '/githubSync/',
-        timeout: 0,
-        success: function(response) {
-          window.location.href = '/home/';
-            
-        },       
-         error : function(xhr,errmsg,err) {
+                  var tickets = JSON.parse(data['tickets']);  
+                  for (var i = 0; i < tickets.length; i++) {
 
-             console.log(xhr.status + ": " + xhr.responseText); 
-         }
-    });
+                      $.ajax({
+                            type: 'GET',
+                            url: '/githubSync/'+tickets[i].id+'/',
+                            timeout: 0,
+                            success: function(response) {
+
+                              if (response.status_lbl == "Success") {
+
+                                $.growl.notice({title: response.status_lbl, message: "Ticket ["+response.id+"] is succesfully synced with Github" });
+                              }else{
+                                $.growl.error({title: response.status_lbl, message: "Ticket ["+response.id+"] Faied to update" });
+                              };
+                                
+                            },       
+                             error : function(xhr,errmsg,err) {
+
+                                 console.log(xhr.status + ": " + xhr.responseText); 
+                             }
+                        });
+                    };        
+            }); 
 
 };
