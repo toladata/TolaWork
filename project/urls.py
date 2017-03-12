@@ -58,8 +58,9 @@ urlpatterns += patterns('',
     url(r'^faq', 'project.views.faq', name='faq'),
     url(r'^splash', 'project.views.splash', name='splash'),
     url(r'^documentation', 'project.views.documentation', name='documentation'),
-    url(r'^githubSync', 'project.views.githubSync', name='githubSync'),
+    url(r'^githubSync/(?P<ticket_id>[0-9]+)/$', 'project.views.githubSync', name='githubSync'),
     url(r'^create_funding_opportunity', 'project.views.create_funding_opportunity', name='create_funding_opportunity'),
+    url(r'^tickets', 'project.views.ticket_objects', name='ticket_objects'),
 
     #local login
     url(r'^login/$', 'django.contrib.auth.views.login', name='login'),
