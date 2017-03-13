@@ -252,7 +252,8 @@
                                 <td><strong>Priority</strong></td>
                                 <td><strong>Assigned To</strong></td>
                               </tr>
-                              {% for task in recent_tasks %}
+
+                              {% for task in recent_tasks.reverse|slice:"5" %}
                               <tr>  <td><strong><a href= "{% url 'task' task.id %} ">{{ task.task }}</a></strong></td>
                                 <td>{{ task.created_date | date}}</td>
                                 <td>{{ task.due_date | date}}</td>
@@ -292,7 +293,7 @@
                                           <td><strong>Priority</strong></td>
                                           <td><strong>Assigned To</strong></td>
                                         </tr>
-                                        {% for task in tasks_created %}
+                                        {% for task in tasks_created.reverse|slice:"5" %}
                                         <tr>
                                           <td><strong><a href= "{% url 'task' task.id %} ">{{ task.task }}</a></strong></td>
                                           <td>{{ task.created_date | date}}</td>
@@ -330,7 +331,7 @@
                                             <td><strong>Priority</strong></td>
                                             <td><strong>Assigned To</strong></td>
                                           </tr>
-                                          {% for task in tasks_assigned %}
+                                          {% for task in tasks_assigned.reverse|slice:"5" %}
                                           <tr>
                                             <td><strong><a href= "{% url 'task' task.id %} ">{{ task.task }}</a></strong></td>
                                             <td>{{ task.created_date | date}}</td>

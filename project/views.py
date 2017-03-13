@@ -29,7 +29,9 @@ except ImportError:
 
 from helpdesk.views.staff import form_data, user_tickets
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 import requests
+
 
 def splash(request):
     if request.user.is_authenticated():
@@ -69,12 +71,12 @@ def user (request):
     #tickets
     if user_id:
         try:
-            tickets = get_tickets_by_user(email)
+            tickets = Ticket.objects.filter(status__in=[1,2,3])
             all_tickets = (tickets).values('status').annotate(total=Count('status')).order_by('total')
             total_tickets = len(tickets)
 
             #created by logged_in user
-            tickets_created = (tickets).select_related('queue').exclude(status__in=([3,4,5])).order_by('-created')[:5]
+            tickets_created = (tickets).select_related('queue').filter(submitter_email=request.user.email).order_by('-created')
             total_tickets_created = len(tickets_created)
 
             #assigned to the user
@@ -82,7 +84,7 @@ def user (request):
                     assigned_to=user_id,
                  ).exclude(
                     status__in=([3,4,5]),
-                ).order_by('-created')[:5]
+                ).order_by('-created')
 
             total_tickets_assigned=len(tickets_assigned)
 
@@ -90,26 +92,29 @@ def user (request):
             tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
                 assigned_to=user_id,
                     status__in=[3,4],
-                ).order_by('-created')[:5]
+                ).order_by('-created')
 
             total_tickets_closed_resolved = len(tickets_closed_resolved)
 
             #tasks
-            tasks = get_tasks_by_user(email)
+            tasks = Task.objects.filter(created_by = request.user)
             all_tasks = (tasks).values('status').annotate(total=Count('status')).order_by('total')
             total_tasks= len(tasks)
 
             #tasks created by user
-            tasks_created = (tasks).exclude(status__in=([3,4])).order_by('created_date')[:5]
-            total_tasks_created = len(tasks_created)
+            all_tasks_created = (tasks).exclude(status__in=([3,4])).order_by('created_date')
+            tasks_created = all_tasks_created.reverse
+            total_tasks_created = len(all_tasks_created)
 
             #tasks assigned to the user
-            tasks_assigned = Task.objects.filter(assigned_to_id=user_id).exclude(status__in=([3,4])).order_by('created_date')[:5]
-            total_tasks_assigned = len(tasks_assigned)
+            all_tasks_assigned = Task.objects.filter(assigned_to_id=user_id).exclude(status__in=([3,4])).order_by('created_date')
+            tasks_assigned = all_tasks_assigned.reverse
+            total_tasks_assigned = len(all_tasks_assigned)
 
             #tasks completed by the user
-            tasks_completed = (tasks).filter(status__in='3').order_by('created_date')[:5]
-            total_tasks_completed = len (tasks_completed)
+            all_tasks_completed = (tasks).filter(status__in='3').order_by('created_date')
+            tasks_completed = all_tasks_completed.reverse
+            total_tasks_completed = len (all_tasks_completed)
 
         except Exception, e:
             pass  
@@ -119,7 +124,7 @@ def user (request):
     logged_users = logged_in_users(request)
     form = form_data(request)
 
-    return render(request, "user.html", {'all_tickets': all_tickets,'total_tickets': total_tickets, 'all_tasks': all_tasks, \
+    return render(request, "user.html", {'all_tickets': all_tickets,'total_tickets': total_tickets, \
                                         'logged_users': logged_users, 'username': username,'tickets_created': tickets_created, 'total_tickets_created':total_tickets_created, \
                                         'tickets_assigned': tickets_assigned, 'total_tickets_assigned': total_tickets_assigned, 'tickets_closed_resolved': tickets_closed_resolved, \
                                         'total_tickets_closed_resolved': total_tickets_closed_resolved,'tasks_created': tasks_created, 'tasks_assigned': tasks_assigned, \
@@ -156,9 +161,9 @@ def home(request):
 
     recent_tickets = Ticket.objects.all().exclude(status__in='4').order_by('-created')[:5]
     votes_tickets = Ticket.objects.all().exclude(status__in='4').filter(type=2).order_by('-votes')[:5]
-    recent_tasks = Task.objects.all().order_by('-created_date')[:5]
+    recent_tasks = Task.objects.filter(Q(created_by=request.user) | Q(assigned_to=request.user) ).exclude(status__in=([3,4])).order_by('created_date')
     num_tickets = len(Ticket.objects.filter(status__in=[1,2,3]))
-    num_tasks = len(Task.objects.all())
+    num_tasks = recent_tasks.count
 
     closed_resolved = 0
     assigned_to_me = 0
@@ -203,19 +208,18 @@ def home(request):
         created_by_me = len(created_byme)
 
         #Tasks
-        tasks = Task.objects.filter(submitter_email=request.user.email)
-        all_tasks = (tasks).values('status').annotate(total=Count('status')).order_by('total')
+        tasks = Task.objects.filter(created_by = request.user)
 
         #tasks created by user
-        tasks_created = (tasks).exclude(status__in=([3,4])).order_by('created_date')[:5]
+        tasks_created = (tasks).exclude(status__in=([3,4])).order_by('created_date')
         total_tasks_created = len(tasks_created)
 
         #tasks assigned to the user
-        tasks_assigned = Task.objects.filter(assigned_to_id=request.user).exclude(status__in=([3,4])).order_by('created_date')[:5]
+        tasks_assigned = Task.objects.filter(assigned_to_id=request.user).exclude(status__in=([3,4])).order_by('created_date')
         total_tasks_assigned = len(tasks_assigned)
 
         #tasks completed by the user
-        tasks_completed = (tasks).filter(status__in='3').order_by('created_date')[:5]
+        tasks_completed = (tasks).filter(status__in='3').order_by('created_date')
         total_tasks_completed = len (tasks_completed)
 
 #----Data From Tola Tools APIs----####
