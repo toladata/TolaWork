@@ -14,7 +14,7 @@
                });
 
 
-              $("#id_note").autocomplete({
+              $("#id_note, #id_note_edit").autocomplete({
                   source: array,
 
                   search: function() {
@@ -26,7 +26,7 @@
                       var text = this.value;
                       var pos = text.lastIndexOf(trigger);
 
-                      this.value = '<a href="/helpdesk/tickets/'+ui.item.value+'/">[Ticket: '+ui.item.value+']</a>  '+text.substring(0, pos);
+                      this.value = text.substring(0, pos)+'<a href="/helpdesk/tickets/'+ui.item.value+'/">[Ticket: '+ui.item.value+']</a>  ';
 
                       triggered = false;
 
@@ -79,6 +79,37 @@ function create_task(data, csrftoken) {
         data: data,
         success : function(task) {
                 alert("You have Succefully Created task #"+task.id);
+                window.location.href = "/tasks/tasks/";
+        },
+        error : function(xhr,errmsg,err) {
+            console.log(xhr.status + ": " + xhr.responseText); 
+        }
+    });
+};
+
+//Edit task  data
+function edit_task(data, csrftoken, task_id) {
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        },
+        headers: { "cache-control": "no-cache" }
+    });
+
+    $.ajax({
+        url : "/tasks/"+task_id+"/task_edit/",
+        type : "POST", 
+        processData: false,
+        contentType: false,
+        data: data,
+        success : function(task) {
+                alert("You have Succefully Edited task #"+task_id);
                 window.location.href = "/tasks/tasks/";
         },
         error : function(xhr,errmsg,err) {
