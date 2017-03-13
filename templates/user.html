@@ -140,7 +140,7 @@ $(function () {
                         </tr>
                         {% load endless %}
                         {% paginate tickets_created %}
-                        {% for item in tickets_created %}
+                        {% for item in tickets_created|slice:"5" %}
                           <tr>
                             <td>{% if item.status == 1 %} Open {%elif item.status == 2%}Re-Opened{% elif item.status == 3%}Resolved{% elif item.status == 4%}Closed{% elif item.status == 5%}Duplicate{% endif %}</td>
                             <td>{{ item.queue }}</td>
@@ -184,7 +184,7 @@ $(function () {
                         <th>Date Created</th>
                       </tr>
                       {% paginate tickets_assigned using "tickets_assigned_page" %}
-                      {% for ticket in tickets_assigned  %}
+                      {% for ticket in tickets_assigned|slice:"5"  %}
                       <tr>
                         <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
                         <td>{{ticket.queue}}</td>
@@ -227,7 +227,7 @@ $(function () {
                           <th>Date Created</th>
                         </tr>
                         {% paginate tickets_closed_resolved using "tickets_closed_resolved_page" %}
-                        {% for ticket in tickets_closed_resolved %}
+                        {% for ticket in tickets_closed_resolved|slice:"5" %}
                         <tr>
                           <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
                           <td>{{ticket.queue}}</td>
@@ -294,7 +294,7 @@ $(function () {
                           <td><strong>Assigned To</strong></td>
                         </tr>
                         {% paginate tasks_created using "tasks_created_page" %}
-                        {% for task in tasks_created %}
+                        {% for task in tasks_created|slice:"5" %}
                         <tr>
                           <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
                           <td>{{ task.created_date | date}}</td>
@@ -342,7 +342,7 @@ $(function () {
                             <td><strong>Assigned To</strong></td>
                           </tr>
                           {% paginate tasks_assigned using "tasks_assigned_page" %}
-                          {% for task in tasks_assigned %}
+                          {% for task in tasks_assigned|slice:"5" %}
                           <tr>
                             <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
                             <td>{{ task.created_date | date}}</td>
@@ -390,7 +390,7 @@ $(function () {
                             <td><strong>Assigned To</strong></td>
                           </tr>
                           {% paginate tasks_completed using "tasks_completed" %}
-                          {% for task in tasks_completed %}
+                          {% for task in tasks_completed|slice:"5" %}
                           <tr>
                             <td><strong><a href= "{% url 'task_list' %}">{{ task.task }}</a></strong></td>
                             <td>{{ task.created_date | date}}</td>
