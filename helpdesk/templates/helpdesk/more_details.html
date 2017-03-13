@@ -53,9 +53,6 @@
                         {% endif %}
                     </div>
                     {% empty %}
-                    <div class="col-md-8">
-                      <p>This ticket has no dependencies. If you want to make this ticket dependent on another ticket, search and add a dependent ticket. </p>
-                    </div>
                     <div class="col-md-4">
                       <p>
                         <form class="navbar-form navbar-left" id='searchform' method='get' action='{% url 'helpdesk_ticket_dependency_add' ticket.id %}'>
@@ -161,7 +158,6 @@
 
                 <!-- respond to ticket and status section -->
                 <div id='add-followup' class="well">
-                  <h4><strong>Respond to this ticket</strong></h4>
                   <form method='post' id="ticket_new_status{{ticket.id}}"  enctype='multipart/form-data' class="form-horizontal">
                     <fieldset>
                       <dl>
@@ -172,15 +168,14 @@
                         {% endif %}
 
                         <dt>
-                          <label for='commentBox'>Comment / Resolution:</label>
+                          <label for='commentBox'>Comment</label>
                         </dt>
                         <dd>
                           <textarea class="form-control preview_links" rows="3" name='comment' id='commentBox{{ticket.id}}' style="width:550px"></textarea>
                         </dd>
-                        <dd class='form_help_text'><p> You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>.</p></dd>
 
                         <!-- ticket status -->
-                        <dt><label>New Status</label></dt>
+                        <dt><label>Status</label></dt>
                           {% if not ticket.can_be_resolved %}
 
                         <dd>This ticket cannot be resolved or closed until the tickets it depends on are resolved./dd>{% endif %}
@@ -248,7 +243,7 @@
                           {% else %}
                           <dt><label for='id_public'>Is this update public? </label> <span class='form_optional'> (Optional)</span></dt>
                           <dd><input type='checkbox' name='public' id= "id_public{{ticket.id}}" value='1' checked='checked' /></dd>
-                          <dd class='form_help_text'>If this is public, the submitter will be e-mailed your comment or resolution.</dd>
+                          <dd class='form_help_text'>Email status updates and comments to submitter</dd>
                         {% endif %}
                       </dl>
                       

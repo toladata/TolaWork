@@ -52,7 +52,7 @@
                     <strong>Ticket CC:&nbsp;</strong>
                     {{ ticketcc_string }} <a data-toggle='tooltip' href='{% url 'helpdesk_ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'><strong>{% trans "Manage" %}</strong></a>{% if SHOW_SUBSCRIBE %}, <strong><a data-toggle='tooltip' href='?subscribe' title='{% trans "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'>{% trans "Subscribe" %}</a></strong>{% endif %}
                     <br/>
-                    <strong>Priority:&nbsp;</strong>[{{ ticket.get_priority_display }}]&nbsp;<strong>Type:&nbsp;</strong>{{ ticket.get_type_display }}&nbfsp;&nbsp;f
+                    <strong>Priority:&nbsp;</strong>[{{ ticket.get_priority_display }}]&nbsp;<strong>Type:&nbsp;</strong>{{ ticket.get_type_display }}
 
                 </div>
                 <div class="panel-body">
@@ -85,9 +85,6 @@
 
                                       </div>
                                       {% empty %}
-                                      <div class="col-md-8">
-                                        <p>{% trans "This ticket has no dependencies. If you want to make this ticket dependent on another ticket, search and add a dependent ticket. " %} </p>
-                                      </div>
                                       <div class="col-md-4">
                                               <p>
                                               <form class="navbar-form navbar-left" id='searchform' method='get' action='{% url 'helpdesk_ticket_dependency_add' ticket.id %}'>
@@ -181,7 +178,6 @@
                                   {% endif %}
                                 </div>
                                 <div id='add-followup' class="well">
-                                <h4><strong>{% trans "Respond to this ticket" %}</strong></h4>
 
                                 <form method='post' id="ticket_new_status{{ticket.id}}"  enctype='multipart/form-data' class="form-horizontal">
                                 <fieldset>
@@ -193,15 +189,14 @@
                                     {% endif %}
 
                                     <dt>
-                                      <label for='commentBox'>{% trans "Comment / Resolution:" %}</label>
+                                      <label for='commentBox'>{% trans "Comment" %}</label>
                                     </dt>
                                     <dd>
                                       <textarea class="form-control preview_links" rows="3" name='comment' id='commentBox{{ticket.id}}'></textarea>
                                     </dd>
-                                    <dd class='form_help_text'><p> You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>.</p></dd>
 
                                     <!-- ticket status -->
-                                    <dt><label>{% trans "New Status" %}</label></dt>
+                                    <dt><label>{% trans "Status" %}</label></dt>
                                       {% if not ticket.can_be_resolved %}
 
                                     <dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
@@ -269,7 +264,7 @@
                                       {% else %}
                                       <dt><label for='id_public'>{% trans "Is this update public?" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
                                       <dd><input type='checkbox' name='public' id= "id_public{{ticket.id}}" value='1' checked='checked' /></dd>
-                                      <dd class='form_help_text'>{% trans "If this is public, the submitter will be e-mailed your comment or resolution." %}</dd>
+                                      <dd class='form_help_text'>{% trans "Email status updates and comments to submitter" %}</dd>
                                     {% endif %}
                                   </dl>
                                   
