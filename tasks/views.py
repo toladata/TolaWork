@@ -136,9 +136,18 @@ def task_list(request):
     # User tasks
     tasks_created = Task.objects.filter(created_by = request.user).exclude(status__in=([3,4]))
     total_tasks_created = len(tasks_created)
+
+    created = request.GET.get('created')
+    if created:
+        tasks = tasks_created
+
     #assigned_to
     tasks_assigned = Task.objects.filter(assigned_to = request.user).exclude(status__in=([3,4]))
     total_tasks_assigned = len(tasks_assigned) 
+
+    assigned = request.GET.get('assigned')
+    if assigned:
+        tasks = tasks_assigned
 
     try:
         tasks = apply_query(tasks, query_params)

@@ -512,10 +512,17 @@
               </div>
               <div class="panel-body">
               <div class="sort_panels">
-                   <span class="glyphicon glyphicon-list-alt"></span><a href="#">&nbsp;Created by Me </a><strong> <span class="badge read_more"> {{ total_tasks_created }} </span></strong>
+                   <form action="{% url 'task_list' %}" >
+                      <span class="glyphicon glyphicon-list-alt"></span>
+                      <a type="submit" name="created" href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}&{% endif %}created={{request.user.email}}">&nbsp;Created by Me </a><strong> <span class="badge read_more"> {{ total_tasks_created }} </span></strong>
+                   </form>
                 </div> 
                 <div class="sort_panels">
-                   <span class="glyphicon glyphicon-list-alt"></span><a href="#">&nbsp;Assigned to Me </a><strong> <span class="badge read_more"> {{ total_tasks_assigned }} </span></strong>
+                  <form action="{% url 'task_list' %}" >
+                      <span class="glyphicon glyphicon-list-alt"></span>
+                      <a type="submit" name="created" href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}&{% endif %}assigned={{request.user.email}}">&nbsp;Assigned to Me </a><strong> <span class="badge read_more"> {{ total_tasks_assigned }} </span></strong>
+                   </form>
+                   </span><a href="#">
                 </div>
               </div>
             </div>
