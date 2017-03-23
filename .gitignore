@@ -23,6 +23,7 @@ build
 
 #allvritualenv
 venv/
+venv-tw/
 
 #conf
 conf/awstats.conf

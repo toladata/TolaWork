@@ -8,6 +8,7 @@ from datetime import datetime
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django import VERSION
 from django.contrib.auth.models import User
+from project.models import Organization, TolaUser
 
 
 try:
@@ -361,6 +362,8 @@ class Ticket(models.Model):
 
     title = models.CharField(_('Title'), max_length=200,)
     queue = models.ForeignKey(Queue,verbose_name=_('Queue'),)
+    organization = models.ForeignKey(Organization, verbose_name=_('Organization'),null=True)
+    submitter = models.ForeignKey(TolaUser,null=True)
     created = models.DateTimeField(_('Created'), blank=True, help_text=_('Date this ticket was first created'),)
     modified = models.DateTimeField(_('Modified'),blank=True,help_text=_('Date this ticket was most recently changed.'),)
     submitter_email = models.EmailField(_('Submitter E-Mail'),blank=True,null=True,help_text=_('The submitter will receive an email for all public follow-ups left for this task.'),)
@@ -383,7 +386,7 @@ class Ticket(models.Model):
     tags = models.ManyToManyField(Tag, related_name='ticket_tags', blank=True)
     slack_status = models.IntegerField(_('Slack Status'),default=0)
     remind = models.IntegerField(default=0)
-    remind_date = models.DateTimeField(_('Reminder'), blank=True, help_text=_('Date the last reminder was sent'),default=datetime.now(),)
+    remind_date = models.DateTimeField(_('Reminder'), blank=True, help_text=_('Date the last reminder was sent'))
 
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
@@ -518,6 +521,7 @@ class Ticket(models.Model):
 
         super(Ticket, self).save(*args, **kwargs)
 
+
 class FollowUpManager(models.Manager):
     def private_followups(self):
         return self.filter(public=False)
@@ -565,9 +569,10 @@ class FollowUp(models.Model):
         t.save()
         super(FollowUp, self).save(*args, **kwargs)
 
+
 class UserVotes(models.Model):
     """
-
+    Track the number of votes a user has submitted for an individual ticket
     """
     current_user = models.ForeignKey(settings.AUTH_USER_MODEL,blank=True,null=True,verbose_name=_('User'),)
     ticket_voted = models.ForeignKey(Ticket,verbose_name=_('Ticket'),)
@@ -632,7 +637,6 @@ class Attachment(models.Model):
     Represents a file attached to a follow-up. This could come from an e-mail
     attachment, or it could be uploaded via the web interface.
     """
-
     followup = models.ForeignKey(FollowUp,verbose_name=_('Follow-up'),)
     file = models.FileField(_('File'),upload_to=attachment_path,max_length=1000,)
     filename = models.CharField(_('Filename'),max_length=1000,)
@@ -668,7 +672,6 @@ class PreSetReply(models.Model):
     When replying to a ticket, the user can select any reply set for the current
     queue, and the body text is fetched via AJAX.
     """
-
     queues = models.ManyToManyField(
         Queue,
         blank=True,
@@ -707,7 +710,6 @@ class EscalationExclusion(models.Model):
     To create these on a regular basis, check out the README file for an
     example cronjob that runs 'create_escalation_exclusions.py'.
     """
-
     queues = models.ManyToManyField(
         Queue,
         blank=True,
@@ -737,7 +739,6 @@ class EmailTemplate(models.Model):
     Store Email templates in a database. This means that an admin can change email templates without having to have
     access to the filesystem.
     """
-
     template_name = models.CharField(_('Template Name'),max_length=100,)
     subject = models.CharField(_('Subject'),max_length=100,help_text=_('This will be prefixed with "[ticket.ticket] ticket.title". We recommend something simple such as "(Updated") or "(Closed)" - the same context is available as in plain_text, below.'),)
     heading = models.CharField(_('Heading'),max_length=100,help_text=_('In HTML e-mails, this will be the heading at the top of the email - the same context is available as in plain_text, below.'),)
@@ -759,7 +760,6 @@ class KBCategory(models.Model):
     Lets help users help themselves: the Knowledge Base is a categorised
     listing of questions & answers.
     """
-
     title = models.CharField(
         _('Title'),
         max_length=100,
@@ -782,7 +782,6 @@ class KBCategory(models.Model):
     def get_absolute_url(self):
         return ('helpdesk_kb_category', (), {'slug': self.slug})
     get_absolute_url = models.permalink(get_absolute_url)
-
 
 
 class KBItem(models.Model):
@@ -849,7 +848,6 @@ class KBItem(models.Model):
         return u'%s' % obj.kbitem
 
     question.allow_tags = True
-
 
 
 class SavedSearch(models.Model):

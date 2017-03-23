@@ -28,7 +28,6 @@ openpyxl==2.1.5
 Pillow==2.5.1
 py2app==0.7.3
 Pygments==2.0.1
-pyparsing==2.0.1
 python-dateutil==1.5
 pytz==2013.7
 PyYAML==3.11
