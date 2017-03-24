@@ -170,7 +170,7 @@ function edit_ticket_status(ticket_id, csrftoken) {
        headers: { "cache-control": "no-cache" }
    });
 
-   var new_status = $('input[name="new_status'+ticket_id+'"]:checked').val();
+   var new_status = $('#id_statuses'+ticket_id).val();
    var comment = $('#commentBox'+ticket_id).val();
    var public = $('#id_public'+ticket_id).val();
    var data_object = {
@@ -179,7 +179,8 @@ function edit_ticket_status(ticket_id, csrftoken) {
             public : public
            
        };
-       
+    console.log(new_status); 
+
    $.ajax({
        url : "/helpdesk/tickets/"+ticket_id+"/post_comment/",
        type : "POST", 
