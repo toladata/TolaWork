@@ -47,9 +47,10 @@ def get_issue_status(repo,ticket):
 
             print 'Ticket#' + str(ticket.id) + str(comments)
             try: 
-                if not int(current_status) == int(status):
-                    new_followup = FollowUp(title=title, date=updated_date, ticket_id=ticket.id, comment=comments, public=1, new_status=status, )
-                    new_followup.save()
+                if current_status != 7 and status != 1:
+                    if not int(current_status) == int(status):
+                        new_followup = FollowUp(title=title, date=updated_date, ticket_id=ticket.id, comment=comments, public=1, new_status=status, )
+                        new_followup.save()
                     
                 update_ticket.status = status
             except Exception, e:
