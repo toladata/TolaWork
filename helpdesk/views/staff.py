@@ -1322,6 +1322,7 @@ def more_details(request, ticket_id):
             'tickets_closed':len(tickets_closed),
             'active_users': users,
             'priorities': Ticket.PRIORITY_CHOICES,
+            'status_choices':Ticket.STATUS_CHOICES,
             'ticket_type': Ticket.TICKET_TYPE,
             'ticket_queue': q,
             'preset_replies': PreSetReply.objects.filter(Q(queues=ticket.queue) | Q(queues__isnull=True)),
