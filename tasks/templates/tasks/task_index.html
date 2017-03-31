@@ -506,7 +506,7 @@
                 
               </div>
             </div>
-            {% if tolaActivityData.approvals %}
+            {% if tolaActivityData %}
             <div>
                 <button class= "btn btn-warning" data-toggle="collapse" data-target="#tolaactivity">Project Initiations</button>
                 <div id="tolaactivity" class="panel-collapse collapse" style="margin-top: 10px">
@@ -526,7 +526,7 @@
                               <th>Due Date</th>
                               <th></th>
                             </tr>
-                            {% for agreement in tolaActivityData.approvals|dictsort:"expected_start_date" reversed%}
+                            {% for agreement in tolaActivityData.agreements|dictsort:"expected_start_date" reversed%}
                             <tr>
                               <td>{{agreement.project_name}}</td>
                               <td> {% if agreement.approval == 'approved' %} Done {% else %} Active {% endif %}</td>
