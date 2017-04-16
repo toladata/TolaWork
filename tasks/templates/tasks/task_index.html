@@ -12,7 +12,14 @@
 <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css">
 <style type="text/css" src='{{ STATIC_URL }}task/css/app.css'></style>
 <div class="container">
-<h3>My Tasks</h3>
+ {% if tasks and not query  %}
+   <h3>My Tasks</h3>
+  {% elif tasks and query %}
+   <h3>{{total_tasks}} tickets found for {{query}}</h3>
+ {% endif %}
+ {% if total_tasks == 0 %}
+   <h3>My Tasks</h3>
+ {% endif %}
   <div class="ticket_cover">
         <div class="col-md-9 col-sm-9">
          <!-- start search -->
@@ -53,13 +60,13 @@
                 </tr>
                 {% load endless %}
                 {% paginate tasks %}
-                {% for task in tasks.reverse %}
+                {% for task in tasks reversed %}
                 <tr data-toggle="collapse" data-target="#{{ task.id }}" class="accordion-toggle">
 
                 <td><strong><a href= "#">{{ task.task }}</a></strong></td>
                 <td>{{ task.created_date | date}}</td>
                 <td>{{ task.due_date | date}}</td>
-                 <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</td>
+                 <td> {% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</td>
                   <td> {% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</td>
 
                 <td>{{task.assigned_to}}</td>
@@ -88,7 +95,7 @@
                             <td><p>{{task.submitter_email}}</p></td>
                           </tr>
                           <tr><td><p><strong>{% trans "Status:" %} </strong></p></td>
-                            <td><p>{% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Closed{% elif task.status == 4%}Cancelled  {% endif %}</p></td>
+                            <td><p>{% if task.status == 1 %} Active {%elif task.status == 2%}Re-Opened{% elif task.status == 3%}Completed{% elif task.status == 4%}Cancelled  {% endif %}</p></td>
                             <td><p><strong>{% trans "Priority:" %}</strong></p></td>
                             <td><p>{% if task.priority == 1 %} High {% elif task.priority == 2 %} Normal {% elif task.priority == 3 %} Low {% endif %}</p></td>
                           </tr>
@@ -552,7 +559,7 @@
               </div>
               <div class="panel-body">
               <div class="sort_panels">
-                   <span class="glyphicon glyphicon-list-alt"></span><a href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}&{% endif %}created={{request.user.email}}">&nbsp;Created by Me </a><strong> <span class="badge read_more"> {{ total_tasks_created }} </span></strong>
+                   <span class="glyphicon glyphicon-th-list"></span><a href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}&{% endif %}created={{request.user.email}}">&nbsp;Created by Me </a><strong> <span class="badge read_more"> {{ total_tasks_created }} </span></strong>
                 </div> 
                 <div class="sort_panels">
                    <span class="glyphicon glyphicon-list-alt"></span><a href="{% url 'task_list' %}?{% if query_string %}{{ query_string }}&{% endif %}assigned={{request.user.email}}">&nbsp;Assigned to Me </a><strong> <span class="badge read_more"> {{ total_tasks_assigned }} </span></strong>
@@ -660,7 +667,10 @@
                 <div class="keywords">
                   <label for='id_statuses'>{% trans "Status(es): " %}</label>
                   <select id='id_statuses' name='status' multiple='selected' rows="4" class="status_select" >{% for s in status_choices %}
-                    <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>{% endfor %}
+                  {% if s.0 != 4 %}
+                    <option value='{{ s.0 }}'{% if s.0|in_list:query_params.filtering.status__in %} selected='selected'{% endif %}>{{ s.1 }}</option>
+                  {%endif %}
+                  {% endfor %}
                   </select>
                 </div>
                 <p class='filterHelp'>{% trans "Ctrl-click to select multiple options" %}</p>

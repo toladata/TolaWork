@@ -64,7 +64,7 @@ def task_list(request):
         }
 
 
-    tasks = Task.objects.filter(Q(created_by = request.user) | Q(assigned_to = request.user)).exclude(status__in=([3,4]))
+    tasks = Task.objects.filter(Q(created_by = request.user) | Q(assigned_to = request.user)).exclude(status__in = '4')
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     context = {}
 
@@ -134,7 +134,7 @@ def task_list(request):
         tolaActivityData = get_TolaActivity_byUser(request)
         tolaTablesData = get_TolaTables_data(request)
     # User tasks
-    tasks_created = Task.objects.filter(created_by = request.user).exclude(status__in=([3,4]))
+    tasks_created = Task.objects.filter(created_by = request.user).exclude(status__in = '4')
     total_tasks_created = len(tasks_created)
 
     created = request.GET.get('created')
@@ -142,7 +142,7 @@ def task_list(request):
         tasks = tasks_created
 
     #assigned_to
-    tasks_assigned = Task.objects.filter(assigned_to = request.user).exclude(status__in=([3,4]))
+    tasks_assigned = Task.objects.filter(assigned_to = request.user).exclude(status__in = '4')
     total_tasks_assigned = len(tasks_assigned) 
 
     assigned = request.GET.get('assigned')
@@ -154,7 +154,7 @@ def task_list(request):
     except ValidationError:
         # invalid parameters in query, return default query
         query_params = {
-            'filtering': {'status__in': [1, 2, 3, 4]},
+            'filtering': {'status__in': [1, 2, 3]},
             'sorting': 'created_date',
         }
         tasks = apply_query(tasks, query_params)
@@ -168,6 +168,7 @@ def task_list(request):
         'tasks': tasks,
         'query_params': query_params,
         'tasks_assigned': tasks_assigned,
+        'total_tasks': len(tasks),
         'tasks_created': tasks_created,
         'total_tasks_created': total_tasks_created,
         'total_tasks_assigned': total_tasks_assigned,
