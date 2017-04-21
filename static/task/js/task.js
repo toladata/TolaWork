@@ -1,14 +1,18 @@
 
  $(document).ready(function () { 
+    document.getElementById('ticket-field').style.display = 'none';
+
     var triggered = false;
     var trigger = "#";
     $.ajax({
            url: "/tasks/tasks/tickets",
            type: "GET",
            success: function (data) {
+            console.log(data);
               array =  $.map(JSON.parse(data.tickets), function (el) {
                    return {
                        label: el.title,
+                       queue: el.queue__title,
                        value: el.id
                    };
                });
@@ -25,8 +29,14 @@
                   select: function(event, ui) {
                       var text = this.value;
                       var pos = text.lastIndexOf(trigger);
+                      $('#tickets').append("<li><a>["+ui.item.queue.toUpperCase()+"-"+ui.item.value+"]"+ui.item.label+"</a></li>");
+                      this.value = text.substring(0, pos);
 
-                      this.value = text.substring(0, pos)+'<a href="/helpdesk/tickets/'+ui.item.value+'/">[Ticket: '+ui.item.value+']</a>  ';
+                      var selectedItem= ui.item.value;
+                      document.getElementById('ticket-field').style.display = 'block';
+                      var field = '<span><input type="text" id="tickets[]" name="tickets[]" value="'+selectedItem+'" hidden></span>';
+                      document.getElementById('ticket-field').innerHTML += field;
+
 
                       triggered = false;
 
@@ -70,6 +80,7 @@ function create_task(data, csrftoken) {
         },
         headers: { "cache-control": "no-cache" }
     });
+    console.log(data.tickets);
 
     $.ajax({
         url : "/tasks/tasks/submit/",
