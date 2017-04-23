@@ -161,9 +161,7 @@ def home(request):
 
     recent_tickets = Ticket.objects.all().exclude(status__in='4').order_by('-created')[:5]
     votes_tickets = Ticket.objects.all().exclude(status__in='4').filter(type=2).order_by('-votes')[:5]
-    recent_tasks = Task.objects.filter(Q(created_by=request.user) | Q(assigned_to=request.user) ).exclude(status__in=([3,4])).order_by('created_date')
     num_tickets = len(Ticket.objects.filter(status__in=[1,2,3]))
-    num_tasks = recent_tasks.count
 
     closed_resolved = 0
     assigned_to_me = 0
@@ -171,6 +169,8 @@ def home(request):
     closed = []
     tome = []
     byme = []
+    num_tasks = 0
+    recent_tasks = []
     tasks_created = []
     total_tasks_created = 0
     tasks_assigned = []
@@ -222,9 +222,10 @@ def home(request):
         tasks_completed = (tasks).filter(status__in='3').order_by('created_date')
         total_tasks_completed = len (tasks_completed)
 
-#----Data From Tola Tools APIs----####
-
-
+        #recent tasks
+        recent_tasks = Task.objects.filter(Q(created_by=request.user) | Q(assigned_to=request.user) ).exclude(status__in=([3,4])).order_by('created_date')
+        num_tasks = recent_tasks.count
+        #----Data From Tola Tools APIs----####
     tolaActivityData = {}
     tolaTablesData = {}
 
