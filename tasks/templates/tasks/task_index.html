@@ -120,6 +120,37 @@
                         
                         </div>
 
+                        <!--Tickets-->
+
+                        {% if task.tickets.all %}
+                        <div class="col-md-10">
+                          <b>Linked Tickets</b><br>
+                            <table class="table table-striped" >
+                              <thead>
+                                <th>Ticket</th>
+                                <th>Status</th>
+                              </thead>
+                              <tbody>
+                              {% for t in task.tickets.all %}
+                                <tr>
+                                  <td><a href="/helpdesk/tickets/{{t.id}}/">{{t.ticket}} {{t.title}}</a></td>
+                                  <td>
+
+                                    {% for status in t_status_choices %}
+                                        {% if status.0 == t.status %}
+                                          {{status.1}}
+                                        {% endif %}
+                                    {% endfor %}
+                                  </td>
+
+                                </tr>
+                              {% endfor %}
+                              </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                        <!--End Tickets-->
+
                         <!--Attachments-->
                         <div class="view_table">
                         {% if task.taskattachment_set.all%}
@@ -393,7 +424,11 @@
                       <div class="col-md-10 row ticket_edit">
                         <div class="edit_note examples">
                             <textarea class="form-control" rows="4" name='note' id='id_note' required></textarea>
-                            <span style="font-size: 9pt">Type <b>"#"</b> symbol to link this Task to a Ticket(s)</span><br><br>
+                            <span style="font-size: 9pt">Type <b>"#"</b> symbol to link this Task to a Ticket(s). The linked ticket(s) will appear below</span><br>
+                            <div id="ticket-field">
+                              <h5><b>Linked Tickets</b></h5>
+                              <ul id="tickets"></ul><br>
+                            </div>
                         </div>
                       </div>
                     </div>
@@ -496,7 +531,6 @@
                             <label class="col-md-2"><p><strong>{% trans "Attach File(s):" %}</strong></p></label>
                             <div class=" ticket_padding dropzone col-md-9" id="dZUpload" style="margin-botttom:10px;"></div>
                         </div>
-                    <br><br>
                      
                         <div class="col-md-12 row modal_button">
                           <label class= "col-md-6 row ticket_edit">

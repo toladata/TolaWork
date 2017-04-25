@@ -130,9 +130,9 @@ def task_list(request):
     total_tasks_assigned = 0
     total_tasks_created = 0
 
-    if request.user.is_authenticated():
-        tolaActivityData = get_TolaActivity_byUser(request)
-        tolaTablesData = get_TolaTables_data(request)
+    # if request.user.is_authenticated():
+    #     tolaActivityData = get_TolaActivity_byUser(request)
+    #     tolaTablesData = get_TolaTables_data(request)
     # User tasks
     tasks_created = Task.objects.filter(created_by = request.user).exclude(status__in = '4')
     total_tasks_created = len(tasks_created)
@@ -177,7 +177,8 @@ def task_list(request):
         'priority': Task.PRIORITY_CHOICES,
         'form' : form,
         'tolaActivityData': tolaActivityData,
-        'tolaTablesData': tolaTablesData
+        'tolaTablesData': tolaTablesData,
+        't_status_choices': Ticket.STATUS_CHOICES
 
         }))
 
@@ -189,6 +190,8 @@ def create_task(request):
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     if request.method == 'POST':
+        data = request.POST
+        print data
 
         title = request.POST.get('task')
         submitter_mail = request.POST.get('submitter_mail')
@@ -209,6 +212,11 @@ def create_task(request):
             due_date=due_date, created_date=created_date,created_by_id=created_by, assigned_to_id=assigned_to, 
             project_agreement=project_agreement, table=table, note=note)
         task.save()
+         #save tickettags
+        tickets = request.POST.getlist('tickets[]')
+        print tickets
+        for ticket in tickets:
+            task.tickets.add(ticket)
 
         file_attachment(request, task)
 
@@ -340,7 +348,7 @@ def get_TolaActivity_byUser(request):
 
 def get_tickets(request):
     
-    tickets = Ticket.objects.all().values('id', 'title')
+    tickets = Ticket.objects.all().values('id', 'title', 'queue__title')
     tickets = json.dumps(list(tickets), cls=DjangoJSONEncoder)
     final_dict = {'tickets': tickets}
     return JsonResponse(final_dict, safe=False)
