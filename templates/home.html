@@ -12,6 +12,16 @@
     <!-- home left side section (main_home) -->
     <div class=" col-md-9 col-sm-9 main_home">
       <div class="col-md-12 col-sm-12">
+      <!-- announcement section -->
+        <div class="alert alert-warning alert-dismissable" style="margin-top: 10px;">
+          <h4 style="text-align:center; color:#f00">Announcements</h4>
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+            <ol>
+              {% for announcement in announcements reversed %}
+                <li><strong>{{announcement.title}}: </strong>{{announcement.description|force_escape|urlizetrunc:50|linebreaksbr}}</li>
+              {% endfor %}
+            </ol>
+        </div>
         <!-- Introductory message -->
         <h2><strong>Tola</strong>Work</h2>
         <p class="font7">Get help setting up, using and configuring Tola Activity, Tola Tables, Mobile Data collection platforms and M&E in general. Use tickets to report any issues with <strong>Tola</strong>Data tools, request and vote on new features.</p>
