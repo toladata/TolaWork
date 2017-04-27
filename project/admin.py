@@ -8,3 +8,5 @@ class TolaUserAdmin(admin.ModelAdmin):
 	list_filter = ( 'activity_url',)
 
 admin.site.register(TolaUser, TolaUserAdmin)
+
+admin.site.register(Announcement)

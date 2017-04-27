@@ -14,7 +14,7 @@ from tasks.models import Task
 from django.conf import settings
 from django.db.models import Count, Sum
 import os
-from project.models import LoggedUser, TolaUser
+from project.models import LoggedUser, TolaUser, Announcement
 from helpdesk.forms import TicketForm, PublicTicketForm
 from datetime import datetime as timezone
 from helpdesk.views.staff import file_attachment
@@ -250,6 +250,8 @@ def home(request):
 
     country = get_user_country(request)
     
+    # Announcement
+    announcements = Announcement.objects.all().order_by('create_date')
 
     return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
                                          'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
@@ -260,7 +262,7 @@ def home(request):
                                           'num_tasks': num_tasks, 'total_tasks_created': total_tasks_created, \
                                         'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed, 'total_tasks_completed': total_tasks_completed, 
                                         'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData, \
-                                         'logged_users':users, 'form':form, 'helper':form.helper})
+                                         'logged_users':users, 'form':form, 'helper':form.helper, 'announcements':announcements,})
 
 
 def contact(request):

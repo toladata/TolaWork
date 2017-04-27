@@ -127,3 +127,16 @@ def get_user_country(request):
     except Exception, e:
         response = "undefined"
         return response
+
+class Announcement(models.Model):
+    title = models.CharField("Title", max_length=255, blank=True, default="Announcement")
+    description = models.TextField("Description", max_length=765, null=True, blank=True)
+    create_date = models.DateTimeField(null=True, blank=True)
+    def save(self, *args, **kwargs):
+        if self.create_date == None:
+            self.create_date = datetime.now()
+        super(Announcement, self).save()
+
+
+    def __unicode__(self):
+        return self.title
