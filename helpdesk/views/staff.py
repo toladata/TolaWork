@@ -1295,7 +1295,6 @@ def more_details(request, ticket_id):
     users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     q = Queue.objects.all()
 
-    # TODO: shouldn't this template get a form to begin with?
     tags = [t.pk for t in ticket.tags.all()]
     form = form_data(request)
     tags = Tag.objects.all()
