@@ -294,7 +294,7 @@
                                 {% if task.tickets.all %}
                                   {% for t in task.tickets.all %}
                                   <div id="ticket{{t.id}}"><span><input type="text" id="tickets[]" name="tickets[]" value="{{t.id}}" hidden></span></div>
-                                  <li id="item{{t.id}}"><a>{{t.ticket}}&nbsp;&nbsp;{{t.title}}</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('{{t.id}}')">Remove</a></li>
+                                  <li id="item{{t.id}}"><a>{{t.ticket}}&nbsp;&nbsp;{{t.title}}</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('{{t.id}}')"><span class="label label-danger">Remove</span></a><br></li>
                                   {% endfor %}
                                 {% endif %}
                                 </ul><br>

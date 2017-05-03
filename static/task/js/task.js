@@ -31,7 +31,7 @@
 
                       if ($('#id_note').is(':focus')){
 
-                        $('#tickets').append('<li id="item'+ui.item.value+'"><a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')">Remove</a></li>');
+                        $('#tickets').append('<li id="item'+ui.item.value+'"><a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')"><span class="label label-danger">Remove</span></a></li>');
                         this.value = text.substring(0, pos);
 
                         var selectedItem= ui.item.value;
@@ -40,7 +40,7 @@
                         document.getElementById('ticket-field').innerHTML += field;
                       }
                       else{
-                        $('#tickets-edit').append('<li id="item'+ui.item.value+'"><a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')">Remove</a></li>');
+                        $('#tickets-edit').append('<li id="item'+ui.item.value+'"><a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')"><span class="label label-danger">Remove</span></a></li>');
                           this.value = text.substring(0, pos);
 
                         var selectedItem= ui.item.value;
