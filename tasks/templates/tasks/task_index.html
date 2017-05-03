@@ -282,12 +282,15 @@
                                 </div>
                               </div>
                               <div class="col-md-12 row">
-                                <div class="col-md-11 row ticket_edit">
                                   <label class="col-md-2"><p><strong>{% trans "Description:" %}</strong></p></label>
                                   <div class="col-md-9 edit_note">
-                                      <textarea class="form-control" rows="4" name='note_edit' id='id_note_edit' required>{{ task.note}}</textarea><br>
+                                      <textarea class="form-control" rows="4" name='note_edit' id='id_note_edit' required>{{ task.note}}</textarea>
+                                      <span style="font-size: 9pt">Type <b>"#"</b> symbol to link this Task to a Ticket(s). The linked ticket(s) will appear below</span><br><br>
                                   </div>
-                                </div>
+                              </div>
+                              <div class="col-sm-offset-2 row" id="ticket-field">
+                                <h5><b>Linked Tickets</b></h5>
+                                <ul id="tickets-edit"></ul><br>
                               </div>
                               <div class="row mydropdiv">
                                   <label class="col-md-2"><p><strong>{% trans "Attach File(s):" %}</strong></p></label>
