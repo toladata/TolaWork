@@ -1574,7 +1574,7 @@ report_index = staff_member_required(report_index)
 
 
 def run_report(request, report):
-    if Ticket.objects.all().count() == 0 or report not in ('queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus', 'userpriority', 'userqueue', 'daysuntilticketclosedbymonth'):
+    if Ticket.objects.all().count() == 0 or report not in ('queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'queuevotes', 'userstatus', 'userpriority', 'userqueue', 'daysuntilticketclosedbymonth'):
         return HttpResponseRedirect(reverse("helpdesk_report_index"))
 
     report_queryset = Ticket.objects.all().select_related()
@@ -1659,6 +1659,12 @@ def run_report(request, report):
         possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
         charttype = 'bar'
 
+    elif report == 'queuevotes':
+        title = _('Queue by Votes')
+        col1heading = _('Queue')
+        possible_options = [t for t in [0, 1, 2, 3, 4, 5]]
+        charttype = 'bar'
+
     elif report == 'queuestatus':
         title = _('Queue by Status')
         col1heading = _('Queue')
@@ -1698,6 +1704,10 @@ def run_report(request, report):
         elif report == 'queuepriority':
             metric1 = u'%s' % ticket.queue.title
             metric2 = u'%s' % ticket.get_priority_display()
+
+        elif report == 'queuevotes':
+            metric1 = u'%s' % ticket.queue.title
+            metric2 = u'%s' % ticket.votes
 
         elif report == 'queuestatus':
             metric1 = u'%s' % ticket.queue.title
