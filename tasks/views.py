@@ -212,7 +212,8 @@ def create_task(request):
             due_date=due_date, created_date=created_date,created_by_id=created_by, assigned_to_id=assigned_to, 
             project_agreement=project_agreement, table=table, note=note)
         task.save()
-         #save tickettags
+
+        #save tickettags
         tickets = request.POST.getlist('tickets[]')
         print tickets
         for ticket in tickets:
@@ -267,6 +268,17 @@ def task_edit(request, task_id):
 
 	task.save(update_fields=['task','submitter_email','priority','assigned_to_id','status','due_date','note','created_by_id',])
     
+
+    #save new ticket-tags
+    tickets = request.POST.getlist('tickets[]')
+
+    if tickets:
+        #delete linked tickets or this Tasks
+        Task.tickets.through.objects.filter(task_id = task_id).delete()
+
+        for ticket in tickets:
+            task.tickets.add(ticket)
+
     file_attachment(request, task)
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
