@@ -29,13 +29,17 @@
                   select: function(event, ui) {
                       var text = this.value;
                       var pos = text.lastIndexOf(trigger);
-                      $('#tickets').append("<li><a>["+ui.item.queue.toUpperCase()+"-"+ui.item.value+"]"+ui.item.label+"</a></li>");
-                      this.value = text.substring(0, pos);
 
-                      var selectedItem= ui.item.value;
-                      document.getElementById('ticket-field').style.display = 'block';
-                      var field = '<span><input type="text" id="tickets[]" name="tickets[]" value="'+selectedItem+'" hidden></span>';
-                      document.getElementById('ticket-field').innerHTML += field;
+                      if (document.getElementById('#myID').hasFocus()){
+                        
+                        $('#tickets').append('<li id="item'+ui.item.value+'"><a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')">Remove</a></li>');
+                        this.value = text.substring(0, pos);
+
+                        var selectedItem= ui.item.value;
+                        document.getElementById('ticket-field').style.display = 'block';
+                        var field = '<div id="ticket'+selectedItem+'"><span><input type="text" id="tickets[]" name="tickets[]" value="'+selectedItem+'" hidden></span></div>';
+                        document.getElementById('ticket-field').innerHTML += field;
+                      }
 
 
                       triggered = false;
@@ -65,6 +69,14 @@
            }  
        });
  });
+
+//Removing inked Tickets
+function removeticket(id) {
+    var elem = document.getElementById("ticket"+id);
+   elem.parentNode.removeChild(elem);
+   document.getElementById("item"+id).style.display = "none";
+   return false;
+}
 
 //Submit task  data
 function create_task(data, csrftoken) {
