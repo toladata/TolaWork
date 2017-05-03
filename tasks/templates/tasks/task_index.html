@@ -288,9 +288,16 @@
                                       <span style="font-size: 9pt">Type <b>"#"</b> symbol to link this Task to a Ticket(s). The linked ticket(s) will appear below</span><br><br>
                                   </div>
                               </div>
-                              <div class="col-sm-offset-2 row" id="ticket-edit-field">
-                                <h5><b>Linked Tickets</b></h5>
-                                <ul id="tickets-edit"></ul><br>
+                              <div class="col-sm-offset-2 row" id="ticket-edit-field" {% if not task.tickets.all %} hidden {% endif %}>
+                                <h5><b>Linked Tickets</b></h5>   
+                                <ul id="tickets-edit">
+                                {% if task.tickets.all %}
+                                  {% for t in task.tickets.all %}
+                                  <div id="ticket{{t.id}}"><span><input type="text" id="tickets[]" name="tickets[]" value="{{t.id}}" hidden></span></div>
+                                  <li id="item{{t.id}}"><a>{{t.ticket}}&nbsp;&nbsp;{{t.title}}</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('{{t.id}}')">Remove</a></li>
+                                  {% endfor %}
+                                {% endif %}
+                                </ul><br>
                               </div>
                               <div class="row mydropdiv">
                                   <label class="col-md-2"><p><strong>{% trans "Attach File(s):" %}</strong></p></label>
