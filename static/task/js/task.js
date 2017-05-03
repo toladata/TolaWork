@@ -8,7 +8,6 @@
            url: "/tasks/tasks/tickets",
            type: "GET",
            success: function (data) {
-            console.log(data);
               array =  $.map(JSON.parse(data.tickets), function (el) {
                    return {
                        label: el.title,
@@ -30,8 +29,8 @@
                       var text = this.value;
                       var pos = text.lastIndexOf(trigger);
 
-                      if (document.getElementById('#myID').hasFocus()){
-                        
+                      if ($('#id_note').is(':focus')){
+
                         $('#tickets').append('<li id="item'+ui.item.value+'"><a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')">Remove</a></li>');
                         this.value = text.substring(0, pos);
 
@@ -39,6 +38,16 @@
                         document.getElementById('ticket-field').style.display = 'block';
                         var field = '<div id="ticket'+selectedItem+'"><span><input type="text" id="tickets[]" name="tickets[]" value="'+selectedItem+'" hidden></span></div>';
                         document.getElementById('ticket-field').innerHTML += field;
+                      }
+                      else{
+                        $('#tickets-edit').append('<li id="item'+ui.item.value+'"><a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')">Remove</a></li>');
+                          this.value = text.substring(0, pos);
+
+                        var selectedItem= ui.item.value;
+                        document.getElementById('ticket-edit-field').style.display = 'block';
+                        var field = '<div id="ticket'+selectedItem+'"><span><input type="text" id="tickets[]" name="tickets[]" value="'+selectedItem+'" hidden></span></div>';
+                        document.getElementById('ticket-edit-field').innerHTML += field;
+
                       }
 
 
