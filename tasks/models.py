@@ -48,7 +48,7 @@ class Task(models.Model):
     priority = models.IntegerField(choices=PRIORITY_CHOICES)
     project_agreement = models.TextField(blank=True, null=True)
     table = models.TextField(blank=True, null=True)
-    tickets = models.ManyToManyField(Ticket, related_name='task_tickets', blank=True)
+    #tickets = models.ManyToManyField(Ticket, related_name='task_tickets', blank=True)
 
 
     def _get_assigned_to(self):
