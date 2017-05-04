@@ -2917,6 +2917,8 @@ def ticket_report_data(request, queue, votes):
 
     if votes != "Null":
         tickets = tickets.filter(votes=int(votes))
+    if votes== "10":
+        tickets.filter(votes__gte = 9)
 
     getTickets = json.dumps(list(tickets), cls=DjangoJSONEncoder)
 
@@ -2929,7 +2931,7 @@ def ticket_report(request):
     form = form_data(request)
 
     getQueues = Queue.objects.all()
-    votes = [ 1,2,3,4,5,6,7,8,9,10 ]
+    votes = [0, 1,2,3,4,5,6,7,8,9]
 
     return render_to_response('helpdesk/ticket_report.html',
         RequestContext(request, dict(
