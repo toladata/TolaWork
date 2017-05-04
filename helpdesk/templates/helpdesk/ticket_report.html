@@ -1,0 +1,114 @@
+{% extends "helpdesk/dashboard.html" %}{% load i18n %}
+
+{% block helpdesk_title %}{% trans "Report Dashboard" %}{% endblock %}
+
+{% block helpdesk_body %}
+<script type="text/javascript">
+    
+     function show_ticketTable(tickets) {
+            tickets_records = JSON.parse(tickets);
+            //First destroy any old version of the table to refresh anew
+            if ( $.fn.dataTable.isDataTable( '#ticketstable' ) ) {
+                table.destroy();
+                $('#ticketstable').empty();
+            };
+
+            $('#ticketstable').on( 'page.dt', function () {
+                $('html, body').animate({
+                    scrollTop: 0
+                }, 300);
+            } );
+
+
+            table = $('#ticketstable').DataTable( {
+                 "order": [], 
+                 "bFilter": false,
+                 'bLengthChange': false,
+                 "aoColumnDefs": [
+                           { "bSortable": false, "targets": [0, 1, 2] }
+                        ],
+                retrieve: true,
+                data: tickets_records,
+                columns: [
+                    { title: "Date Created", data: "created",
+                        "defaultContent": "<i>Not set</i>" },
+
+                    { title: "Queue", data: "queue__title",
+                        "defaultContent": "<i>Not set</i>"},
+
+                    { title: "Title ", data: "title",
+                        "mRender": function (data, record, row) {
+                                return '<a name=' + row.id + ' href="#">' + row.title + '</a>';
+                            }},
+                    { title: "Votes ", data: "votes" }
+
+                    ]
+            } );
+
+        }
+
+    function get_filter(queue, votes)
+        {
+
+            $.getJSON("/helpdesk/reports/tickets/"+ queue + "/"+votes+"/", function(data) {  
+                show_ticketTable(data['getTickets']);                                          
+            });
+        } 
+    get_filter('None', 'Null');
+</script>
+
+<div class="ticket_cover">
+    <div class="col-md-9 col-sm-9 ticket_right">
+
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <strong>{% trans "Reports &amp; Stats Dashboard" %}</strong>
+                </div>
+            </div>
+            {% ifequal number_tickets 0 %}
+                <p>{% trans "You haven't created any tickets yet, so you cannot run any reports." %}</p>
+            {% else %}
+            <!-- Table -->
+            <table class="table" id="ticketstable">
+            </table>
+
+    </div>
+    <div class="col-md-3 col-sm-3 ">
+
+       <!-- start search -->
+          <div class="search" >
+            <form class="input-group" id='searchform' method='get' action="{% url 'helpdesk_list' %}">
+                <input type="text" name='q' class="form-control" placeholder="Search" id='search_query'>
+                <span class="input-group-btn">
+                  <button class="btn btn-info" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                </span>
+              </form>
+          </div>
+          <!-- end search -->
+
+            <ul>
+    <li><strong>{% trans "Reports By User" %}</strong>
+        <ul>
+            <li><a href='userpriority/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Priority" %}</a></li>
+            <li><a href='userqueue/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Queue" %}</a></li>
+            <li><a href='userstatus/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Status" %}</a></li>
+            <li><a href='usermonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Month" %}</a></li>
+        </ul>
+    </li>
+    <li><strong>{% trans "Reports By Queue" %}</strong>
+        <ul>
+            <li><a href='queuepriority/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Priority" %}</a></li>
+            <li><a href='queuestatus/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Status" %}</a></li>
+            <li><a href='queuevotes/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Votes" %}</a></li>
+            <li><a href='queuemonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "by Month" %}</a></li>
+            <li><a href='daysuntilticketclosedbymonth/{% if saved_query %}?saved_query={{ saved_query }}{% endif %}'>{% trans "Days until ticket closed" %}</a></li>
+        </ul>
+    </li>
+
+</ul>
+
+
+    </div>
+</div>
+
+{% endifequal %}{% endblock %}
