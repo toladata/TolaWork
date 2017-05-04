@@ -65,6 +65,9 @@
                     <strong>{% trans "Reports &amp; Stats Dashboard" %}</strong>
                 </div>
             </div>
+
+            {% include "helpdesk/ticket_filter.html" %}
+
             {% ifequal number_tickets 0 %}
                 <p>{% trans "You haven't created any tickets yet, so you cannot run any reports." %}</p>
             {% else %}

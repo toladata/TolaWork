@@ -1,0 +1,31 @@
+<div class="dropdown">
+    {% if getQueues %}
+        <div class="btn-group" role="group">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                Queues
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                {% for q in getQueues.reverse %}
+                    <li role="presentation"><a role="menuitem" tabindex="-1" onclick="get_filter('{{q.title}}', 'Null')">{{ q.id}} - {{ q.title }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    {% if votes %}
+        <div class="btn-group" role="group">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-expanded="true">
+                Votes
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+                <li role="presentation"><a role="menuitem" tabindex="-1" onclick="indicator_filter(0)"> -- All -- </a></li>
+                {% for vote in votes %}
+                    <li role="presentation"><a role="menuitem" tabindex="-1" onclick="get_filter('None','{{vote}}')">{{ vote }} - <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <br/>
+    <br/>
+</div>
