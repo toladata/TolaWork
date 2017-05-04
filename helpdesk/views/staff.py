@@ -2904,3 +2904,34 @@ def entry_index(
         context.update(extra_context)
     return render_to_response(
         template, context, context_instance=RequestContext(request))
+
+### TICKETS QUEUE & VOTES REPORT
+
+def ticket_report_data(request, queue, votes):
+
+
+    tickets = Ticket.objects.all().values('id','created', 'queue__title', 'title', 'votes')
+
+    if queue != "None":
+        tickets = tickets.filter(queue__tittle=queue)
+
+    if votes != "Null":
+        tickets = tickets.filter(votes=int(votes))
+
+    getTickets = json.dumps(list(tickets), cls=DjangoJSONEncoder)
+
+    final_dict = { 'getTickets': getTickets }
+
+    return JsonResponse(final_dict, safe=False)
+
+def ticket_report(request):
+
+    form = form_data(request)
+
+    return render_to_response('helpdesk/ticket_report.html',
+        RequestContext(request, dict(
+            {},
+            form=form,
+
+        )))
+
