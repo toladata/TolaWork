@@ -2,10 +2,10 @@
     {% if getQueues %}
         <div class="btn-group" role="group">
           <select id="queue" class="listoption_filters" onchange="get_filter()">
-            <option value="None">Queue(s)</option>
-            {% for q in getQueues.reverse %}
+            <option value=0>Queue(s)</option>
+            {% for q in getQueues %}
             
-              <option value="{{q.title}}">{{ q.id}} - {{ q.title }}</option>
+              <option value="{{q.id}}">{{ q.id}} - {{ q.title }}</option>
             {% endfor %}
           </select>
         </div>

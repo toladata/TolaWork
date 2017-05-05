@@ -2912,8 +2912,8 @@ def ticket_report_data(request, queue, votes):
 
     tickets = Ticket.objects.all().values('id','created', 'queue__title', 'title', 'votes')
 
-    if queue != "None":
-        tickets = tickets.filter(queue__title=queue)
+    if int(queue) != 0:
+        tickets = tickets.filter(queue__id=queue)
 
     if votes != "Null":
         tickets = tickets.filter(votes=int(votes))
@@ -2930,7 +2930,7 @@ def ticket_report(request):
 
     form = form_data(request)
 
-    getQueues = Queue.objects.all()
+    getQueues = Queue.objects.all().order_by('id')
     votes = [0, 1,2,3,4,5,6,7,8,9]
 
     return render_to_response('helpdesk/ticket_report.html',
