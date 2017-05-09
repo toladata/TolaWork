@@ -120,6 +120,14 @@ urlpatterns = patterns('helpdesk.views.staff',
         'run_report',
         name='helpdesk_run_report'),
 
+    url(r'^report/tickets/$',
+        'ticket_report',
+        name='ticket_report'),
+
+    url(r'^reports/tickets/(?P<queue>\w+)/(?P<votes>\w+)/$',
+        'ticket_report_data',
+        name='report_tickets_data'),
+
     url(r'^save_query/$',
         'save_query',
         name='helpdesk_savequery'),

@@ -1,0 +1,27 @@
+<div class="dropdown">
+    {% if getQueues %}
+        <div class="btn-group" role="group">
+          <select id="queue" class="listoption_filters" onchange="get_filter()">
+            <option value=0>Queue(s)</option>
+            {% for q in getQueues %}
+            
+              <option value="{{q.id}}">{{ q.id}} - {{ q.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+    {% endif %}
+    {% if votes %}
+        <div class="btn-group" role="group">
+          <select id="vote" class="listoption_filters" onchange="get_filter()">
+            <option value="Null">Vote(s)</option>
+            {% for vote in votes %}
+              <option value="{{vote}}">{{ vote }} - Vote(s)</option>
+            {% endfor %}
+            <option value="10">More than 10</option>
+
+          </select>
+        </div>
+    {% endif %}
+    <br/>
+    <br/>
+</div>
