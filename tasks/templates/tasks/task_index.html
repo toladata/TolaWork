@@ -60,7 +60,7 @@
                 </tr>
                 {% load endless %}
                 {% paginate tasks %}
-                {% for task in tasks reversed %}
+                {% for task in tasks %}
                 <tr data-toggle="collapse" data-target="#{{ task.id }}" class="accordion-toggle">
 
                 <td><strong><a href= "#">{{ task.task }}</a></strong></td>
