@@ -26,7 +26,7 @@
         {% endif %}
         <!-- Introductory message -->
         <h2><strong>Tola</strong>Work</h2>
-        <p class="font7">Get help setting up, using and configuring Tola Activity, Tola Tables, Mobile Data collection platforms and M&E in general. Use tickets to report any issues with <strong>Tola</strong>Data tools, request and vote on new features.</p>
+        <p class="font7">Get help setting up, using and configuring TolaActivity, TolaTables, Mobile Data collection platforms and M&E in general. Use tickets to report any issues with <strong>Tola</strong>Data tools, request and vote on new features.</p>
         <br/>
         <!--  add ticket button -->
         {% if user.is_authenticated %}
@@ -41,197 +41,10 @@
 
         <!-- the tickets, tasks and tools section -->
         <br/>
-        <h3>Tickets, Tasks and <strong>Tola</strong>Data Tools</h3>
+        <h4>Tasks</h4>
         <div class="home-bottom">
           <div class="panel_bottom">
             <div class="panel-group" id="accordion">
-              <!-- the tickets section -->
-              <div class="panel home-panel">
-                <div class="panel-heading home-paneltitle">
-                  <h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion" href="#tickets"><font class="font5"><span class="glyphicon glyphicon-tags"></span>&nbsp;&nbsp;Tickets</font></a></h4>
-                </div>
-                <!-- the collapse for the tickets section -->
-                <div id="tickets" class="panel-collapse collapse">
-                  <div class="panel-body">
-                    <!-- ticket section labels -->
-                    <ul class="nav nav-tabs">
-                      <li class="active">
-                        <a data-toggle="tab" href="#enhancements"><b><span class="glyphicon glyphicon-th"></span></b>&nbsp;&nbsp;Top Enhancement Requests</a>
-                      </li>
-                      <li>
-                        <a data-toggle="tab" href="#Recent"><b><span class="glyphicon glyphicon-list-alt"></span></b>&nbsp;&nbsp;Recent Tickets</a>
-                      </li>
-                      {% if user.is_authenticated %}
-                        <li>
-                          <a data-toggle="tab" href="#Preview"><b><span class="glyphicon glyphicon-th-list"></span></b>&nbsp;&nbsp;Tickets Preview</a>
-                        </li>
-                      {% endif %}
-                    </ul>
-                   <!--  tickets display -->
-                    <div class="tab-content">
-                      <!-- begin top enhancement display -->
-                      <div id="enhancements" class="tab-pane fade in active">
-                        <div class=" col-md-12 table-responsive">
-                          <table class="table table-striped">
-                            <tr>
-                              <th>Queue</th>
-                              <th>Title</th>
-                              <th>Votes</th>
-                            </tr>
-                            {% for item in votes_tickets %}
-                            <tr>
-                              <td>{{ item.queue }}</td>
-                              <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
-                              <td>{{ item.votes }}</td>
-                            </tr>
-                            {% endfor %}
-                          </table>
-                        </div>
-                      </div><!-- end top enhancement -->
-
-                      <!-- begin recent tickets display -->
-                      <div id="Recent" class="tab-pane fade">
-                        <div class="table-responsive">
-                          <table class="table table-striped">
-                            <tr>
-                              <th>Status</th>
-                              <th>Queue</th>
-                              <th>Title</th>
-                              <th>Date Created</th>
-                            </tr>
-                            {% for item in recent_tickets %}
-                            <tr>
-                              <td>{% if item.status == 1 %} Open {%elif item.status == 2%}Re-Opened{% elif item.status == 3%}Resolved{% elif item.status == 4%}Closed{% elif item.status == 5%}Duplicate{% endif %}</td>
-                              <td>{{ item.queue }}</td>
-                              <td><a href="/helpdesk/tickets/{{ item.id }}/">{{ item.title }}</a></td>
-                              <td>{{ item.created }}</td>
-                            </tr>
-                            {% endfor %}
-                          </table>
-                        </div>
-                      </div><!-- end recent tickets -->
-
-                      <!-- begin tickets preview -->
-                      <div id="Preview" class="tab-pane fade">
-                        <div class="panel panel-info ">
-                          <!-- total tickets -->
-                          <div class="panel-heading">
-                            <strong><a href='{% url 'helpdesk_list' %}'>Total Tickets</a> <span class="badge read_more">{{ num_tickets }}</span></strong>
-                          </div>
-                          <div class="panel-body">
-                            <!-- tickets created by me -->
-                            <div class="sort_panels" >
-                              <div class= "preview_links">
-                                <a href="#Created_by_me" data-toggle="collapse">Created By Me </a> <strong> <span class="badge read_more"> {{ created_by_me }} </span></strong>
-                              </div>
-                             <!--  collapse section for tickets created by me -->
-                              <div id="Created_by_me" class="collapse in">
-                                {% if byme %}
-                                  <div class="table-responsive">
-                                    <table class="table table-striped">
-                                      <tr>
-                                        <th>Status</th>
-                                        <th>Queue</th>
-                                        <th>Title</th>
-                                        <th>Date Created</th>
-                                      </tr>
-                                      {% for ticket in byme %}
-                                      <tr>
-                                        <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
-                                        <td>{{ticket.queue}}</td>
-                                        <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
-                                        <td> {{ticket.created}}</td>
-                                      </tr>
-                                      {%endfor%}
-                                      <p><strong>&nbsp;Recent tickets created by Me.</strong></p>
-                                    </table>
-                                  </div>
-                                {% else %}
-                                  <div class="alert alert-info" role="alert">
-                                    <h5>You currently have no tickets. Go to <a href='{% url 'helpdesk_list' %}' class="alert-link">Tickets</a> to create a ticket(s)</h5>
-                                  </div>
-                                {% endif %}
-                              </div> 
-                            </div><!-- end tickets created by me -->
-
-                            <!-- tickets assigned to me -->
-                            <div class="sort_panels">
-                              <div class= "preview_links">
-                                <a href="#assigned_to_me" data-toggle="collapse">&nbsp;Assigned to Me</a> <strong><span class="badge read_more"> {{ assigned_to_me }} </span></strong>
-                              </div>
-                              <!-- collapse section for tickets assigned to me -->
-                               <div id="assigned_to_me" class="collapse">
-                                {% if tome %}
-                                  <div class="table-responsive">
-                                    <table class="table table-striped">
-                                      <tr>
-                                        <th>Status</th>
-                                        <th>Queue</th>
-                                        <th>Title</th>
-                                        <th>Date Created</th>
-                                      </tr>
-                                      {% for ticket in tome %}
-                                      <tr>
-                                        <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
-                                        <td>{{ticket.queue}}</td>
-                                        <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
-                                        <td> {{ticket.created}}</td>
-                                      </tr>
-                                      {%endfor%}
-                                      <p><strong>Recent tickets assigned to me.</strong></p>
-                                    </table>
-                                  </div>
-                                {% else %}
-                                  <div class="alert alert-info" role="alert">
-                                    <h5>You currently have no tickets assigned to you</h5>
-                                  </div>
-                                {% endif %}
-                              </div> 
-                            </div><!-- end tickets assigned to me -->
-
-                            <!-- tickets resolved by me -->
-                            <div class="sort_panels">
-                              <div class= "preview_links">
-                                <a href="#closed_resolved" data-toggle="collapse">&nbsp;Resolved & Closed by Me </a> <strong> <span class="badge read_more"> {{ closed_resolved }} </span></strong>
-                              </div>
-                              <!-- collapse section for tickets resolved -->
-                              <div id="closed_resolved" class="collapse">
-                                {% if closed%} 
-                                 <div class="table-responsive">
-                                    <table class="table table-striped">
-                                      <tr>
-                                        <th>Status</th>
-                                        <th>Queue</th>
-                                        <th>Title</th>
-                                        <th>Date Created</th>
-                                      </tr>
-                                      {% for ticket in closed %}
-                                      <tr>
-                                        <td> {% if ticket.status == 1 %} Open {%elif ticket.status == 2%}Re-Opened{% elif ticket.status == 3%}Resolved{% elif ticket.status == 4%}Closed{% elif ticket.status == 5%}Duplicate{% endif %}</td>
-                                        <td>{{ticket.queue}}</td>
-                                        <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
-                                        <td> {{ticket.created}}</td>
-                                      </tr>
-                                      {%endfor%}
-                                      <p><strong>Recent tickets resolved and closed by me</strong></p>
-                                    </table>
-                                  </div>
-                                {% else %}
-                                  <div class="alert alert-info" role="alert">
-                                    <h5>You currently have no tickets closed and resolved by you</h5>
-                                  </div>
-                                {% endif %}
-                              </div>
-                            </div><!-- end tickets resolved by me -->
-                          </div>
-                        </div>
-                      </div><!--  end tickets preview -->
-                    </div><!-- end tickets display -->
-                  </div>
-                </div><!-- end the collapse for the tickets section -->
-              </div>
-              <!-- end the tickets section -->
-
 
               <!-- the tasks section -->
               {% if user.is_authenticated %}
@@ -250,7 +63,7 @@
                         <li class="active"><a data-toggle="tab" href="#recent_tasks"><b><span class="glyphicon glyphicon-list-alt"></span></b>&nbsp;&nbsp;Recent Tasks</a></li>
                         <li><a data-toggle="tab" href="#tasks_preview"><b><span class="glyphicon glyphicon-th-list"></span></b>&nbsp;&nbsp;Tasks Preview</a></li>
                       </ul>
-                      <!-- tasks display --> 
+                      <!-- tasks display -->
                       <div class="tab-content">
                         <!-- recent tasks section -->
                         <div id="recent_tasks" class="tab-pane fade in active">
@@ -402,7 +215,7 @@
                                 </div> <!-- end tasks completed -->
 
                               </div> <!-- end tasks panel body -->
-                          </div>  
+                          </div>
                         </div> <!-- end task preview section -->
                       </div> <!-- end tasks display -->
                     </div>
@@ -412,143 +225,13 @@
                     </div>
                   {% endif %}
                   </div> <!-- end the collapse section for tasks -->
-                </div> 
+                </div>
               {% endif %}
               <!-- end tasks section -->
 
 
-              <!-- the tools section -->
-              <div class="panel panel-info">
-                <div class="panel-heading ">
-                  <h4 class="panel-title">
-                    <a data-toggle="collapse" data-parent="#accordion" href="#tools"> <font ><span class="glyphicon glyphicon-cog"></span>&nbsp;&nbsp;Tola<strong>Data</strong> Tools</font></a>
-                  </h4>
-                </div>
-                <!-- the collapse section of tools -->
-                <div id="tools" class="panel-collapse collapse in">
-                <div class="panel-body">
-                  <!-- tool labels -->
-                  <ul class="nav nav-tabs">
-                    <li class="active ">
-                      <a data-toggle="tab" href="#tables"> <div class="tolatables"> <img src="{{ STATIC_URL }}img/tola-tables-icon-blue.png" class="icon"> Tola Tables </div></a>
-                    </li>
-                    <li>
-                      <a data-toggle="tab" href="#activity"><div class="tolaactivity"><img src="{{ STATIC_URL }}img/tola-activity-icon-orange.png" class="icon"> Tola Activity</div>
-                      </a>
-                    </li>
-                    <!-- <li>
-                      <a data-toggle="tab" href="#ona"><div class="ona">ONA Mobile Platform</div></a>
-                    </li> -->
-                  </ul>
-                  <!-- tool displays -->
-                  <div class="tab-content">
-                    <!-- tolaTables -->
-                    <div id="tables" class="tab-pane fade in active">
-                    {% if user.is_authenticated %}
-                      {% if tolaTablesData.my_tables or tolaTablesData.my_silos%}
-                        <h4>Your Tables</h4>
-                        <div class=" table-responsive">
-                          <table class="table table-striped">
-                            <tr>
-                              <th>Name</th>
-                              <th>Public</th>
-                              <th>Date Created</th>
-                            </tr>
-                            {% for table in tolaTablesData.my_tables %}
-                            <tr>
-                              <td>{{table.name}}</td>
-                              <td>{{table.public}}</td>
-                              <td>{{table.create_date}} </td>
-                            </tr>
-                            {% endfor %}
-                            {% for silo in tolaTablesData.my_silos %}
-                            <tr>
-                              <td>{{silo.name}}</td>
-                              <td>{{silo.public}}</td>
-                              <td>{{silo.create_date}} </td>
-                            </tr>
-                            {% endfor %}
-                          </table>
-                        </div>
-                      {% else %}
-                        <div class="alert alert-info" role="alert">
-                          <h5>You currently have no tables on Tolatables. Go to <a href="#" class="alert-link">TolaTables</a> to create a table(s)</h5>
-                        </div>
-                      {% endif %}
-                    {% else %}
-                      <div class="alert alert-info" role="alert">
-                        <h5>Kindly<a href="#" class="alert-link"> Login</a> to see a list of Tables you own on TolaTables.</h5>
-                      </div>
-                    {% endif %}
-                      <div class="row activity_details">
-                        <div class="col-md-3">
-                          <strong>Latest Release:</strong> <a href="{{ tola_url }}"><span class="badge">{{ tola_number }}</span></a>
-                        </div>
-                        <div class="col-md-3">
-                          <strong>Status:</strong> {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}
-                        </div>
-                        <div class="col-md-2">
-                          <img src="https://travis-ci.org/toladata/TolaTables.svg?branch=master">
-                        </div>
-                      </div>  
-                    </div>
-                    <!--  end tolaTables -->
 
-                    <!-- tolaActivity -->
-                    <div id="activity" class="tab-pane fade">
-                      {% if tolaActivityData %}
-                        <h4>Latest Projects</h4>
-                        <div class="table-responsive">
-                          <table class="table table-striped">
-                            <tr>
-                              <th>Project</th>
-                              <th>Status</th>
-                              <th>Start Date</th>
-                            </tr>
-                            {% for data in tolaActivityData|dictsort:"expected_start_date" reversed %}
-                              <tr>
-                                <td>{{data.project_name}}</td>
-                                <td>{{data.approval}}</td>
-                                <td>{{data.expected_start_date}}</td>
-                              </tr>
-                            {% endfor %}
-                          </table>
-                        </div>
-                      {% else %}
-                        <div class="alert alert-warning" role="alert">
-                          <h5>There was a Problem loading Project(s) From <a href="#" class="alert-link">TolaActivity</a></h5>
-                        </div>
-                      {% endif %}
-                      <div class="row activity_details">
-                        <div class="col-md-4">
-                          <strong>Latest Release:</strong> <a href="{{ tola_activity_url }}"><span class="badge">{{ tola_activity_number }}</span></a>
-                        </div>
-                        <div class="col-md-3">
-                          <strong>Status:</strong> {% if data_up == 0 %} SERVER IS DOWN {% else %} Server is up!{% endif %}
-                        </div>
-                        <div class="col-md-2">
-                          <img src="https://travis-ci.org/toladata/TolaActivity.svg?branch=master">
-                        </div>
-                      </div>    
-                    </div>
-                    <!-- end tolaActivity -->
-
-                    <!-- ona -->
-                    <!-- <div id="ona" class="tab-pane fade">
-                      <div class="list-group-item col-md-6">
-                      Start using <a href="https://ona.io/home/">Ona</a> and easily collect your data in the field. Are you already using Ona and you'd like the enterprise features? Just fill out this <a href="https://docs.google.com/forms/d/1dhhDPNgr7a8gEBI9U1dr_b61v6rlOP5ca3e2g6Box_g/viewform?edit_requested=true">form</a> and your Ona account will be added to one of our enterprise organizations.<hr/>
-                      </div>
-                    </div> -->
-                    <!-- end ona -->
-
-                  </div> <!-- end tools display -->
-                </div>
-                </div> <!-- end the collapse section of tools  -->
-              </div>
-              <!-- end tools section -->
-
-
-            </div> 
+            </div>
           </div>
         </div>
         <!-- end of the tickets, tasks and tools section -->

@@ -131,31 +131,8 @@ def user (request):
                                         'total_tasks': total_tasks, 'total_tasks_created': total_tasks_created,'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed,\
                                          'total_tasks_completed': total_tasks_completed, 'form': form})
 
+
 def home(request):
-
-    #Ping Tola servers
-    activity_up = os.system("ping -c 1 " + "http://tola-activity.mercycorps.org")
-    data_up = os.system("ping -c 1 " + "http://tola-tables.mercycorps.org")
-
-    #GitHub releases for status
-    tola_repo = settings.GITHUB_REPO_1
-    tola_activity_repo = settings.GITHUB_REPO_2
-
-    tola = latest_release(tola_repo)
-    if tola:
-        tola_url = tola['html_url']
-        tola_number = tola['tag_name']
-    else:
-        tola_url = None
-        tola_number = None
-
-    tola_activity = latest_release(tola_activity_repo)
-    if tola_activity:
-        tola_activity_url = tola_activity['html_url']
-        tola_activity_number = tola_activity['tag_name']
-    else:
-        tola_activity_url = None
-        tola_activity_number = None
 
     tickets = Ticket.objects.all().values('status').annotate(total=Count('status')).order_by('total')
 
@@ -253,9 +230,7 @@ def home(request):
     # Announcement
     announcements = Announcement.objects.all().order_by('create_date')
 
-    return render(request, 'home.html', {'home_tab': 'active', 'tola_url': tola_url,'tola_number': tola_number, \
-                                         'tola_activity_url': tola_activity_url, 'tola_activity_number': tola_activity_number, \
-                                         'activity_up': activity_up, 'data_up': data_up, 'tickets': tickets, \
+    return render(request, 'home.html', {'home_tab': 'active', 'tickets': tickets, \
                                          'recent_tickets': recent_tickets,'votes_tickets': votes_tickets, 'num_tickets': num_tickets, 'recent_tasks': recent_tasks, \
                                          'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'created_by_me':created_by_me,\
                                          'closed':closed,'tome':tome,'byme':byme, 'tasks_created': tasks_created, 'tasks_assigned': tasks_assigned, \
