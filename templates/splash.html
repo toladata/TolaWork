@@ -50,7 +50,7 @@
                     <h5 class="font10">Login via</h5>
                       <a type="button" href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-info "><i class="fa fa-google"></i> Google</a>
                     <h4 class="font10" >OR</h4>
-                    <h5 class="font10">Login with TolaData Account</h5>
+                    <h5 class="font10">Login with a TolaData Account</h5>
                   </div>
                   <form class="col-md-12 col-sm-12" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
                       {% csrf_token %}
