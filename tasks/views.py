@@ -130,9 +130,9 @@ def task_list(request):
     total_tasks_assigned = 0
     total_tasks_created = 0
 
-    # if request.user.is_authenticated():
-    #     tolaActivityData = get_TolaActivity_byUser(request)
-    #     tolaTablesData = get_TolaTables_data(request)
+    if request.user.is_authenticated():
+        tolaActivityData = get_TolaActivity_byUser(request)
+        tolaTablesData = get_TolaTables_data(request)
     # User tasks
     tasks_created = Task.objects.filter(created_by = request.user).exclude(status__in = '4')
     total_tasks_created = len(tasks_created)
