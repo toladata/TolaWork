@@ -9,10 +9,6 @@ urlpatterns = patterns('helpdesk.views.staff',
         'ticket_list',
         name='helpdesk_list'),
     
-    url(r'^tickets/ticket_object$',
-        'ticket_object',
-        name='ticket_object'),
-    
     url(r'^tickets/$',
         'my_default_sort',
         name='my_sort'),
