@@ -51,7 +51,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 from helpdesk.serializer import UserSerializer, TicketSerializer, QueueSerializer, FollowUpSerializer, TicketDependencySerializer, AttachmentSerializer, TicketChangeSerializer
 from helpdesk.forms import TicketForm, UserSettingsForm, CommentTicketForm, CommentFollowUpForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
-from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context, form_data
+from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context, form_data, user_tickets
 from helpdesk.models import Ticket, UserVotes, Queue, UserSettings, KBCategory, Tag, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate, UserDefaultSort
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo, get_label, get_issue
 from helpdesk.slack import post_slack,post_tola_slack
@@ -2518,32 +2518,6 @@ def remind_messages(tickets):
             else:
                 # print "Ticket is " + str(months) + " Months old"
                 pass
-
-#get user specific tickets
-def user_tickets(request):
-
-    if request.user.email:
-        tickets_reported = Ticket.objects.select_related('queue').filter(
-                submitter_email=request.user.email,
-            ).order_by('status')
-
-    #tickets, resolved by current user
-    tickets_closed = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
-
-    #display tickets assigned to current user
-    tickets_assigned = Ticket.objects.select_related('queue')\
-                    .filter(assigned_to=request.user,)\
-                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
-    #display tickets created by current user
-    tickets_created = Ticket.objects.select_related('queue')\
-                    .filter(submitter_email=request.user.email,)\
-                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
-
-    user_tickets = [tickets_reported, tickets_closed, tickets_assigned, tickets_created]
-
-    return tickets_reported, tickets_closed, tickets_assigned, tickets_created
 
 
 def entry_index(

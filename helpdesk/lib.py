@@ -283,7 +283,7 @@ class MyHighlighter(Highlighter):
 
 #Ticket Form data
 def form_data(request):
-    #Form data
+
     from helpdesk.forms import TicketForm, PublicTicketForm
     from helpdesk.models import Queue
 
@@ -308,3 +308,30 @@ def form_data(request):
         pass
 
     return form
+
+#get user specific tickets
+def user_tickets(request):
+    from helpdesk.models import Ticket
+
+    if request.user.email:
+        tickets_reported = Ticket.objects.select_related('queue').filter(
+                submitter_email=request.user.email,
+            ).order_by('status')
+
+    #tickets, resolved by current user
+    tickets_closed = Ticket.objects.select_related('queue').filter(
+        assigned_to=request.user,
+        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+
+    #display tickets assigned to current user
+    tickets_assigned = Ticket.objects.select_related('queue')\
+                    .filter(assigned_to=request.user,)\
+                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+    #display tickets created by current user
+    tickets_created = Ticket.objects.select_related('queue')\
+                    .filter(submitter_email=request.user.email,)\
+                    .exclude(status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],)
+
+    user_tickets = [tickets_reported, tickets_closed, tickets_assigned, tickets_created]
+
+    return tickets_reported, tickets_closed, tickets_assigned, tickets_created
