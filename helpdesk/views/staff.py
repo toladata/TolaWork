@@ -633,14 +633,6 @@ def subscribe_staff_member_to_ticket(ticket, user):
     ticketcc.can_update = True
     ticketcc.save()
 
-def return_to_ticket(user, ticket):
-    ''' Helpder function for update_ticket '''
-
-    if user.is_staff:
-        return HttpResponseRedirect(ticket.get_absolute_url())
-    else:
-        return HttpResponseRedirect(ticket.get_absolute_url())
-
 def tickets_dependency(request,ticket_id):
     d_ticket = Ticket.objects.get(id=ticket_id)
 
