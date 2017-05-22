@@ -51,7 +51,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 from helpdesk.serializer import UserSerializer, TicketSerializer, QueueSerializer, FollowUpSerializer, TicketDependencySerializer, AttachmentSerializer, TicketChangeSerializer
 from helpdesk.forms import TicketForm, UserSettingsForm, CommentTicketForm, CommentFollowUpForm, EmailIgnoreForm, EditTicketForm, TicketCCForm, EditFollowUpForm, TicketDependencyForm, PublicTicketForm
-from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context
+from helpdesk.lib import send_templated_mail, query_to_dict, apply_query, safe_template_context, form_data
 from helpdesk.models import Ticket, UserVotes, Queue, UserSettings, KBCategory, Tag, KBItem, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch, IgnoreEmail, TicketCC, TicketDependency, EmailTemplate, UserDefaultSort
 from helpdesk.github import new_issue, get_issue_status, add_comments, open_issue, close_issue, queue_repo, get_label, get_issue
 from helpdesk.slack import post_slack,post_tola_slack
@@ -2569,30 +2569,6 @@ def user_tickets(request):
 
     return tickets_reported, tickets_closed, tickets_assigned, tickets_created
 
-#Form data
-def form_data(request):
-    #Form data
-    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-    initial_data = {}
-
-    form = PublicTicketForm(initial=initial_data)
-    form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-
-    try:
-        if request.user.email:
-            initial_data['submitter_email'] = request.user.email
-        if 'queue' in request.GET:
-            initial_data['queue'] = request.GET['queue']
-
-        if request.user.is_staff:
-            form = TicketForm(initial=initial_data)
-            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
-            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
-        
-    except Exception, e:
-        pass
-
-    return form
 
 def entry_index(
         request, template='myapp/entry_index.html', extra_context=None):

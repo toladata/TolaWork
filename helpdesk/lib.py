@@ -14,6 +14,13 @@ logger = logging.getLogger('helpdesk')
 
 from django.utils.encoding import smart_str
 
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
+
+
 
 def send_templated_mail(template_name, email_context, recipients, sender=None, bcc=None, fail_silently=False, files=None):
     """
@@ -273,3 +280,31 @@ class MyHighlighter(Highlighter):
         if start_offset < 0:
             start_offset = 0
         return self.render_html(highlight_locations, start_offset, end_offset)
+
+#Ticket Form data
+def form_data(request):
+    #Form data
+    from helpdesk.forms import TicketForm, PublicTicketForm
+    from helpdesk.models import Queue
+
+    assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
+    initial_data = {}
+
+    form = PublicTicketForm(initial=initial_data)
+    form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
+    try:
+        if request.user.email:
+            initial_data['submitter_email'] = request.user.email
+        if 'queue' in request.GET:
+            initial_data['queue'] = request.GET['queue']
+
+        if request.user.is_staff:
+            form = TicketForm(initial=initial_data)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+            form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+        
+    except Exception, e:
+        pass
+
+    return form
