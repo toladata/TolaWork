@@ -2453,13 +2453,6 @@ def file_attachment(request,f):
                 except NotImplementedError:
                     pass
     return
-#Filter and Search Tickets by Tags
-def filter_tickets_by_tags(taglist):
-    tickets = Ticket.objects.annotate(count=Count('tags')).filter(tags=taglist[0])
-    for tag in taglist[1:]:
-        tickets = tickets.filter(taglist=tag)
-    tickets = tickets.filter(count=len(taglist))
-    return tickets
 
 #save mysort
 def my_default_sort(request):
