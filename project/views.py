@@ -202,14 +202,6 @@ def home(request):
         #recent tasks
         recent_tasks = Task.objects.filter(Q(created_by=request.user) | Q(assigned_to=request.user) ).exclude(status__in=([3,4])).order_by('created_date')
         num_tasks = recent_tasks.count
-        #----Data From Tola Tools APIs----####
-    tolaActivityData = {}
-    tolaTablesData = {}
-
-    if request.user.is_authenticated():
-
-        tolaActivityData = get_TolaActivity_data(request)
-        tolaTablesData = get_TolaTables_data(request)
 
     #create ticket modal
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
@@ -235,8 +227,7 @@ def home(request):
                                          'closed_resolved': closed_resolved,'assigned_to_me':assigned_to_me,'created_by_me':created_by_me,\
                                          'closed':closed,'tome':tome,'byme':byme, 'tasks_created': tasks_created, 'tasks_assigned': tasks_assigned, \
                                           'num_tasks': num_tasks, 'total_tasks_created': total_tasks_created, \
-                                        'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed, 'total_tasks_completed': total_tasks_completed, 
-                                        'tolaActivityData': tolaActivityData, 'tolaTablesData':tolaTablesData, \
+                                        'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed, 'total_tasks_completed': total_tasks_completed,\
                                          'logged_users':users, 'form':form, 'helper':form.helper, 'announcements':announcements,})
 
 
