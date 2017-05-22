@@ -26,16 +26,7 @@
 
 </head>
     
-<body>    
-<div class="carousel slide carousel-fade" data-ride="carousel" data-interval="15000">
-    <!-- Wrapper for slides -->
-    <div class="carousel-inner" role="listbox">
-        <div class="item active">
-        </div>
-        <div class="item">
-        </div>
-    </div>
-</div>
+<body>
 
 <!-- Remeber to put all the content you want on top of the slider below the slider code -->   
   <header id="header">
@@ -59,7 +50,7 @@
                     <h5 class="font10">Login via</h5>
                       <a type="button" href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-info "><i class="fa fa-google"></i> Google</a>
                     <h4 class="font10" >OR</h4>
-                    <h5 class="font10">Login with Tola Account</h5>
+                    <h5 class="font10">Login with a TolaData Account</h5>
                   </div>
                   <form class="col-md-12 col-sm-12" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
                       {% csrf_token %}
@@ -85,88 +76,8 @@
     </nav>
     
   </header>
-    
-  <div class="splash"> 
-    <div class="col-md-12 row">
-    <div class="col-md-1"></div>
-      <div class=" col-md-3 logo">
-       <img src="{{ STATIC_URL }}img/tola-data-primary-mark-light.png" >
-    </div> 
-    </div>
-    <section id="intro" class="intro-parallax ">
-      <div class="container splash_main">               
-        <div class="row">
-              
-          <!-- Intro Section Description -->    
-          <div id="intro_description" class="col-sm-7 col-md-7">
-          
-            <!-- Intro Section Title -->
-            <!-- <h1><strong>Tolawork</h1> -->
-              
-            <!-- Description #1 --> 
-            <div class="intro_feature">
-            <p> <font class="font6">TolaData</font> We are building an open-source monitoring and evaluation platform that streamlines data, brings transparency and builds capacity for humanitarian projects. </p>
-              <h3 class="font8"><img src="{{ STATIC_URL }}img/tola-activity-icon-orange.png" class="icon"> Tola Activity</h3>
-              <p>TolaActivity is a collection of standard data forms, reports, and visualizations designed to track the impact of organizations' programs and projects. There are two primary sections of Tola Activity: Project Workflow and Indicator Tracking.
-              </p>
-            </div>
-            <!-- Description #2 --> 
-            <div class="intro_feature">
-              <h3 class="font7"><img src="{{ STATIC_URL }}img/tola-tables-icon-blue.png" class="icon"> Tola  Tables</h3>
-              <p>TolaTables is a data collection, aggregation and management tool for all types of data collection methods designed to track the impact of NGO programs and projects in the field.
-              </p>
-            </div>  
-            <div>
-              <h3 class="font6"><img src="{{ STATIC_URL }}img/tola-data-icon-red.png" class="icon"> Tola Work</h3>
-              <p>TolaWork is a helpdesk, documentation and support tool for TolaData.</p>
-            </div>
-            <div class="intro_button text-center">
-              <a class="btn btn-lg button" href="http://toladata.com/">More information</a>
-            </div>
-            
-          </div>  <!-- End Intro Section Description -->  
-          
-            
-          <!-- Intro Section Form -->   
-          <div id="intro_form" class="col-sm-4 col-md-4 col-md-offset-1">
-          
-            <!--Register form -->
-            <div class="form_register">
-              <h2 class="register_font"> Register Now! </h2>
-              
-              <form class="row" id="register" method="post" action="/accounts/register/">
-                {% csrf_token %}
 
-                <div id="input_detail" class="col-md-12">
-                  <input id="username" class="form-control" type="text" name="username" placeholder="Username"> 
-                </div>
-                  
-                <div id="input_detail" class="col-md-12">
-                  <input class="form-control" type="password" name="password1" placeholder="Enter your Password"> 
-                </div>
-                
-                <div id="input_detail" class="col-md-12">
-                  <input class="form-control" type="password" name="password2" placeholder="Confirm Your Password"> 
-                </div>
-    
-                <!-- Submit Button -->
-                <div id="form_register_btn" >
-                  <input class="btn btn-info btn-lg" type="submit" value="Register">
-                </div> 
-              </form>
-            </div>
-          </div>  <!-- End Intro Section Form -->
-        
-        </div>  <!-- End row -->  
-        <div>
-      </div>     <!-- End container -->
-      </div>
-    </section> 
-  </div>
 </body>
-<script type="text/javascript">
-  $('.carousel').carousel();
-</script>
 
 <!-- Typekit (Fonts) -->
 <script src="https://use.typekit.net/shi4wqr.js"></script>
