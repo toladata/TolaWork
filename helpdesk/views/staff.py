@@ -384,15 +384,6 @@ def post_comment(request, ticket_id):
 
     return HttpResponseRedirect(reverse('helpdesk_view', args=[ticket.id]))
 
-def taskview(request):
-
-    return render_to_response('tasks/task_index.html',
-        RequestContext(request, {
-
-
-        }))
-taskview = staff_member_required(taskview)
-
 
 def send_to_github(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
