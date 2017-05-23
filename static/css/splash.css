@@ -177,12 +177,7 @@ nav ul li a:active
     margin-top: 12px;
     padding: 20px;
 }
-p
-{
-    color:#fff;
-    font-size: 18px;
-    
-}
+
 .splash_main
 {
     margin-top: 20px;
@@ -212,4 +207,10 @@ p
 .intro_button
 {
     padding-bottom: 12px;
+}
+
+/*login*/
+.login-button
+{
+    margin-top: 10px;
 }
