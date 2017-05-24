@@ -64,7 +64,7 @@ def task_list(request):
         }
 
 
-    tasks = Task.objects.filter(Q(created_by = request.user) | Q(assigned_to = request.user)).exclude(status__in = [3, 4])
+    tasks = Task.objects.filter(Q(created_by = request.user) | Q(assigned_to = request.user)).exclude(status__in = [ 4])
     task_obj = Task.objects.filter(Q(created_by = request.user) | Q(assigned_to = request.user)).exclude(status__in = [4])
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     context = {}
@@ -160,7 +160,7 @@ def task_list(request):
     except ValidationError:
         # invalid parameters in query, return default query
         query_params = {
-            'filtering': {'status__in': [1, 2]},
+            'filtering': {'status__in': [1, 2,3]},
             'sorting': 'created_date',
         }
         tasks = apply_query(task_obj, query_params)
