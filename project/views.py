@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from helpdesk.models import DocumentationApp, FAQ
 from django.contrib.auth.views import login, logout
+from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from helpdesk.github import latest_release, new_issue, update_issue, get_issue, queue_repo, get_issue_status, get_label
@@ -323,8 +324,22 @@ def login_view(request):
     """Login a User"""
 
     form = form_data(request)
-    login(request)
+    password = username = error_message = ''
 
+    if request.POST:
+        username = request.POST['username']
+        password = request.POST['password']
+
+        logged_user = authenticate(username=username, password=password)
+        if logged_user is not None:
+            if logged_user.is_active:
+                login(request, user)
+                return HttpResponseRedirect('/home')
+            error_message =  'You are profile Status is inactive. Contact the admin.'
+        error_message = 'Kindly confirm your Credentials (Both Username and Password are case sensitive).'
+        return render(request, "registration/login.html", {'form':form, 'error_message': error_message})
+
+    login(request)
     return render(request, "registration/login.html", {'form':form})
 
 def permission_denied(request):
