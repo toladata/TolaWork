@@ -9,6 +9,14 @@
 
 </head>
 <div class="container col-md-12">
+
+  {% if error_message %}
+    <div class = "col-md-12">
+      <div class="col-md-6 col-md-offset-3 alert alert-danger">
+        <strong>Eroor!! </strong> {{error_message}}
+      </div>
+    </div>
+  {% endif %}
   <div class="col-md-3"></div>
   <div class="login-main col-md-6 col-sm-6">
     <div class="login-details">
@@ -22,15 +30,15 @@
               <p>Login with Tola Account</p><br/>
           </div>
           <div> 
-            <form class="form" role="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
+            <form class="form" role="form" method="post" action="{% url 'login' %}">
                                   {% csrf_token %}
                 <div class="login-body col-md-6 col-md-offset-3">
                     <div id="input_detail">
-                      <input class="form-control" type="text" name="username" placeholder="Username"> 
+                      <input class="form-control" type="text" name="username" id="username" placeholder="Username"> 
                     </div>
                       
                     <div id="input_detail" >
-                      <input class="form-control" type="password" name="password" placeholder="Password"> 
+                      <input class="form-control" type="password" name="password" id ="password" placeholder="Password"> 
                     </div>
                     <div class="row login-button">
                       <div class="col-md-6 ">
