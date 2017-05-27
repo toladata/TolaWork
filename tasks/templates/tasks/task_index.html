@@ -1,5 +1,6 @@
 {% extends "base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
+{% load url_replace %}
 {% block helpdesk_head %}
 <style type="text/css" src='{{ STATIC_URL }}helpdesk/app.css' xmlns="http://www.w3.org/1999/html"></style>
 {% endblock %}
@@ -42,13 +43,29 @@
                   </span>
                 </form>
             </div>
+            {% if query%}
+          
+            <p><input type="checkbox" name='search' id="id_search" {% if query %} checked="checked" {% endif %} > Remove Search</p>
+            <script type="text/javascript">
+              document.getElementById('id_search').onclick = function() {
+                 if($(this).is(":checked")){         
+                      window.location.href = this.getAttribute('href');
+                    }else {
+                       // Code in the case checkbox is NOT checked.
+                    window.location.href = '{% url 'task_list' %}{% query_string " " "q" %}';
+                  }
+
+              }
+            </script>
+
+          {% endif %}
          </div>
           <!-- end search -->
 
 
           <!-- start table -->
          <!--  <p class="highlight_div">{{query}}</p> -->
-            <div class="table-responsive">
+            <div class="table-responsive" style="margin-top:10px">
               <table class="table table-striped table-bordered" style="border-collapse:collapse;">
                 <tr class="info">
                   <td class="highlight_div"><strong>Task Title</strong></td>
