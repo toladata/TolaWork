@@ -29,6 +29,7 @@ except ImportError:
 from helpdesk.lib import send_templated_mail, safe_template_context
 from helpdesk.models import Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC, CustomField, TicketCustomFieldValue, TicketDependency,Tag
 from helpdesk.email import email
+from project.models import Organization
 
 class M2MSelect(forms.SelectMultiple):
     def value_from_datadict(self, data, files, name):
@@ -220,12 +221,15 @@ class TicketForm(forms.Form):
         """
 
         q = Queue.objects.get(id=int(self.cleaned_data['queue']))
+        q = Queue.objects.get(id=int(self.cleaned_data['queue']))
+        org = Organization.objects.get(id=1)
 
         t = Ticket( title = self.cleaned_data['title'],
                     submitter_email = self.cleaned_data['submitter_email'],
                     created = timezone.now(),
                     status = Ticket.OPEN_STATUS,
                     queue = q,
+                    organization = org,
                     description = self.cleaned_data['body'],
                     error_msg = self.cleaned_data['error_msg'],
                     priority = self.cleaned_data['priority'],

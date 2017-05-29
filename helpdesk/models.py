@@ -363,7 +363,7 @@ class Ticket(models.Model):
     title = models.CharField(_('Title'), max_length=200,)
     queue = models.ForeignKey(Queue,verbose_name=_('Queue'),)
     organization = models.ForeignKey(Organization, verbose_name=_('Organization'),null=True)
-    submitter = models.ForeignKey(TolaUser,null=True)
+    #submitter = models.ForeignKey(TolaUser,null=True)
     created = models.DateTimeField(_('Created'), blank=True, help_text=_('Date this ticket was first created'),)
     modified = models.DateTimeField(_('Modified'),blank=True,help_text=_('Date this ticket was most recently changed.'),)
     submitter_email = models.EmailField(_('Submitter E-Mail'),blank=True,null=True,help_text=_('The submitter will receive an email for all public follow-ups left for this task.'),)
