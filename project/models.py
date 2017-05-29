@@ -74,10 +74,10 @@ class Country(models.Model):
 class TolaUser(models.Model):
     name = models.CharField("Given Name", blank=False, null=False, max_length=100)
     user = models.OneToOneField(User, unique=True, related_name='tolawork_user')
-    tables_api_token = models.CharField(blank=True, null=True, max_length=255)
     organization = models.ForeignKey('Organization', default=1, blank=True, null=True, )
     country = models.ForeignKey(Country, blank=True, null=True)
     activity_api_token = models.CharField(blank=True, null=True, max_length=255)
+    tables_api_token = models.CharField(blank=True, null=True, max_length=255)
     activity_url = models.CharField(blank=True, null=True, max_length=255)
     table_url = models.CharField(blank=True, null=True, max_length=255)
 
