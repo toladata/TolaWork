@@ -23,6 +23,6 @@ class QueueTestCase(TestCase):
 		queue = Queue.objects.create(title="TestQueue", slug="TestQueue")
 		queue.save()
 
-	def test_ticket_exists(self):
+	def test_queue_exists(self):
 		get_queue = Queue.objects.get(title="TestQueue")
 		self.assertEqual(Queue.objects.filter(id = get_queue.id).count(), 1)
