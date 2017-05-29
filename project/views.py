@@ -217,8 +217,6 @@ def home(request):
     form = form_data(request)
 
     users = get_current_users()
-
-    country = get_user_country(request)
     
     # Announcement
     announcements = Announcement.objects.all().order_by('create_date')
@@ -570,18 +568,6 @@ def ticket_objects(request):
 
         return {}
 
-
-# from threading import Thread
-# import time
-# import Queue
-# def githubSync(request):
-#     q = Queue.Queue()
-#     t = Thread(target = githubSyncing, args=(request, q))
-#     t.daemon = True
-#     t.start()
-    
-#     return HttpResponseRedirect('/home')
-
 #Get users with active sessions
 def get_current_users():
     active_sessions = Session.objects.filter(expire_date__gte=timezone.now())
@@ -625,15 +611,3 @@ def create_funding_opportunity(request):
             json.dumps({"response": "there was an error"}),
             content_type="application/json"
         )
-def get_user_country(request):
-
-    # Automatically geolocate the connecting IP
-    ip = request.META.get('REMOTE_ADDR')
-    try:
-        response = urlopen('http://ipinfo.io/'+ip+'/json').read()
-        response = json.loads(response)
-        return response['country'].lower()
-
-    except Exception, e:
-        response = "undefined"
-        return response
