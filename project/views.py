@@ -206,13 +206,6 @@ def home(request):
 
     #create ticket modal
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
-    initial_data = {}
-    try:
-        if request.user.is_authenticated and request.user.email:
-            initial_data['submitter_email'] = request.user.email
-
-    except Exception, e:
-        pass
 
     form = form_data(request)
 

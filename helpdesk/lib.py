@@ -289,7 +289,7 @@ def form_data(request):
 
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     initial_data = {}
-
+    form = PublicTicketForm(initial=initial_data)
 
     try:
         if request.user.email:
