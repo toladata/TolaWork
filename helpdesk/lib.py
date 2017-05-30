@@ -290,8 +290,6 @@ def form_data(request):
     assignable_users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
     initial_data = {}
 
-    form = PublicTicketForm(initial=initial_data)
-    form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
 
     try:
         if request.user.email:
@@ -303,6 +301,11 @@ def form_data(request):
             form = TicketForm(initial=initial_data)
             form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
             form.fields['assigned_to'].choices = [('', '--------')] + [[u.id, u.get_username()] for u in assignable_users]
+        else:
+            form = PublicTicketForm(initial=initial_data)
+            form.fields['queue'].choices = [('', '--------')] + [[q.id, q.title] for q in Queue.objects.all()]
+
+
         
     except Exception, e:
         pass
