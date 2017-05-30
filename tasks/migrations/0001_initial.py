@@ -10,6 +10,7 @@ from django.conf import settings
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('helpdesk', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -30,6 +31,7 @@ class Migration(migrations.Migration):
                 ('table', models.TextField(null=True, blank=True)),
                 ('assigned_to', models.ForeignKey(related_name='task_assigned_to', verbose_name='Assigned to', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
                 ('created_by', models.ForeignKey(related_name='task_created_by', verbose_name='Created By', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('tickets', models.ManyToManyField(related_name='task_tickets', to='helpdesk.Ticket', blank=True)),
             ],
             options={
                 'ordering': ['priority'],

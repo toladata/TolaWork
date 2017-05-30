@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#Tolawork Migration File
 from __future__ import unicode_literals
 
 from django.db import models, migrations
@@ -8,10 +7,12 @@ import django.utils.timezone
 import tinymce.models
 import helpdesk.models
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('project', '0001_initial'),
     ]
 
     operations = [
@@ -97,7 +98,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('question', tinymce.models.HTMLField(null=True, blank=True)),
-                ('answer', tinymce.models.HTMLField(verbose_name='Answer')),
+                ('answer', tinymce.models.HTMLField(null=True, blank=True)),
                 ('create_date', models.DateTimeField(null=True, blank=True)),
             ],
             options={
@@ -126,12 +127,30 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(max_length=200, null=True, verbose_name='Title', blank=True)),
                 ('comment', models.TextField(null=True, verbose_name='Comment', blank=True)),
                 ('public', models.BooleanField(default=False, help_text='Public tickets are viewable by the submitter and all staff, but non-public tickets can only be seen by staff.', verbose_name='Public')),
-                ('new_status', models.IntegerField(blank=True, help_text='If the status was changed, what was it changed to?', null=True, verbose_name='New Status', choices=[(1, 'Open'), (2, 'Reopened'), (3, 'Resolved'), (4, 'Closed'), (5, 'Duplicate')])),
+                ('new_status', models.IntegerField(blank=True, help_text='If the status was changed, what was it changed to?', null=True, verbose_name='New Status', choices=[(1, 'Open'), (2, 'Reopened'), (3, 'Resolved'), (4, 'Closed'), (5, 'Duplicate'), (6, 'In Progress'), (7, 'In  Dev Queue')])),
             ],
             options={
                 'ordering': ['date'],
                 'verbose_name': 'Follow-up',
                 'verbose_name_plural': 'Follow-ups',
+            },
+        ),
+        migrations.CreateModel(
+            name='FundingOpportunity',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=100, verbose_name='Name')),
+                ('phone', models.CharField(max_length=15, verbose_name='Phone Number')),
+                ('email', models.EmailField(max_length=254, null=True, verbose_name='E-Mail Address', blank=True)),
+                ('project_description', models.TextField(help_text='Short Description of Project.', verbose_name='Project Description', blank=True)),
+                ('project_start_date', models.DateTimeField(help_text='Anticipated Start Date of Project', verbose_name='Project Start Date', blank=True)),
+                ('total_estimated_amount', models.DecimalField(verbose_name='Estimated Amount', max_digits=10, decimal_places=2)),
+                ('additional_comments', models.TextField(null=True, verbose_name='Comment', blank=True)),
+            ],
+            options={
+                'ordering': ['name'],
+                'verbose_name': 'Funding Opportunity',
+                'verbose_name_plural': 'Funding Opportunities',
             },
         ),
         migrations.CreateModel(
@@ -158,7 +177,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'ordering': ['title'],
-                'verbose_name': 'Knowledge base category',
+                'verbose_name': 'KnCatowledge base category',
                 'verbose_name_plural': 'Knowledge base categories',
             },
         ),
@@ -256,23 +275,28 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(help_text='Date this ticket was first created', verbose_name='Created', blank=True)),
                 ('modified', models.DateTimeField(help_text='Date this ticket was most recently changed.', verbose_name='Modified', blank=True)),
                 ('submitter_email', models.EmailField(help_text='The submitter will receive an email for all public follow-ups left for this task.', max_length=254, null=True, verbose_name='Submitter E-Mail', blank=True)),
-                ('status', models.IntegerField(default=1, verbose_name='Status', choices=[(1, 'Open'), (2, 'Reopened'), (3, 'Resolved'), (4, 'Closed'), (5, 'Duplicate')])),
+                ('status', models.IntegerField(default=1, verbose_name='Status', choices=[(1, 'Open'), (2, 'Reopened'), (3, 'Resolved'), (4, 'Closed'), (5, 'Duplicate'), (6, 'In Progress'), (7, 'In  Dev Queue')])),
                 ('on_hold', models.BooleanField(default=False, help_text='If a ticket is on hold, it will not automatically be escalated.', verbose_name='On Hold')),
-                ('error_msg', models.TextField(help_text='Error message as it appears', null=True, verbose_name='Error Message', blank=True)),
-                ('description', models.TextField(help_text='The content of the customers query.', null=True, verbose_name='Description', blank=True)),
-                ('resolution', models.TextField(help_text='The resolution provided to the customer by our staff.', null=True, verbose_name='Resolution', blank=True)),
+                ('error_msg', models.TextField(help_text='Error message as it appears', verbose_name='Error Message', blank=True)),
+                ('description', models.TextField(help_text='The content of the customers query.', verbose_name='Description', blank=True)),
+                ('resolution', models.TextField(help_text='The resolution provided to the customer by our staff.', verbose_name='Resolution', blank=True)),
                 ('priority', models.IntegerField(default=3, help_text='1 = Highest Priority, 5 = Low Priority', blank=3, verbose_name='Priority', choices=[(1, '1. Critical'), (2, '2. High'), (3, '3. Normal'), (4, '4. Low'), (5, '5. Very Low')])),
-                ('slack_status', models.IntegerField(default=0, verbose_name='Slack Status')),
+                ('git_label', models.IntegerField(default=0, verbose_name='Git Label')),
                 ('due_date', models.DateTimeField(null=True, verbose_name='Due on', blank=True)),
                 ('last_escalation', models.DateTimeField(help_text='The date this ticket was last escalated - updated automatically by management/commands/escalate_tickets.py.', null=True, editable=False, blank=True)),
-                ('github_issue_number', models.CharField(max_length=255, null=True, blank=True)),
-                ('github_issue_url', models.CharField(max_length=255, null=True, blank=True)),
-                ('github_issue_id', models.CharField(max_length=255, null=True, blank=True)),
+                ('github_issue_number', models.CharField(max_length=255, blank=True)),
+                ('github_issue_url', models.CharField(max_length=255, blank=True)),
+                ('github_issue_id', models.CharField(max_length=255, blank=True)),
+                ('t_url', models.CharField(max_length=255, blank=True)),
                 ('type', models.IntegerField(default=1, help_text='Type of Ticket', verbose_name='Ticket Type', choices=[(1, 'Problem'), (2, 'Enhancement'), (3, 'Bug or Error')])),
                 ('votes', models.IntegerField(default=0)),
+                ('slack_status', models.IntegerField(default=0, verbose_name='Slack Status')),
+                ('remind', models.IntegerField(default=0)),
+                ('remind_date', models.DateTimeField(help_text='Date the last reminder was sent', verbose_name='Reminder', blank=True)),
                 ('assigned_to', models.ForeignKey(related_name='assigned_to', verbose_name='Assigned to', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('organization', models.ForeignKey(verbose_name='Organization', to='project.Organization', null=True)),
                 ('queue', models.ForeignKey(verbose_name='Queue', to='helpdesk.Queue')),
-                ('tags', models.ManyToManyField(to='helpdesk.Tag')),
+                ('tags', models.ManyToManyField(related_name='ticket_tags', to='helpdesk.Tag', blank=True)),
             ],
             options={
                 'ordering': ('id',),
@@ -329,6 +353,17 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Ticket dependency',
                 'verbose_name_plural': 'Ticket dependencies',
+            },
+        ),
+        migrations.CreateModel(
+            name='UserDefaultSort',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('sort', models.CharField(max_length=50)),
+                ('user_id', models.ForeignKey(related_name='userdefaultsort', verbose_name='User', to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'verbose_name_plural': 'userdefaultsorts',
             },
         ),
         migrations.CreateModel(
