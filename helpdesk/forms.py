@@ -222,14 +222,14 @@ class TicketForm(forms.Form):
 
         q = Queue.objects.get(id=int(self.cleaned_data['queue']))
         q = Queue.objects.get(id=int(self.cleaned_data['queue']))
-        org = Organization.objects.get(id=1)
+        #org = Organization.objects.get(id=1)
 
         t = Ticket( title = self.cleaned_data['title'],
                     submitter_email = self.cleaned_data['submitter_email'],
                     created = timezone.now(),
                     status = Ticket.OPEN_STATUS,
                     queue = q,
-                    organization = org,
+                    #organization = org,
                     description = self.cleaned_data['body'],
                     error_msg = self.cleaned_data['error_msg'],
                     priority = self.cleaned_data['priority'],
