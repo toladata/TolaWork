@@ -25,7 +25,6 @@ class DocumentationApp(models.Model):
 
     class Meta:
         ordering = ('create_date',)
-
     def save(self, *args, **kw):
         if self.create_date is None:
             self.create_date = datetime.now()
