@@ -2,8 +2,18 @@
  $(document).ready(function () { 
     document.getElementById('ticket-field').style.display = 'none';
 
+
+
     var triggered = false;
     var trigger = "#";
+    var tickets_array = new Array(); 
+    if (document.getElementsByName('tickets[]')) {
+      var linked_edit_tickets = document.getElementsByName('tickets[]');
+      for(var i = 0; i < linked_edit_tickets.length; i++) {
+            tickets_array.push(parseInt(linked_edit_tickets[i].value));
+        }
+    };
+
     $.ajax({
            url: "/tasks/tasks/tickets",
            type: "GET",
@@ -31,22 +41,41 @@
 
                       if ($('#id_note').is(':focus')){
 
-                        $('#tickets').append('<li id="item'+ui.item.value+'"><a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')"><span class="label label-danger">Remove</span></a></li>');
-                        this.value = text.substring(0, pos);
+                        if ($.inArray(ui.item.value, tickets_array) == -1) {
+                            tickets_array.push(ui.item.value);
 
-                        var selectedItem= ui.item.value;
-                        document.getElementById('ticket-field').style.display = 'block';
-                        var field = '<div id="ticket'+selectedItem+'"><span><input type="text" id="tickets[]" name="tickets[]" value="'+selectedItem+'" hidden></span></div>';
-                        document.getElementById('ticket-field').innerHTML += field;
+                            $('#tickets').append('<li id="item'+ui.item.value+'">'+'<a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')"><span class="label label-danger">Remove</span></a></li>');
+                            this.value = text.substring(0, pos);
+
+                            var selectedItem= ui.item.value;
+                            document.getElementById('ticket-field').style.display = 'block';
+                            var field = '<div id="ticket'+selectedItem+'"><span><input type="text" id="tickets[]" name="tickets[]" value="'+selectedItem+'" hidden></span></div>';
+                            document.getElementById('ticket-field').innerHTML += field;
+                        }else{
+                          alert("This ticket is already linked to this task!");
+                        }
+
+
                       }
                       else{
-                        $('#tickets-edit').append('<li id="item'+ui.item.value+'"><a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')"><span class="label label-danger">Remove</span></a></li>');
-                          this.value = text.substring(0, pos);
 
-                        var selectedItem= ui.item.value;
-                        document.getElementById('ticket-edit-field').style.display = 'block';
-                        var field = '<div id="ticket'+selectedItem+'"><span><input type="text" id="tickets[]" name="tickets[]" value="'+selectedItem+'" hidden></span></div>';
-                        document.getElementById('ticket-edit-field').innerHTML += field;
+                        if ($.inArray(ui.item.value, tickets_array) == -1) {
+                            tickets_array.push(ui.item.value);
+                            console.log(tickets_array);
+
+                            $('#tickets-edit').append('<li id="item'+ui.item.value+'"><a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')"><span class="label label-danger">Remove</span></a></li>');
+                              this.value = text.substring(0, pos);
+
+                            var selectedItem= ui.item.value;
+                            document.getElementById('ticket-edit-field').style.display = 'block';
+                            var field = '<div id="ticket'+selectedItem+'"><span><input type="text" name= "edit_tickets'+selectedItem+' "id="tickets[]" name="tickets[]" value="'+selectedItem+'" hidden></span></div>';
+                            document.getElementById('ticket-edit-field').innerHTML += field;
+                          }else
+
+                          {
+                            alert("This ticket is already linked to this task!");
+                          }
+
 
                       }
 
@@ -110,7 +139,7 @@ function create_task(data, csrftoken) {
         contentType: false,
         data: data,
         success : function(task) {
-                alert("You have Succefully Created task #"+task.id);
+                $.growl.notice({title: "Success Message", message: "You have Succefully Created task #"+task.id });
                 window.location.href = "/tasks/tasks/";
         },
         error : function(xhr,errmsg,err) {

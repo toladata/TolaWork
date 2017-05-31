@@ -416,7 +416,7 @@
                 </tr>
                 <tr>
                   <td colspan="6">
-                    <button class="btn btn-success" type="submit" data-toggle="modal" data-target="#myModal" ><b><span class="glyphicon glyphicon-plus"></span></b><strong></strong> Create a Task</strong>  </button>
+                    <button class="btn btn-success" type="submit" data-toggle="modal" data-target="#myModal" ><b><span class="glyphicon glyphicon-plus" id="btn_create_task"></span></b><strong></strong> Create a Task</strong>  </button>
                   </td>
                 </tr>
               </table>
@@ -805,12 +805,15 @@
       dateFormat: "yy-mm-dd"
     });
 
-/*   var date = new Date();
+   var date = new Date();
    var datestring = ('0000' + date.getFullYear()).slice(-4) + '-' + ('00' + (date.getMonth() + 1)).slice(-2) + '-' + ('00' + date.getDate()).slice(-2);
    document.getElementById('id_created_date').value = datestring;
    document.getElementById('id_due_date').value = datestring;
-   document.getElementById('id_edit_due_date').value = datestring;
-   document.getElementById('id_edit_created_date').value = datestring;*/
+
+   if (document.getElementById('id_edit_due_date')  && document.getElementById('id_edit_created_date') ){ 
+       document.getElementById('id_edit_due_date').value = datestring;
+       document.getElementById('id_edit_created_date').value = datestring;
+   };
 
     
   });
@@ -928,6 +931,8 @@ $(document).ready(function() {
 
             $('#task_create-form').on('submit', function(event){
                 event.preventDefault();
+
+                alert("Your data has been submitted!!");
 
                 var data = new FormData($(this)[0]);
 
