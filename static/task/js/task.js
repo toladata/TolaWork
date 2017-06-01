@@ -1,19 +1,15 @@
 
- $(document).ready(function () { 
-    document.getElementById('ticket-field').style.display = 'none';
+ $(document).ready(function (){ 
 
+    if (document.getElementById('ticket-field')) {
 
+      document.getElementById('ticket-field').style.display = 'none';
+    };
 
     var triggered = false;
     var trigger = "#";
     var tickets_array = new Array(); 
-    if (document.getElementsByName('tickets[]')) {
-      var linked_edit_tickets = document.getElementsByName('tickets[]');
-      for(var i = 0; i < linked_edit_tickets.length; i++) {
-            tickets_array.push(parseInt(linked_edit_tickets[i].value));
-        }
-    };
-
+  
     $.ajax({
            url: "/tasks/tasks/tickets",
            type: "GET",
@@ -59,24 +55,36 @@
                       }
                       else{
 
+                        var div_id = document.activeElement.name;
+                        console.log(div_id);
+
+                        var linked_tickets = $(".linked_tickets"+div_id+" .ticket_linked"+div_id+"").map(function()         {
+                                     return parseInt($(this).val());
+                                  }).get();
+
+                        for (var i = 0; i < linked_tickets.length; i++) {
+                                tickets_array.push(linked_tickets[i]);
+                        };
+                        console.log(tickets_array);
+
                         if ($.inArray(ui.item.value, tickets_array) == -1) {
                             tickets_array.push(ui.item.value);
-                            console.log(tickets_array);
 
-                            $('#tickets-edit').append('<li id="item'+ui.item.value+'"><a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')"><span class="label label-danger">Remove</span></a></li>');
+                            $('#tickets-edit'+div_id).append('<li id="item'+ui.item.value+'"><a>['+ui.item.queue.toUpperCase()+'-'+ui.item.value+']'+ui.item.label+'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('+ui.item.value+')"><span class="label label-danger">Remove</span></a></li>');
                               this.value = text.substring(0, pos);
 
                             var selectedItem= ui.item.value;
-                            document.getElementById('ticket-edit-field').style.display = 'block';
-                            var field = '<div id="ticket'+selectedItem+'"><span><input type="text" name= "edit_tickets'+selectedItem+' "id="tickets[]" name="tickets[]" value="'+selectedItem+'" hidden></span></div>';
-                            document.getElementById('ticket-edit-field').innerHTML += field;
+                            console.log('ticket-edit-field'+div_id);
+                            document.getElementById('ticket-edit-field'+div_id).style.display = 'block';
+                            var field = '<div id="ticket'+selectedItem+'"><span><input type="text" class="ticket_linked'+div_id+' "id="tickets[]" name="tickets[]" value="'+selectedItem+'" hidden></span></div>';
+                            document.getElementById('ticket-edit-field'+div_id).innerHTML += field;
+
+                            tickets_array.length = 0;
                           }else
 
                           {
                             alert("This ticket is already linked to this task!");
                           }
-
-
                       }
 
 
@@ -110,7 +118,7 @@
 
 //Removing inked Tickets
 function removeticket(id) {
-    var elem = document.getElementById("ticket"+id);
+   var elem = document.getElementById("ticket"+id);
    elem.parentNode.removeChild(elem);
    document.getElementById("item"+id).style.display = "none";
    return false;
@@ -171,7 +179,7 @@ function edit_task(data, csrftoken, task_id) {
         data: data,
         success : function(task) {
                 alert("You have Succefully Edited task #"+task_id);
-                window.location.href = "/tasks/tasks/";
+                window.location.reload(true);
         },
         error : function(xhr,errmsg,err) {
             console.log(xhr.status + ": " + xhr.responseText); 
