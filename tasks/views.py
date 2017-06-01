@@ -248,6 +248,7 @@ def task(request, task_id):
             'assignable_users': assignable_users,
             'status_choices':Task.STATUS_CHOICES, 
             'priority': Task.PRIORITY_CHOICES,
+            't_status_choices': Ticket.STATUS_CHOICES
         }))
 
 @login_required
