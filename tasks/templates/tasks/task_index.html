@@ -300,25 +300,25 @@
                               </div>
                               <div class="col-md-12 row">
                                   <label class="col-md-2"><p><strong>{% trans "Description:" %}</strong></p></label>
-                                  <div class="col-md-9 edit_note">
-                                      <textarea class="form-control" rows="4" name='note_edit' id='id_note_edit' required>{{ task.note}}</textarea>
+                                  <div class="col-md-9 edit_note" id="{{task.id}}">
+                                      <textarea class="form-control" rows="4" name="{{task.id}}" id="id_note_edit{{t.id}}" required>{{ task.note}}</textarea>
                                       <span style="font-size: 9pt">Type <b>"#"</b> symbol to link this Task to a Ticket(s). The linked ticket(s) will appear below</span><br><br>
                                   </div>
                               </div>
                               {% if task.tickets.all %}
-                                  <div class="col-sm-offset-2 row" id="ticket-edit-field">
+                                  <div class="col-sm-offset-2 row linked_tickets{{task.id}}" id="ticket-edit-field{{task.id}}">
                                     <h5><b>Linked Tickets</b></h5>   
-                                    <ul id="tickets-edit">
+                                    <ul id="tickets-edit{{task.id}}">
                                       {% for t in task.tickets.all %}
-                                      <div id="ticket{{t.id}}"><span><input type="text" id="tickets[]" name="tickets[]" value="{{t.id}}" hidden></span></div>
+                                      <div id="ticket{{t.id}}"><span><input type="text" class="ticket_linked{{task.id}}" id="tickets[]" name="tickets[]" value="{{t.id}}" hidden></span></div>
                                       <li id="item{{t.id}}"><a>{{t.ticket}}&nbsp;&nbsp;{{t.title}}</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('{{t.id}}')"><span class="label label-danger">Remove</span></a><br></li>
                                       {% endfor %}
                                     </ul><br>
                                   </div>
                                 {% else %}
-                                  <div class="col-sm-offset-2 row" id="ticket-edit-field">
+                                  <div class="col-sm-offset-2 row linked_tickets{{task.id}}" id="ticket-edit-field{{task.id}}">
                                     <h5><b>Linked Tickets:</b></h5>   
-                                    <ul id="tickets-edit">
+                                    <ul id="tickets-edit{{task.id}}">
                                     </ul><br>
                                   </div>
                                 {% endif %}
@@ -335,6 +335,7 @@
                                 </label>
                             </div>
                             </form>
+
                             <script>
                                $(document).ready(function(){
 
@@ -455,7 +456,7 @@
                     <div class="col-md-12 row ui-front">
                         <label class="col-md-2"><p><strong>{% trans "Description:" %}</strong></p></label>
                       <div class="col-md-10 row ticket_edit">
-                        <div class="edit_note examples">
+                        <div class="edit_note examples" id="textarea_add">
                             <textarea class="form-control" rows="4" name='note' id='id_note' required></textarea>
                             <span style="font-size: 9pt">Type <b>"#"</b> symbol to link this Task to a Ticket(s). The linked ticket(s) will appear below</span><br>
                             <div id="ticket-field">
