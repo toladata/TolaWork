@@ -76,6 +76,50 @@
     </table>
     
     </div>
+    <!--Tickets-->
+
+      {% if task.tickets.all %}
+      <div class="col-md-10">
+        <b>Linked Tickets</b><br>
+          <table class="table table-striped" >
+            <thead>
+              <th>Ticket</th>
+              <th>Status</th>
+            </thead>
+            <tbody>
+            {% for t in task.tickets.all %}
+              <tr>
+                <td><a href="/helpdesk/tickets/{{t.id}}/">{{t.ticket}} {{t.title}}</a></td>
+                <td>
+
+                  {% for status in t_status_choices %}
+                      {% if status.0 == t.status %}
+                        {{status.1}}
+                      {% endif %}
+                  {% endfor %}
+                </td>
+
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+      </div>
+      {% endif %}
+      <!--End Tickets-->
+
+      <!--Attachments-->
+      <div class="view_table">
+      {% if task.taskattachment_set.all%}
+        <label class="col-md-2"><p><strong>{% trans "Attachments:" %}</strong></p></label>
+        {% for attachment in task.taskattachment_set.all %}
+            <div class='col-md-12'>
+                 <a href='{{ attachment.file.url }}'><span class="glyphicon glyphicon-file"> {{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</span>
+            </div>
+        {% endfor %}
+        {% endif %}
+      </div>
+      <!-- End of Attachments-->
+
     <div class="view_table">
       {% if task.taskcomment_set.all %}
         <label class="col-md-2"><p><strong>{% trans "Comments:" %}</strong></p></label>
@@ -119,94 +163,168 @@
   <div id="tasktab{{ task.id }}" class="tab-pane task_edit fade">
   <p class="font9"> <strong>Use this form to make any changes to the task</strong></p>
     <div class="ticket_form">
-      <form method= "POST" action='{% url 'task_edit' task.id  %}'>
-        <div class="col-md-12 row task_spacing">
-          <div class="col-md-6 row ticket_edit">
-             <label class="col-md-4"><p><strong> {% trans "Title:" %}</strong></p></label>
-             <div class="col-md-8">
-                <input class="form-control" type="text" id='id_title{{task.id}}' name='task' required value="{{task.task}}" />
-             </div>
-          </div>
-          <div class="col-md-6 row ticket_edit">
-                <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
-                <div class="col-md-8" >
-                  <input class="form-control" type="text" name='submitter_mail' id='id_submitter_mail' value="{{task.submitter_email}}">
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12 row task_spacing">
-         <div class="col-md-6 row ticket_edit">
-                <label class="col-md-4"><p><strong>{% trans "Status:" %}</strong></p></label>
-          <div class="col-md-8">
-              <select class="form-control" id='id_status' name='status'>
-              {% for s in status_choices %}<option value='{{ s.0 }}'{% ifequal s.0 task.status %} selected='selected'{% endifequal %}>{{ s.1 }}</option>{% endfor %}
-            </select >
-           </div>
-          </div>
-            <div class="col-md-6 row ticket_edit">
-               <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
-               <div class="col-md-8">
-                 <select class="form-control" id='id_priority' name='priority'>
-                 {% for p in priority %}<option value='{{ p.0 }}'{% ifequal p.0 task.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}
-                  </select>
-               </div>
-            </div>
-          </div>
-          <div class="col-md-12 row task_spacing">
+      <form method= "POST" id="task_edit-form{{task.id}}">
+                            <div class="col-md-12 row">
+                              <div class="col-md-6 row ticket_edit">
+                                 <label class="col-md-4"><p><strong> {% trans "Title:" %}</strong></p></label>
+                                 <div class="col-md-8">
+                                    <input class="form-control" type="text" id='id_title{{task.id}}' name='task' required value="{{task.task}}" />
+                                 </div>
+                              </div>
+                              <div class="col-md-6 row ticket_edit">
+                                    <label class="col-md-4"><p><strong>{% trans "Submitter Email:" %}</strong></p></label>
+                                    <div class="col-md-8" >
+                                      <input class="form-control" type="text" name='submitter_mail' id='id_submitter_mail' value="{{task.submitter_email}}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 row task_spacing">
+                             <div class="col-md-6 row ticket_edit">
+                                    <label class="col-md-4"><p><strong>{% trans "Status:" %}</strong></p></label>
+                              <div class="col-md-8">
+                                  <select class="form-control" id='id_status' name='status'>
+                                  {% for s in status_choices %}<option value='{{ s.0 }}'{% ifequal s.0 task.status %} selected='selected'{% endifequal %}>{{ s.1 }}</option>{% endfor %}
+                                </select >
+                               </div>
+                              </div>
+                                <div class="col-md-6 row ticket_edit">
+                                   <label class="col-md-4"><p><strong>{% trans "Priority:" %}</strong></p></label>
+                                   <div class="col-md-8">
+                                     <select class="form-control" id='id_priority' name='priority'>
+                                     {% for p in priority %}<option value='{{ p.0 }}'{% ifequal p.0 task.priority %} selected='selected'{% endifequal %}>{{ p.1 }}</option>{% endfor %}
+                                      </select>
+                                   </div>
+                                </div>
+                              </div>
+                              <div class="col-md-12 row">
 
-            <div class="col-md-6 row ticket_edit">
-              <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
-              <div class="col-md-8">
+                                <div class="col-md-6 row ticket_edit">
+                                  <label class="col-md-4"><p><strong>{% trans "Created Date:" %}</strong></p></label>
+                                  <div class="col-md-8">
 
-                 <input class="form-control" name='created_date' id='id_edit_created_date' value="{{ task.created_date | date}}">
-              </div>
-            </div>
-              <div class="col-md-6 row ticket_edit">
-              <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
-              <div class="col-md-8">
-              <input class="form-control" name='due_date' id='id_edit_due_date' Value="{{ task.due_date | date}}">
+                                     <input class="form-control" name='created_date' id='id_edit_created_date' value="{{ task.created_date | date}}">
+                                  </div>
+                                </div>
+                                  <div class="col-md-6 row ticket_edit">
+                                  <label class="col-md-4"><p><strong>{% trans "Due Date:" %}</strong></p></label>
+                                  <div class="col-md-8">
+                                  <input class="form-control" name='due_date' id='id_edit_due_date' Value="{{ task.due_date | date}}">
 
-              </div>
-            </div>
-          </div>
-          <div class="col-md-12 row task_spacing">
-            <div class="col-md-6 row ticket_edit">
-              <label class="col-md-4"><p><strong>{% trans "Created by:" %}</strong></p></label>
-              <div class="col-md-8">
-                <select class=" form-control" name='created_by' id='id_created_by'>
-                  <option value="{{created_by.id}}">{{task.created_by}}</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-md-6 row ticket_edit">
-              <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong></p></label>
-              <div class="col-md-8">
-                <select class="form-control" name='assigned_to' id='id_assigned_to'>
-                  <option>------</option>
-                  {% for user in assignable_users %}
-                  <option value='{{ user.id }}' {% ifequal user.id task.assigned_to_id %} selected='selected' {% endifequal %}>{{ user.username }}</option>
-                  {% endfor %}
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="col-md-12 row">
+                                <div class="col-md-6 row ticket_edit">
+                                  <label class="col-md-4"><p><strong>{% trans "Created by:" %}</strong></p></label>
+                                  <div class="col-md-8">
+                                    <select class=" form-control" name='created_by' id='id_created_by'>
+                                      <option value="{{created_by.id}}">{{task.created_by}}</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div class="col-md-6 row ticket_edit">
+                                  <label class="col-md-4"><p><strong>{% trans "Assigned to:" %}</strong></p></label>
+                                  <div class="col-md-8">
+                                    <select class="form-control" name='assigned_to' id='id_assigned_to'>
+                                      <option>------</option>
+                                      {% for user in assignable_users %}
+                                      <option value='{{ user.id }}' {% ifequal user.id task.assigned_to_id %} selected='selected' {% endifequal %}>{{ user.username }}</option>
+                                      {% endfor %}
 
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-12 row">
-            <div class="col-md-11 row ticket_edit">
-              <label class="col-md-2"><p><strong>{% trans "Note:" %}</strong></p></label>
-              <div class="col-md-9 sort_add">
-                  <textarea class="form-control" rows="4" name='note_edit' id='id_note_edit' required>{{ task.note}}</textarea>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-12 row modal_button">
-            <label class= "col-md-6 row ticket_edit">
-                <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />
-                {% csrf_token %}
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="col-md-12 row">
+                                  <label class="col-md-2"><p><strong>{% trans "Description:" %}</strong></p></label>
+                                  <div class="col-md-9 edit_note" id="{{task.id}}">
+                                      <textarea class="form-control" rows="4" name="{{task.id}}" id="id_note_edit{{t.id}}" required>{{ task.note}}</textarea>
+                                      <span style="font-size: 9pt">Type <b>"#"</b> symbol to link this Task to a Ticket(s). The linked ticket(s) will appear below</span><br><br>
+                                  </div>
+                              </div>
+                              {% if task.tickets.all %}
+                                  <div class="col-sm-offset-2 row linked_tickets{{task.id}}" id="ticket-edit-field{{task.id}}">
+                                    <h5><b>Linked Tickets</b></h5>   
+                                    <ul id="tickets-edit{{task.id}}">
+                                      {% for t in task.tickets.all %}
+                                      <div id="ticket{{t.id}}"><span><input type="text" class="ticket_linked{{task.id}}" id="tickets[]" name="tickets[]" value="{{t.id}}" hidden></span></div>
+                                      <li id="item{{t.id}}"><a>{{t.ticket}}&nbsp;&nbsp;{{t.title}}</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('{{t.id}}')"><span class="label label-danger">Remove</span></a><br></li>
+                                      {% endfor %}
+                                    </ul><br>
+                                  </div>
+                                {% else %}
+                                  <div class="col-sm-offset-2 row linked_tickets{{task.id}}" id="ticket-edit-field{{task.id}}">
+                                    <h5><b>Linked Tickets:</b></h5>   
+                                    <ul id="tickets-edit{{task.id}}">
+                                    </ul><br>
+                                  </div>
+                                {% endif %}
+                              <div class="row mydropdiv">
+                                  <label class="col-md-2"><p><strong>{% trans "Attach File(s):" %}</strong></p></label>
+                                  <div class=" ticket_padding dropzone col-md-8" id="dZUpload-edit" style="margin-botttom:10px;"></div>
+                              </div>
+                              <br><br>
+                              <div class="col-md-12 row modal_button">
+                                <label class= "col-md-6 row ticket_edit">
+                                    <input class="btn btn-primary col-md-offset-5" type='submit' value='{% trans "Save Changes" %}' />
+                                    {% csrf_token %}
 
-            </label>
-        </div>
-        </form>
+                                </label>
+                            </div>
+                            </form>
+
+    <script>
+       $(document).ready(function(){
+
+              var list_of_files = new Array();
+              Dropzone.autoDiscover = false;
+
+              $("div#dZUpload-edit").dropzone({
+                    url: "/helpdesk/tickets/submit/",
+                    uploadMultiple: true,
+                    maxFiles: 5,
+                    autoProcessQueue : false,
+                    init : function() {
+                        this.on("addedfile", function(file)
+                            {
+                                if (list_of_files.length < 5)
+                                {
+                                    list_of_files.push(file)
+                                    console.log("file added");
+                                }
+                            });
+                    }
+                });
+
+
+            document.onpaste = function(event){
+                var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+
+                for (index in items) {
+                  var item = items[index];
+                  if (item.kind === 'file') {
+                    // adds the file to your dropzone instance
+                    mydropzone1.addFile(item.getAsFile());
+                  }
+                }
+              }
+
+
+              $('#task_edit-form{{task.id}}').on('submit', function(event){
+                  event.preventDefault();
+
+                  var data = new FormData($(this)[0]);
+
+                  for(i=0;i<list_of_files.length;i++)
+                      {
+                        data.append('attachment', list_of_files[i]);
+                      }
+
+                  var csrftoken = $("#task_edit-form{{task.id}}").find('input[name="csrfmiddlewaretoken"]').val();
+                  edit_task(data, csrftoken, '{{task.id}}');
+                  });
+     });
+    </script>
 
     </div>
   </div>
@@ -224,5 +342,5 @@
   </div>
 </div>
 </div>
-
+<script src='{{ STATIC_URL }}task/js/task.js' type='text/javascript'></script>
 {% endblock %}
