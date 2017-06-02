@@ -375,6 +375,8 @@
 
                                       $('#task_edit-form{{task.id}}').on('submit', function(event){
                                           event.preventDefault();
+                                          alert("Your data changes have been submitted!!");
+
 
                                           var data = new FormData($(this)[0]);
 

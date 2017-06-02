@@ -144,7 +144,6 @@ function create_task(data, csrftoken) {
         },
         headers: { "cache-control": "no-cache" }
     });
-    console.log(data.tickets);
 
     $.ajax({
         url : "/tasks/tasks/submit/",
@@ -184,7 +183,7 @@ function edit_task(data, csrftoken, task_id) {
         contentType: false,
         data: data,
         success : function(task) {
-                alert("You have Succefully Edited task #"+task_id);
+                $.growl.notice({title: "Success Message", message: "You have Succefully Edited task #"+task_id });
                 window.location.reload(true);
         },
         error : function(xhr,errmsg,err) {
