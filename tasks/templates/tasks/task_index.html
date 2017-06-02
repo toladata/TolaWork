@@ -310,8 +310,8 @@
                                     <h5><b>Linked Tickets</b></h5>   
                                     <ul id="tickets-edit{{task.id}}">
                                       {% for t in task.tickets.all %}
-                                      <div id="ticket{{t.id}}"><span><input type="text" class="ticket_linked{{task.id}}" id="tickets[]" name="tickets[]" value="{{t.id}}" hidden></span></div>
-                                      <li id="item{{t.id}}"><a>{{t.ticket}}&nbsp;&nbsp;{{t.title}}</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('{{t.id}}')"><span class="label label-danger">Remove</span></a><br></li>
+                                      <div id="ticket{{task.id}}{{t.id}}"><span><input type="text" class="ticket_linked{{task.id}}" id="tickets[]" name="tickets[]" value="{{t.id}}" hidden></span></div>
+                                      <li id="item{{task.id}}{{t.id}}"><a>{{t.ticket}}&nbsp;&nbsp;{{t.title}}</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="removeticket('{{t.id}}', '{{task.id}}')"><span class="label label-danger">Remove</span></a><br></li>
                                       {% endfor %}
                                     </ul><br>
                                   </div>
@@ -461,7 +461,7 @@
                             <span style="font-size: 9pt">Type <b>"#"</b> symbol to link this Task to a Ticket(s). The linked ticket(s) will appear below</span><br>
                             <div id="ticket-field">
                               <h5><b>Linked Tickets</b></h5>
-                              <ul id="tickets"></ul><br>
+                              <ul id="tickets_create"></ul><br>
                             </div>
                         </div>
                       </div>
