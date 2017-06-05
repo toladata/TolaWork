@@ -45,6 +45,18 @@ class FeedbackTestCase(TestCase):
         get_feedback = Feedback.objects.get(severity="TestSeverity")
         self.assertEqual(Feedback.objects.filter(id=get_feedback.id).count(), 1)
 
+class FAQTestCase(TestCase):
+
+    def setUp(self):
+        new_faq = FAQ.objects.create(question="Test question?", answer="Test anwer")
+        new_faq.save()
+
+    def test_faq_exists(self):
+        get_faq = FAQ.objects.get(question="Test question?")
+        self.assertEqual(FAQ.objects.filter(id=get_faq.id).count(), 1)
+
+        
+
 
 
 

@@ -50,10 +50,10 @@ class Feedback(models.Model):
     class Meta:
         ordering = ('create_date',)
 
-    def save(self, *args, **kw):
+    def save(self, *args, **kwargs):
         if self.create_date is None:
             self.create_date = datetime.now()
-        super(Feedback, self).save(*args, **kw)
+        super(Feedback, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return unicode(self.submitter)
@@ -73,10 +73,10 @@ class FAQ(models.Model):
     class Meta:
         ordering = ('create_date',)
 
-    def save(self):
+    def save(self, *args, **kwargs):
         if self.create_date is None:
             self.create_date = datetime.now()
-        super(FAQ, self).save()
+        super(FAQ, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return unicode(self.question)
