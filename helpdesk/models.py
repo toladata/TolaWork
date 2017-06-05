@@ -50,10 +50,10 @@ class Feedback(models.Model):
     class Meta:
         ordering = ('create_date',)
 
-    def save(self):
+    def save(self, *args, **kw):
         if self.create_date is None:
             self.create_date = datetime.now()
-        super(Feedback, self).save()
+        super(Feedback, self).save(*args, **kw)
 
     def __unicode__(self):
         return unicode(self.submitter)
