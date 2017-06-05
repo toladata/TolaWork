@@ -18,16 +18,6 @@ class DocumentationAppTestCase(TestCase):
         get_documentation = DocumentationApp.objects.get(name="testdoc")
         self.assertEqual(DocumentationApp.objects.filter(id=get_documentation.id).count(), 1)
 
-
-class QueueTestCase(TestCase):
-    def setUp(self):
-        queue = Queue.objects.create(title="TestQueue", slug="TestQueue")
-        queue.save()
-
-    def test_queue_exists(self):
-            get_queue = Queue.objects.get(title="TestQueue")
-            self.assertEqual(Queue.objects.filter(id = get_queue.id).count(), 1)
-
 class FeedbackTestCase(TestCase):
 
     def setUp(self):
@@ -54,6 +44,26 @@ class FAQTestCase(TestCase):
     def test_faq_exists(self):
         get_faq = FAQ.objects.get(question="Test question?")
         self.assertEqual(FAQ.objects.filter(id=get_faq.id).count(), 1)
+
+class QueueTestCase(TestCase):
+
+    def setUp(self):
+        new_queue = Queue.objects.create(title="TestQueue", slug="TestQueue")
+        new_queue.save()
+
+    def test_queue_exists(self):
+        get_queue = Queue.objects.get(title="TestQueue")
+        self.assertEqual(Queue.objects.filter(id=get_queue.id).count(), 1)
+
+class TagTestCase(TestCase):
+    def setUp(self):
+        new_tag = Tag.objects.create(name="TestCaseTag")
+        new_tag.save()
+
+    def test_tag_exists(self):
+        get_tag = Tag.objects.get(name="TestCaseTag")
+        self.assertEqual(Tag.objects.filter(id=get_tag.id).count(), 1)
+        
 
         
 
