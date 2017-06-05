@@ -5,7 +5,7 @@ from helpdesk.models import DocumentationApp
 from django.contrib.auth.models import User
 
 
-class IndicatorTestCase(TestCase):
+class DocumentationAppTestCase(TestCase):
 
     def setUp(self):
         user = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword')
@@ -18,3 +18,11 @@ class IndicatorTestCase(TestCase):
         get_documentation = DocumentationApp.objects.get(name="testdoc")
         self.assertEqual(DocumentationApp.objects.filter(id=get_documentation.id).count(), 1)
 
+class OrganizationTestCase(TestCase):
+    def setUp(self):
+        new_organization = Organization.objects.create(name="OpenBuild", description="Test OpenBuild description", organization_url="http://open.build")
+        new_organization.save()
+
+    def organization_exists(self):
+        get_organization = Organization.objects.get(name="OpenBuild")
+        self.assertEqual(Organizatio.objects.filter(id=get_organization.id).count(), 1)
