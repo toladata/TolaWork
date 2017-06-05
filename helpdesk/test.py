@@ -4,6 +4,7 @@ from django.test import Client
 from helpdesk.models import *
 from project.models import Organization, TolaUser
 from django.contrib.auth.models import User
+from datetime import datetime
 
 
 class DocumentationAppTestCase(TestCase):
@@ -86,6 +87,16 @@ class TicketTestCase(TestCase):
     def test_ticket_exists(self):
         get_ticket = Ticket.objects.get(title="Just a TestCase Ticket")
         self.assertEqual(Ticket.objects.filter(id=get_ticket.id).count(), 1)
+
+class FundingOpportunityTestCase(TestCase):
+
+    def setUp(self):
+        new_f_opportuity = FundingOpportunity.objects.create(name="Opportunity1", phone="000001111", email="test@test.com", project_description="This is a test Funding opportunity", project_start_date=datetime.now(), total_estimated_amount=120000)
+        new_f_opportuity.save()
+
+    def test_fundingopportunity_exists(self):
+        get_f_opportunity = FundingOpportunity.objects.get(name="Opportunity1")
+        self.assertEqual(FundingOpportunity.objects.filter(id=get_f_opportunity.id).count(), 1)
 
 
 
