@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
-from django.template import RequestContext, loader, Context
 from tasks.models import Task, TaskComment, TaskAttachment
 from helpdesk.models import Ticket
 from datetime import datetime
@@ -20,7 +19,6 @@ from django.utils.translation import ugettext as _
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
-from django.core import paginator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 try:
     from django.utils import timezone
@@ -31,7 +29,6 @@ import requests
 import re
 import json
 from tasks.forms import TaskForm
-from tasks.models import Task
 from helpdesk.views.staff import form_data, user_tickets
 from helpdesk.lib import apply_query, query_to_dict
 from project.views import get_TolaActivity_data, get_TolaTables_data
