@@ -8,7 +8,8 @@ class TolaUserAdmin(admin.ModelAdmin):
 	list_filter = ( 'activity_url',)
 
 class OrganizationAdmin(admin.ModelAdmin):
-	list_filter = ( 'name',)
+    list_display = ('name', 'create_date', 'edit_date')
+    display = 'Organization'
 
 admin.site.register(TolaUser, TolaUserAdmin)
 admin.site.register(Organization, OrganizationAdmin)
