@@ -16,7 +16,6 @@ try:
     User = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
@@ -37,7 +36,6 @@ from django.core import paginator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.safestring import mark_safe
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core import serializers 
 
 try:
     from django.utils import timezone
