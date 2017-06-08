@@ -46,7 +46,6 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 class Country(models.Model):
     country = models.CharField("Country Name", max_length=255, blank=True)
-    organization = models.ForeignKey('Organization', default=1)
     code = models.CharField("2 Letter Country Code", max_length=4, blank=True)
     description = models.TextField("Description/Notes", max_length=765,blank=True)
     latitude = models.CharField("Latitude", max_length=255, null=True, blank=True)
