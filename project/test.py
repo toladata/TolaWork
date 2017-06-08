@@ -21,3 +21,12 @@ class AnnouncementTestCase(TestCase):
 	def test_announcement_exists(self):
 		get_announcement = Announcement.objects.get(title="Test Announcement")
 		self.assertEqual(Announcement.objects.filter(id=get_announcement.id).count(), 1)
+
+class CountryTestCase(TestCase):
+	def setUp(self):
+		new_country = Country.objects.create(country="TestCountry", code="TC", description="Just a test country")
+		new_country.save()
+
+	def test_country_exists(self):
+		get_country = Country.objects.get(country="TestCountry")
+		self.assertEqual(Country.objects.filter(id=get_country.id).count(), 1) 
