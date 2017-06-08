@@ -1,31 +1,22 @@
 from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader, Context
-from django.contrib.auth.models import User
 from tasks.models import Task, TaskComment, TaskAttachment
 from helpdesk.models import Ticket
 from datetime import datetime
-from datetime import datetime, timedelta
 
 try:
     from django.contrib.auth import get_user_model
     User = get_user_model()
 except ImportError:
     from django.contrib.auth.models import User
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
-from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, render_to_response, get_object_or_404
 from django.template import RequestContext, loader, Context
-from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
-from django.utils.html import escape
-from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
@@ -46,10 +37,6 @@ from helpdesk.lib import apply_query, query_to_dict
 from project.views import get_TolaActivity_data, get_TolaTables_data
 from django.core.serializers.json import DjangoJSONEncoder
 
-staff_member_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_staff)
-
-
-superuser_required = user_passes_test(lambda u: u.is_authenticated() and u.is_active and u.is_superuser)
 # Create your views here.
 @login_required
 def task_list(request):
