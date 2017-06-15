@@ -13,5 +13,3 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 admin.site.register(TolaUser, TolaUserAdmin)
 admin.site.register(Organization, OrganizationAdmin)
-
-admin.site.register(Announcement)

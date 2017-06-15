@@ -15,7 +15,7 @@ from tasks.models import Task
 from django.conf import settings
 from django.db.models import Count, Sum
 import os
-from project.models import LoggedUser, TolaUser, Announcement
+from project.models import LoggedUser, TolaUser
 from helpdesk.forms import TicketForm, PublicTicketForm
 from datetime import datetime as timezone
 from helpdesk.views.staff import file_attachment
@@ -210,9 +210,6 @@ def home(request):
     form = form_data(request)
 
     users = get_current_users()
-    
-    # Announcement
-    announcements = Announcement.objects.all().order_by('create_date')
 
     return render(request, 'home.html', {'home_tab': 'active', 'tickets': tickets, \
                                          'recent_tickets': recent_tickets,'votes_tickets': votes_tickets, 'num_tickets': num_tickets, 'recent_tasks': recent_tasks, \
@@ -220,7 +217,7 @@ def home(request):
                                          'closed':closed,'tome':tome,'byme':byme, 'tasks_created': tasks_created, 'tasks_assigned': tasks_assigned, \
                                           'num_tasks': num_tasks, 'total_tasks_created': total_tasks_created, \
                                         'total_tasks_assigned': total_tasks_assigned, 'tasks_completed': tasks_completed, 'total_tasks_completed': total_tasks_completed,\
-                                         'logged_users':users, 'form':form, 'helper':form.helper, 'announcements':announcements,})
+                                         'logged_users':users, 'form':form, 'helper':form.helper})
 
 
 def contact(request):
