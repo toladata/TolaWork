@@ -316,6 +316,8 @@ def form_data(request):
 def user_tickets(request):
     from helpdesk.models import Ticket
 
+    tickets_closed = tickets_reported = tickets_assigned = tickets_created = []
+
     if request.user.email:
         tickets_reported = Ticket.objects.select_related('queue').filter(
                 submitter_email=request.user.email,
