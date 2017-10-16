@@ -588,7 +588,9 @@ def view_ticket(request, ticket_id):
             #'SHOW_SUBSCRIBE': SHOW_SUBSCRIBE,
         }))
 
+
 def return_ticketccstring_and_show_subscribe(user, ticket):
+
     ''' used in view_ticket() and followup_edit()'''
     # create the ticketcc_string and check whether current user is already
     # subscribed
@@ -623,6 +625,8 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
     return ticketcc_string, SHOW_SUBSCRIBE
 
 def subscribe_staff_member_to_ticket(ticket, user):
+
+
     ''' used in view_ticket() and update_ticket() '''
     ticketcc = TicketCC()
     ticketcc.ticket = ticket
@@ -1327,7 +1331,6 @@ def edit_ticket(request):
             'form' : form,
             'tags': tags,
         }))
-    
 
 
 @ensure_csrf_cookie
