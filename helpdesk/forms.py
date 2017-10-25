@@ -221,8 +221,11 @@ class TicketForm(forms.Form):
         """
 
         q = Queue.objects.get(id=int(self.cleaned_data['queue']))
-        q = Queue.objects.get(id=int(self.cleaned_data['queue']))
-        org = Organization.objects.get(id=1)
+        try:
+            org = Organization.objects.get(id=1)  
+        except Exception as e:
+            org = Organization.objects.create(name="TolaData", description="Test TolaData description", organization_url="http://toladata.CommentTicketForm")
+            org.save()
 
         t = Ticket( title = self.cleaned_data['title'],
                     submitter_email = self.cleaned_data['submitter_email'],
